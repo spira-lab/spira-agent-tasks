@@ -1,7 +1,17 @@
 {
   "version": 1,
-  "packageVersion": "1.0.1",
+  "packageVersion": "1.0.2",
   "description": "Turn a script, brief, or idea into a finished 9:16 video for Reels and TikTok, following the skills in skills/ (start with skills/creative-video-production.md).",
+  "requirements": [
+    { "name": "ffmpeg", "kind": "system", "purpose": "Encoding, mixing and frame extraction (render, bgm-extend, add-ons)", "check": "ffmpeg -version && ffprobe -version" },
+    { "name": "python3", "kind": "system", "purpose": "tools/make-timings.py and tools/bgm-extend.py", "check": "python3 --version" },
+    { "name": "chromium", "kind": "system", "purpose": "Frame capture in tools/render/render.js", "check": "test -x \"$CHROME_PATH\"" },
+    { "name": "playwright-core", "kind": "npm", "purpose": "Drives Chromium in tools/render/render.js (the render stage)", "check": "node -e \"require('playwright-core')\"", "install": "npm install -g playwright-core@1.63.0" },
+    { "name": "@spira-lab/cli", "kind": "npm", "purpose": "Every generated asset, uploads and the credit balance (skills/toolkit.md)", "check": "spira --version", "install": "npm install -g @spira-lab/cli" },
+    { "name": "spira sign-in", "kind": "credential", "purpose": "The Spira CLI must be signed in as the operator to generate or upload anything", "check": "spira auth whoami" },
+    { "name": "openai-whisper", "kind": "pip", "purpose": "Word timings for the voice-over (tools/make-timings.py, the timings stage)", "check": "python3 -m whisper --help", "install": "pip install openai-whisper" },
+    { "name": "yt-dlp", "kind": "pip", "purpose": "Downloading a reference video from a URL (add-ons.md reference add-on)", "check": "yt-dlp --version", "install": "pip install yt-dlp", "optional": true }
+  ],
   "inputs": [
     { "key": "referenceVideo", "type": "string", "description": "Reference video material, as given by the operator; the agent works out how to use it" },
     { "key": "durationSeconds", "type": "number", "description": "Target length of the video" }
