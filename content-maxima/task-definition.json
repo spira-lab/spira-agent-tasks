@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "packageVersion": "1.0.1",
+  "description": "Turn a script, brief, or idea into a finished 9:16 video for Reels and TikTok, following the skills in skills/ (start with skills/creative-video-production.md).",
+  "inputs": [
+    { "key": "referenceVideo", "type": "string", "description": "Reference video material, as given by the operator; the agent works out how to use it" },
+    { "key": "durationSeconds", "type": "number", "description": "Target length of the video" }
+  ],
+  "stages": [
+    { "id": "setup", "title": "Read skills and preferences, start clock, preflight CLI" },
+    { "id": "concept", "title": "Choose video type, hook and style" },
+    { "id": "script", "title": "Write or refine the script" },
+    { "id": "workspace", "title": "Create editable, materials folder and metadata" },
+    { "id": "voiceover", "title": "Generate voice-over" },
+    { "id": "timings", "title": "Build word timings from the voice-over" },
+    { "id": "visuals", "title": "Generate images, b-roll and clips" },
+    { "id": "music", "title": "Pick or generate background music" },
+    { "id": "sfx", "title": "Choose and place sound effects" },
+    { "id": "layout", "title": "Build the stage scenes" },
+    { "id": "animation", "title": "Animate scenes and transitions" },
+    { "id": "captions", "title": "Add word-per-word captions" },
+    { "id": "audit", "title": "First-frame audit and pre-render checks" },
+    { "id": "render", "title": "Render MP4" },
+    { "id": "publish", "title": "Upload render and record metadata" },
+    { "id": "report", "title": "Report credits, minutes and deletable sizes" }
+  ],
+  "outputs": [
+    { "key": "video", "kind": "file", "required": true, "accept": [".mp4"], "description": "The current render under renders/" },
+    { "key": "publicUrl", "kind": "url", "description": "Public URL of the published render, when it was uploaded" },
+    { "key": "caption", "kind": "text", "description": "Post caption for the video" }
+  ]
+}

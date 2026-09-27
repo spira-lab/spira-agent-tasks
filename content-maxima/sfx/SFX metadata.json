@@ -1,0 +1,82 @@
+[
+  {
+    "file": "01_riser.wav",
+    "path": "sfx/01_riser.wav",
+    "description": "Tension transition only, not for every cut. Bright, noisy riser that builds fast and lands on a hit. Place it so the peak sits on a dramatic cut or reveal. Pair with 02_impact.wav or 14_dark_impact.wav as the payoff."
+  },
+  {
+    "file": "02_impact.wav",
+    "path": "sfx/02_impact.wav",
+    "description": "Tension transition only, not for every cut. The big boom that hits right on the cut as the payoff after a riser. Use it for dramatic, high-energy changes, not routine edits."
+  },
+  {
+    "file": "03_whoosh.wav",
+    "path": "sfx/03_whoosh.wav",
+    "description": "Any time something is moving on screen (camera move, object motion, text or graphic flying in, speed ramp), drop in a whoosh to bring the scene to life."
+  },
+  {
+    "file": "04_camera_shutter.wav",
+    "path": "sfx/04_camera_shutter.wav",
+    "description": "Adds a bit of depth to a transition. Also fits photo pop-ins and freeze frames."
+  },
+  {
+    "file": "05_apple_keyboard_click.wav",
+    "path": "sfx/05_apple_keyboard_click.wav",
+    "description": "Sync with text appearing on screen (kinetic typography, captions, titles). One click per word."
+  },
+  {
+    "file": "06_button_1.wav",
+    "path": "sfx/06_button_1.wav",
+    "description": "UI button click, bright and snappy. Use when a button, toggle, or menu item is pressed on screen, or to punctuate a small pop-in of a graphic or icon."
+  },
+  {
+    "file": "07_button_2.wav",
+    "path": "sfx/07_button_2.wav",
+    "description": "UI button click, crisp and airy with more high-end than Button 1. Use for lighter taps: selecting an option, ticking a checkbox, hovering or highlighting an element."
+  },
+  {
+    "file": "08_button_3.wav",
+    "path": "sfx/08_button_3.wav",
+    "description": "UI button click, softer and lower-pitched than Buttons 1 and 2. Use for confirm or 'done' actions, closing a panel, or a subtle tap where the brighter clicks would feel too sharp."
+  },
+  {
+    "file": "09_combo.wav",
+    "path": "sfx/09_combo.wav",
+    "description": "Bass-heavy multi-hit combo: several rapid low punches in a row. Use for quick multi-step reveals or counters, stacked pop-ins, or a rapid sequence of items appearing one after another."
+  },
+  {
+    "file": "10_sparkle.wav",
+    "path": "sfx/10_sparkle.wav",
+    "description": "High, glittery shimmer that swells then fades. Use for magic or highlight moments: a glow, a shine sweep across text or a logo, an achievement or 'premium' reveal."
+  },
+  {
+    "file": "11_deep_whoosh.wav",
+    "path": "sfx/11_deep_whoosh.wav",
+    "description": "Sub-heavy deep whoosh, almost no high end. Use for big, slow on-screen movement: a large element sliding in, a heavy camera push or pull, or a zoom into a subject."
+  },
+  {
+    "file": "12_typing.wav",
+    "path": "sfx/12_typing.wav",
+    "description": "Single keystroke click. Use for text appearing on screen, one click per character or per word depending on the pace of the type-on."
+  },
+  {
+    "file": "13_stuttering.wav",
+    "path": "sfx/13_stuttering.wav",
+    "description": "Low swell that turns into rapid rhythmic stutter pulses. Use for stutter or glitch edits, frame-repeat effects, or as a build-up right before a drop or a big reveal."
+  },
+  {
+    "file": "14_dark_impact.wav",
+    "path": "sfx/14_dark_impact.wav",
+    "description": "Tension transition only, not for every cut. Deep sub-bass boom with a short pre-hit and almost no high end. Use for ominous or dramatic moments: a dark reveal, a hard cut to something serious, or the payoff after 13_stuttering.wav or a riser."
+  },
+  {
+    "file": "15_focusing.wav",
+    "path": "sfx/15_focusing.wav",
+    "description": "Set of rising pitched sweeps that glide upward together. Use for focus pulls, zooming or pushing in on a detail, or a 'locking on' or 'zeroing in' moment."
+  },
+  {
+    "file": "16_choppy.wav",
+    "path": "sfx/16_choppy.wav",
+    "description": "Short, low, punchy burst with a quick decay, lighter than a full impact. Use for choppy jump cuts, fast glitch cuts, or speed-ramp hits where a full impact would be too heavy."
+  }
+]
