@@ -15,12 +15,20 @@ whole, and the job ids in it are how the platform bills the run.
   python3 tools/gen.py seedance-1.5-pro th-02.json th-02.mp4 &
   wait
 
+To keep working while a long batch runs (the talking-head clips), start the
+batch with the Bash tool's background mode, work, then block on it:
+
+  python3 tools/gen.py --await th-01.mp4 th-02.mp4 th-03.mp4
+
+--await returns once each of those generations has finished, and prints
+what each one printed. Never wait with sleep, pgrep or polling loops.
+
 Prints the job id (the platform bills the run from it), then `url: <resultUrl>`
 for chaining into the next job. On failure prints the job's status and exits 1.
 Checks: a .webm must carry alpha; a transparent-background .png must have an
 alpha channel. A failed check is printed as `warning:` and the file is kept.
 """
-import json, pathlib, subprocess, sys
+import io, json, pathlib, subprocess, sys, time
 
 ALPHA_FORMATS = {"rgba", "ya8", "rgba64be", "ya16be", "rgba64le", "ya16le"}
 
@@ -44,8 +52,75 @@ def probe(file, entries):
     return p.stdout
 
 
+def marker(out):
+    """Where a generation leaves its finished marker: jobs/<out-file>.done beside the output."""
+    out = pathlib.Path(out).resolve()
+    return out.parent / "jobs" / f"{out.name}.done"
+
+
+def parse_timeout(value):
+    return int(value[:-1]) * 60 if value.endswith("m") else int(value)
+
+
+def await_outputs(args):
+    timeout = 1200
+    if "--timeout" in args:
+        i = args.index("--timeout"); timeout = parse_timeout(args[i + 1]); del args[i:i + 2]
+    pending = {pathlib.Path(a).resolve(): marker(a) for a in args}
+    if not pending:
+        sys.exit("usage: gen.py --await <out-file> [<out-file> ...]")
+    failed, deadline = [], time.time() + timeout
+    while pending and time.time() < deadline:
+        for out, m in list(pending.items()):
+            if m.exists():
+                done = json.loads(m.read_text())
+                print(done["log"].rstrip())
+                if done["status"] != "ok":
+                    failed.append(out.name)
+                del pending[out]
+        if pending:
+            time.sleep(3)
+    if pending:
+        sys.exit(f"still running after {timeout // 60} min: {', '.join(o.name for o in pending)}")
+    if failed:
+        sys.exit(f"failed: {', '.join(failed)}")
+
+
+class Tee(io.TextIOBase):
+    """Print as usual and keep a copy for the finished marker."""
+    def __init__(self, real):
+        self.real, self.buf = real, []
+    def write(self, text):
+        self.buf.append(text)
+        return self.real.write(text)
+    def flush(self):
+        self.real.flush()
+
+
 def main():
     args = sys.argv[1:]
+    if args[:1] == ["--await"]:
+        return await_outputs(args[1:])
+    pos = [a for i, a in enumerate(args) if a != "--timeout" and (i == 0 or args[i - 1] != "--timeout")]
+    if len(pos) == 3:
+        done = marker(pos[2])
+        done.parent.mkdir(parents=True, exist_ok=True)
+        done.unlink(missing_ok=True)
+        tee = Tee(sys.stdout)
+        sys.stdout = tee
+        status = "failed"
+        try:
+            generate(args)
+            status = "ok"
+        finally:
+            sys.stdout = tee.real
+            done.write_text(json.dumps({"status": status, "log": "".join(tee.buf)}))
+        return
+    generate(args)
+
+
+def generate(args):
+    args = list(args)
     timeout = "20m"
     if "--timeout" in args:
         i = args.index("--timeout"); timeout = args[i + 1]; del args[i:i + 2]

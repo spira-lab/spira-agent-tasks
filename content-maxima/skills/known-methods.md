@@ -60,6 +60,15 @@ tool the entry points to; this file holds the why.
   grew from 1 s to 38 s as the file grew, sixteen times over.
 - **Where:** stage-canvas-html, section 7.
 
+## Waiting on a background batch
+
+- **Works:** the clip batch in the Bash tool's background mode, the scene
+  plan and timing-free CSS written meanwhile, then
+  `python3 tools/gen.py --await <outputs>`.
+- **Fails:** waiting with a `pgrep -f` loop (it matches itself and never
+  ends: 10 minutes to the tool timeout on staging) or a guessed `sleep 150`.
+- **Where:** toolkit, section 3e.
+
 ## Music style
 
 - **Works:** a `style` of genre, mood, tempo, and instruments only.

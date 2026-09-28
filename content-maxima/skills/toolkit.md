@@ -216,11 +216,20 @@ command (3f). Running the clips one at a time is the single biggest
 waste of time in the kit.
 
 **Plan while the clips render.** The clips take three to four minutes.
-Run their batch in the background (the Bash tool's background mode; you
-are told when it finishes) and use the wait: decide every scene (what it
-shows, which assets, roughly where each sentence falls) and write the
-CSS and skeleton that do not depend on exact timings. Timings, clip
-placement and captions come after the clips are in.
+Start their batch with the Bash tool's background mode and use the wait:
+decide every scene (what it shows, which assets, roughly where each
+sentence falls) and write the CSS and skeleton that do not depend on
+exact timings. When the plan is written, block on the batch:
+
+```bash
+python3 tools/gen.py --await $M/th-01.mp4 $M/th-02.mp4 $M/th-03.mp4
+```
+
+It returns as soon as every clip has finished and prints what each
+generation printed. Timings, clip placement and captions come after it.
+Wait on background generations only this way: never with `sleep`,
+`pgrep` or a polling loop (a `pgrep -f` loop matches itself and never
+ends; on staging one ran into the tool's 10-minute timeout).
 
 The clips' own audio is the voice-over. Build it and its timings in one
 step, clips in order, then place the clips back to back on the stage:
