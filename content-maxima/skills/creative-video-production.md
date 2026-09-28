@@ -186,6 +186,10 @@ empties them, never the session.
   the safe zone is wrong. The canvas centre is x 540, y 960, and the
   safe zone sits off it: compose to the canvas, then check the key
   elements against the zone.
+- Nothing covers the presenter's face: cards, text, stickers, and props
+  sit beside, above, or below it, never over the eyes and mouth, and
+  least of all in the hook, where the face is what stops the scroll.
+  Check it on the audit sheet.
 - Captions sit in the lower part of the canvas, centred on x 540, never
   on the safe zone. A block up to 700 wide centred there clears the
   icon column at x 890; keep the wrap width within that and never shift

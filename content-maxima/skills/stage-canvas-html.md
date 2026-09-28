@@ -23,7 +23,11 @@ from a blank file. The copy gives you:
   in the preview and are mixed by the renderer (section 5).
 - A **timeline object**, `window.STAGE`, with `play()`, `pause()`,
   `restart()`, `seek(ms)`, `onFrame(fn)`, `time`, `playing`, `timings`,
-  `duration`, `width`, `height`.
+  `duration`, `width`, `height`. `onFrame(fn)` calls `fn(t)`, `t` being the
+  stage time in milliseconds, on every frame while playing, on every
+  `seek`, and on `restart`; the renderer seeks every frame it captures, so
+  a JS-driven element that derives its state from `t` alone renders
+  exactly as it previews (rule 6).
 - Preview controls, UI guide overlays (both draw the safe zone), and a
   word readout for the operator; `?render` hides them and places the
   canvas at 1:1. Do not edit them.
@@ -87,6 +91,12 @@ it has no exit.
 - **Do not read the stage template.** Section 1 is its interface; the
   copy is your editable, and reading 23 KB of harness only fills the
   context.
+- **Fonts are the ones installed; there are no web fonts (rule 8).** Set
+  `font-family` to one of: `Noto Sans`, `Noto Sans Display`, `Noto Serif`,
+  `Noto Serif Display`, `DejaVu Sans`, `DejaVu Serif`, `DejaVu Sans Mono`,
+  and `Noto Color Emoji` for emoji. Each has Regular, Bold, Italic, and
+  Bold Italic only: `font-weight` 800 or 900 renders as Bold. Do not list
+  or inspect the system fonts.
 
 ## 4. Rules for animating inside the stage
 

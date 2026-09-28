@@ -2,9 +2,9 @@
 // Pre-render audit of a stage editable, in the renderer's own ?render view.
 // Usage: node tools/render/audit.js <editable.html> [--at ms,ms,...]
 //   Without --at: the whole video is checked (run it when every scene is written,
-//   and again after the fixes). With --at: a quick look at a stretch you just
-//   built. Only those frames are shot, and leaks and text are checked only
-//   between the first and last time given (0.5 s either side).
+//   and again after the fixes). With --at: a quick look at what you just built.
+//   Only those frames are shot, and leaks and text are checked only within 0.5 s
+//   of each time given. Checks never decode video; only the frames shot do.
 //   * leaks: an element whose entry animation (first keyframe opacity 0 or fully
 //     clipped) has not started yet but is visible anyway. Checked on the first frame
 //     and 0.4 s before each .scene starts (a scene starts at its earliest animation).
@@ -22,8 +22,7 @@ const { serve, launch, openStage, seekTo, readEditable } = require('./stage');
 const args = process.argv.slice(2);
 const atIdx = args.indexOf('--at');
 const at = atIdx >= 0 ? args.splice(atIdx, 2)[1].split(',').map(Number) : null;
-const lo = at ? Math.min(...at) - 500 : -Infinity, hi = at ? Math.max(...at) + 500 : Infinity;
-const inWindow = t => t >= lo && t <= hi;
+const inWindow = t => !at || at.some(a => Math.abs(t - a) <= 500);
 if (!args[0]) { console.error('usage: audit.js <editable.html> [--at ms,ms,...]'); process.exit(2); }
 const htmlPath = path.resolve(args[0]);
 const dir = path.dirname(htmlPath), rel = path.basename(htmlPath);
@@ -56,7 +55,7 @@ const ZONE = { left: 70, top: 230, right: 1005, bottom: 1615, stepY: 1255, stepR
   // Leaks.
   const leakTimes = [0, ...scenes.filter(s => s.start >= 400).map(s => s.start - 400)].filter(inWindow);
   for (const t of [...new Set(leakTimes)]) {
-    await seekTo(page, t);
+    await seekTo(page, t, false);
     const leaks = await page.evaluate(t => {
       const stage = document.getElementById('stage').getBoundingClientRect();
       // Seen at all: opacity along the chain, and no ancestor clipped away or scaled to nothing.
@@ -103,7 +102,7 @@ const ZONE = { left: 70, top: 230, right: 1005, bottom: 1615, stepY: 1255, stepR
     });
   });
   for (const ph of phrases.filter(p => inWindow(p.t))) {
-    await seekTo(page, ph.t);
+    await seekTo(page, ph.t, false);
     const r = await page.evaluate(({ id, Z }) => {
       const p = document.querySelector(`[data-audit-id="${id}"]`);
       let o = 1; for (let e = p; e && e.id !== 'stage'; e = e.parentElement) o *= parseFloat(getComputedStyle(e).opacity);
@@ -153,15 +152,17 @@ const ZONE = { left: 70, top: 230, right: 1005, bottom: 1615, stepY: 1255, stepR
   const deletable = path.join(dir, 'materials', ed.name, 'deletable');
   fs.mkdirSync(deletable, { recursive: true });
   const sheet = path.join(deletable, 'audit-sheet.jpg');
-  const cols = Math.min(shots.length, 6), rows = Math.ceil(shots.length / cols);
+  // A few frames come out large enough to read detail; more are tiled small.
+  const big = shots.length <= 4;
+  const cols = Math.min(shots.length, big ? 4 : 6), rows = Math.ceil(shots.length / cols);
   execFileSync('ffmpeg', ['-v', 'error', '-y', '-framerate', '1', '-i', path.join(tmp, '%03d.jpg'),
-    '-vf', `scale=270:480,tile=${cols}x${rows}`, '-frames:v', '1', sheet]);
+    '-vf', `scale=${big ? '540:960' : '270:480'},tile=${cols}x${rows}`, '-frames:v', '1', sheet]);
   fs.rmSync(tmp, { recursive: true, force: true });
 
   errors.forEach(e => problems.push(`console: ${e}`));
   if (stuck) problems.push(`${stuck} video seeks timed out`);
   console.log(`scenes: ${scenes.map(s => `${s.id}@${(s.start / 1000).toFixed(2)}s`).join(' ') || 'none (.scene[id] marks one)'}`);
-  if (at) console.log(`checked: ${(Math.max(lo, 0) / 1000).toFixed(1)}s to ${(Math.min(hi, ed.durationMs) / 1000).toFixed(1)}s only; run without --at for the whole video`);
+  if (at) console.log(`checked: within 0.5 s of ${at.map(a => (a / 1000).toFixed(1) + 's').join(', ')} only; run without --at for the whole video`);
   console.log(`sheet: ${sheet} (${shots.map(s => (s.t / 1000).toFixed(1) + 's').join(' ')})`);
   console.log(problems.length ? problems.join('\n') : 'audit clean');
   process.exit(0);

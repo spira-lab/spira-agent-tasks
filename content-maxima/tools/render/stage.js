@@ -89,9 +89,16 @@ async function openStage(browser, port, rel) {
   return { page, W, H, nAnims };
 }
 
-/** Put the page on stage time `ms` and wait for two painted frames. */
-function seekTo(page, ms) {
-  return page.evaluate(ms => { window.__seek(ms); return window.__seekVideos(ms).then(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))); }, ms);
+/**
+ * Put the page on stage time `ms` and wait for two painted frames. `videos: false`
+ * leaves the clips where they are: layout and opacity checks do not need a decoded
+ * frame, and on a busy worker the decode is most of a seek.
+ */
+function seekTo(page, ms, videos = true) {
+  return page.evaluate(([ms, videos]) => {
+    window.__seek(ms);
+    return (videos ? window.__seekVideos(ms) : Promise.resolve()).then(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+  }, [ms, videos]);
 }
 
 /** The stage facts a tool needs, read from the editable's html. */
