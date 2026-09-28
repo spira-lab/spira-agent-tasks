@@ -20,12 +20,6 @@ again.
   redundancy between caption subtitles and on-screen text: IF the
   on-screen text already covers the script word per word, use no
   caption subtitle.
-- WHEN several visual elements are needed, generate them in one GPT
-  Image 2 request, listing every element in the prompt on a transparent
-  background, instead of one request per element. When the output
-  returns, cut each element out of it and use those cut-outs as the
-  elements of the video. One request for many elements costs less than
-  many requests.
 - WHEN generating background music, the tone is scientific, not sad.
 - WHEN asked to translate a video into another language, translate the
   script, generate a new VO from the translated script with the IASO VO

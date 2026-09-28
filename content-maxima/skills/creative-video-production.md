@@ -49,6 +49,20 @@ Elements to consider:
   - WHEN the user says no music or no bgm, use none: nothing generated,
     nothing picked.
 
+Generate several visuals as one image, then cut them apart:
+
+- WHEN several transparent-background elements are needed, generate
+  them all together in one GPT Image 2 image at high resolution, each in
+  its own section with empty space around it, then cut them out one by
+  one. Cutting one out never takes anything from the others.
+- WHEN several b-roll stills are needed, generate them as one
+  high-resolution GPT Image 2 collage of equally divided frames, with no
+  border, no outline, and no gaps, then cut the frames out right after.
+
+One image costs less per visual than one image each, and it is one
+generation to wait for instead of several. The sheet formats and the
+cutting tool are in the toolkit, sections 3c and 3d.
+
 ## 2. Principles
 
 - WHEN creating an element, whether a UI design to illustrate
@@ -138,14 +152,14 @@ the speech is usually right.
 ## 8. When done
 
 A video is done when it is rendered, its cover is set, and it is
-published (file-management section 6). Then:
+hosted (file-management section 6). Then:
 
 1. WHEN the `submit_result` tool is available, call it with the render
-   as `video`, the published URL as `publicUrl`, and a post caption as
+   as `video`, the hosted URL as `publicUrl`, and a post caption as
    `caption`.
-2. End with a short final message: the video's name and published URL,
-   and anything you had to assume or skip, such as a tag that did not
-   exist. Do not describe what is on screen; the operator sees it.
+2. End with a short final message: the video's name and hosted URL, and
+   anything you had to assume or skip. Do not describe what is on
+   screen; the operator sees it.
 
 Credits and minutes are measured by the platform from the jobs the run
 started; do not tally them. Deletable files are kept: the operator
@@ -196,7 +210,7 @@ These skills are essential. None of them is skipped.
   the rules for animating inside it, the audit, the sound effects, and
   the render.
 - **file-management**: where every file lives, what it is called, what
-  happens to it when it is replaced, and how a render is published.
+  happens to it when it is replaced, and how a render is handed over.
 - **known-methods**: methods proven to work and to fail, with the
   reason. Read it so a failure already paid for is not paid for again.
 

@@ -69,8 +69,7 @@ URL.
   straight into the next job; never re-upload a job's output.
 - **The file exists only on disk** (a user-provided product image, a
   frame cut locally). Host it with `spira assets upload <file>`, which
-  prints nothing but the hosted URL. Do not use `spira social assets upload` for this: that one publishes
-  to the Social Post Assets library.
+  prints nothing but the hosted URL.
 
 ## 3. Tool map
 
@@ -141,8 +140,22 @@ persona.
 ## 3c. Transparent-background elements: `gpt-image-2`
 
 For any cut-out element that sits on the stage: props, icons, objects,
-stickers. Payload:
-`{"prompt":"<element>, on a transparent background, PNG with alpha, no backdrop, no shadow on the ground, no frame","size":"1:1","resolution":"1K"}`.
+stickers. Several elements are one sheet (creative-video-production
+section 1): up to six in one `1:1` `2K` image (2048 x 2048), 3.45 credits
+for all of them. Payload:
+`{"prompt":"Four separate objects arranged in a 2x2 layout with wide empty space between them, each object whole and not touching any other: <element>, <element>, <element>, <element>. On a transparent background, PNG with alpha, no backdrop, no shadow on the ground, no frame, no text","size":"1:1","resolution":"2K"}`.
+
+Then cut them out, naming them in reading order (left to right, top to
+bottom):
+
+```bash
+python3 tools/cut-sheet.py elements <materials>/<name>/el-sheet.png --names el-piston,el-wing,el-flag,el-helmet
+```
+
+Each object is cropped with a small margin, and anything belonging to
+another object is cleared from its crop. Move the sheet to `deletable/`
+once the cut-outs are in. A single element on its own is the same prompt
+with one object at `1:1` `1K`.
 
 The prompt must say transparent background in those words; it does not
 happen by default, and a white or grey backdrop cannot be keyed cleanly
@@ -150,12 +163,23 @@ afterwards. `gen.py` warns when the PNG came back without alpha.
 
 ## 3d. Stock stills for b-roll: `gpt-image-2`
 
-Payload: `{"prompt":"<scene>, photographic, natural light","size":"9:16","resolution":"2K"}`.
-Use `9:16` for full-bleed stage backgrounds and `16:9` for inset shots.
-A full-bleed `9:16` still is always `2K`: it comes back 1152 x 2048, while
-`1K` comes back 640 x 1136, too small for the 1080 x 1920 stage, and gets
-generated twice. `1K` (`1:1` is 1024 x 1024) is for insets, cards and
-elements that sit well under full width.
+Several stills are one collage (creative-video-production section 1): a
+`9:16` `4K` image comes back 2160 x 3840, so a 2 x 2 collage cuts into four
+frames of exactly 1080 x 1920, full-bleed on the stage, for 6.15 credits
+in all. Payload:
+`{"prompt":"A 2x2 collage of four separate photographs in four equally divided frames, edge to edge, no border, no outline, no gaps, no dividing lines. Top left: <scene>. Top right: <scene>. Bottom left: <scene>. Bottom right: <scene>. Photographic, natural light, no text, no logos","size":"9:16","resolution":"4K"}`.
+
+Then cut the frames out, named in reading order:
+
+```bash
+python3 tools/cut-sheet.py grid <materials>/<name>/broll-sheet.png 2x2 --names broll-track,broll-engine,broll-cockpit,broll-daily
+```
+
+Frames used as insets or cards are cut from the same collage and cropped
+on the stage with `object-fit: cover`. A single still on its own is
+`{"prompt":"<scene>, photographic, natural light","size":"9:16","resolution":"2K"}`
+(1152 x 2048); never `1K` for a full-bleed still, which comes back
+640 x 1136.
 
 ## 3e. Talking-head clip: `seedance-1.5-pro`
 

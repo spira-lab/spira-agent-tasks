@@ -67,12 +67,3 @@ tool the entry points to; this file holds the why.
   as a producer tag, the CLI shows only `provider_error`, and blind
   retries fail the same way, minutes each.
 - **Where:** toolkit, section 3g.
-
-## Publishing a finished render
-
-- **Works:** `tools/publish.sh` with no tag lists the tags; then publish
-  under one that exists. IF none fits, leave the render unpublished and
-  say so.
-- **Fails:** uploading under a tag name of your own: the CLI cannot
-  create tags and rejects it with `VALIDATION_FAILED`.
-- **Where:** file-management, section 6.

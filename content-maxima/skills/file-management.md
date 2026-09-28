@@ -1,6 +1,6 @@
 ---
 name: file-management
-description: Where every file of a video session lives, how it is named, what happens to it when it is replaced or rejected, and how a finished render is published. Fixed procedure. Apply to every file created, moved, or replaced in a video session.
+description: Where every file of a video session lives, how it is named, what happens to it when it is replaced or rejected, and how a finished render is handed over. Fixed procedure. Apply to every file created, moved, or replaced in a video session.
 ---
 
 # File Management
@@ -85,24 +85,17 @@ old one to its materials `deletable/` first.
   reference video and its frames) are written straight to `deletable/`
   by the tools.
 
-## 6. Renders and publishing
+## 6. Renders
 
 - `tools/render/render.js` writes `renders/NN-name-MM-DD.mp4`, moving a
   previous render to `renders/deletable/NN-name-MM-DD_<YYYYMMDD-HHMM>.mp4`
   first, so `renders/` holds exactly the current render of each editable.
-- A finished render (rendered, checked, cover set) is published to the
-  Social Post Assets library:
+- A finished render (rendered, checked, cover set) is hosted, so it can
+  be handed over as a URL:
 
   ```bash
-  tools/publish.sh renders/NN-name-MM-DD.mp4               # lists the tags
-  tools/publish.sh renders/NN-name-MM-DD.mp4 "<tag>"       # uploads, prints the asset id and URL
+  spira assets upload renders/NN-name-MM-DD.mp4
   ```
 
-  Every upload needs a tag that already exists; the CLI cannot create
-  one, and an unknown tag fails before anything is transferred. Match the
-  video to the tag for its brand or kind. IF no existing tag fits, do not
-  file it under an approximate one (there is no delete command): leave
-  it unpublished and say so in the final message.
-- Only the current render is published. A re-render that supersedes a
-  published video is published again; removing the superseded asset is
-  the operator's call.
+  It prints nothing but the hosted URL.
+- Only the current render is hosted. A re-render is hosted again.
