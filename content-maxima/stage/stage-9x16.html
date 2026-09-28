@@ -130,10 +130,13 @@
 </div>
 
 <div id="stage" class="is-paused" data-duration="0"> <!-- ms; last spoken word end + 1000, see setup skill -->
-  <!-- Voice-over: keep the file next to this html. Remove the tag if there is no VO. -->
-  <audio id="vo" src="materials/EDITABLE-NAME/vo.mp3" preload="auto"></audio>
+  <!-- Voice-over: keep the file next to this html. Remove the tag if there is no VO.
+       data-sfx-under: how many LU the sound effects sit under the voice (8; 14 for ElevenLabs voices). -->
+  <audio id="vo" src="materials/EDITABLE-NAME/vo.mp3" preload="auto" data-sfx-under="8"></audio>
   <!-- Background music: loops, previewed at data-volume (0..1). Remove the tag if there is none. -->
   <audio id="bgm" src="materials/EDITABLE-NAME/bgm.mp3" preload="auto" loop data-volume="0.14"></audio>
+  <!-- Sound effects: one tag per cue, data-at = stage ms it starts; the renderer mixes them.
+       <audio class="sfx" src="materials/EDITABLE-NAME/sfx/03_whoosh.wav" data-at="1600"></audio> -->
   <!-- ---------- Video content goes here ---------- -->
 
   <!-- ---------- Guide layers: toggled from the controls, hidden in ?render ---------- -->
@@ -198,12 +201,28 @@
   const toggleBtn = document.getElementById('btn-toggle');
   const vo = document.getElementById('vo');      // optional voice-over
   const bgm = document.getElementById('bgm');    // optional background music (loops)
+  const sfx = [...stage.querySelectorAll('audio.sfx')];   // optional sound effects at data-at ms
+  // The renderer mixes audio itself; under ?render nothing audible is loaded.
+  const RENDER = new URLSearchParams(location.search).has('render');
+  if (RENDER) [vo, bgm, ...sfx].forEach(a => { if (a) { a.removeAttribute('src'); a.preload = 'none'; } });
   if (bgm && bgm.getAttribute('src')) {
     bgm.volume = parseFloat(bgm.dataset.volume) || 0.15;
     fetch(bgm.getAttribute('src')).then(r => r.blob())
       .then(b => { bgm.src = URL.createObjectURL(b); bgm.load(); }).catch(() => {});
   }
   const bgmSeek = ms => { if (bgm && bgm.duration) bgm.currentTime = (ms / 1000) % bgm.duration; };
+  // Each effect plays once as the clock crosses its data-at; a seek re-arms it.
+  sfx.forEach(a => { a.volume = 0.6; a.fired = false; });
+  function sfxSync(ms) {
+    sfx.forEach(a => {
+      const at = parseFloat(a.dataset.at) || 0;
+      if (!playing) { a.pause(); a.fired = ms > at; return; }
+      if (!a.fired && ms >= at) {
+        a.fired = true;
+        if (!a.duration || ms - at < a.duration * 1000) { a.currentTime = (ms - at) / 1000; a.play().catch(() => {}); }
+      }
+    });
+  }
   const wordEl = document.getElementById('word');
   let timings = null;                             // from timings.json (whisper), if present
   // timings.json lives in this editable's materials folder: materials/<editable-name>/timings.json
@@ -279,6 +298,7 @@
     timeEl.textContent = (elapsed / 1000).toFixed(2) + 's';
     showWord(elapsed);
     vidSync(elapsed);
+    sfxSync(elapsed);
     frameListeners.forEach(fn => fn(elapsed));
     raf = requestAnimationFrame(tick);
   }
@@ -295,6 +315,7 @@
       vo.currentTime = elapsed / 1000; vo.play().catch(() => {});
     }
     if (bgm) { bgmSeek(elapsed); bgm.play().catch(() => {}); }
+    sfx.forEach(x => { x.fired = elapsed > (parseFloat(x.dataset.at) || 0); });
     vidSync(elapsed);
     tick();
   }
@@ -306,6 +327,7 @@
     if (vo) vo.pause();
     if (bgm) bgm.pause();
     vidSync(elapsed);
+    sfxSync(elapsed);
   }
   function restart() {
     pause();
@@ -375,7 +397,7 @@
     });
   });
 
-  if (new URLSearchParams(location.search).has('render')) body.classList.add('render');
+  if (RENDER) body.classList.add('render');
   fit();
 })();
 </script>

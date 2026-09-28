@@ -1,42 +1,31 @@
 {
   "version": 1,
-  "packageVersion": "1.0.2",
+  "packageVersion": "1.1.0",
   "description": "Turn a script, brief, or idea into a finished 9:16 video for Reels and TikTok, following the skills in skills/ (start with skills/creative-video-production.md).",
   "requirements": [
-    { "name": "ffmpeg", "kind": "system", "purpose": "Encoding, mixing and frame extraction (render, bgm-extend, add-ons)", "check": "ffmpeg -version && ffprobe -version" },
-    { "name": "python3", "kind": "system", "purpose": "tools/make-timings.py and tools/bgm-extend.py", "check": "python3 --version" },
-    { "name": "chromium", "kind": "system", "purpose": "Frame capture in tools/render/render.js", "check": "test -x \"$CHROME_PATH\"" },
-    { "name": "playwright-core", "kind": "npm", "purpose": "Drives Chromium in tools/render/render.js (the render stage)", "check": "node -e \"require('playwright-core')\"", "install": "npm install -g playwright-core@1.63.0" },
-    { "name": "@spira-lab/cli", "kind": "npm", "purpose": "Every generated asset, uploads and the credit balance (skills/toolkit.md)", "check": "spira --version", "install": "npm install -g @spira-lab/cli" },
-    { "name": "spira sign-in", "kind": "credential", "purpose": "The Spira CLI must be signed in as the operator to generate or upload anything", "check": "spira auth whoami" },
-    { "name": "openai-whisper", "kind": "pip", "purpose": "Word timings for the voice-over (tools/make-timings.py, the timings stage)", "check": "python3 -m whisper --help", "install": "pip install openai-whisper" },
-    { "name": "yt-dlp", "kind": "pip", "purpose": "Downloading a reference video from a URL (add-ons.md reference add-on)", "check": "yt-dlp --version", "install": "pip install yt-dlp", "optional": true }
+    {"name": "ffmpeg", "kind": "system", "purpose": "Encoding, mixing, frame extraction and probing (render, gen, add-ons)", "check": "ffmpeg -version && ffprobe -version"},
+    {"name": "python3", "kind": "system", "purpose": "tools/gen.py, tools/meta.py, tools/make-timings.py and tools/bgm-extend.py", "check": "python3 --version"},
+    {"name": "chromium", "kind": "system", "purpose": "Frame capture in tools/render/render.js", "check": "test -x \"$CHROME_PATH\""},
+    {"name": "playwright-core", "kind": "npm", "purpose": "Drives Chromium in tools/render/render.js (the render stage)", "check": "node -e \"require('playwright-core')\"", "install": "npm install -g playwright-core@1.63.0"},
+    {"name": "@spira-lab/cli", "kind": "npm", "purpose": "Every generated asset, uploads and the credit balance (skills/toolkit.md)", "check": "spira --version", "install": "npm install -g @spira-lab/cli"},
+    {"name": "spira sign-in", "kind": "credential", "purpose": "The Spira CLI must be signed in as the operator to generate or upload anything", "check": "spira auth whoami"},
+    {"name": "openai-whisper", "kind": "pip", "purpose": "Word timings for the voice-over (tools/make-timings.py, the assets stage)", "check": "python3 -c \"import importlib.util, sys; sys.exit(importlib.util.find_spec('whisper') is None)\"", "install": "pip install openai-whisper"},
+    {"name": "yt-dlp", "kind": "pip", "purpose": "Downloading a reference video from a URL (tools/style-sheet.sh)", "check": "yt-dlp --version", "install": "pip install yt-dlp", "optional": true}
   ],
   "inputs": [
-    { "key": "referenceVideo", "type": "string", "description": "Reference video material, as given by the operator; the agent works out how to use it" },
-    { "key": "durationSeconds", "type": "number", "description": "Target length of the video" }
+    {"key": "referenceVideo", "type": "string", "description": "Reference video material, as given by the operator; the agent works out how to use it"},
+    {"key": "durationSeconds", "type": "number", "description": "Target length of the video"}
   ],
   "stages": [
-    { "id": "setup", "title": "Read skills and preferences, start clock, preflight CLI" },
-    { "id": "concept", "title": "Choose video type, hook and style" },
-    { "id": "script", "title": "Write or refine the script" },
-    { "id": "workspace", "title": "Create editable, materials folder and metadata" },
-    { "id": "voiceover", "title": "Generate voice-over" },
-    { "id": "timings", "title": "Build word timings from the voice-over" },
-    { "id": "visuals", "title": "Generate images, b-roll and clips" },
-    { "id": "music", "title": "Pick or generate background music" },
-    { "id": "sfx", "title": "Choose and place sound effects" },
-    { "id": "layout", "title": "Build the stage scenes" },
-    { "id": "animation", "title": "Animate scenes and transitions" },
-    { "id": "captions", "title": "Add word-per-word captions" },
-    { "id": "audit", "title": "First-frame audit and pre-render checks" },
-    { "id": "render", "title": "Render MP4" },
-    { "id": "publish", "title": "Upload render and record metadata" },
-    { "id": "report", "title": "Report credits, minutes and deletable sizes" }
+    {"id": "setup", "title": "Preflight, read skills, settle concept and script"},
+    {"id": "assets", "title": "Generate voice, talking head, visuals and music; build word timings"},
+    {"id": "build", "title": "Build scenes, animation, captions and sound effects; pass the audit"},
+    {"id": "render", "title": "Render MP4 and set the cover"},
+    {"id": "publish", "title": "Publish the render and report"}
   ],
   "outputs": [
-    { "key": "video", "kind": "file", "required": true, "accept": [".mp4"], "description": "The current render under renders/" },
-    { "key": "publicUrl", "kind": "url", "description": "Public URL of the published render, when it was uploaded" },
-    { "key": "caption", "kind": "text", "description": "Post caption for the video" }
+    {"key": "video", "kind": "file", "required": true, "accept": [".mp4"], "description": "The current render under renders/"},
+    {"key": "publicUrl", "kind": "url", "description": "Public URL of the published render, when it was uploaded"},
+    {"key": "caption", "kind": "text", "description": "Post caption for the video"}
   ]
 }

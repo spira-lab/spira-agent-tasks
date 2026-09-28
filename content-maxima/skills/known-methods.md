@@ -7,50 +7,60 @@ description: Methods proven to work and methods proven to fail in this package, 
 
 Each entry is a failure that has already cost time or credits, and the
 method that replaced it. The instruction itself lives in the skill or
-tool the entry points to; this file holds the why. An entry is removed
-once its lesson is fully absorbed and no longer needs explaining.
+tool the entry points to; this file holds the why.
 
 ## Talking head on the stage
 
 - **Works:** the alpha WebM cut-out placed as a `<video>` inside `#stage`
-  with `data-start`. The harness and the renderer drive it; the builder
-  writes no sync script and extracts nothing. A build done this way
-  was several times faster than the alternative.
+  with `data-start`. The harness drives it, and the renderer swaps in an
+  all-keyframe copy so each frame costs one decode.
 - **Fails:** extracting the clip to a frame sequence and stepping it
-  with CSS. A short video became 775 frames, minutes of conversion, and
-  a hand-written converter that hung for ten minutes on a
-  multiprocessing bug before anything was placed.
-- **Where:** stage-canvas-html, rule 11.
+  with CSS: 775 frames, minutes of conversion, and a hand-written
+  converter that hung for ten minutes. Also slow: the renderer seeking
+  the original clip, which decodes from the last keyframe on every
+  frame and took 120 s for a 29 s video against 48 s now.
+- **Where:** stage-canvas-html, rule 11; `tools/render/render.js`.
 
 ## Writing the editable
 
-- **Works:** skeleton first, then one scene per edit. Progress is on
-  disk as it happens.
-- **Fails:** the whole editable in a single write. An 80 KB file takes
-  minutes to produce with nothing visible, and an interruption during
-  it loses everything.
-- **Where:** stage-canvas-html, section 2.
+- **Works:** skeleton first, then one scene per edit, written by hand
+  from `timings.json`.
+- **Fails:** the whole editable in one write (an 80 KB file takes minutes
+  with nothing visible, and an interruption loses everything), and a
+  generator script that emits the html (paid for three times: writing,
+  running, fixing).
+- **Where:** stage-canvas-html, section 3.
 
-## Building the editable
+## Sound effects and the number of renders
 
-- **Works:** editing the html directly. Read the timings, write the
-  scene, move on.
-- **Fails:** writing a helper script that generates the html from the
-  timings. A session judged writing by hand impractical, built a
-  generator instead, and paid three times: writing it, running it, and
-  fixing it, with a stall possible at each. The judgement was a human
-  reflex applied to an LLM, for which direct editing is the cheap path.
-- **Where:** stage-canvas-html, section 2.
+- **Works:** `<audio class="sfx" data-at>` tags placed before the first
+  render; the renderer mixes them. One render per video.
+- **Fails:** rendering first, then mixing effects with a hand-written
+  ffmpeg command and rendering again: two or three renders per video,
+  two to four minutes each.
+- **Where:** stage-canvas-html, section 5.
+
+## Checking the stage
+
+- **Works:** `tools/render/audit.js` after each scene; it prints every
+  leak and text problem and writes a sheet of frames.
+- **Fails:** writing a Playwright screenshot or leak script in every
+  session, which costs the time to write and debug it each time.
+- **Where:** stage-canvas-html, section 6.
+
+## Music style
+
+- **Works:** a `style` of genre, mood, tempo, and instruments only.
+- **Fails:** a style naming the subject ("motorsport"): Suno rejects it
+  as a producer tag, the CLI shows only `provider_error`, and blind
+  retries fail the same way, minutes each.
+- **Where:** toolkit, section 3g.
 
 ## Publishing a finished render
 
-- **Works:** `spira social assets tags` first, then
-  `spira social assets upload <file> --tag <id>` with a tag that already
-  exists. IF none fits the video, the user creates it and the upload
-  waits for that.
-- **Fails:** calling upload with a tag name of your own invention,
-  expecting it to be created. The CLI has no command that creates a tag;
-  it rejects the name with `VALIDATION_FAILED`, and the whole hand-over
-  stalls on a round trip to the user that listing the tags first would
-  have avoided.
+- **Works:** `tools/publish.sh` with no tag lists the tags; then publish
+  under one that exists. IF none fits, leave the render unpublished and
+  say so.
+- **Fails:** uploading under a tag name of your own: the CLI cannot
+  create tags and rejects it with `VALIDATION_FAILED`.
 - **Where:** file-management, section 6.

@@ -38,7 +38,7 @@
 |--------|-------|
 | `skills/` | The procedures a session reads: creative video production, toolkit, prompting, stage canvas HTML, file management, known methods, add-ons, working memory |
 | `stage/` | The 9:16 stage template every editable is copied from |
-| `tools/` | The renderer, the Whisper timings script, the music bed script |
+| `tools/` | The renderer and stage audit, the generation, metadata, cover and publish scripts, the Whisper timings and music bed scripts |
 | `sfx/` | Sound effects and their metadata |
 | `music/` | The music library, numbered tracks |
 | `docs/` | These cards and the script that renders them |
