@@ -56,6 +56,10 @@ def cut_grid(sheet, spec, names):
     rows, cols = (int(x) for x in spec.lower().split("x"))
     w, h = size(sheet)
     cw, ch = w // cols, h // rows
+    if min(cw, ch) < 1080:
+        print(f"warning: frames are {cw}x{ch}, under the 1080 px stage width: the sheet came back at {w}x{h}, "
+              f"lower than asked. Use them only as insets or cards; for full-bleed stills generate each one "
+              f"on its own at 2K (toolkit 3d).")
     outs = outputs(sheet, rows * cols, names)
     for i, out in enumerate(outs):
         r, c = divmod(i, cols)

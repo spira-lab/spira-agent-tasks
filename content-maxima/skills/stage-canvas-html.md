@@ -40,6 +40,9 @@ Every timed element is placed against the spoken words:
 python3 tools/make-timings.py <materials>/<name>/vo.mp3
 ```
 
+(`--from <clip> <clip> ...` builds `vo.mp3` from talking-head clips first:
+toolkit 3e.)
+
 This runs Whisper (`small.en`, word timestamps) and writes `timings.json`
 next to the audio, where the harness loads it from:
 

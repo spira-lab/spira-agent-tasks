@@ -176,7 +176,11 @@ python3 tools/cut-sheet.py grid <materials>/<name>/broll-sheet.png 2x2 --names b
 ```
 
 Frames used as insets or cards are cut from the same collage and cropped
-on the stage with `object-fit: cover`. A single still on its own is
+on the stage with `object-fit: cover`. The provider sometimes returns a
+collage smaller than asked (1024 x 1536 instead of 2160 x 3840);
+`cut-sheet.py` then warns that the frames are under the stage width. Keep
+those frames for insets and cards only, and generate each full-bleed still
+on its own. A single still on its own is
 `{"prompt":"<scene>, photographic, natural light","size":"9:16","resolution":"2K"}`
 (1152 x 2048); never `1K` for a full-bleed still, which comes back
 640 x 1136.
@@ -211,8 +215,17 @@ parallel command (section 1), then every cut-out in one parallel
 command (3f). Running the clips one at a time is the single biggest
 waste of time in the kit.
 
-The clips' own audio is the voice-over: concatenate their audio tracks
-in order into `vo.mp3` and place the clips back to back on the stage.
+The clips' own audio is the voice-over. Build it and its timings in one
+step, clips in order, then place the clips back to back on the stage:
+
+```bash
+python3 tools/make-timings.py <materials>/<name>/vo.mp3 --from th-01.mp4 th-02.mp4 th-03.mp4
+```
+
+The clips keep the persona image's framing: the face sits where it sits
+in `persona.png`, so plan the layout around it from that image, and check
+it on the stage with `audit.js --at`. Do not cut frames out of the clips
+to look at them.
 
 Cost per second at `standard`:
 

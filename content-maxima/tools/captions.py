@@ -163,10 +163,11 @@ def build(groups, style, top, size, color, hl):
   #captions .cc-body {{ display: block; }}
   #captions .cc-fit {{ display: inline-block; transform-origin: 50% 50%; }}
   #captions .cc-body.out {{ animation: ccOut .04s linear both; }}
-  #captions .w {{ font-style: normal; display: inline-block; animation-name: {word_anim}; animation-timing-function: linear; animation-fill-mode: both; }}
+  #captions .w {{ font-style: normal; display: inline-block; margin: 0 .09em; animation-name: {word_anim}; animation-timing-function: linear; animation-fill-mode: both; }}
   @keyframes ccIn {{ from {{ opacity: 0; transform: translateY(20px) scale(.95); }} to {{ opacity: 1; transform: none; }} }}
   @keyframes ccOut {{ from {{ opacity: 1; }} to {{ opacity: 0; }} }}
-  @keyframes ccHl {{ 0% {{ color: {color}; transform: scale(1); }} 1%, 99% {{ color: {hl}; transform: scale(1.08); }} 100% {{ color: {color}; transform: scale(1); }} }}
+  /* colour only: a scaled word would grow into the space beside it (a transform does not move its neighbours) */
+  @keyframes ccHl {{ 0% {{ color: {color}; }} 1%, 99% {{ color: {hl}; }} 100% {{ color: {color}; }} }}
   @keyframes ccAppear {{ from {{ opacity: 0; transform: translateY(10px); }} to {{ opacity: 1; transform: none; }} }}
   /* captions:end */
 """

@@ -1,10 +1,30 @@
 #!/usr/bin/env python3
-"""Transcribe a VO with Whisper (word timestamps) and write timings.json
-next to it. Usage: python3 tools/make-timings.py <path to vo.mp3>
-Needs openai-whisper installed (pip install openai-whisper) and ffmpeg."""
-import json, shutil, subprocess, sys, pathlib
+"""Word timings for a VO: Whisper word timestamps written as timings.json beside it.
 
-src = pathlib.Path(sys.argv[1]).resolve(); out_dir = src.parent
+  python3 tools/make-timings.py <materials>/<name>/vo.mp3
+  python3 tools/make-timings.py <materials>/<name>/vo.mp3 --from th-01.mp4 th-02.mp4 th-03.mp4
+
+With --from, the VO is first built from the talking-head clips: their audio
+tracks joined in the order given (paths relative to the VO's folder, or
+absolute), written to vo.mp3. Needs openai-whisper and ffmpeg.
+"""
+import json, shutil, subprocess, sys, pathlib, tempfile
+
+args = sys.argv[1:]
+if not args:
+    sys.exit(__doc__)
+src = pathlib.Path(args[0]).resolve(); out_dir = src.parent
+if "--from" in args:
+    clips = [(out_dir / c).resolve() for c in args[args.index("--from") + 1:]]
+    missing = [str(c) for c in clips if not c.exists()]
+    if not clips or missing:
+        sys.exit(f"make-timings: clips not found: {missing or 'none given'}")
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as lst:
+        lst.write("".join(f"file '{c}'\n" for c in clips))  # absolute paths: concat resolves relative ones against the list
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", lst.name, "-vn",
+                    "-ac", "2", "-c:a", "libmp3lame", "-q:a", "2", str(src)], check=True)
+    pathlib.Path(lst.name).unlink()
+    print(f"vo.mp3 built from {len(clips)} clips")
 whisper = shutil.which("whisper")
 cmd = [whisper] if whisper else [sys.executable, "-m", "whisper"]
 try:
@@ -24,4 +44,5 @@ json.dump({"source": src.name, "duration": round(words[-1]["e"], 2), "segments":
           open(out_dir / "timings.json", "w"), indent=1)
 (out_dir / (src.stem + ".json")).unlink()
 print(f"{len(words)} words, {len(segs)} segments -> {out_dir/'timings.json'}")
+print(f"last word ends {words[-1]['e']:.2f}s: data-duration = {int(round(words[-1]['e'] * 1000)) + 1000}")
 for s in segs: print(f"  {s['start']:6.2f}-{s['end']:6.2f}  {s['text']}")

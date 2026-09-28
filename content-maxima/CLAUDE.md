@@ -34,7 +34,7 @@ cost), **Where**.
 
 ```bash
 python3 tools/gen.py <model-id> <payload.json> <out-file>     # one generation: submit, wait, download
-python3 tools/make-timings.py <materials>/<name>/vo.mp3         # word timings beside the VO
+python3 tools/make-timings.py <materials>/<name>/vo.mp3 [--from clips...]  # word timings (and the VO from clips)
 python3 tools/cut-sheet.py grid|elements <sheet.png> ... --names a,b  # cut one generated sheet into its images
 python3 tools/captions.py <root>/editable/<name>.html            # word-per-word captions from the timings
 node tools/render/audit.js <root>/editable/<name>.html [--at ms,...]  # leaks, text, files, frame sheet
