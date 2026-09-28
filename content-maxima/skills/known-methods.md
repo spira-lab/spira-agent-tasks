@@ -23,13 +23,23 @@ tool the entry points to; this file holds the why.
 
 ## Writing the editable
 
-- **Works:** skeleton first, then one scene per edit, written by hand
-  from `timings.json`.
+- **Works:** 6 or 7 scenes planned up front, a skeleton, then two or
+  three scenes per edit, written by hand from `timings.json`.
 - **Fails:** the whole editable in one write (an 80 KB file takes minutes
-  with nothing visible, and an interruption loses everything), and a
-  generator script that emits the html (paid for three times: writing,
-  running, fixing).
+  with nothing visible), a generator script that emits the html (paid for
+  three times: writing, running, fixing), and ten scenes written one per
+  edit with an audit after each: twenty minutes of round trips on staging
+  for a 30-second video.
 - **Where:** stage-canvas-html, section 3.
+
+## Captions
+
+- **Works:** `tools/captions.py`: the script aligned to the timings,
+  one-line phrases, restyled with CSS after its markers.
+- **Fails:** captions written by hand inside every scene: 90 timed word
+  spans per video, most of the audit's text problems (lonely words,
+  third lines), and a round of fixes for each.
+- **Where:** stage-canvas-html, section 6.
 
 ## Sound effects and the number of renders
 
@@ -42,11 +52,13 @@ tool the entry points to; this file holds the why.
 
 ## Checking the stage
 
-- **Works:** `tools/render/audit.js` after each scene; it prints every
-  leak and text problem and writes a sheet of frames.
-- **Fails:** writing a Playwright screenshot or leak script in every
-  session, which costs the time to write and debug it each time.
-- **Where:** stage-canvas-html, section 6.
+- **Works:** `tools/render/audit.js` twice on the whole video, once with
+  every scene written and once after the fixes, and `--at` for a quick
+  look at a stretch while building (seconds, not a full pass).
+- **Fails:** writing a Playwright screenshot or probe script in every
+  session, and a full audit after every scene: on staging each full run
+  grew from 1 s to 38 s as the file grew, sixteen times over.
+- **Where:** stage-canvas-html, section 7.
 
 ## Music style
 

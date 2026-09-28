@@ -20,7 +20,7 @@ from a blank file. The copy gives you:
 - **Video clip support**: every `<video>` inside `#stage` follows the
   stage clock (rule 11).
 - **Sound-effect support**: `<audio class="sfx">` tags play at their time
-  in the preview and are mixed by the renderer (section 4).
+  in the preview and are mixed by the renderer (section 5).
 - A **timeline object**, `window.STAGE`, with `play()`, `pause()`,
   `restart()`, `seek(ms)`, `onFrame(fn)`, `time`, `playing`, `timings`,
   `duration`, `width`, `height`.
@@ -65,18 +65,28 @@ it has no exit.
 - Video JavaScript goes in a **new** `<script>` tag after the harness
   script. Do not edit the harness script.
 - Each scene is a container with the class `scene` and an id (`#s1`,
-  `#s2`, ...); the audit finds scenes by it. Caption and kinetic-type
-  words are elements with the class `w` (a key word also `k`), each
-  phrase in its own parent; the audit checks phrases by it.
-- **Build in stages, never in one write.** First the skeleton: scene
-  containers, the audio tags, `data-duration`. Then one scene at a time,
-  each as its own edit, so progress is on disk as it happens and an
-  interruption loses one scene.
+  `#s2`, ...); the audit finds scenes by it. Kinetic-type words are
+  elements with the class `w` (a key word also `k`), each phrase in its
+  own parent; the audit checks phrases by it. Captions are not written by
+  hand: section 6.
+- **Plan the scenes once, then build in a few edits.** A scene is one
+  look that holds for a few seconds; the changes inside it (cards, words,
+  zooms) carry the pace. A 30-second video has at most 6 or 7 scenes,
+  about one per sentence; more scenes are more to write and check, not
+  a better video. Decide them all before the first edit, then write the
+  skeleton (scene containers, the audio and sfx tags, `data-duration`),
+  then the scenes two or three per edit. Never the whole file in one
+  write: a very large write takes minutes with nothing on disk.
 - **Write the editable by hand. Never build a helper that writes it.** No
   build script, generator, or template filler that takes timings and
   emits the html. You are the generator: read `timings.json`, write the
   CSS and markup with the numbers in them. A helper costs the time to
-  write it, run it, and debug it, and can stall at each step.
+  write it, run it, and debug it, and can stall at each step. The one
+  exception is the captions, which the package's own tool writes
+  (section 6).
+- **Do not read the stage template.** Section 1 is its interface; the
+  copy is your editable, and reading 23 KB of harness only fills the
+  context.
 
 ## 4. Rules for animating inside the stage
 
@@ -137,12 +147,45 @@ talking-head speech), whose speech lands quieter against effects. The
 music bed sits 20 LU under the voice. Do not pre-mix effects into
 `vo.mp3`; the VO file stays the dry voice that the timings came from.
 
-## 6. Audit
+## 6. Captions
 
-After each scene, and once more before rendering:
+Word-per-word captions are mechanical, so a tool writes them:
+
+```bash
+python3 tools/captions.py <root>/editable/<name>.html [--style highlight|appear] [--top 1390] [--size 66] [--color #fff] [--hl #ffcf33]
+```
+
+It aligns the script with the timings, so every word carries the
+script's spelling and Whisper's timing; splits the words into one-line
+phrases where the sentence reads best; shrinks a phrase that is wider
+than the 700 px caption block; and writes the markup and CSS between
+`captions:start` / `captions:end` markers, centred on x 540. `highlight`
+lights each word as it is spoken; `appear` brings each word in as it is
+spoken (creative-video-production section 7 decides which). Run it once
+the timings exist, and again whenever the VO or script changes.
+
+Restyle with CSS after the marker block: `#captions` (the layer),
+`.cc-phrase` (position, size, colour, font), `.cc-phrase .w` (a word), and
+the `ccHl` keyframes (the highlight). Never edit inside the markers, never
+write caption words by hand, and do not reuse the `cc-` names.
+
+## 7. Audit
+
+Run the whole-video audit twice: once when every scene is written, and
+once after fixing what it found. Not after each scene: problems are
+cheaper to fix together.
 
 ```bash
 node tools/render/audit.js <root>/editable/<name>.html
+```
+
+To look at a stretch while building, add `--at` with the moments to see:
+only those frames are shot, and only that stretch is checked, so it takes
+seconds instead of a full pass. Use it instead of writing a script to
+screenshot or inspect the page.
+
+```bash
+node tools/render/audit.js <root>/editable/<name>.html --at 7400,8100,9000
 ```
 
 It seeks the stage in the renderer's own view and prints `audit clean` or
@@ -154,14 +197,18 @@ one line per problem:
   before each scene.
 - `text @t`: a phrase outside the safe zone, a caption over two lines,
   or a line holding a single short non-key word.
+- `file:` a referenced file that is missing, or sits in `deletable/` or
+  `jobs/`.
 - `console:` a page error.
 
-Fix every line and run it again. It also writes
+Each line says how to fix it; fix them all in as few edits as you can,
+then run it the second time. It also writes
 `materials/<name>/deletable/audit-sheet.jpg`: the first frame, each scene
-0.6 s in, and the last frame (`--at ms,ms,...` for other moments). Look
-at it; it is the check a render would otherwise be spent on.
+0.6 s in, and the last frame, or the `--at` moments. Look at it on the
+first run; it is the check a render would otherwise be spent on. The
+tool's output is the whole interface: do not read its source.
 
-## 7. Render
+## 8. Render
 
 ```bash
 node tools/render/render.js <root>/editable/<name>.html <root>/renders/<name>.mp4 30
@@ -174,7 +221,7 @@ the editable; there is nothing else to configure. It moves an existing
 render to `renders/deletable/` first, captures every frame in parallel
 headless Chrome, mixes the audio (voice at -16 LUFS, effects and bed
 under it, bed faded in 1 s and out 1.5 s), checks the file (duration,
-frame count, stereo), records it in metadata, and writes
+frame count, stereo), and writes
 `materials/<name>/deletable/cover-sheet.jpg`. Output is 1080 x 1920,
 30 fps, H.264, stereo AAC.
 
@@ -194,7 +241,7 @@ element fully built, sharp, and readable, nothing mid-transition), and:
 tools/set-cover.sh <root>/renders/<name>.mp4 <seconds>
 ```
 
-## 8. Other aspect ratios
+## 9. Other aspect ratios
 
 Default is 9:16. For another ratio change only `#stage { width; height }`
 in CSS, `STAGE_W`, `STAGE_H` in the harness JS, and the `<title>`,

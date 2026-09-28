@@ -32,7 +32,7 @@ again.
   job, apply it to the video, and adjust the timing of every element to
   the new VO. Captions and any on-screen text that carries the script
   follow the translated script. Save it as a new editable, with its own
-  materials, metadata, and render, named with the language as a prefix
+  materials and render, named with the language as a prefix
   on the title and the same video number as the original:
   `NN-<lang>-name-MM-DD`, so `03-iaso-09-21` in Spanish becomes
   `03-es-iaso-09-21`. The number is kept, not incremented; the language

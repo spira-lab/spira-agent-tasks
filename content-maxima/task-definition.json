@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "packageVersion": "1.1.0",
+  "packageVersion": "1.2.0",
   "description": "Turn a script, brief, or idea into a finished 9:16 video for Reels and TikTok, following the skills in skills/ (start with skills/creative-video-production.md).",
   "requirements": [
     {"name": "ffmpeg", "kind": "system", "purpose": "Encoding, mixing, frame extraction and probing (render, gen, add-ons)", "check": "ffmpeg -version && ffprobe -version"},
-    {"name": "python3", "kind": "system", "purpose": "tools/gen.py, tools/meta.py, tools/make-timings.py and tools/bgm-extend.py", "check": "python3 --version"},
+    {"name": "python3", "kind": "system", "purpose": "tools/gen.py, tools/make-timings.py and tools/bgm-extend.py", "check": "python3 --version"},
     {"name": "chromium", "kind": "system", "purpose": "Frame capture in tools/render/render.js", "check": "test -x \"$CHROME_PATH\""},
     {"name": "playwright-core", "kind": "npm", "purpose": "Drives Chromium in tools/render/render.js (the render stage)", "check": "node -e \"require('playwright-core')\"", "install": "npm install -g playwright-core@1.63.0"},
     {"name": "@spira-lab/cli", "kind": "npm", "purpose": "Every generated asset, uploads and the credit balance (skills/toolkit.md)", "check": "spira --version", "install": "npm install -g @spira-lab/cli"},

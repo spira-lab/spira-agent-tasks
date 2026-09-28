@@ -36,14 +36,12 @@ from and never written to, and nothing is built inside them.
   renders/
     NN-name-MM-DD.mp4           the current render of each editable
     deletable/                  replaced renders
-  metadata/
-    NN-name-MM-DD.json          prompts, URLs, jobs, renders, publication
 ```
 
 ## 3. Naming
 
 Every video has one name, `NN-name-MM-DD`, shared by its editable, its
-materials folder, its render, and its metadata file.
+materials folder, and its render.
 
 - **NN**: two-digit sequence number within this root: the highest
   number in `editable/` plus one, `01` if there is none. Never reuse a
@@ -61,14 +59,13 @@ Create it, its materials folder, and the script in one step:
 
 ```bash
 N=NN-name-MM-DD
-mkdir -p editable/materials/$N/deletable editable/materials/$N/jobs renders/deletable metadata
+mkdir -p editable/materials/$N/deletable editable/materials/$N/jobs renders/deletable
 cp <package>/stage/stage-9x16.html editable/$N.html
 sed -i.bak "s/EDITABLE-NAME/$N/g" editable/$N.html && rm editable/$N.html.bak
 printf '%s\n' "<the approved script>" > editable/materials/$N/script.txt
 ```
 
-The metadata file is created by the first tool that writes to it. An
-edit to a video is made to the same editable; never create a second
+An edit to a video is made to the same editable; never create a second
 html for the same video. IF an editable is rebuilt from scratch, move the
 old one to its materials `deletable/` first.
 
@@ -80,14 +77,9 @@ old one to its materials `deletable/` first.
 - Only material in use stays in the folder proper. The moment a file is
   rejected, replaced, or turns out to be unused (the second take of a
   music job, a Soul base image once the edit is in, a contact sheet),
-  move it with
-
-  ```bash
-  python3 tools/meta.py move <file> [--by <file that replaces it>]
-  ```
-
-  which moves it to `deletable/`, keeps its name (adding `_2`, `_3` on a
-  collision), and updates its metadata entry.
+  `mv` it to `deletable/` under the same name (adding `_2`, `_3` on a
+  collision). The generation's payload stays in `jobs/`, so the asset can
+  be made again.
 - Never delete. The `deletable/` folders are the operator's to empty.
 - Tool working files (audit and cover sheets, the cover still, a
   reference video and its frames) are written straight to `deletable/`
@@ -103,7 +95,7 @@ old one to its materials `deletable/` first.
 
   ```bash
   tools/publish.sh renders/NN-name-MM-DD.mp4               # lists the tags
-  tools/publish.sh renders/NN-name-MM-DD.mp4 "<tag>"       # uploads, records it in metadata
+  tools/publish.sh renders/NN-name-MM-DD.mp4 "<tag>"       # uploads, prints the asset id and URL
   ```
 
   Every upload needs a tag that already exists; the CLI cannot create
@@ -114,27 +106,3 @@ old one to its materials `deletable/` first.
 - Only the current render is published. A re-render that supersedes a
   published video is published again; removing the superseded asset is
   the operator's call.
-
-## 7. Metadata
-
-`metadata/NN-name-MM-DD.json` holds, with absolute paths, the script, one
-entry per asset (file, status, tool, the verbatim prompt, the output URL,
-the job id, when), and one entry per render (fps, duration, publication).
-It is how any asset is regenerated after its file is gone.
-
-It is written only by the tools: `tools/gen.py` records each generation,
-`tools/meta.py move` each move, `render.js` each render, `publish.sh`
-each publication. A local file hosted by hand is recorded with
-`python3 tools/meta.py asset` (toolkit section 2). Never edit the JSON by
-hand.
-
-## 8. Before hand-over
-
-```bash
-python3 tools/meta.py check editable/NN-name-MM-DD.html
-```
-
-It prints `check ok`, or every file the html references that is missing
-or in `deletable/`, every metadata entry whose file is gone, and a
-current render that is not published. Fix each line, unless it is the
-unpublished render of section 6's no-fitting-tag case.

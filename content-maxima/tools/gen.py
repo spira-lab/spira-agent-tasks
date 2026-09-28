@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One generation, end to end: submit, wait, download, check, record in metadata.
+"""One generation, end to end: submit, wait, download, check.
 
   python3 tools/gen.py <model-id> <payload.json> <out-file> [--timeout 20m]
 
@@ -8,7 +8,8 @@ first); <out-file> is where the result lands, inside the video's materials
 folder. Extra results of the same job land beside it as <name>-2.<ext>, ...
 
 Run independent generations in parallel in one command, each in the
-background, then wait:
+background, then wait. Leave the output on the terminal: each line is printed
+whole, and the job ids in it are how the platform bills the run.
 
   python3 tools/gen.py seedance-1.5-pro th-01.json th-01.mp4 &
   python3 tools/gen.py seedance-1.5-pro th-02.json th-02.mp4 &
@@ -20,10 +21,6 @@ Checks: a .webm must carry alpha; a transparent-background .png must have an
 alpha channel. A failed check is printed as `warning:` and the file is kept.
 """
 import json, pathlib, subprocess, sys
-
-sys.dont_write_bytecode = True  # the package is read-only: no __pycache__ beside the tools
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-import meta  # noqa: E402
 
 ALPHA_FORMATS = {"rgba", "ya8", "rgba64be", "ya16be", "rgba64le", "ya16le"}
 
@@ -58,7 +55,6 @@ def main():
     payload = pathlib.Path(payload_file).read_text()
     json.loads(payload)  # fail here, not at the provider, on a malformed payload
     out = pathlib.Path(out).resolve()
-    meta.locate(out)  # before spending credits: the result must land in a video's materials
     out.parent.mkdir(parents=True, exist_ok=True)
 
     created = spira_json(["spira", "--json", "ai", "jobs", "create", "--model-id", model,
@@ -80,7 +76,6 @@ def main():
         # curl, not urllib: the CDN turns away urllib's default client
         if run(["curl", "-sSfL", "--retry", "3", "-o", str(target), url]).returncode != 0:
             sys.exit(f"download failed: {url}")
-        meta.record_asset(target, model, payload, url=url, job=job)
         files.append((target, url))
 
     for target, _ in files:

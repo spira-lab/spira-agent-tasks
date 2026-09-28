@@ -119,19 +119,21 @@ to watch, and predictable.
 
 ## 7. Captions
 
-Captions are one to two lines only, never more.
+Captions are one line per phrase, made by `tools/captions.py` (stage
+skill section 6); style them, never write them by hand.
 
 There are two types. One is word-per-word highlighting that follows
 the script: every word is highlighted in turn as it is spoken, not a
-selection of words. The other is word-per-word appearance, where each
-word shows up on screen as it is spoken. Which one to use is decided
-by the style of the video being created.
+selection of words (`--style highlight`). The other is word-per-word
+appearance, where each word shows up on screen as it is spoken
+(`--style appear`). Which one to use is decided by the style of the
+video being created.
 
 Captions and any on-screen text carry the script's spelling, never the
-transcription's. WHEN Whisper hears a word differently from the script
-(a hyphenated word split, a brand name misheard), keep its timing and
-write the script's word. Do not regenerate the voice for it: to human
-ears the speech is usually right.
+transcription's; the tool already does this for captions. WHEN Whisper
+hears a word differently from the script (a hyphenated word split, a
+brand name misheard), do not regenerate the voice for it: to human ears
+the speech is usually right.
 
 ## 8. When done
 

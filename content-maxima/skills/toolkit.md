@@ -25,9 +25,9 @@ python3 tools/gen.py <model-id> <payload.json> <materials>/<name>/<out-file>
 
 It submits the job, waits (20 minutes by default; `--timeout 30m` to
 raise it), downloads the result to `<out-file>` (a job's extra results
-land beside it as `<name>-2.<ext>`), records the asset with its prompt,
-URL and job id in the metadata file, checks alpha on `.webm` results and
-on transparent-background `.png` results, and prints `url: <resultUrl>`.
+land beside it as `<name>-2.<ext>`), checks alpha on `.webm` results and
+on transparent-background `.png` results, and prints its job id and
+`url: <resultUrl>`.
 Pass that URL into the next job that needs the result. Payload files
 are working files: keep them in `<materials>/<name>/jobs/`, which is
 never referenced by the html.
@@ -37,7 +37,10 @@ fix the payload before resubmitting once; never resubmit an unchanged
 payload in a loop.
 
 **Independent jobs run in parallel, in one command.** Whenever jobs do
-not depend on each other's results, start them all at once and wait:
+not depend on each other's results, start them all at once and wait.
+Leave their output on the terminal, never redirected to files: each
+result prints as whole lines, and the job ids in that output are how the
+platform bills the run.
 
 ```bash
 M=editable/materials/<name>
@@ -66,9 +69,7 @@ URL.
   straight into the next job; never re-upload a job's output.
 - **The file exists only on disk** (a user-provided product image, a
   frame cut locally). Host it with `spira assets upload <file>`, which
-  prints nothing but the hosted URL, and record it with
-  `python3 tools/meta.py asset <file> --tool upload --prompt "<what it is>" --url <url>`.
-  Do not use `spira social assets upload` for this: that one publishes
+  prints nothing but the hosted URL. Do not use `spira social assets upload` for this: that one publishes
   to the Social Post Assets library.
 
 ## 3. Tool map
@@ -149,10 +150,12 @@ afterwards. `gen.py` warns when the PNG came back without alpha.
 
 ## 3d. Stock stills for b-roll: `gpt-image-2`
 
-Payload: `{"prompt":"<scene>, photographic, natural light","size":"9:16","resolution":"1K"}`.
-Use `9:16` for full-bleed stage backgrounds, `16:9` for inset shots.
-`1K` is enough for a 1080-wide stage; go to `2K` only when the image
-will be zoomed past 1:1.
+Payload: `{"prompt":"<scene>, photographic, natural light","size":"9:16","resolution":"2K"}`.
+Use `9:16` for full-bleed stage backgrounds and `16:9` for inset shots.
+A full-bleed `9:16` still is always `2K`: it comes back 1152 x 2048, while
+`1K` comes back 640 x 1136, too small for the 1080 x 1920 stage, and gets
+generated twice. `1K` (`1:1` is 1024 x 1024) is for insets, cards and
+elements that sit well under full width.
 
 ## 3e. Talking-head clip: `seedance-1.5-pro`
 

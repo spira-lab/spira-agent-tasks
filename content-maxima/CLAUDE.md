@@ -18,8 +18,8 @@ is a map; where it and a skill disagree, the skill wins.
 
 The package (`skills/`, `stage/`, `tools/`, `sfx/`, `music/`, `docs/`) is
 read from, never written to. Session output goes to the root, the folder
-the session was opened in, under `editable/`, `renders/`, and `metadata/`,
-which are gitignored. `file-management.md` governs every path.
+the session was opened in, under `editable/` and `renders/`, which are
+gitignored. `file-management.md` governs every path.
 
 ## Record a corrected approach in known-methods
 
@@ -33,13 +33,13 @@ cost), **Where**.
 ## Commands
 
 ```bash
-python3 tools/gen.py <model-id> <payload.json> <out-file>     # one generation, recorded in metadata
+python3 tools/gen.py <model-id> <payload.json> <out-file>     # one generation: submit, wait, download
 python3 tools/make-timings.py <materials>/<name>/vo.mp3         # word timings beside the VO
-node tools/render/audit.js <root>/editable/<name>.html          # leaks, text, frame sheet
+python3 tools/captions.py <root>/editable/<name>.html            # word-per-word captions from the timings
+node tools/render/audit.js <root>/editable/<name>.html [--at ms,...]  # leaks, text, files, frame sheet
 node tools/render/render.js <root>/editable/<name>.html <root>/renders/<name>.mp4 30
 tools/set-cover.sh <root>/renders/<name>.mp4 <seconds>
 tools/publish.sh <root>/renders/<name>.mp4 "<tag>"
-python3 tools/meta.py check <root>/editable/<name>.html
 tools/style-sheet.sh <url or path> <materials>/<name>/deletable # style reference contact sheet
 node docs/render-steps.js                                       # refresh the README cards
 ```

@@ -10,8 +10,8 @@
 //     data-sfx-under LU (on #vo, default 8) under the voice
 //   * stage size is read from the page (window.STAGE), so any ratio works
 //   * a render already at <out.mp4> is moved to renders/deletable first; the new one
-//     is checked (duration, frames, stereo), recorded in metadata, and a one-frame-per-
-//     second sheet for choosing the cover is written to the materials deletable/
+//     is checked (duration, frames, stereo), and a one-frame-per-second sheet for
+//     choosing the cover is written to the materials deletable/
 // Four workers saturate a 12-core machine; more only contend. process.exit(0) at the
 // end is needed: the local server holds Chrome's keep-alive sockets open.
 const { spawn, execFileSync } = require('child_process');
@@ -25,7 +25,6 @@ const dir = path.dirname(htmlPath);            // the editable's folder; everyth
 const rel = path.basename(htmlPath);
 const fps = parseInt(fpsArg || '30', 10);
 const WORKERS = parseInt(workersArg || '4', 10);
-const META = path.join(__dirname, '..', 'meta.py');
 const inRoot = path.basename(path.dirname(out)) === 'renders';
 
 const ed = readEditable(htmlPath);
@@ -124,6 +123,21 @@ function checkRender() {
   console.log(problems.length ? `  check FAILED: ${problems.join('; ')}` : `  check ok: ${(ed.durationMs/1000).toFixed(2)} s, ${nb} frames, stereo`);
 }
 
+// renders/ holds only the current render: the previous one goes to renders/deletable,
+// stamped with its own modification time.
+function archivePrevious() {
+  if (!fs.existsSync(out)) return;
+  if (!inRoot) return fs.rmSync(out);
+  const d = fs.statSync(out).mtime, p = n => String(n).padStart(2, '0');
+  const stamp = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;
+  const folder = path.join(path.dirname(out), 'deletable');
+  fs.mkdirSync(folder, { recursive: true });
+  let target = path.join(folder, `${ed.name}_${stamp}.mp4`);
+  for (let n = 2; fs.existsSync(target); n++) target = path.join(folder, `${ed.name}_${stamp}_${n}.mp4`);
+  fs.renameSync(out, target);
+  console.log(`previous render moved to ${path.relative(process.cwd(), target)}`);
+}
+
 function coverSheet() {
   const deletable = path.join(dir, 'materials', ed.name, 'deletable');
   if (!fs.existsSync(path.dirname(deletable))) return;
@@ -135,10 +149,7 @@ function coverSheet() {
 }
 
 (async () => {
-  if (fs.existsSync(out)) {
-    if (inRoot) execFileSync('python3', [META, 'move', out], { stdio: 'inherit' });
-    else fs.rmSync(out);
-  }
+  archivePrevious();
   const t0 = Date.now();
   const swap = await intraCopies();
   const tPrep = Date.now();
@@ -163,7 +174,6 @@ function coverSheet() {
   console.log(`  concat+audio in ${((Date.now()-tTail)/1000).toFixed(0)}s | total ${((Date.now()-t0)/1000).toFixed(0)}s`);
 
   checkRender();
-  if (inRoot) execFileSync('python3', [META, 'render', out, '--fps', String(fps), '--duration-ms', String(ed.durationMs)], { stdio: 'inherit' });
   coverSheet();
   console.log('done:', out);
   process.exit(0);
