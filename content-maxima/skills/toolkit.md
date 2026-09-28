@@ -215,6 +215,13 @@ parallel command (section 1), then every cut-out in one parallel
 command (3f). Running the clips one at a time is the single biggest
 waste of time in the kit.
 
+**Plan while the clips render.** The clips take three to four minutes.
+Run their batch in the background (the Bash tool's background mode; you
+are told when it finishes) and use the wait: decide every scene (what it
+shows, which assets, roughly where each sentence falls) and write the
+CSS and skeleton that do not depend on exact timings. Timings, clip
+placement and captions come after the clips are in.
+
 The clips' own audio is the voice-over. Build it and its timings in one
 step, clips in order, then place the clips back to back on the stage:
 

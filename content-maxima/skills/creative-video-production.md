@@ -28,7 +28,7 @@ Elements to consider:
 - Sensible b-roll visuals only, never visuals that mean nothing and are
   there just to match a word in the speech.
 - Sound effects, added for immersion. Choose them from
-  `sfx/SFX metadata.json`, which names each sound, says what it is, and
+  `sfx/SFX metadata.json` (read it whole with `cat`), which names each sound, says what it is, and
   says when it is best used; never open the audio files to learn them.
   How a chosen sound is placed and how loud it plays is in the stage
   skill.

@@ -159,7 +159,8 @@ def build(groups, style, top, size, color, hl):
   #captions {{ position: absolute; inset: 0; z-index: 900; pointer-events: none; }}
   #captions .cc-phrase {{ position: absolute; left: 190px; width: 700px; top: {top}px; text-align: center;
     font-weight: 900; font-size: {size}px; line-height: 1.1; color: {color}; white-space: nowrap;
-    text-shadow: 0 4px 18px rgba(0,0,0,.65); animation: ccIn .16s ease-out both; }}
+    -webkit-text-stroke: 5px rgba(0,0,0,.55); paint-order: stroke fill;
+    text-shadow: 0 0 3px rgba(0,0,0,.9), 0 3px 14px rgba(0,0,0,.75); animation: ccIn .16s ease-out both; }}
   #captions .cc-body {{ display: block; }}
   #captions .cc-fit {{ display: inline-block; transform-origin: 50% 50%; }}
   #captions .cc-body.out {{ animation: ccOut .04s linear both; }}
