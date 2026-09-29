@@ -241,13 +241,45 @@ async function inspect(page, { at, durationMs, shotDir }) {
         }
         return box;
       };
+      // A cut-out's frame, under object-fit none (intrinsic size, centred) or cover
+      // (clipped to its box), mapped through the element's transform.
+      const frameRect = el => {
+        const r = el.getBoundingClientRect(), fit = getComputedStyle(el).objectFit;
+        const sx = r.width / (el.offsetWidth || 1), sy = r.height / (el.offsetHeight || 1);
+        const box = { left: r.left - st.left, top: r.top - st.top, right: r.right - st.left, bottom: r.bottom - st.top };
+        if (fit !== 'none') return fit === 'cover' || fit === 'fill' ? box : painted(el);
+        const cx = (box.left + box.right) / 2, cy = (box.top + box.bottom) / 2;
+        const w = el.videoWidth * sx, h = el.videoHeight * sy;
+        return { left: Math.max(box.left, cx - w / 2), right: Math.min(box.right, cx + w / 2), top: Math.max(box.top, cy - h / 2), bottom: Math.min(box.bottom, cy + h / 2) };
+      };
+      // Which sides of the decoded frame the figure touches (opaque along more than 3% of that side).
+      const touched = v => {
+        const w = v.videoWidth, h = v.videoHeight;
+        if (!w || !h) return [];
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(v, 0, 0);
+        const share = (x, y, ww, hh) => { const d = g.getImageData(x, y, ww, hh).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 128) n++; return n / (ww * hh); };
+        return [['left', share(0, 0, 2, h)], ['right', share(w - 2, 0, 2, h)], ['top', share(0, 0, w, 2)], ['bottom', share(0, h - 2, w, 2)]]
+          .filter(([, s]) => s > 0.03).map(([side]) => side);
+      };
       const out = [];
+      document.querySelectorAll('#stage video').forEach(v => {
+        if (!v.dataset.auditCutout || !shown(v)) return;
+        const f = frameRect(v);
+        if (f.right <= 0 || f.left >= W || f.bottom <= 0 || f.top >= H) return;
+        const inside = { left: f.left > 2 && f.left, right: W - f.right > 2 && f.right, top: f.top > 2 && f.top, bottom: H - f.bottom > 2 && f.bottom };
+        const cuts = touched(v).filter(side => inside[side] !== false).map(side => `${side} at ${side === 'left' || side === 'right' ? 'x' : 'y'} ${Math.round(inside[side])}`);
+        if (cuts.length) {
+          const scene = v.closest('.scene');
+          out.push(`${scene ? '#' + scene.id + ' ' : ''}cut-out is cropped by its own frame inside the canvas (${cuts.join(', ')}): the figure ends in a straight line there; scale or move it so the cropped side runs past the canvas edge`);
+        }
+      });
       document.querySelectorAll('#stage img, #stage video, #stage canvas, #stage .scene, #stage .scene > *, #stage .bg').forEach(el => {
         if (!shown(el)) return;
         const cs = getComputedStyle(el);
         const media = ['IMG', 'VIDEO', 'CANVAS'].includes(el.tagName);
         if (!media && cs.backgroundImage === 'none' && (cs.backgroundColor === 'rgba(0, 0, 0, 0)' || cs.backgroundColor === 'transparent')) return;
-        if (el.dataset.auditCutout) return; // a cut-out is a figure, not a layer
+        if (el.dataset.auditCutout) return; // a cut-out is a figure, not a layer; checked above
         const b = painted(el);
         const gaps = [];
         if (b.bottom - b.top >= 0.6 * H) {
@@ -266,7 +298,11 @@ async function inspect(page, { at, durationMs, shotDir }) {
       });
       return out;
     });
-    found.forEach(s => { if (!slivers.has(s)) { slivers.add(s); problems.push(`edge @${(t / 1000).toFixed(2)}s: ${s}; a frame-filling layer runs to all four edges (object-fit: cover), or sits clearly inside the safe zone as a card`); } });
+    found.forEach(s => {
+      if (slivers.has(s)) return;
+      slivers.add(s);
+      problems.push(`edge @${(t / 1000).toFixed(2)}s: ${s}${s.includes('cut-out') ? '' : '; a frame-filling layer runs to all four edges (object-fit: cover), or sits clearly inside the safe zone as a card'}`);
+    });
     const f = path.join(shotDir, `${String(shots.length).padStart(3, '0')}.jpg`);
     await page.screenshot({ path: f, type: 'jpeg', quality: 80 });
     shots.push({ f, t });

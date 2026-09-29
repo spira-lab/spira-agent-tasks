@@ -138,7 +138,11 @@ b-roll still, or an infographic; a headline or a big word set behind
 the head so the person stands in front of it; the room fading away to
 leave the person over the scene. The clip with its own room is one look
 among several, never the whole video. A talking-head video with no
-cut-out on screen is wrong; the audit flags it.
+cut-out on screen is wrong; the audit flags it. Wherever the figure is cropped by
+its own frame (the body at the bottom, often a shoulder or an arm at the
+sides), that side of the cut-out runs past the canvas edge; placed or
+scaled so a cropped side ends inside the canvas, the person ends in a
+straight line in mid-air, which the audit flags.
 
 **Type is designed, never default.** Every video has a type system
 taken from its style reference (the rolled one included): a headline

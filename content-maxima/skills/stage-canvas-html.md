@@ -223,7 +223,8 @@ one line per problem:
   outside the safe zone, a caption over two lines, or a line holding a
   single short non-key word.
 - `edge @t`: a frame-filling layer (a clip, a still, a painted
-  background) that stops a sliver short of the canvas edge.
+  background) that stops a sliver short of the canvas edge, or a cut-out
+  whose cropped side ends inside the canvas.
 - `font:` a font that failed to load, or text set only in system fonts.
 - `cut-out:` talking-head clips on the stage with none of their cut-outs.
 - `file:` a referenced file that is missing, or sits in `deletable/` or
