@@ -41,32 +41,22 @@ from and never written to, and nothing is built inside them.
 ## 3. Naming
 
 Every video has one name, `NN-name-MM-DD`, shared by its editable, its
-materials folder, and its render.
-
-- **NN**: two-digit sequence number within this root: the highest
-  number in `editable/` plus one, `01` if there is none. Never reuse a
-  number, even if an earlier video was abandoned.
-- **name**: the brand name if a brand has been mentioned; otherwise the
-  video's topic. Lowercase letters and digits, words joined by hyphens.
-- **MM-DD**: month and day the editable was created, joined by a hyphen.
-
-The name is assigned once, when the editable is created, and never
-changes. Edits, re-renders, and later sessions keep it.
+materials folder, and its render: a sequence number, the brand if one is
+named (otherwise the topic), and the day it was started. The tool in
+section 4 assigns it; it never changes afterwards, through edits,
+re-renders, and later sessions.
 
 ## 4. The editable
 
-Create it, its materials folder, and the script in one step. Several
-runs can share this root at the same time, so claim the number with a
-plain `mkdir` (no `-p`): it fails if the folder exists, and then the next
-number is yours.
+One command starts the video: it numbers and claims it, copies the stage
+template to `editable/<name>.html`, makes its materials folder (with
+`deletable/`, `jobs/`, and `sfx/`), saves the script, and prints the name.
+The root's own folders already exist.
 
 ```bash
-N=NN-name-MM-DD
-mkdir editable/materials/$N || { echo "taken: pick the next NN"; exit 1; }
-mkdir -p editable/materials/$N/deletable editable/materials/$N/jobs renders/deletable
-cp <package>/stage/stage-9x16.html editable/$N.html
-sed -i.bak "s/EDITABLE-NAME/$N/g" editable/$N.html && rm editable/$N.html.bak
-printf '%s\n' "<the approved script>" > editable/materials/$N/script.txt
+tools/new-video.sh "<brand or topic>" <<'SCRIPT'
+<the approved script>
+SCRIPT
 ```
 
 An edit to a video is made to the same editable; never create a second

@@ -71,8 +71,8 @@ tool the entry points to; this file holds the why.
 
 ## Other runs in the same root
 
-- **Works:** claiming the video's number with a plain `mkdir`, and
-  touching only the editable this session created.
+- **Works:** `tools/new-video.sh`, which claims the video's number
+  atomically, and touching only the editable this session created.
 - **Fails:** adopting an editable found in the root as "a previous run
   interrupted": it was another run working at the same time, and the two
   overwrote each other's voice-over and html.

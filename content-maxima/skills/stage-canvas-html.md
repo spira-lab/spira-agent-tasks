@@ -10,9 +10,9 @@ creative decisions are not made here.
 
 ## 1. Start from the template
 
-Every video is a copy of `stage/stage-9x16.html`, made as file-management
-section 4 says. Never edit the template itself, and never build a video
-from a blank file. The copy gives you:
+Every video is a copy of `stage/stage-9x16.html`, made by
+`tools/new-video.sh` (file-management section 4). Never edit the template
+itself, and never build a video from a blank file. The copy gives you:
 
 - A **9:16 canvas**, `<div id="stage">`, at a fixed **1080 x 1920 px**.
 - A **voice-over slot**, `<audio id="vo">`, and a **music slot**,
