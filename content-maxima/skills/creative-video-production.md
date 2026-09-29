@@ -131,6 +131,26 @@ its look, never its story, its people, or its words.
 
 ## 5. Tips
 
+**The persona cut-out is the talking head's main tool.** Every
+talking-head clip is cut out (toolkit 3f), and the cut-out carries most
+of the talking-head scenes: the person over an animated background, a
+b-roll still, or an infographic; a headline or a big word set behind
+the head so the person stands in front of it; the room fading away to
+leave the person over the scene. The clip with its own room is one look
+among several, never the whole video. A talking-head video with no
+cut-out on screen is wrong; the audit flags it.
+
+**Type is designed, never default.** Every video has a type system
+taken from its style reference (the rolled one included): a headline
+face, an accent treatment, and a caption face, from the `fonts/`
+library (stage skill section 3). Carry the reference's treatment: weight
+contrast (a heavy word beside light ones), an italic serif accent word
+inside a sans headline, a coloured key word, a highlight box or pill
+behind a word, tight tracking on stacked lines, outline or glow where
+the reference has it. Headlines are set tight, line height 0.95 to 1.1.
+Text set in the system fonts with one weight and one colour is a draft,
+and the audit flags it.
+
 - WHEN making a talking head with a disappearing background, use the
   main talking head video, with the background-removed talking head on
   top, and fade the background out.
@@ -190,8 +210,8 @@ empties them, never the session.
 ## 9. Hard rules
 
 - Read only what the skills tell you to: the essential skills in
-  section 10, `skills/working-memory.md`, `sfx/SFX metadata.json`, the stage
-  template, the one rolled sheet in `styles/`, and the editable you are
+  section 10, `skills/working-memory.md`, `sfx/SFX metadata.json`,
+  `fonts/fonts.md`, the stage template, the one rolled sheet in `styles/`, and the editable you are
   working on. Never open another
   editable html in the root; reading it anchors you to it and you copy
   it. Open `skills/add-ons.md` only WHEN the user asks for an add-on by name
@@ -208,7 +228,20 @@ empties them, never the session.
   edges and under the UI; a lower half left empty because it is outside
   the safe zone is wrong. The canvas centre is x 540, y 960, and the
   safe zone sits off it: compose to the canvas, then check the key
-  elements against the zone.
+  elements against the zone. Every text on screen, not only the
+  captions, is a key element: a headline, a pill, a label, card copy.
+  Set its wrap width so it ends inside the zone, x 1005 above y 1255
+  and x 890 below it.
+- Place everything on the stage grid (the template's `Centre` and
+  `Thirds` guides, stage skill section 1). A key element is centred on
+  x 540 or sits on a thirds line (x 360 or 720, y 640 or 1280); its
+  edges and gaps fall on the 5% ticks (54 px across, 96 px down), and
+  elements that share a scene share those lines instead of each finding
+  its own. A layer that fills the frame fills all of it: a clip, a still,
+  or a background runs past all four edges of the 1080 x 1920 canvas
+  (`object-fit: cover`), never stopping a sliver short of one; a card
+  that does not fill the frame sits clearly inside the safe zone. The
+  audit flags a text outside the zone and a layer short of the edge.
 - Nothing covers the presenter's face: cards, text, stickers, and props
   sit beside, above, or below it, never over the eyes and mouth, and
   least of all in the hook, where the face is what stops the scroll.

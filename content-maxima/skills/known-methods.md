@@ -85,3 +85,34 @@ tool the entry points to; this file holds the why.
   as a producer tag, the CLI shows only `provider_error`, and blind
   retries fail the same way, minutes each.
 - **Where:** toolkit, section 3g.
+
+## Persona cut-outs
+
+- **Works:** every talking-head clip cut out in one Bria batch, and the
+  cut-out layered over most talking-head scenes: over an animated
+  background or b-roll, in front of a headline, the room faded away.
+- **Fails:** cutting out only the clips the scene plan showed as a
+  cut-out: sessions planned none, and every video was the clip in its
+  own room from start to end (content team review, 2026-09-29).
+- **Where:** toolkit, section 3f; creative-video-production, section 5.
+
+## Type
+
+- **Works:** the families the style calls for from `fonts/`, copied into
+  the materials and declared with `@font-face`, with the reference's
+  treatment (weight contrast, italic serif accent, key-word colour).
+- **Fails:** setting everything in the installed Noto and DejaVu fonts:
+  one plain sans in every video, whatever the style reference showed
+  (content team review, 2026-09-29).
+- **Where:** stage-canvas-html, section 3; `fonts/fonts.md`.
+
+## Layout on the stage
+
+- **Works:** key elements on the stage grid (centre, thirds, 5% ticks),
+  every text checked against the safe zone, and frame-filling layers
+  run past all four edges; the audit checks all three.
+- **Fails:** checking only the caption phrases: a headline ran past
+  x 1005 into the icon column, and a talking-head clip stopped 60 px
+  short of the right edge, both unflagged (content team review,
+  2026-09-29).
+- **Where:** creative-video-production, section 9; `tools/render/inspect.js`.

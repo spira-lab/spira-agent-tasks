@@ -282,9 +282,14 @@ cut-out. The only reasons to touch the result are a missing alpha
 channel or the user asking for a change.
 
 The WebM goes on the stage as a `<video>` element, never as extracted
-frames (stage-canvas-html, rule 11). Cut out only the clips shown on
-screen as a cut-out; a clip used for its voice alone, or shown whole in
-its own room, needs none.
+frames (stage-canvas-html, rule 11).
+
+**Every talking-head clip is cut out, in one batch.** As soon as the
+clips are in, submit every clip to Bria in one parallel command
+(section 1), never one at a time, and never skip a clip because the
+scene plan shows it whole: the cut-out is what the scenes are layered
+with (creative-video-production section 5), and deciding per clip is
+how sessions stopped using it at all.
 
 ## 3g. Background music: `suno-music`
 

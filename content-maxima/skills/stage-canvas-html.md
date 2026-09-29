@@ -28,9 +28,13 @@ itself, and never build a video from a blank file. The copy gives you:
   `seek`, and on `restart`; the renderer seeks every frame it captures, so
   a JS-driven element that derives its state from `t` alone renders
   exactly as it previews (rule 6).
-- Preview controls, UI guide overlays (both draw the safe zone), and a
-  word readout for the operator; `?render` hides them and places the
-  canvas at 1:1. Do not edit them.
+- Preview controls, guide overlays, and a word readout for the operator;
+  `?render` hides them and places the canvas at 1:1. Do not edit them.
+  The guides are the stage grid every layout is placed on
+  (creative-video-production section 9): `TikTok UI` and `Reels UI` draw
+  the app UI and the one safe zone, `Centre` the X and Y axes through
+  x 540, y 960 with a tick every 5% (54 px across, 96 px down), and
+  `Thirds` the 3 x 3 lines at x 360 and 720, y 640 and 1280.
 
 ## 2. Voice-over timings (as soon as the VO file exists)
 
@@ -96,12 +100,15 @@ it has no exit.
 - **Do not read the stage template.** Section 1 is its interface; the
   copy is your editable, and reading 23 KB of harness only fills the
   context.
-- **Fonts are the ones installed; there are no web fonts (rule 8).** Set
-  `font-family` to one of: `Noto Sans`, `Noto Sans Display`, `Noto Serif`,
-  `Noto Serif Display`, `DejaVu Sans`, `DejaVu Serif`, `DejaVu Sans Mono`,
-  and `Noto Color Emoji` for emoji. Each has Regular, Bold, Italic, and
-  Bold Italic only: `font-weight` 800 or 900 renders as Bold. Do not list
-  or inspect the system fonts.
+- **Type comes from the package's `fonts/` library.** Read
+  `fonts/fonts.md` (the table of families, what each looks like, and the
+  `@font-face` to write), pick the families the style calls for, copy
+  their files into `materials/<name>/fonts/`, and declare them at the
+  top of the video CSS. Nothing is fetched from the web (rule 8). The
+  installed system fonts (`Noto Sans`, `DejaVu Sans`, ...) are fallbacks
+  only, never the video's type; `Noto Color Emoji` is the emoji font. Do
+  not list or inspect the system fonts. The audit flags a font that
+  failed to load and a video whose text is all in system fonts.
 
 ## 4. Rules for animating inside the stage
 
@@ -181,7 +188,9 @@ the timings exist, and again whenever the VO or script changes.
 
 Restyle with CSS after the marker block: `#captions` (the layer),
 `.cc-phrase` (position, size, colour, font), `.cc-phrase .w` (a word), and
-the `ccHl` keyframes (the highlight). Never edit inside the markers, never
+the `ccHl` keyframes (the highlight). The captions come out in no font of
+their own: set `.cc-phrase` to the caption face of the video's type
+system (creative-video-production section 5). Never edit inside the markers, never
 write caption words by hand, and do not reuse the `cc-` names.
 
 ## 7. Audit
@@ -210,8 +219,13 @@ one line per problem:
   (rule 10, a `stroke-dasharray` shorter than its path, a second
   animation without its own delay). Checked on the first frame and 0.4 s
   before each scene.
-- `text @t`: a phrase outside the safe zone, a caption over two lines,
-  or a line holding a single short non-key word.
+- `text @t`: a phrase or any other text (a headline, a pill, card copy)
+  outside the safe zone, a caption over two lines, or a line holding a
+  single short non-key word.
+- `edge @t`: a frame-filling layer (a clip, a still, a painted
+  background) that stops a sliver short of the canvas edge.
+- `font:` a font that failed to load, or text set only in system fonts.
+- `cut-out:` talking-head clips on the stage with none of their cut-outs.
 - `file:` a referenced file that is missing, or sits in `deletable/` or
   `jobs/`.
 - `console:` a page error.

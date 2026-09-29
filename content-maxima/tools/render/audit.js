@@ -9,9 +9,15 @@
 //     clipped) has not started yet but is visible anyway. Checked on the first frame
 //     and 0.4 s before each .scene starts (a scene starts at its earliest animation).
 //   * text: every phrase (the parent of .w words) at the moment its last word has
-//     landed: safe-zone hits and lines holding a single short non-key word.
-//   * files: every materials/ file the html references exists, and none is in
-//     deletable/ or jobs/.
+//     landed: safe-zone hits and lines holding a single short non-key word; every
+//     other text block (headlines, labels, card copy) once its entry has finished:
+//     safe-zone hits.
+//   * edge: on each sheet frame, a frame-filling layer (media or a painted box
+//     spanning most of the canvas) that stops just short of an edge.
+//   * font: a @font-face that failed to load, or no text in a font from fonts/.
+//   * files: every materials/ file the html references (tags and CSS url()) exists,
+//     and none is in deletable/ or jobs/.
+//   * cut-out: talking-head clips (th-*.mp4) on the stage with no cut-out WebM.
 //   * sheet: the frames at --at, or by default the first frame, each scene 0.6 s in
 //     and the last frame, written to materials/<name>/deletable/audit-sheet.jpg.
 // Prints "audit clean" or one line per problem. Fix every line, then run it again.
@@ -33,10 +39,16 @@ const ed = readEditable(htmlPath);
 (async () => {
   const problems = [];
 
-  // Files.
-  for (const ref of [...new Set([...ed.html.matchAll(/(?:src|href)="(materials\/[^"]+)"/g)].map(m => m[1]))]) {
+  // Files, from tags and from CSS url()s (fonts, background images).
+  const refs = [...new Set([...ed.html.matchAll(/(?:src|href)="(materials\/[^"]+)"|url\(\s*['"]?(materials\/[^'")]+)/g)].map(m => m[1] || m[2]))];
+  for (const ref of refs) {
     if (/\/(deletable|jobs)\//.test(ref)) problems.push(`file: ${ref} is in ${ref.includes('/jobs/') ? 'jobs/' : 'deletable/'}; move what the video uses back out`);
     else if (!fs.existsSync(path.join(dir, ref))) problems.push(`file: ${ref} does not exist`);
+  }
+
+  // A talking head is layered with its cut-out (toolkit 3f): clips on the stage and no WebM means it never is.
+  if (refs.some(r => /\/th-[^/]*\.mp4$/.test(r)) && !refs.some(r => /\.webm$/.test(r))) {
+    problems.push('cut-out: the talking-head clips are on the stage but none of their cut-outs is; cut every clip out (toolkit 3f) and layer the WebM over the scenes (creative-video-production section 5)');
   }
 
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'stage-audit-'));

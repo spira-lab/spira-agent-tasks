@@ -42,6 +42,7 @@
 | `sfx/` | Sound effects and their metadata |
 | `music/` | The music library, numbered tracks |
 | `styles/` | The style library, numbered contact sheets rolled for a video with no style reference |
+| `fonts/` | The type library (SIL OFL), indexed in `fonts/fonts.md` |
 | `docs/` | These cards and the script that renders them |
 
 The cards are generated from `docs/steps.html`. After editing it, run `node docs/render-steps.js` from the package folder to refresh the images.

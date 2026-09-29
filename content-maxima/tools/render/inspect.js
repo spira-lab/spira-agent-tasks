@@ -135,12 +135,135 @@ async function inspect(page, { at, durationMs, shotDir }) {
     if (r) problems.push(`text @${(ph.t / 1000).toFixed(2)}s ${r}`);
   }
 
-  // Sheet.
+  // Other text: every text block that is not a .w phrase (headlines, labels, pills, card copy),
+  // checked against the safe zone once its entry has finished.
+  if (portrait) {
+    const blocks = await page.evaluate(() => {
+      const hidden = kf => kf && (kf.opacity === '0' || /inset\(\s*100%|inset\([^)]*100%\s*\)/.test(kf.clipPath || '') || /scale\(0\)/.test(kf.transform || ''));
+      const ownText = e => [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
+      const all = [...document.querySelectorAll('#stage *')].filter(e => ownText(e) && !e.closest('#captions') && !e.closest('.w') && !e.querySelector('.w'));
+      // the outermost element with text of its own stands for the block
+      const tops = all.filter(e => { for (let p = e.parentElement; p && p.id !== 'stage'; p = p.parentElement) if (all.includes(p)) return false; return true; });
+      return tops.map((e, i) => {
+        e.dataset.auditText = i;
+        let end = null;
+        for (let p = e; p && p.id !== 'stage'; p = p.parentElement) {
+          p.getAnimations().forEach(a => {
+            if (!hidden(a.effect.getKeyframes()[0])) return;
+            const tm = a.effect.getTiming();
+            end = Math.max(end || 0, (tm.delay || 0) + (tm.duration || 0));
+          });
+        }
+        const scene = e.closest('.scene');
+        return { id: i, t: end, scene: scene ? scene.id : null };
+      });
+    });
+    const sceneStart = Object.fromEntries(scenes.map(s => [s.id, s.start]));
+    const byTime = new Map();
+    blocks.forEach(b => {
+      const t = Math.min(b.t != null ? b.t + 200 : (sceneStart[b.scene] || 0) + 600, durationMs - 100);
+      if (inWindow(t)) byTime.set(t, [...(byTime.get(t) || []), b.id]);
+    });
+    for (const [t, ids] of [...byTime].sort((a, b) => a[0] - b[0])) {
+      await seekTo(page, t, false);
+      const out = await page.evaluate(({ ids, Z }) => ids.map(id => {
+        const el = document.querySelector(`[data-audit-text="${id}"]`);
+        let o = 1;
+        for (let e = el; e && e.id !== 'stage'; e = e.parentElement) {
+          const cs = getComputedStyle(e);
+          if (cs.display === 'none' || cs.visibility === 'hidden') return null;
+          o *= parseFloat(cs.opacity);
+        }
+        if (o < 0.5) return null;
+        const st = document.getElementById('stage').getBoundingClientRect();
+        const range = document.createRange(); range.selectNodeContents(el);
+        const b = range.getBoundingClientRect();
+        if (b.width < 2 || b.height < 2) return null;
+        const box = { left: b.left - st.left, right: b.right - st.left, top: b.top - st.top, bottom: b.bottom - st.top };
+        // off the canvas altogether is a deliberate exit, not a placement
+        if (box.right < 0 || box.left > st.width || box.bottom < 0 || box.top > st.height) return null;
+        const rLim = box.bottom > Z.stepY ? Z.stepRight : Z.right;
+        const flags = [];
+        if (box.left < Z.left) flags.push(`left ${Math.round(box.left)}`);
+        if (box.right > rLim) flags.push(`right ${Math.round(box.right)} (limit ${rLim})`);
+        if (box.top < Z.top) flags.push(`top ${Math.round(box.top)}`);
+        if (box.bottom > Z.bottom) flags.push(`bottom ${Math.round(box.bottom)}`);
+        return flags.length ? `"${el.textContent.trim().replace(/\s+/g, ' ').slice(0, 48)}": ${flags.join(', ')}, outside the safe zone: x 70-1005, y 230-1255, then x 70-890 down to y 1615 (shrink, rewrap or move it inside)` : null;
+      }).filter(Boolean), { ids, Z: ZONE });
+      out.forEach(l => problems.push(`text @${(t / 1000).toFixed(2)}s ${l}`));
+    }
+  }
+
+  // Fonts: a family that failed to load falls back silently; type set only in the
+  // system fonts means the video has no type design of its own.
+  const fonts = await page.evaluate(() => {
+    const faces = [...document.fonts];
+    return {
+      failed: [...new Set(faces.filter(f => f.status === 'error').map(f => f.family.replace(/"/g, '')))],
+      loaded: faces.filter(f => f.status === 'loaded').length,
+    };
+  });
+  fonts.failed.forEach(f => problems.push(`font: ${f} failed to load; copy its file from fonts/ into materials/<name>/fonts/ and point the @font-face src at it`));
+  if (!fonts.loaded) problems.push('font: no text uses a font from fonts/; set the headlines, key words and captions in the fonts the style calls for (stage-canvas-html section 3)');
+
+  // Sheet, and on each sheet frame: frame-filling layers that stop just short of the canvas edge.
   const times = at || [0, ...scenes.map(s => s.start + 600), durationMs - 100]
     .filter(t => t >= 0 && t < durationMs).sort((a, b) => a - b);
   const shots = [];
+  const slivers = new Set();
   for (const t of [...new Set(times)]) {
     await seekTo(page, t);
+    const found = await page.evaluate(() => {
+      const st = document.getElementById('stage').getBoundingClientRect();
+      const W = st.width, H = st.height;
+      const shown = el => {
+        let o = 1;
+        for (let e = el; e && e.id !== 'stage'; e = e.parentElement) {
+          const cs = getComputedStyle(e);
+          if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+          o *= parseFloat(cs.opacity);
+        }
+        return o > 0.5;
+      };
+      // What is painted: an img or video under object-fit contain paints less than its box.
+      const painted = el => {
+        const r = el.getBoundingClientRect();
+        const box = { left: r.left - st.left, top: r.top - st.top, right: r.right - st.left, bottom: r.bottom - st.top };
+        const iw = el.videoWidth || el.naturalWidth, ih = el.videoHeight || el.naturalHeight;
+        const fit = getComputedStyle(el).objectFit;
+        if (iw && ih && (fit === 'contain' || fit === 'scale-down')) {
+          const s = Math.min(r.width / iw, r.height / ih), w = iw * s, h = ih * s;
+          const cx = (box.left + box.right) / 2, cy = (box.top + box.bottom) / 2;
+          return { left: cx - w / 2, right: cx + w / 2, top: cy - h / 2, bottom: cy + h / 2 };
+        }
+        return box;
+      };
+      const out = [];
+      document.querySelectorAll('#stage img, #stage video, #stage canvas, #stage .scene, #stage .scene > *, #stage .bg').forEach(el => {
+        if (!shown(el)) return;
+        const cs = getComputedStyle(el);
+        const media = ['IMG', 'VIDEO', 'CANVAS'].includes(el.tagName);
+        if (!media && cs.backgroundImage === 'none' && (cs.backgroundColor === 'rgba(0, 0, 0, 0)' || cs.backgroundColor === 'transparent')) return;
+        if (media && el.tagName === 'VIDEO' && /\.webm/i.test(el.getAttribute('src') || '')) return; // a cut-out is a figure, not a layer
+        const b = painted(el);
+        const gaps = [];
+        if (b.bottom - b.top >= 0.6 * H) {
+          if (b.left > 0.5 && b.left < 70) gaps.push(`left ${Math.round(b.left)} px`);
+          if (W - b.right > 0.5 && W - b.right < 75) gaps.push(`right ${Math.round(W - b.right)} px`);
+        }
+        if (b.right - b.left >= 0.6 * W) {
+          if (b.top > 0.5 && b.top < 96) gaps.push(`top ${Math.round(b.top)} px`);
+          if (H - b.bottom > 0.5 && H - b.bottom < 96) gaps.push(`bottom ${Math.round(H - b.bottom)} px`);
+        }
+        if (gaps.length) {
+          const scene = el.closest('.scene');
+          const name = `${scene && scene !== el ? '#' + scene.id + ' ' : ''}${el.tagName.toLowerCase()}${el.id ? '#' + el.id : ''}${typeof el.className === 'string' && el.className.trim() ? '.' + el.className.trim().split(/\s+/).join('.') : ''}`;
+          out.push(`${name} stops short of the canvas edge (${gaps.join(', ')})`);
+        }
+      });
+      return out;
+    });
+    found.forEach(s => { if (!slivers.has(s)) { slivers.add(s); problems.push(`edge @${(t / 1000).toFixed(2)}s: ${s}; a frame-filling layer runs to all four edges (object-fit: cover), or sits clearly inside the safe zone as a card`); } });
     const f = path.join(shotDir, `${String(shots.length).padStart(3, '0')}.jpg`);
     await page.screenshot({ path: f, type: 'jpeg', quality: 80 });
     shots.push({ f, t });
