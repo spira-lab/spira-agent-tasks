@@ -61,7 +61,7 @@ longest one. A job that depends on another's output starts the moment
 that output is in, not after the whole batch. Plan the order so the
 longest chain starts first: for a talking head that is Soul, then the
 persona edit, then the clips, then the cut-outs (with the user's own
-photo it is the speech, then the clip: 3j); music, b-roll, and elements
+photo the chain starts at the clips, or at the speech in 3j); music, b-roll, and elements
 run beside it.
 
 To inspect a model's inputs and prices: `spira ai models get <modelId>`.
@@ -99,9 +99,15 @@ This is Higgsfield Soul. It is the first step of every persona and is
 never skipped: no other model produces the base likeness.
 
 **The one exception: the user provides the photo.** WHEN the user
-hands over a photo to use as the avatar, skip Soul, the clean-up edit
-(3b), and Seedance (3e). The talking head is made from the photo as
-given, in section 3j.
+hands over a photo to use as the avatar (or a video, from which a clear
+frame is taken), skip Soul and the clean-up edit (3b). The photo is used
+as given; host it only if it is not already a public URL (section 2).
+Then:
+
+- **With an ElevenLabs voice ID:** skip Seedance too. The talking head
+  is HeyGen driven by ElevenLabs speech, section 3j.
+- **Without a voice ID** (voice left on Auto): the talking head is
+  Seedance (3e) with the photo as the `referenceImage`.
 
 Payload: `{"prompt":"<persona description>","size":"9:16","resolution":"1080p"}`.
 `size` also takes 16:9, 4:3, 3:4, 1:1, 2:3, 3:2; `resolution` 720p or
@@ -195,7 +201,8 @@ on its own. A single still on its own is
 
 ## 3e. Talking-head clip: `seedance-1.5-pro`
 
-Animates the cleaned persona image into a speaking clip. Payload:
+Animates the cleaned persona image, or the user's photo (3a), into a
+speaking clip. Payload:
 `{"prompt":"<line and delivery>","referenceImage":["<persona url>"],"duration":"8","size":"9:16","resolution":"1080p","sound":true}`.
 
 Inputs: `referenceImage` (up to 2 URLs; one for a talking head),
@@ -354,9 +361,8 @@ character. The voice is ElevenLabs, so `data-sfx-under="14"` on `#vo`.
 
 ## 3j. Talking head from the user's photo: `heygen-avatar-4`
 
-Only WHEN the user provides a photo; without one, the talking head is
-the usual Soul, 3b, and Seedance route. The request always carries an
-ElevenLabs voice ID. Two jobs, in order:
+Only WHEN the user provides both a photo and an ElevenLabs voice ID
+(3a). Two jobs, in order:
 
 1. **Speech**, the whole script in one job with that voice ID on
    ElevenLabs V2:

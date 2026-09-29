@@ -69,7 +69,7 @@ transparent background. Nothing else.
 
 ## 5. Seedance 1.5 Pro, talking head
 
-The cleaned persona image is the reference. The line is the script
+The cleaned persona image, or the user's own photo, is the reference. The line is the script
 chunk for this clip, sized per the toolkit.
 
 ```
