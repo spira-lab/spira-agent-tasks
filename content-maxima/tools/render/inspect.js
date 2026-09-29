@@ -211,6 +211,9 @@ async function inspect(page, { at, durationMs, shotDir }) {
     .filter(t => t >= 0 && t < durationMs).sort((a, b) => a - b);
   const shots = [];
   const slivers = new Set();
+  // The harness swaps each clip's src for a blob, so a cut-out is known by the blob's type.
+  await page.evaluate(() => Promise.all([...document.querySelectorAll('#stage video')].map(v =>
+    fetch(v.currentSrc || v.src).then(r => r.blob()).then(b => { if (b.type === 'video/webm') v.dataset.auditCutout = '1'; }).catch(() => {}))));
   for (const t of [...new Set(times)]) {
     await seekTo(page, t);
     const found = await page.evaluate(() => {
@@ -244,7 +247,7 @@ async function inspect(page, { at, durationMs, shotDir }) {
         const cs = getComputedStyle(el);
         const media = ['IMG', 'VIDEO', 'CANVAS'].includes(el.tagName);
         if (!media && cs.backgroundImage === 'none' && (cs.backgroundColor === 'rgba(0, 0, 0, 0)' || cs.backgroundColor === 'transparent')) return;
-        if (media && el.tagName === 'VIDEO' && /\.webm/i.test(el.getAttribute('src') || '')) return; // a cut-out is a figure, not a layer
+        if (el.dataset.auditCutout) return; // a cut-out is a figure, not a layer
         const b = painted(el);
         const gaps = [];
         if (b.bottom - b.top >= 0.6 * H) {
