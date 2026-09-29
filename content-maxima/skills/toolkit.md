@@ -356,7 +356,8 @@ character. The voice is ElevenLabs, so `data-sfx-under="14"` on `#vo`.
 Anything not listed above, including other image models
 (`nano-banana-*`, `seedream-*`, `flux-kontext`), other video models
 (`kling-*` other than 3.0 motion control, `seedance-2.*`, `veo3.1`,
-`heygen-avatar-4`), and any lip-sync route. The one exception is a model
+`heygen-avatar-4`, used only where `skills/brands/cookiy.md` says), and
+any lip-sync route. The one exception is a model
 the user names explicitly in the request: then use it for that request,
 reading its inputs and prices with `spira ai models get <modelId>`.
 IF a step seems to need a tool that is neither listed nor named by the

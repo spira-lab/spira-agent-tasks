@@ -15,6 +15,8 @@ file under `skills/brands/`, read only for that brand.
 
 - IASO: read `skills/brands/iaso.md` and follow it. Applies only when the request
   names IASO, and to no other brand or project.
+- Cookiy: read `skills/brands/cookiy.md` and follow it. Applies only when
+  the request names Cookiy, and to no other brand or project.
 - WHEN the user provides a video URL or a local path to a video as the
   style reference, use the `Style ref contact sheet` add-on.
 
