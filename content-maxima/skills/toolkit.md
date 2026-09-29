@@ -60,8 +60,9 @@ Serial waiting costs the sum of the job times; parallel costs the
 longest one. A job that depends on another's output starts the moment
 that output is in, not after the whole batch. Plan the order so the
 longest chain starts first: for a talking head that is Soul, then the
-persona edit, then the clips, then the cut-outs; music, b-roll, and
-elements run beside it.
+persona edit, then the clips, then the cut-outs (with the user's own
+photo it is the speech, then the clip: 3j); music, b-roll, and elements
+run beside it.
 
 To inspect a model's inputs and prices: `spira ai models get <modelId>`.
 
@@ -87,6 +88,7 @@ URL.
 | Transparent-background element | `gpt-image-2` | same |
 | Stock still for b-roll | `gpt-image-2` | same |
 | Talking-head clip | `seedance-1.5-pro` | per second, see 3e |
+| Talking head from the user's photo | `elevenlabs-text-to-speech` + `heygen-avatar-4` | see 3j |
 | Talking-head cut-out | `bria-video-background-removal` | 0.42 per source second |
 | Background music | `suno-music` | 6.6 per track |
 | Avatar motion control, persona driven by a reference video | `kling-3.0-motion-control` pro | 9.52 per second |
@@ -96,11 +98,10 @@ URL.
 This is Higgsfield Soul. It is the first step of every persona and is
 never skipped: no other model produces the base likeness.
 
-**The one exception: the user provides the image.** WHEN the user
-hands over an image and says to use it as the avatar or the talking
-head, skip Soul entirely. That image is the base likeness. Host it
-(section 2) and go straight to the clean-up edit in 3b with it as the
-reference, exactly as a Soul output would be.
+**The one exception: the user provides the photo.** WHEN the user
+hands over a photo to use as the avatar, skip Soul, the clean-up edit
+(3b), and Seedance (3e). The talking head is made from the photo as
+given, in section 3j.
 
 Payload: `{"prompt":"<persona description>","size":"9:16","resolution":"1080p"}`.
 `size` also takes 16:9, 4:3, 3:4, 1:1, 2:3, 3:2; `resolution` 720p or
@@ -111,8 +112,8 @@ is never used directly; it is the reference for 3b, which is mandatory.
 
 ## 3b. Persona clean-up edit: `gpt-image-2`
 
-Takes the Soul output, or the user's own avatar image, as the reference
-and returns the production-ready persona image.
+Takes the Soul output as the reference and returns the
+production-ready persona image.
 
 Payload: `{"prompt":"<edit instruction>","referenceImage":["<soul url>"],"size":"9:16","resolution":"2K"}`.
 
@@ -263,9 +264,9 @@ tests and `1080p` for the final.
 
 ## 3f. Talking-head cut-out: `bria-video-background-removal`
 
-Removes the background from a Seedance clip so the talking head sits on
+Removes the background from a Seedance or HeyGen clip so the talking head sits on
 the stage with real transparency. Payload:
-`{"referenceVideo":["<seedance url>"],"mode":"Transparent","preserveAudio":true,"autoZoom":false}`,
+`{"referenceVideo":["<clip url>"],"mode":"Transparent","preserveAudio":true,"autoZoom":false}`,
 written to `<name>.webm`.
 
 **`mode` must be the word `Transparent`.** `spira ai models get` lists
@@ -351,13 +352,33 @@ Voices proven on this account: `21m00Tcm4TlvDq8ikWAM` (female) and
 the video, unless a brand file names its own. Cost is 0.01 credits a
 character. The voice is ElevenLabs, so `data-sfx-under="14"` on `#vo`.
 
+## 3j. Talking head from the user's photo: `heygen-avatar-4`
+
+Only WHEN the user provides a photo; without one, the talking head is
+the usual Soul, 3b, and Seedance route. The request always carries an
+ElevenLabs voice ID. Two jobs, in order:
+
+1. **Speech**, the whole script in one job with that voice ID on
+   ElevenLabs V2:
+   `{"text":"<the script>","voiceId":"<the voice ID from the request>","providerModelId":"eleven_multilingual_v2"}`,
+   written to `vo.mp3`. Build the timings from it straight away
+   (`python3 tools/make-timings.py <materials>/<name>/vo.mp3`), then
+   host it with `spira assets upload` (section 2).
+2. **Talking head**, the photo lip-synced to that speech:
+   `{"referenceImage":["<photo url>"],"referenceAudio":["<vo.mp3 url>"],"size":"9:16","resolution":"1080p","mode":"stable","talkingStyle":"stable"}`,
+   written to `th-01.mp4`. Use `720p` for tests.
+
+One clip covers the whole voice-over: no 4/8/12-second chunks. It is cut
+out with 3f like any talking-head clip and goes on the stage at
+`data-start="0"`. The voice is ElevenLabs, so `data-sfx-under="14"` on
+`#vo`. Cost is 10 credits a second.
+
 ## 4. Do not use
 
 Anything not listed above, including other image models
 (`nano-banana-*`, `seedream-*`, `flux-kontext`), other video models
 (`kling-*` other than 3.0 motion control, `seedance-2.*`, `veo3.1`,
-`heygen-avatar-4`, used only where `skills/brands/cookiy.md` says), and
-any lip-sync route. The one exception is a model
+`heygen-avatar-4` outside 3j), and any other lip-sync route. The one exception is a model
 the user names explicitly in the request: then use it for that request,
 reading its inputs and prices with `spira ai models get <modelId>`.
 IF a step seems to need a tool that is neither listed nor named by the

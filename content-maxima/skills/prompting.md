@@ -40,8 +40,7 @@ UGC Casually taken shot of one [age] [gender], alone in the frame, [pretty/hands
 
 ## 3. GPT Image 2, persona edit
 
-The Soul output is the reference, or the user's own image when they
-provided one to use as the avatar. The prompt keeps everything and
+The Soul output is the reference. The prompt keeps everything and
 changes only what is named.
 
 ```
