@@ -61,7 +61,7 @@ longest one. A job that depends on another's output starts the moment
 that output is in, not after the whole batch. Plan the order so the
 longest chain starts first: for a talking head that is Soul, then the
 persona edit, then the clips, then the cut-outs (with the user's own
-photo the chain starts at the clips, or at the speech in 3j); music, b-roll, and elements
+photo the chain starts at the persona edit, or at the speech in 3j); music, b-roll, and elements
 run beside it.
 
 To inspect a model's inputs and prices: `spira ai models get <modelId>`.
@@ -100,14 +100,16 @@ never skipped: no other model produces the base likeness.
 
 **The one exception: the user provides the photo.** WHEN the user
 hands over a photo to use as the avatar (or a video, from which a clear
-frame is taken), skip Soul and the clean-up edit (3b). The photo is used
-as given; host it only if it is not already a public URL (section 2).
-Then:
+frame is taken), skip Soul. Host the photo only if it is not already a
+public URL (section 2). Then:
 
-- **With an ElevenLabs voice ID:** skip Seedance too. The talking head
-  is HeyGen driven by ElevenLabs speech, section 3j.
-- **Without a voice ID** (voice left on Auto): the talking head is
-  Seedance (3e) with the photo as the `referenceImage`.
+- **With an ElevenLabs voice ID:** skip the clean-up edit (3b) and
+  Seedance too. The talking head is HeyGen driven by ElevenLabs speech
+  from the photo as given, section 3j.
+- **Without a voice ID** (voice left on Auto): the photo takes Soul's
+  place as the reference for the clean-up edit (3b), which still gives
+  the headspace above the head. The edited image goes into Seedance (3e)
+  as usual.
 
 Payload: `{"prompt":"<persona description>","size":"9:16","resolution":"1080p"}`.
 `size` also takes 16:9, 4:3, 3:4, 1:1, 2:3, 3:2; `resolution` 720p or
@@ -118,8 +120,8 @@ is never used directly; it is the reference for 3b, which is mandatory.
 
 ## 3b. Persona clean-up edit: `gpt-image-2`
 
-Takes the Soul output as the reference and returns the
-production-ready persona image.
+Takes the Soul output (or the user's photo, 3a) as the reference and
+returns the production-ready persona image.
 
 Payload: `{"prompt":"<edit instruction>","referenceImage":["<soul url>"],"size":"9:16","resolution":"2K"}`.
 
@@ -201,8 +203,7 @@ on its own. A single still on its own is
 
 ## 3e. Talking-head clip: `seedance-1.5-pro`
 
-Animates the cleaned persona image, or the user's photo (3a), into a
-speaking clip. Payload:
+Animates the cleaned persona image into a speaking clip. Payload:
 `{"prompt":"<line and delivery>","referenceImage":["<persona url>"],"duration":"8","size":"9:16","resolution":"1080p","sound":true}`.
 
 Inputs: `referenceImage` (up to 2 URLs; one for a talking head),

@@ -40,7 +40,8 @@ UGC Casually taken shot of one [age] [gender], alone in the frame, [pretty/hands
 
 ## 3. GPT Image 2, persona edit
 
-The Soul output is the reference. The prompt keeps everything and
+The Soul output, or the user's photo when there is no voice ID, is the
+reference. The prompt keeps everything and
 changes only what is named.
 
 ```
@@ -69,7 +70,7 @@ transparent background. Nothing else.
 
 ## 5. Seedance 1.5 Pro, talking head
 
-The cleaned persona image, or the user's own photo, is the reference. The line is the script
+The cleaned persona image is the reference. The line is the script
 chunk for this clip, sized per the toolkit.
 
 ```
