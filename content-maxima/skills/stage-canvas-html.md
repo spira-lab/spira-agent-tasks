@@ -80,7 +80,9 @@ it has no exit.
   look that holds for a few seconds; the changes inside it (cards, words,
   zooms) carry the pace. A 30-second video has at most 6 or 7 scenes,
   about one per sentence; more scenes are more to write and check, not
-  a better video. Decide them all before the first edit, then write the
+  a better video. Decide them all before the first edit, as one scene
+  table (time window, what it shows, which assets), and build from it
+  without re-deciding each scene as you reach it. Then write the
   skeleton (scene containers, the audio and sfx tags, `data-duration`),
   then the scenes two or three per edit. Never the whole file in one
   write: a very large write takes minutes with nothing on disk.
@@ -242,13 +244,17 @@ Expect 1.5 to 2.5 s of wall time per second of video with talking-head
 clips and about 1 s without. IF it prints `check FAILED` or `video seeks
 timed out`, fix the cause before anything else. Render once, after the
 audit is clean and the sound effects are placed: every re-render is
-another minute of capture.
+another minute of capture. Choose the cover moment before the render,
+from the audit sheet, and look at it once with `audit.js --at <ms>`: a
+defect first seen on the cover (text over the chin, a sliver at the
+edge) otherwise costs a second render.
 
 **Then set the cover.** The cover is the still a player shows before the
-video plays, stored beside the video so the first frame keeps its motion.
-Look at the cover sheet (tile n is the frame at n minus 1 seconds; the
-first tile is never the pick), choose the clearest poster frame (the key
-element fully built, sharp, and readable, nothing mid-transition), and:
+video plays, stored beside the video so the first frame keeps its motion:
+the clearest poster frame (the key element fully built, sharp, and
+readable, nothing mid-transition), never the first frame. Use the moment
+chosen before the render; the cover sheet (tile n is the frame at n
+minus 1 seconds) is there to confirm it:
 
 ```bash
 tools/set-cover.sh <root>/renders/<name>.mp4 <seconds>

@@ -13,8 +13,8 @@ an add-on from `add-ons.md`; then that add-on applies wherever the
 preference does. A brand with several preferences keeps them in its own
 file under `brands/`, read only for that brand.
 
-- IASO: read `brands/iaso.md` and follow it. Applies to every project for
-  the IASO brand and to no other brand or project.
+- IASO: read `brands/iaso.md` and follow it. Applies only when the request
+  names IASO, and to no other brand or project.
 - WHEN the user provides a video URL or a local path to a video as the
   style reference, use the `Style ref contact sheet` add-on.
 

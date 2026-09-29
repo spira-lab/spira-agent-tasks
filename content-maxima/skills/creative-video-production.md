@@ -12,7 +12,17 @@ Create a video for social media in 9:16, for Meta Reels or TikTok.
 Before deciding anything, open `working-memory.md` beside the skills
 and read its Preferences. WHEN a preference names the brand or the
 kind of project in front of you, it applies, without being asked
-again.
+again. A brand's preferences apply only when the request names that
+brand; never infer one. What the request itself supplies always wins
+over a preference: an avatar photo means a talking head of that person,
+a named style means that style.
+
+**The script.** WHEN the user gives a script, it is spoken word for word:
+never shorten, reword, or speed it up to fit a target length. Before any
+generation, count its words: at 3.3 words a second that is its length.
+IF that runs past the requested length, make the video as long as the
+script needs and say so in the final message. Only a brief or an idea is
+written to length.
 
 The task may come as different types of video: a UGC video with a
 talking head, a VO explainer video, an animated short, a product ad, a

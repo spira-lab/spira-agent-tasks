@@ -86,9 +86,38 @@ const ZONE = { left: 70, top: 230, right: 1005, bottom: 1615, stepY: 1255, stepR
       return out;
     }, t);
     leaks.slice(0, 8).forEach(l => problems.push(`leak @${(t / 1000).toFixed(2)}s: ${l} is already visible (an exit's backwards fill on the same element, rule 10: move the exit to a wrapper)`));
+    // A scene that has not started shows nothing, whether or not its content animates in:
+    // content with no entry animation at all is visible from t = 0 unless its scene hides it.
+    const early = await page.evaluate(({ t, scenes }) => {
+      const stage = document.getElementById('stage').getBoundingClientRect();
+      const shown = el => {
+        let o = 1;
+        for (let e = el; e && e.id !== 'stage'; e = e.parentElement) {
+          const cs = getComputedStyle(e);
+          if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+          o *= parseFloat(cs.opacity);
+          if (/inset\(\s*100%|inset\([^)]*100%\s*\)|circle\(0/.test(cs.clipPath) || /^matrix\(0, 0, 0, 0,/.test(cs.transform)) return false;
+        }
+        return o > 0.05;
+      };
+      const out = [];
+      // scenes that begin within the first second are the opening, shown from frame 0 by design
+      scenes.filter(s => s.start > Math.max(t + 200, 1000)).forEach(s => {
+        const el = document.getElementById(s.id);
+        const hit = [...el.querySelectorAll('img, video, svg, canvas, *')].find(e => {
+          if (!['IMG', 'VIDEO', 'svg', 'CANVAS'].includes(e.tagName) && ![...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) return false;
+          const r = e.getBoundingClientRect();
+          return r.width > 2 && r.height > 2 && r.bottom > stage.top && r.top < stage.bottom && r.right > stage.left && r.left < stage.right && shown(e);
+        });
+        if (hit) out.push(`#${s.id} (starts ${(s.start / 1000).toFixed(2)}s) already shows ${hit.tagName.toLowerCase()}${hit.className && typeof hit.className === 'string' ? '.' + hit.className.trim().split(/\s+/).join('.') : ''}`);
+      });
+      return out;
+    }, { t, scenes });
+    early.forEach(l => problems.push(`leak @${(t / 1000).toFixed(2)}s: ${l} (give the scene container an entry, e.g. opacity 0 until its start, or an entry on that element)`));
   }
 
-  // Text.
+  // Text. The safe zone is a 9:16 rule; other ratios get the caption and lonely-word checks only.
+  const portrait = await page.evaluate(() => window.STAGE.width === 1080 && window.STAGE.height === 1920);
   const phrases = await page.evaluate(() => {
     const parents = [...new Set([...document.querySelectorAll('#stage .w')].map(w => w.parentElement))];
     return parents.map((p, i) => {
@@ -118,11 +147,11 @@ const ZONE = { left: 70, top: 230, right: 1005, bottom: 1615, stepY: 1255, stepR
         L.words.push(w);
       });
       const flags = [];
-      const rLim = box.bottom > Z.stepY ? Z.stepRight : Z.right;
-      if (box.left < Z.left) flags.push(`left ${Math.round(box.left)}`);
-      if (box.right > rLim) flags.push(`right ${Math.round(box.right)} (limit ${rLim})`);
-      if (box.top < Z.top) flags.push(`top ${Math.round(box.top)}`);
-      if (box.bottom > Z.bottom) flags.push(`bottom ${Math.round(box.bottom)}`);
+      const rLim = Z ? (box.bottom > Z.stepY ? Z.stepRight : Z.right) : 0;
+      if (Z && box.left < Z.left) flags.push(`left ${Math.round(box.left)}`);
+      if (Z && box.right > rLim) flags.push(`right ${Math.round(box.right)} (limit ${rLim})`);
+      if (Z && box.top < Z.top) flags.push(`top ${Math.round(box.top)}`);
+      if (Z && box.bottom > Z.bottom) flags.push(`bottom ${Math.round(box.bottom)}`);
       if (flags.length && /left|right|top|bottom/.test(flags.join())) flags.push('outside the safe zone: x 70-1005, y 230-1255, then x 70-890 down to y 1615');
       if (lines.length > 2 && p.closest('#captions, .cap, .caption, .captions, #caps')) flags.push(`${lines.length} lines (captions take one or two: split the phrase)`);
       const lonely = lines.filter(l => l.words.length === 1 && !l.words[0].classList.contains('k') && l.words[0].textContent.trim().length <= 9)
@@ -130,7 +159,7 @@ const ZONE = { left: 70, top: 230, right: 1005, bottom: 1615, stepY: 1255, stepR
       if (lonely.length) flags.push(`lonely word: ${lonely.join(' | ')} (rewrap so no short word sits alone on a line; a deliberate one-word key line gets class k)`);
       const text = [...p.querySelectorAll('.w')].map(w => w.textContent.trim()).join(' ').slice(0, 48);
       return flags.length ? `"${text}": ${flags.join(', ')}` : null;
-    }, { id: ph.id, Z: ZONE });
+    }, { id: ph.id, Z: portrait ? ZONE : null });
     if (r) problems.push(`text @${(ph.t / 1000).toFixed(2)}s ${r}`);
   }
 
@@ -162,6 +191,7 @@ const ZONE = { left: 70, top: 230, right: 1005, bottom: 1615, stepY: 1255, stepR
   errors.forEach(e => problems.push(`console: ${e}`));
   if (stuck) problems.push(`${stuck} video seeks timed out`);
   console.log(`scenes: ${scenes.map(s => `${s.id}@${(s.start / 1000).toFixed(2)}s`).join(' ') || 'none (.scene[id] marks one)'}`);
+  if (!portrait) console.log('stage is not 9:16: safe-zone checks skipped; keep key elements clear of the edges by eye');
   if (at) console.log(`checked: within 0.5 s of ${at.map(a => (a / 1000).toFixed(1) + 's').join(', ')} only; run without --at for the whole video`);
   console.log(`sheet: ${sheet} (${shots.map(s => (s.t / 1000).toFixed(1) + 's').join(' ')})`);
   console.log(problems.length ? problems.join('\n') : 'audit clean');

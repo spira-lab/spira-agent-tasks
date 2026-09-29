@@ -55,10 +55,14 @@ changes. Edits, re-renders, and later sessions keep it.
 
 ## 4. The editable
 
-Create it, its materials folder, and the script in one step:
+Create it, its materials folder, and the script in one step. Several
+runs can share this root at the same time, so claim the number with a
+plain `mkdir` (no `-p`): it fails if the folder exists, and then the next
+number is yours.
 
 ```bash
 N=NN-name-MM-DD
+mkdir editable/materials/$N || { echo "taken: pick the next NN"; exit 1; }
 mkdir -p editable/materials/$N/deletable editable/materials/$N/jobs renders/deletable
 cp <package>/stage/stage-9x16.html editable/$N.html
 sed -i.bak "s/EDITABLE-NAME/$N/g" editable/$N.html && rm editable/$N.html.bak
@@ -68,6 +72,13 @@ printf '%s\n' "<the approved script>" > editable/materials/$N/script.txt
 An edit to a video is made to the same editable; never create a second
 html for the same video. IF an editable is rebuilt from scratch, move the
 old one to its materials `deletable/` first.
+
+Other editables in the root belong to other videos, and may be another
+run working right now: never open, reuse, resume, or take files from
+them. The one exception is this same task being continued after an
+interruption (the message says to continue): then the editable this
+session created is yours, with its paid assets; check what exists and
+carry on from there, and generate nothing that is already in.
 
 ## 5. Materials
 

@@ -69,6 +69,15 @@ tool the entry points to; this file holds the why.
   ends: 10 minutes to the tool timeout on staging) or a guessed `sleep 150`.
 - **Where:** toolkit, section 3e.
 
+## Other runs in the same root
+
+- **Works:** claiming the video's number with a plain `mkdir`, and
+  touching only the editable this session created.
+- **Fails:** adopting an editable found in the root as "a previous run
+  interrupted": it was another run working at the same time, and the two
+  overwrote each other's voice-over and html.
+- **Where:** file-management, section 4.
+
 ## Music style
 
 - **Works:** a `style` of genre, mood, tempo, and instruments only.

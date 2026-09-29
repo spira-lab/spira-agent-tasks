@@ -16,6 +16,11 @@ The preflight is the task's requirements check; `spira auth whoami`
 passing is all a generation needs. Do not check the balance: other
 sessions share it, and the platform measures what this run spends.
 
+Run every command from the root, with root-relative paths; never `cd`
+into a folder (a later command then resolves its paths from the wrong
+place). Use only the commands and flags this skill gives: `spira` has no
+wait flag of its own beyond what `gen.py` wraps.
+
 Every generation is one command. Write the job's full inputs to a
 payload file first, then:
 
@@ -67,9 +72,11 @@ URL.
 
 - **The file came from a job.** Its `url:` is already hosted. Pass it
   straight into the next job; never re-upload a job's output.
-- **The file exists only on disk** (a user-provided product image, a
-  frame cut locally). Host it with `spira assets upload <file>`, which
-  prints nothing but the hosted URL.
+- **The request already gives a public URL** (an avatar photo, a product
+  image). Pass it straight into the job; never download and re-upload it.
+- **The file exists only on disk** (a frame cut locally, a render). Host
+  it with `spira assets upload <file>`; the hosted address is its
+  `url:` line.
 
 ## 3. Tool map
 
@@ -275,7 +282,9 @@ cut-out. The only reasons to touch the result are a missing alpha
 channel or the user asking for a change.
 
 The WebM goes on the stage as a `<video>` element, never as extracted
-frames (stage-canvas-html, rule 11).
+frames (stage-canvas-html, rule 11). Cut out only the clips shown on
+screen as a cut-out; a clip used for its voice alone, or shown whole in
+its own room, needs none.
 
 ## 3g. Background music: `suno-music`
 
@@ -326,6 +335,16 @@ credits per second.
 5. Host the clip (section 2), set `duration` to its length, and run.
    Rejected clips, extended intermediates, and untrimmed outputs go to
    deletable.
+
+## 3i. Voice-over without a presenter: `elevenlabs-text-to-speech`
+
+For a VO explainer with no talking head. Payload:
+`{"text":"<the script>","voiceId":"21m00Tcm4TlvDq8ikWAM","providerModelId":"eleven_v3"}`,
+written to `vo.mp3`, then `python3 tools/make-timings.py <materials>/<name>/vo.mp3`.
+Voices proven on this account: `21m00Tcm4TlvDq8ikWAM` (female) and
+`iP95p4xoKVk53GoZ742B` (male), both on `eleven_v3`; use the one that fits
+the video, unless a brand file names its own. Cost is 0.01 credits a
+character. The voice is ElevenLabs, so `data-sfx-under="14"` on `#vo`.
 
 ## 4. Do not use
 

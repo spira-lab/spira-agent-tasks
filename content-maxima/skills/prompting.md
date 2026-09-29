@@ -35,7 +35,7 @@ Fill the slots. Drop a slot only where the format says it may be
 dropped.
 
 ```
-UGC Casually taken shot of a [age] [gender], [pretty/handsome/cute good looking], [beautiful and attractive with a natural easy smile, or the description that fits], [hair style] in a [outfit style], [what it is not, when needed; remove if unnecessary]. [He/She] is wearing a [outfit detail]. [Framed from the legs up if standing, waist up if sitting], [standing/sitting] relaxed in [setting location] [daylight/night time], looking at the camera, no posing, no filters, no text
+UGC Casually taken shot of one [age] [gender], alone in the frame, [pretty/handsome/cute good looking], [beautiful and attractive with a natural easy smile, or the description that fits], [hair style] in a [outfit style], [what it is not, when needed; remove if unnecessary]. [He/She] is wearing a [outfit detail]. [Framed from the legs up if standing, waist up if sitting], [standing/sitting] relaxed in [setting location] [daylight/night time], looking at the camera, no posing, no filters, no text
 ```
 
 ## 3. GPT Image 2, persona edit
@@ -78,6 +78,11 @@ The person says: “[line]”
 The camera remain static and steady on position.
 No camera movements, No sound effects, No special effects, No text on screen.
 ```
+
+The line goes in without quotation marks of its own: take out any “ ” or
+" " around words in the script (`The word “Ferrari”` becomes `The word
+Ferrari`), or the presenter reads the quote marks as pauses and words.
+Captions and on-screen text keep them.
 
 ## 6. Speech
 
