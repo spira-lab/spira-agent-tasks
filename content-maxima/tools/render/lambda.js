@@ -1,6 +1,7 @@
 // The browser work of render.js and audit.js, on AWS Lambda: CM_RENDER_LAMBDA names the
 // function, CM_RENDER_BUCKET its bucket (both set on the worker; see
-// content-maxima-render-lambda/).
+// apps/cc-engine/scripts/content-maxima-render-lambda/). The Lambda runs its own copy of
+// stage.js and inspect.js: after changing either, re-run that deploy.sh as well.
 //   * the editable, the files it references and its prepared all-keyframe clips are
 //     uploaded once to s3://<bucket>/jobs/<id>/site/, audio left out (the page mutes
 //     it at ?render; render.js mixes it locally)
