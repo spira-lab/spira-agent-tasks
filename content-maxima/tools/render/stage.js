@@ -1,7 +1,8 @@
-// Shared plumbing for render.js and audit.js: serve an editable's folder,
-// open it at ?render in headless Chrome, and seek it frame by frame.
-const { chromium } = require('playwright-core');
+// Shared plumbing for render.js, audit.js and the render Lambda: read an editable,
+// serve its folder, open it at ?render in headless Chrome, and seek it frame by frame.
+// The browser only runs on the Lambda, so playwright-core is required there, on launch.
 const fs = require('fs'), path = require('path'), http = require('http');
+const { spawn } = require('child_process');
 
 const MIME = { html:'text/html', css:'text/css', js:'text/javascript', json:'application/json',
                png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', webp:'image/webp', gif:'image/gif', svg:'image/svg+xml', avif:'image/avif',
@@ -24,10 +25,10 @@ function serve(dir, swap = {}) {
   return new Promise(r => server.listen(0, '127.0.0.1', () => r(server)));
 }
 
-function launch() {
-  const o = { args: ['--force-device-scale-factor=1'] };
+function launch(extraArgs = []) {
+  const o = { args: ['--force-device-scale-factor=1', ...extraArgs] };
   if (process.env.CHROME_PATH) o.executablePath = process.env.CHROME_PATH; else o.channel = 'chrome';
-  return chromium.launch(o);
+  return require('playwright-core').chromium.launch(o);
 }
 
 // Injected once per page: pause every animation, cache the list, expose a cheap
@@ -101,6 +102,44 @@ function seekTo(page, ms, videos = true) {
   }, [ms, videos]);
 }
 
+/**
+ * Capture frames [from, to) of the editable served on `port` into an H.264 segment
+ * at `seg`. Every segment of a render is encoded with the same settings, so they
+ * join with the concat demuxer without a re-encode. Runs in the render Lambda,
+ * one chunk per invocation (render.js -> lambda.js).
+ */
+async function renderRange({ port, rel, fps, from, to, seg, label = '', ffmpeg = 'ffmpeg', launchArgs = [] }) {
+  const browser = await launch(launchArgs);
+  const { page, W, H, nAnims } = await openStage(browser, port, rel);
+  const ff = spawn(ffmpeg, ['-y','-v','error','-f','image2pipe','-vcodec','mjpeg','-framerate',String(fps),'-i','-',
+    '-c:v','libx264','-preset','medium','-crf','17','-pix_fmt','yuv420p', seg], { stdio: ['pipe','inherit','inherit'] });
+  const ffDone = new Promise((res, rej) => { ff.on('error', rej); ff.on('close', c => c === 0 ? res() : rej(new Error(`${label} ffmpeg ${c}`))); });
+  const write = buf => new Promise(r => { if (!ff.stdin.write(buf)) ff.stdin.once('drain', r); else r(); });
+
+  let tSeek = 0, tShot = 0, tPipe = 0;
+  const clip = { x: 0, y: 0, width: W, height: H };
+  for (let i = from; i < to; i++) {
+    const t0 = Date.now();
+    await seekTo(page, i * 1000 / fps);
+    const t1 = Date.now();
+    const shot = await page.screenshot({ type: 'jpeg', quality: 92, clip });
+    const t2 = Date.now();
+    await write(shot);
+    tSeek += t1 - t0; tShot += t2 - t1; tPipe += Date.now() - t2;
+    if ((i - from) % 100 === 0) process.stdout.write(`\r  ${label} ${i - from}/${to - from}   `);
+  }
+  const stuck = await page.evaluate(() => window.__stuck);
+  ff.stdin.end();
+  await ffDone;
+  await browser.close();
+  const n = to - from;
+  return { frames: n, W, H, nAnims, stuck, seekMs: tSeek / n, shotMs: tShot / n, pipeMs: tPipe / n };
+}
+
+/** One log line for a finished segment. */
+const rangeSummary = (label, r) =>
+  `  ${label} done ${r.frames} frames | ${r.W}x${r.H} | anims ${r.nAnims} | seek ${r.seekMs.toFixed(0)}ms shot ${r.shotMs.toFixed(0)}ms pipe ${r.pipeMs.toFixed(0)}ms${r.stuck ? ` | ${r.stuck} video seeks timed out` : ''}`;
+
 /** The stage facts a tool needs, read from the editable's html. */
 function readEditable(htmlPath) {
   // Comments hold examples (the template's sample sfx tag), never cues.
@@ -121,4 +160,4 @@ function readEditable(htmlPath) {
   };
 }
 
-module.exports = { serve, launch, openStage, seekTo, readEditable };
+module.exports = { serve, launch, openStage, seekTo, renderRange, rangeSummary, readEditable };

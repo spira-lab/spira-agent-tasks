@@ -229,19 +229,17 @@ tool's output is the whole interface: do not read its source.
 node tools/render/render.js <root>/editable/<name>.html <root>/renders/<name>.mp4 30
 ```
 
-Arguments are the editable, the output, the frame rate, and optionally
-the worker count (default 4; fewer only on a small machine). The
+Arguments are the editable, the output, and the frame rate. The
 renderer reads `data-duration`, `#vo`, `#bgm`, and the `.sfx` tags from
 the editable; there is nothing else to configure. It moves an existing
-render to `renders/deletable/` first, captures every frame in parallel
-headless Chrome, mixes the audio (voice at -16 LUFS, effects and bed
+render to `renders/deletable/` first, captures every frame on AWS Lambda
+in parallel chunks, mixes the audio (voice at -16 LUFS, effects and bed
 under it, bed faded in 1 s and out 1.5 s), checks the file (duration,
 frame count, stereo), and writes
 `materials/<name>/deletable/cover-sheet.jpg`. Output is 1080 x 1920,
 30 fps, H.264, stereo AAC.
 
-Expect 1.5 to 2.5 s of wall time per second of video with talking-head
-clips and about 1 s without. IF it prints `check FAILED` or `video seeks
+Expect about a minute for a video up to two minutes long. IF it prints `check FAILED` or `video seeks
 timed out`, fix the cause before anything else. Render once, after the
 audit is clean and the sound effects are placed: every re-render is
 another minute of capture. Choose the cover moment before the render,

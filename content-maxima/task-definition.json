@@ -5,8 +5,7 @@
   "requirements": [
     {"name": "ffmpeg", "kind": "system", "purpose": "Encoding, mixing, frame extraction and probing (render, gen, add-ons)", "check": "ffmpeg -version && ffprobe -version"},
     {"name": "python3", "kind": "system", "purpose": "tools/gen.py, tools/make-timings.py and tools/bgm-extend.py", "check": "python3 --version"},
-    {"name": "chromium", "kind": "system", "purpose": "Frame capture in tools/render/render.js", "check": "test -x \"$CHROME_PATH\""},
-    {"name": "playwright-core", "kind": "npm", "purpose": "Drives Chromium in tools/render/render.js (the render stage)", "check": "node -e \"require('playwright-core')\"", "install": "npm install -g playwright-core@1.63.0"},
+    {"name": "@aws-sdk/client-s3 + client-lambda", "kind": "npm", "purpose": "tools/render/render.js and audit.js run their browser on AWS Lambda (CM_RENDER_LAMBDA / CM_RENDER_BUCKET)", "check": "node -e \"require('@aws-sdk/client-s3'); require('@aws-sdk/client-lambda')\"", "install": "npm install -g @aws-sdk/client-s3@3.1142.0 @aws-sdk/client-lambda@3.1142.0"},
     {"name": "@spira-lab/cli", "kind": "npm", "purpose": "Every generated asset, uploads and the credit balance (skills/toolkit.md)", "check": "spira --version", "install": "npm install -g @spira-lab/cli"},
     {"name": "spira sign-in", "kind": "credential", "purpose": "The Spira CLI must be signed in as the operator to generate or upload anything", "check": "spira auth whoami"},
     {"name": "openai-whisper", "kind": "pip", "purpose": "Word timings for the voice-over (tools/make-timings.py, the assets stage)", "check": "python3 -c \"import importlib.util, sys; sys.exit(importlib.util.find_spec('whisper') is None)\"", "install": "pip install openai-whisper"},

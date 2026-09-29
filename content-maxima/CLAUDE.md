@@ -50,8 +50,9 @@ node docs/render-steps.js                                       # refresh the RE
 
 ## What the machine needs
 
-Node, ffmpeg (with libvpx), Python 3, curl, and Google Chrome (or
-`CHROME_PATH` set to another Chromium). Run `npm install` once in
-`tools/render`. Timings need `pip install openai-whisper`; reference
+Node, ffmpeg (with libvpx), Python 3, and curl. Run `npm install` once in
+`tools/render`. The render and the audit run their browser on AWS Lambda:
+`CM_RENDER_LAMBDA` and `CM_RENDER_BUCKET` name the function and its bucket
+(set on the worker), with AWS credentials allowed to use them. Timings need `pip install openai-whisper`; reference
 videos from a URL need `yt-dlp`. The Spira CLI (`npm install -g
 @spira-lab/cli`) must be signed in.
