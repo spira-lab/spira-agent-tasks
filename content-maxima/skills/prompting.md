@@ -89,8 +89,8 @@ Captions and on-screen text keep them.
 WHEN a prompt carries words to be spoken, the Seedance line or a VO
 script, the model will get some of them wrong: brand names, product
 names, acronyms, unusual spellings, words borrowed from another
-language. Before writing the prompt, open `working-memory.md`, which
-sits beside this skill in the package, and check its Reword section. Any word listed there goes into the
+language. Before writing the prompt, open `skills/working-memory.md`
+and check its Reword section. Any word listed there goes into the
 spoken line in its reword spelling, not its original.
 
 IF you hear a word mispronounced in the output and it is not in the

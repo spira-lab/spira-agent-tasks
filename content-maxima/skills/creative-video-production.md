@@ -9,8 +9,8 @@ description: Creative video production and principles for building a video: what
 
 Create a video for social media in 9:16, for Meta Reels or TikTok.
 
-Before deciding anything, open `working-memory.md` beside the skills
-and read its Preferences. WHEN a preference names the brand or the
+Before deciding anything, open `skills/working-memory.md` and read its
+Preferences. WHEN a preference names the brand or the
 kind of project in front of you, it applies, without being asked
 again. A brand's preferences apply only when the request names that
 brand; never infer one. What the request itself supplies always wins
@@ -178,10 +178,10 @@ empties them, never the session.
 ## 9. Hard rules
 
 - Read only what the skills tell you to: the essential skills in
-  section 10, `working-memory.md`, `sfx/SFX metadata.json`, the stage
+  section 10, `skills/working-memory.md`, `sfx/SFX metadata.json`, the stage
   template, and the editable you are working on. Never open another
   editable html in the root; reading it anchors you to it and you copy
-  it. Open `add-ons.md` only WHEN the user asks for an add-on by name
+  it. Open `skills/add-ons.md` only WHEN the user asks for an add-on by name
   or a Preference names one.
 - Respect the Meta and TikTok guidelines and their UI. Nothing that
   must be seen or read may be obstructed by the app's UI. The safe
@@ -218,7 +218,7 @@ These skills are essential. None of them is skipped.
   (`tools/gen.py`), and what each costs.
 - **prompting**: the fixed prompt format for each model. IF a
   generation is not listed there, prompt as you see fit under its
-  principles. It points to the Reword table in `working-memory.md`,
+  principles. It points to the Reword table in `skills/working-memory.md`,
   which you may add to when you learn a pronunciation fix.
 - **stage-canvas-html**: the HTML stage. How the editable is set up,
   the rules for animating inside it, the audit, the sound effects, and
@@ -231,4 +231,4 @@ These skills are essential. None of them is skipped.
 One more file sits beside these and is not essential: **add-ons**, the
 user's exclusive techniques. WHEN the user asks for an add-on by name,
 or a Preference in working memory names one for the brand or project
-at hand, open `add-ons.md`, find that add-on, and follow it as written.
+at hand, open `skills/add-ons.md`, find that add-on, and follow it as written.

@@ -9,11 +9,11 @@ recorded; never add, change, or remove a preference otherwise.
 
 Things the user has said they prefer, to be applied without being asked
 again. One per line: what, and where it applies. A preference may name
-an add-on from `add-ons.md`; then that add-on applies wherever the
+an add-on from `skills/add-ons.md`; then that add-on applies wherever the
 preference does. A brand with several preferences keeps them in its own
-file under `brands/`, read only for that brand.
+file under `skills/brands/`, read only for that brand.
 
-- IASO: read `brands/iaso.md` and follow it. Applies only when the request
+- IASO: read `skills/brands/iaso.md` and follow it. Applies only when the request
   names IASO, and to no other brand or project.
 - WHEN the user provides a video URL or a local path to a video as the
   style reference, use the `Style ref contact sheet` add-on.
