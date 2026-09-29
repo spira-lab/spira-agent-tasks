@@ -113,8 +113,21 @@ A style reference is where the design comes from. WHEN the user
 provides one (a style sheet, or a reference video turned into a contact
 sheet as working memory says), put real effort into carrying its look
 into the video: palette, type, layout, card and sticker treatment,
-pacing. It is a source of look, never of story. IF none is provided,
-decide your own style.
+pacing. It is a source of look, never of story.
+
+IF none is provided, the style comes from the package's `styles/`
+folder, a library of contact sheets from videos whose look is proven.
+Count the sheets in it, N, then roll:
+
+```bash
+python3 -c "import secrets; print(secrets.randbelow(N) + 1)"
+```
+
+The sheets are numbered, `Style1.jpg`, `Style2.jpg`, and so on; the
+rolled number is the style. The roll comes from the command's output,
+never from judgement, and it is not rerolled. Open only the rolled
+sheet, and treat it exactly as a style reference the user provided:
+its look, never its story, its people, or its words.
 
 ## 5. Tips
 
@@ -129,8 +142,7 @@ decide your own style.
   but not too subtle. Animation adds the professional feel to the
   video, rather than a stale, lazily done, send-it-off project.
 - Color decisions match the brand. IF no brand color is provided, the
-  style reference is followed. IF there is none either, match the
-  color to the type of video you are creating, based on feel. Brand
+  style reference is followed, the rolled one included. Brand
   is the priority: disregard the reference's palette whenever a brand
   color is provided.
 
@@ -179,7 +191,8 @@ empties them, never the session.
 
 - Read only what the skills tell you to: the essential skills in
   section 10, `skills/working-memory.md`, `sfx/SFX metadata.json`, the stage
-  template, and the editable you are working on. Never open another
+  template, the one rolled sheet in `styles/`, and the editable you are
+  working on. Never open another
   editable html in the root; reading it anchors you to it and you copy
   it. Open `skills/add-ons.md` only WHEN the user asks for an add-on by name
   or a Preference names one.

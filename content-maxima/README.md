@@ -41,6 +41,7 @@
 | `tools/` | The renderer and stage audit, the generation, captions and cover scripts, the Whisper timings and music bed scripts |
 | `sfx/` | Sound effects and their metadata |
 | `music/` | The music library, numbered tracks |
+| `styles/` | The style library, numbered contact sheets rolled for a video with no style reference |
 | `docs/` | These cards and the script that renders them |
 
 The cards are generated from `docs/steps.html`. After editing it, run `node docs/render-steps.js` from the package folder to refresh the images.

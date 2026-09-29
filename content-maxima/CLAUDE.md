@@ -16,7 +16,7 @@ is a map; where it and a skill disagree, the skill wins.
 
 ## Package and root
 
-The package (`skills/`, `stage/`, `tools/`, `sfx/`, `music/`, `docs/`) is
+The package (`skills/`, `stage/`, `tools/`, `sfx/`, `music/`, `styles/`, `docs/`) is
 read from, never written to. Session output goes to the root, the folder
 the session was opened in, under `editable/` and `renders/`, which are
 gitignored. `file-management.md` governs every path.

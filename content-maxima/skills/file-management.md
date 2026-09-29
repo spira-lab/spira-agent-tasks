@@ -14,7 +14,7 @@ it is superseded.
 The **root** is the folder the session was opened in, your working
 directory. Every file the session creates goes inside it, and every path
 here is relative to it. The package folders (`skills/`, `stage/`,
-`tools/`, `sfx/`, `music/`) may sit in the same folder; they are read
+`tools/`, `sfx/`, `music/`, `styles/`) may sit in the same folder; they are read
 from and never written to, and nothing is built inside them.
 
 ## 2. Layout
