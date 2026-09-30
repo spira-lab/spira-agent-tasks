@@ -40,7 +40,7 @@ UGC Casually taken shot of one [age] [gender], alone in the frame, [pretty/hands
 
 ## 3. GPT Image 2, persona edit
 
-The Soul output, or the user's photo when there is no voice ID, is the
+The Soul output, or the user's photo on Auto voice (toolkit 3a), is the
 reference. The prompt keeps everything and
 changes only what is named.
 

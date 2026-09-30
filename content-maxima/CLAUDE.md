@@ -35,7 +35,7 @@ cost), **Where**.
 ```bash
 tools/new-video.sh "<topic>" <<< "<script>"                   # start a video: name, folders, template, script
 python3 tools/gen.py <model-id> <payload.json> <out-file>     # one generation: submit, wait, download
-python3 tools/make-timings.py <materials>/<name>/vo.mp3 [--from clips...]  # word timings (and the VO from clips)
+python3 tools/make-timings.py <materials>/<name>/vo.mp3 [--from clips... | --recording <url>]  # word timings (and the VO from clips or a recording)
 python3 tools/cut-sheet.py grid|elements <sheet.png> ... --names a,b  # cut one generated sheet into its images
 python3 tools/captions.py <root>/editable/<name>.html            # word-per-word captions from the timings
 node tools/render/audit.js <root>/editable/<name>.html [--at ms,...]  # leaks, text, files, frame sheet

@@ -45,9 +45,10 @@ python3 tools/make-timings.py <materials>/<name>/vo.mp3
 ```
 
 (`--from <clip> <clip> ...` builds `vo.mp3` from talking-head clips first:
-toolkit 3e.)
+toolkit 3e. `--recording <url or path>` builds it from the user's own
+recording: toolkit 3j.)
 
-This runs Whisper (`small.en`, word timestamps) and writes `timings.json`
+This runs Whisper (`small`, multilingual, the language detected from the audio, word timestamps) and writes `timings.json`
 next to the audio, where the harness loads it from:
 
 ```json

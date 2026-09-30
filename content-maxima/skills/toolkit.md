@@ -67,7 +67,7 @@ longest one. A job that depends on another's output starts the moment
 that output is in, not after the whole batch. Plan the order so the
 longest chain starts first: for a talking head that is Soul, then the
 persona edit, then the clips, then the cut-outs (with the user's own
-photo the chain starts at the persona edit, or at the speech in 3j); music, b-roll, and elements
+photo the chain starts at the persona edit, or at the voice-over in 3j); music, b-roll, and elements
 run beside it.
 
 To inspect a model's inputs and prices: `spira ai models get <modelId>`.
@@ -87,6 +87,22 @@ URL.
 
 ## 3. Tool map
 
+**Where the voice comes from decides the talking head.** There are
+three sources, and the request says which:
+
+- **Auto** (nothing said about the voice): the talking-head clips speak
+  the script, and their audio is the voice-over (3e).
+- **An ElevenLabs voice ID** (`ElevenLabs voice ID:` in the request):
+  the script is spoken with that voice (3j step 1).
+- **The user's own recording** (`Voice-over:` in the request, an audio
+  file in place of the script): it is the voice-over as it is. Nothing
+  spoken is generated, and its words are the script (3j step 1).
+
+With a voice ID or a recording, the voice-over exists before the
+talking head, so a talking head is HeyGen lip-synced to it (3j), never
+Seedance, whose clips make their own speech. A video with no presenter
+uses it as the voice-over directly (3i).
+
 | Step | Model ID | Credits |
 |------|----------|---------|
 | Persona base image | `ai-influencer-image` | 6.25 per image |
@@ -94,7 +110,7 @@ URL.
 | Transparent-background element | `gpt-image-2` | same |
 | Stock still for b-roll | `gpt-image-2` | same |
 | Talking-head clip | `seedance-1.5-pro` | per second, see 3e |
-| Talking head from the user's photo | `elevenlabs-text-to-speech` + `heygen-avatar-4` | see 3j |
+| Talking head speaking a given voice-over (voice ID or recording) | `heygen-avatar-4` | see 3j |
 | Talking-head cut-out | `bria-video-background-removal` | 0.42 per source second |
 | Background music | `suno-music` | 6.6 per track |
 | Avatar motion control, persona driven by a reference video | `kling-3.0-motion-control` pro | 9.52 per second |
@@ -109,10 +125,10 @@ hands over a photo to use as the avatar (or a video, from which a clear
 frame is taken), skip Soul. Host the photo only if it is not already a
 public URL (section 2). Then:
 
-- **With an ElevenLabs voice ID:** skip the clean-up edit (3b) and
-  Seedance too. The talking head is HeyGen driven by ElevenLabs speech
-  from the photo as given, section 3j.
-- **Without a voice ID** (voice left on Auto): the photo takes Soul's
+- **With a voice ID or a recording** (section 3): skip the clean-up
+  edit (3b) and Seedance too. The talking head is HeyGen from the photo
+  as given, section 3j.
+- **On Auto voice:** the photo takes Soul's
   place as the reference for the clean-up edit (3b), which still gives
   the headspace above the head. The edited image goes into Seedance (3e)
   as usual.
@@ -358,7 +374,9 @@ credits per second.
 
 ## 3i. Voice-over without a presenter: `elevenlabs-text-to-speech`
 
-For a VO explainer with no talking head. Payload:
+For a VO explainer with no talking head. WHEN the voice comes from a
+voice ID or a recording (section 3), the voice-over is 3j step 1
+instead, and nothing here applies. Payload:
 `{"text":"<the script>","voiceId":"21m00Tcm4TlvDq8ikWAM","providerModelId":"eleven_v3"}`,
 written to `vo.mp3`, then `python3 tools/make-timings.py <materials>/<name>/vo.mp3`.
 Voices proven on this account: `21m00Tcm4TlvDq8ikWAM` (female) and
@@ -366,25 +384,43 @@ Voices proven on this account: `21m00Tcm4TlvDq8ikWAM` (female) and
 the video, unless a brand file names its own. Cost is 0.01 credits a
 character. The voice is ElevenLabs, so `data-sfx-under="14"` on `#vo`.
 
-## 3j. Talking head from the user's photo: `heygen-avatar-4`
+## 3j. Talking head speaking a given voice-over: `heygen-avatar-4`
 
-Only WHEN the user provides both a photo and an ElevenLabs voice ID
-(3a). Two jobs, in order:
+WHEN the voice comes from a voice ID or the user's recording (section
+3). The presenter is the user's photo as given (3a), or without one the
+cleaned persona image (3a, then 3b), and it starts beside step 1. Two
+steps, in order:
 
-1. **Speech**, the whole script in one job with that voice ID on
-   ElevenLabs V2:
-   `{"text":"<the script>","voiceId":"<the voice ID from the request>","providerModelId":"eleven_multilingual_v2"}`,
-   written to `vo.mp3`. Build the timings from it straight away
-   (`python3 tools/make-timings.py <materials>/<name>/vo.mp3`), then
-   host it with `spira assets upload` (section 2).
-2. **Talking head**, the photo lip-synced to that speech:
-   `{"referenceImage":["<photo url>"],"referenceAudio":["<vo.mp3 url>"],"size":"9:16","resolution":"1080p","mode":"stable","talkingStyle":"stable"}`,
+1. **The voice-over**, `vo.mp3`, one file for the whole video.
+   - **A voice ID:** the whole script in one job with that voice on
+     ElevenLabs V2:
+     `{"text":"<the script>","voiceId":"<the voice ID from the request>","providerModelId":"eleven_multilingual_v2"}`,
+     written to `vo.mp3`, then its timings:
+     `python3 tools/make-timings.py <materials>/<name>/vo.mp3`.
+     `data-sfx-under="14"` on `#vo`.
+   - **A recording:** no job, and it comes first in the session, before
+     the concept: its words are what the video is about. Start the
+     video with the request's script, or with none
+     (`tools/new-video.sh "<brand, or voiceover>" < /dev/null`), then
+     one command converts the recording to `vo.mp3` as it is, builds
+     its timings, and, unless a script was saved, writes the
+     transcript to `script.txt` as the script:
+     `python3 tools/make-timings.py <materials>/<name>/vo.mp3 --recording <recording url or path>`.
+     Read the transcript it prints and settle the concept from it. In
+     a written `script.txt` correct only the spelling of names
+     (captions carry it). Never cut, retime, or regenerate the
+     recording: its length is the video's length.
+     `data-sfx-under="8"` on `#vo`.
+
+   Then host `vo.mp3` with `spira assets upload` (section 2); it is a
+   file on disk either way.
+2. **Talking head**, the presenter lip-synced to that voice-over:
+   `{"referenceImage":["<photo or persona url>"],"referenceAudio":["<vo.mp3 url>"],"size":"9:16","resolution":"1080p","mode":"stable","talkingStyle":"stable"}`,
    written to `th-01.mp4`. Use `720p` for tests.
 
 One clip covers the whole voice-over: no 4/8/12-second chunks. It is cut
 out with 3f like any talking-head clip and goes on the stage at
-`data-start="0"`. The voice is ElevenLabs, so `data-sfx-under="14"` on
-`#vo`. Cost is 10 credits a second.
+`data-start="0"`. Cost is 10 credits a second.
 
 ## 4. Do not use
 

@@ -20,6 +20,11 @@ reference's type looks like, not by name.
 | Playfair Display | `PlayfairDisplay.ttf`, `PlayfairDisplay-Italic.ttf` | 400-900, italic | Classic display serif: luxury, storytelling |
 | Caveat | `Caveat.ttf` | 400-700 | Handwriting: annotations, arrows' labels, notes |
 
+Text in another script falls back on its own: the renderer has Noto Sans
+for Cyrillic, Greek, Arabic, Hebrew, Devanagari, Tamil and Thai, and Noto
+Sans CJK for Chinese, Japanese and Korean. Keep the library face for the
+style; any character it lacks is drawn in the matching Noto face.
+
 ## Using one
 
 Copy each file the video uses into `materials/<name>/fonts/`, then declare

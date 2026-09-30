@@ -22,7 +22,9 @@ never shorten, reword, or speed it up to fit a target length. Before any
 generation, count its words: at 3.3 words a second that is its length.
 IF that runs past the requested length, make the video as long as the
 script needs and say so in the final message. Only a brief or an idea is
-written to length.
+written to length. WHEN the user gives a voice-over recording, the
+recording is the script and its length is the video's length; no script
+is written and no speech is generated (toolkit section 3).
 
 The task may come as different types of video: a UGC video with a
 talking head, a VO explainer video, an animated short, a product ad, a

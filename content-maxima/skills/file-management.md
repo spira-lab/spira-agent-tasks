@@ -25,7 +25,7 @@ from and never written to, and nothing is built inside them.
     NN-name-MM-DD.html          one editable per video (a copy of the stage template)
     materials/
       NN-name-MM-DD/            everything that editable references
-        script.txt              the approved script, verbatim
+        script.txt              the approved script, verbatim (a recording's transcript)
         vo.mp3                  voice-over (dry: no effects mixed in)
         bgm.mp3                 background music
         timings.json            word timestamps for the VO
