@@ -41,6 +41,12 @@ On failure it prints the job's status and exits 1. Read the error and
 fix the payload before resubmitting once; never resubmit an unchanged
 payload in a loop.
 
+A submitted job's id is kept in `jobs/<out-file>.pending` until its
+result is saved. IF a generation was cut off (a restart, a timeout),
+run the same command again, or `gen.py --await <out-file>`: either
+waits for the recorded job instead of submitting a new one. Delete the
+`.pending` file only to deliberately replace that job.
+
 **Independent jobs run in parallel, in one command.** Whenever jobs do
 not depend on each other's results, start them all at once and wait.
 Leave their output on the terminal, never redirected to files: each

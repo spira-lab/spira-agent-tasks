@@ -25,10 +25,17 @@ what each one printed. Never wait with sleep, pgrep or polling loops.
 
 Prints the job id (the platform bills the run from it), then `url: <resultUrl>`
 for chaining into the next job. On failure prints the job's status and exits 1.
+
+The job id is recorded in jobs/<out-file>.pending the moment the job is
+submitted, and removed once the result is saved or the job has failed. A
+generation cut off before that (a worker restart, a timeout) is picked up
+from the record rather than submitted again: running the same command, or
+`--await` on its output, waits for the recorded job and downloads it, so
+the platform never charges twice for one output.
 Checks: a .webm must carry alpha; a transparent-background .png must have an
 alpha channel. A failed check is printed as `warning:` and the file is kept.
 """
-import io, json, pathlib, subprocess, sys, time
+import io, json, os, pathlib, subprocess, sys, time
 
 ALPHA_FORMATS = {"rgba", "ya8", "rgba64be", "ya16be", "rgba64le", "ya16le"}
 
@@ -58,6 +65,24 @@ def marker(out):
     return out.parent / "jobs" / f"{out.name}.done"
 
 
+def record(out):
+    """Where a submitted job's id waits until its result is saved: jobs/<out-file>.pending."""
+    out = pathlib.Path(out).resolve()
+    return out.parent / "jobs" / f"{out.name}.pending"
+
+
+def process_alive(pid):
+    """True while that gen.py process still runs. A restart reuses pids, so on Linux the command line must match."""
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    cmdline = pathlib.Path(f"/proc/{pid}/cmdline")
+    return not cmdline.exists() or b"gen.py" in cmdline.read_bytes()
+
+
 def parse_timeout(value):
     return int(value[:-1]) * 60 if value.endswith("m") else int(value)
 
@@ -72,6 +97,12 @@ def await_outputs(args):
     failed, deadline = [], time.time() + timeout
     while pending and time.time() < deadline:
         for out, m in list(pending.items()):
+            rec = record(out)
+            if not m.exists() and rec.exists():
+                job = json.loads(rec.read_text())
+                if not process_alive(job.get("pid", 0)):
+                    # The gen.py that submitted it is gone (a restart): wait for the recorded job here.
+                    marked(m, lambda: finish(job["jobId"], job["model"], out, job.get("transparent", False), f"{max(60, int(deadline - time.time()))}s"))
             if m.exists():
                 done = json.loads(m.read_text())
                 print(done["log"].rstrip())
@@ -103,20 +134,26 @@ def main():
         return await_outputs(args[1:])
     pos = [a for i, a in enumerate(args) if a != "--timeout" and (i == 0 or args[i - 1] != "--timeout")]
     if len(pos) == 3:
-        done = marker(pos[2])
-        done.parent.mkdir(parents=True, exist_ok=True)
-        done.unlink(missing_ok=True)
-        tee = Tee(sys.stdout)
-        sys.stdout = tee
-        status = "failed"
-        try:
-            generate(args)
-            status = "ok"
-        finally:
-            sys.stdout = tee.real
-            done.write_text(json.dumps({"status": status, "log": "".join(tee.buf)}))
-        return
+        return marked(marker(pos[2]), lambda: generate(args), silent=False)
     generate(args)
+
+
+def marked(done, work, silent=True):
+    """Run one generation and leave its finished marker, for --await, whatever the outcome."""
+    done.parent.mkdir(parents=True, exist_ok=True)
+    done.unlink(missing_ok=True)
+    tee = Tee(io.StringIO() if silent else sys.stdout)
+    real, sys.stdout = sys.stdout, tee
+    status = "failed"
+    try:
+        work()
+        status = "ok"
+    except SystemExit:
+        if not silent:
+            raise
+    finally:
+        sys.stdout = real
+        done.write_text(json.dumps({"status": status, "log": "".join(tee.buf)}))
 
 
 def generate(args):
@@ -132,14 +169,36 @@ def generate(args):
     out = pathlib.Path(out).resolve()
     out.parent.mkdir(parents=True, exist_ok=True)
 
-    created = spira_json(["spira", "--json", "ai", "jobs", "create", "--model-id", model,
-                          "--inputs-json", payload, "--wait", "--wait-timeout", timeout])
-    job = created.get("id") or (created.get("ids") or {}).get("jobId") or (created.get("data") or {}).get("jobId")
-    if job:
-        print(json.dumps({"jobId": job, "model": model, "out": out.name}))
-    urls = created.get("resultUrls") or []
-    if created.get("status") not in ("completed", "succeeded") or not urls:
-        detail = spira_json(["spira", "--json", "ai", "jobs", "status", job]) if job else created
+    transparent = "transparent" in payload.lower()
+
+    rec = record(out)
+    if rec.exists():
+        job = json.loads(rec.read_text())["jobId"]
+        print(f"resuming the {model} job already submitted for {out.name}; delete {rec.name} to submit a new one")
+    else:
+        created = spira_json(["spira", "--json", "ai", "jobs", "create", "--model-id", model, "--inputs-json", payload])
+        job = (created.get("ids") or {}).get("jobId") or (created.get("data") or {}).get("jobId")
+        if not job:
+            print(f"FAILED {model} -> {out.name}: {json.dumps(created.get('error', created))[:1500]}")
+            sys.exit(1)
+    rec.parent.mkdir(parents=True, exist_ok=True)
+    rec.write_text(json.dumps({"jobId": job, "model": model, "transparent": transparent, "pid": os.getpid()}))
+    finish(job, model, out, transparent, timeout)
+
+
+def finish(job, model, out, transparent, timeout):
+    """Wait for a submitted job, download its results beside `out` and check them; drop its record once settled."""
+    print(json.dumps({"jobId": job, "model": model, "out": out.name}))
+    done = spira_json(["spira", "--json", "ai", "jobs", "wait", job, "--timeout", timeout])
+    urls = done.get("resultUrls") or []
+    if done.get("status") not in ("completed", "succeeded") or not urls:
+        detail = spira_json(["spira", "--json", "ai", "jobs", "status", job])
+        state = str((detail.get("data") or {}).get("status", "")).upper()
+        if state in ("QUEUED", "PENDING", "RUNNING", "PROCESSING"):
+            # Still generating: keep the record so the next run of this command waits for the same job.
+            print(f"STILL RUNNING {model} -> {out.name}: job {job}; run `gen.py --await {out.name}` or this command again to collect it")
+            sys.exit(1)
+        record(out).unlink(missing_ok=True)
         print(f"FAILED {model} -> {out.name}: {json.dumps(detail.get('data', detail))[:1500]}")
         if model == "suno-music":
             print("suno-music's provider_error is usually a rejected style: remove artist, brand, sport and place names from `style` and resubmit once.")
@@ -156,8 +215,9 @@ def generate(args):
     for target, _ in files:
         if target.suffix == ".webm" and "alpha_mode=1" not in probe(target, "stream_tags=alpha_mode").lower():
             print(f"warning: {target.name} has no alpha channel")
-        if target.suffix == ".png" and "transparent" in payload.lower() and probe(target, "stream=pix_fmt").split("=")[-1].strip() not in ALPHA_FORMATS:
+        if target.suffix == ".png" and transparent and probe(target, "stream=pix_fmt").split("=")[-1].strip() not in ALPHA_FORMATS:
             print(f"warning: {target.name} has no alpha channel; the prompt asked for a transparent background")
+    record(out).unlink(missing_ok=True)
     for target, url in files:
         print(f"saved {target.name}\nurl: {url}")
 
