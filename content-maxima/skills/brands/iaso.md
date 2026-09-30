@@ -6,8 +6,9 @@ again.
 
 - Never use a talking head.
 - Produce the VO with this job, the text being the approved script
-  (write the payload to `jobs/vo.json`, then run
-  `python3 tools/gen.py elevenlabs-text-to-speech <materials>/<name>/jobs/vo.json <materials>/<name>/vo.mp3`):
+  (write the payload to `jobs/vo.json`, submit it with `submit_ai_job`
+  as `elevenlabs-text-to-speech`, then `wait_ai_job` with
+  `saveTo: <materials>/<name>/vo.mp3`):
 
   ```json
   {"text":"…","voiceId":"cgSgspJ2msm6clMCkdW9","providerModelId":"eleven_v3"}

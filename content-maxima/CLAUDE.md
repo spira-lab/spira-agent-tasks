@@ -3,8 +3,9 @@
 A skills package that turns a script, a brief, or an idea into a finished
 9:16 video for Reels and TikTok. It is not an application: there is nothing
 to build, no test suite, no dev server. The work of a session is to read
-the procedures in `skills/` and follow them, generating materials through
-the Spira CLI and assembling them in an HTML stage that renders to MP4.
+the procedures in `skills/` and follow them, generating materials as
+Spira AI jobs submitted with the `submit_ai_job` tool (never through the
+Spira CLI) and assembling them in an HTML stage that renders to MP4.
 
 ## Start here, every session
 

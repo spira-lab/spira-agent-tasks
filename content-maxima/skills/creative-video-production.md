@@ -267,7 +267,7 @@ empties them, never the session.
 These skills are essential. None of them is skipped.
 
 - **toolkit**: the one model for each job, how a generation is run
-  (`tools/gen.py`), and what each costs.
+  (`submit_ai_job`, then `wait_ai_job`), and what each costs.
 - **prompting**: the fixed prompt format for each model. IF a
   generation is not listed there, prompt as you see fit under its
   principles. It points to the Reword table in `skills/working-memory.md`,

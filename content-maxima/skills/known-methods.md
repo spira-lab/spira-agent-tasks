@@ -62,9 +62,8 @@ tool the entry points to; this file holds the why.
 
 ## Waiting on a background batch
 
-- **Works:** the clip batch in the Bash tool's background mode, the scene
-  plan and timing-free CSS written meanwhile, then
-  `python3 tools/gen.py --await <outputs>`.
+- **Works:** submit the clip batch, write the scene plan and timing-free
+  CSS meanwhile, then one `wait_ai_job` per clip, all in one turn.
 - **Fails:** waiting with a `pgrep -f` loop (it matches itself and never
   ends: 10 minutes to the tool timeout on staging) or a guessed `sleep 150`.
 - **Where:** toolkit, section 3e.

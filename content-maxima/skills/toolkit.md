@@ -1,14 +1,15 @@
 ---
 name: toolkit
-description: Which tool to use for each production step, how a generation is run with tools/gen.py, and each model's inputs, cost, and caveats. Fixed choices. Consult before generating any asset; never substitute a model.
+description: Which tool to use for each production step, how a generation is run with submit_ai_job and wait_ai_job, and each model's inputs, cost, and caveats. Fixed choices. Consult before generating any asset; never substitute a model.
 ---
 
 # Toolkit
 
-Every generated asset comes from the Spira CLI (`spira`, the npm package
-`@spira-lab/cli`). This document names the one model for each job, so no
-session spends credits or context finding it. The choices are fixed: do
-not substitute another model because it looks similar or cheaper.
+Every generated asset is a Spira AI job, run with two tools on the MCP
+server `worker_tools`: `submit_ai_job` and `wait_ai_job`. This document
+names the one model for each job, so no session spends credits or context
+finding it. The choices are fixed: do not substitute another model because
+it looks similar or cheaper.
 
 ## 1. Running a generation
 
@@ -16,51 +17,52 @@ The preflight is the task's requirements check; `spira auth whoami`
 passing is all a generation needs. Do not check the balance: other
 sessions share it, and the platform measures what this run spends.
 
+**Never run a job through the `spira` CLI** — no `spira ai jobs create`,
+`wait` or `status`, in any form. A CLI submission charges the operator on
+the spot, outside this task's bill. The CLI is used only for what this
+skill names below (hosting a file, model docs).
+
 Run every command from the root, with root-relative paths; never `cd`
 into a folder (a later command then resolves its paths from the wrong
-place). Use only the commands and flags this skill gives: `spira` has no
-wait flag of its own beyond what `gen.py` wraps.
+place).
 
-Every generation is one command. Write the job's full inputs to a
-payload file first, then:
+Every generation is three steps:
 
-```bash
-python3 tools/gen.py <model-id> <payload.json> <materials>/<name>/<out-file>
-```
+1. **Write the payload** — the job's full inputs object — to
+   `<materials>/<name>/jobs/<out-file>.json`. It is the record of what was
+   asked. Payload files are working files, never referenced by the html.
+2. **Submit** with `submit_ai_job`: `modelId` is the model id, `inputs` is
+   the same object as the payload file. It returns the `jobId`. Write
+   `{"jobId": "<id>", "model": "<model-id>"}` to
+   `<materials>/<name>/jobs/<out-file>.pending` at once.
+3. **Collect** with `wait_ai_job`: `jobId`, and `saveTo` set to
+   `<materials>/<name>/<out-file>`. It waits (300 s by default; pass
+   `timeoutSec` up to 600 for video), saves the result there (a job's extra
+   results land beside it as `<name>-2.<ext>`), and returns `status` and
+   `resultUrls`. Delete the `.pending` file once the result is saved.
 
-It submits the job, waits (20 minutes by default; `--timeout 30m` to
-raise it), downloads the result to `<out-file>` (a job's extra results
-land beside it as `<name>-2.<ext>`), checks alpha on `.webm` results and
-on transparent-background `.png` results, and prints its job id and
-`url: <resultUrl>`.
-Pass that URL into the next job that needs the result. Payload files
-are working files: keep them in `<materials>/<name>/jobs/`, which is
-never referenced by the html.
+Pass `resultUrls[0]` into the next job that needs the result.
 
-On failure it prints the job's status and exits 1. Read the error and
-fix the payload before resubmitting once; never resubmit an unchanged
-payload in a loop.
+`status: "FAILED"` carries the provider's error. Read it and fix the
+payload before resubmitting once (a new `submit_ai_job`, a new
+`.pending`); never resubmit an unchanged payload in a loop.
 
-A submitted job's id is kept in `jobs/<out-file>.pending` until its
-result is saved. IF a generation was cut off (a restart, a timeout),
-run the same command again, or `gen.py --await <out-file>`: either
-waits for the recorded job instead of submitting a new one. Delete the
-`.pending` file only to deliberately replace that job.
+`stillRunning: true` means the wait timed out, not that the job failed:
+call `wait_ai_job` again with the same `jobId`. IF a session was cut off
+(a restart), read every `jobs/*.pending` and call `wait_ai_job` on the id
+it holds. **Never call `submit_ai_job` for an output that has a `.pending`
+record** — that pays twice for one output. Delete a `.pending` file only
+to deliberately replace that job.
 
-**Independent jobs run in parallel, in one command.** Whenever jobs do
-not depend on each other's results, start them all at once and wait.
-Leave their output on the terminal, never redirected to files: each
-result prints as whole lines, and the job ids in that output are how the
-platform bills the run.
+`wait_ai_job` checks alpha itself: a saved `.webm`, and a `.png` whose
+payload asked for a transparent background, come back with a `warnings`
+entry when they have no alpha channel.
 
-```bash
-M=editable/materials/<name>
-python3 tools/gen.py seedance-1.5-pro $M/jobs/th-01.json $M/th-01.mp4 &
-python3 tools/gen.py seedance-1.5-pro $M/jobs/th-02.json $M/th-02.mp4 &
-python3 tools/gen.py suno-music $M/jobs/bgm.json $M/bgm.mp3 &
-python3 tools/gen.py gpt-image-2 $M/jobs/broll-1.json $M/broll-1.png &
-wait
-```
+**Independent jobs run in parallel.** Whenever jobs do not depend on each
+other's results, submit them all in one turn — one `submit_ai_job` call
+each — then wait on them all in one turn — one `wait_ai_job` call each.
+Calls in the same turn run at once; one after another costs the sum of
+the job times.
 
 Serial waiting costs the sum of the job times; parallel costs the
 longest one. A job that depends on another's output starts the moment
@@ -197,7 +199,7 @@ with one object at `1:1` `1K`.
 
 The prompt must say transparent background in those words; it does not
 happen by default, and a white or grey backdrop cannot be keyed cleanly
-afterwards. `gen.py` warns when the PNG came back without alpha.
+afterwards. `wait_ai_job` warns when the PNG came back without alpha.
 
 ## 3d. Stock stills for b-roll: `gpt-image-2`
 
@@ -248,26 +250,23 @@ write a segment that needs 5, 9, or 15 seconds; trim the words to the
 slot, never stretch the slot to the words.
 
 **All chunks are one batch.** Write every chunk's payload
-(`jobs/th-01.json`, `jobs/th-02.json`, ...), then run them all in one
-parallel command (section 1), then every cut-out in one parallel
-command (3f). Running the clips one at a time is the single biggest
-waste of time in the kit.
+(`jobs/th-01.json`, `jobs/th-02.json`, ...), submit them all with
+`submit_ai_job` in one turn, wait on them all with `wait_ai_job` in one
+turn (section 1), then every cut-out the same way (3f). Running the
+clips one at a time is the single biggest waste of time in the kit.
 
 **Plan while the clips render.** The clips take three to four minutes.
-Start their batch with the Bash tool's background mode and use the wait:
-decide every scene (what it shows, which assets, roughly where each
-sentence falls) and write the CSS and skeleton that do not depend on
-exact timings. When the plan is written, block on the batch:
+Submit the whole batch, then do not wait yet: decide every scene (what
+it shows, which assets, roughly where each sentence falls) and write the
+CSS and skeleton that do not depend on exact timings. When the plan is
+written, wait on the batch — one `wait_ai_job` per clip, all in one
+turn, each with its `saveTo`.
 
-```bash
-python3 tools/gen.py --await $M/th-01.mp4 $M/th-02.mp4 $M/th-03.mp4
-```
-
-It returns as soon as every clip has finished and prints what each
-generation printed. Timings, clip placement and captions come after it.
-Wait on background generations only this way: never with `sleep`,
-`pgrep` or a polling loop (a `pgrep -f` loop matches itself and never
-ends; on staging one ran into the tool's 10-minute timeout).
+They return as soon as each clip has finished. Timings, clip placement
+and captions come after them. Wait on a submitted job only this way:
+never with `sleep`, `pgrep` or a polling loop (a `pgrep -f` loop matches
+itself and never ends; on staging one ran into the tool's 10-minute
+timeout).
 
 The clips' own audio is the voice-over. Build it and its timings in one
 step, clips in order, then place the clips back to back on the stage:
@@ -304,7 +303,7 @@ only solid colours and says transparent output is not available; both
 are wrong for this purpose and are ignored. `Transparent` returns a VP9
 WebM with true alpha (verified 2026-09-20); a colour mode returns an
 opaque MP4. Never use a colour mode and never add a chroma-key step.
-`gen.py` warns when the WebM came back without alpha.
+`wait_ai_job` warns when the WebM came back without alpha.
 
 **The Bria output is final.** Do not mask, matte, crop, re-key, or
 otherwise adjust it. IF it keeps an object the person holds or touches,
@@ -316,8 +315,8 @@ The WebM goes on the stage as a `<video>` element, never as extracted
 frames (stage-canvas-html, rule 11).
 
 **Every talking-head clip is cut out, in one batch.** As soon as the
-clips are in, submit every clip to Bria in one parallel command
-(section 1), never one at a time, and never skip a clip because the
+clips are in, submit every clip to Bria in one turn and wait on them in
+one turn (section 1), never one at a time, and never skip a clip because the
 scene plan shows it whole: the cut-out is what the scenes are layered
 with (creative-video-production section 5), and deciding per clip is
 how sessions stopped using it at all.
