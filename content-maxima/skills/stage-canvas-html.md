@@ -158,12 +158,14 @@ rendering all behave. Break them and playback or the MP4 will be wrong.
 Each cue is one tag inside `#stage`, next to the audio slots:
 
 ```html
-<audio class="sfx" src="materials/<name>/sfx/03_whoosh.wav" data-at="1600"></audio>
+<audio class="sfx" src="materials/<name>/sfx/03_whoosh.mp3" data-at="1600"></audio>
 ```
 
 `data-at` is the stage millisecond the sound starts; put a whoosh's peak
-on the cut it serves, not after it. Copy each sound you use from the
-package's `sfx/` into `materials/<name>/sfx/` first. The renderer mixes
+on the cut it serves, not after it. Fetch each sound you use into
+`materials/<name>/sfx/` first: `python3 tools/fetch-resource.py
+sfx/<file> editable/materials/<name>/sfx/<file>` (the audio is hosted,
+not in the package). The renderer mixes
 every cue at `data-sfx-under` LU under the voice, set on `#vo`: 8 for
 most voices, 14 WHEN the voice was made with ElevenLabs (directly or as
 talking-head speech), whose speech lands quieter against effects. The

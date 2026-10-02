@@ -42,20 +42,37 @@ Elements to consider:
 - Sound effects, added for immersion. Choose them from
   `sfx/SFX metadata.json` (read it whole with `cat`), which names each sound, says what it is, and
   says when it is best used; never open the audio files to learn them.
+  Each entry also has a category, tags and an intensity (subtle, medium
+  or strong): subtle effects suit small on-screen moments, strong ones
+  only the big moments.
+  The audio is hosted, not in the package: fetch each sound you use into
+  the video's materials with `python3 tools/fetch-resource.py sfx/<file>
+  editable/materials/<name>/sfx/<file>`.
   How a chosen sound is placed and how loud it plays is in the stage
   skill.
 - Background music. Three cases, decided by what the user said:
-  - WHEN the user says to use music from the library, pick from the
-    package's `music/` folder. Count the tracks in it, N, then roll:
+  - WHEN the user says to use music from the library, choose from
+    `music/Music metadata.json` (read it whole with `cat`); never open
+    the tracks to learn them. Each entry gives the track's genre and
+    style, mood, energy, tempo, instruments, structure, what it is
+    best for and what to avoid it for. Shortlist every track that fits
+    the video's topic and tone, and the style the user asked for if
+    they named one. Leave out tracks whose entry has
+    `starts_immediately: false` or a `longest_silence_s` above 2,
+    unless nothing else fits. Count the shortlist, N, then roll:
 
     ```bash
     python3 -c "import secrets; print(secrets.randbelow(N) + 1)"
     ```
 
-    The tracks are numbered, `Music1.mp3`, `Music2.mp3`, and so on;
-    the rolled number is the track. The roll comes from the command's
-    output, never from judgement, and it is not rerolled. Do not open
-    the tracks to learn them.
+    The rolled number is the track's position in the shortlist. The
+    roll comes from the command's output, never from judgement, and it
+    is not rerolled; it keeps one favourite from being picked every
+    time. IF nothing fits, shortlist the whole file. The track is
+    hosted, not in the package: fetch it as the bed with
+    `python3 tools/fetch-resource.py music/<file>
+    editable/materials/<name>/bgm.mp3`. WHEN the chosen entry carries
+    a `mix_note`, follow it when laying the bed.
   - WHEN the user says nothing about music, generate it with the
     toolkit.
   - WHEN the user says no music or no bgm, use none: nothing generated,
@@ -217,7 +234,7 @@ empties them, never the session.
 
 - Read only what the skills tell you to: the essential skills in
   section 10, `skills/working-memory.md`, `sfx/SFX metadata.json`,
-  `fonts/fonts.md`, the stage template, the one rolled sheet in `styles/`, and the editable you are
+  `music/Music metadata.json`, `fonts/fonts.md`, the stage template, the one rolled sheet in `styles/`, and the editable you are
   working on. Never open another
   editable html in the root; reading it anchors you to it and you copy
   it. Open `skills/add-ons.md` only WHEN the user asks for an add-on by name
