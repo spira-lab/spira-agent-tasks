@@ -3,7 +3,8 @@
 //     last keyframe (120 s -> 40 s on a 29 s video with five clips); on the original
 //     Seedance and Bria clips the audit's seeks ran past their timeout
 //   * copies are cached in materials/<name>/deletable/intra/, keyed by the clip's path,
-//     size and modification time, so only the first audit or render pays for them
+//     size, mtime, ctime and inode (a clip replaced by mv gets a new copy), so only the
+//     first audit or render pays for them
 //   * alpha is kept for VP9 cut-outs, and each copy keeps its clip's extension
 //     (inspect.js knows a cut-out by its video/webm blob)
 // Bump INTRA_VERSION after changing the encoder settings, so old copies are not reused.
@@ -29,9 +30,9 @@ async function intraCopies(dir, ed) {
   await Promise.all(ed.videos.map(async src => {
     const file = path.join(dir, src);
     if (!fs.existsSync(file)) { console.error(`warning: ${src} not found`); return; }
-    const { size, mtimeMs } = fs.statSync(file);
+    const { size, mtimeMs, ctimeMs, ino } = fs.statSync(file);
     const ext = path.extname(src);
-    const key = crypto.createHash('sha1').update([src, size, mtimeMs, INTRA_VERSION].join('|')).digest('hex').slice(0, 16);
+    const key = crypto.createHash('sha1').update([src, size, mtimeMs, ctimeMs, ino, INTRA_VERSION].join('|')).digest('hex').slice(0, 16);
     const copy = path.join(cache, `${key}${ext}`);
     if (fs.existsSync(copy)) { swap[src] = copy; cached++; return; }
     const part = path.join(cache, `${key}.part${ext}`);
