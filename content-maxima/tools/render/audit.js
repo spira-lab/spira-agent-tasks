@@ -4,7 +4,11 @@
 //   Without --at: the whole video is checked (run it when every scene is written,
 //   and again after the fixes). With --at: a quick look at what you just built.
 //   Only those frames are shot, and leaks and text are checked only within 0.5 s
-//   of each time given. Checks never decode video; only the frames shot do.
+//   of each time given. Checks never decode video; only the frames shot do, and they
+//   seek the same cached all-keyframe copies the render uses (intra.js), so the first
+//   audit of a video pays for the copies and later audits and the render reuse them.
+//   A "video seeks timed out" line is then a Lambda hiccup: run the audit again, never
+//   change the scenes for it.
 //   * leaks: an element whose entry animation (first keyframe opacity 0 or fully
 //     clipped) has not started yet but is visible anyway. Checked on the first frame
 //     and 0.4 s before each .scene starts (a scene starts at its earliest animation).
@@ -27,6 +31,7 @@ const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path'), os = require('os');
 const { readEditable } = require('./stage');
 const { auditOnLambda } = require('./lambda');
+const { intraCopies } = require('./intra');
 
 const args = process.argv.slice(2);
 const atIdx = args.indexOf('--at');
@@ -52,7 +57,8 @@ const ed = readEditable(htmlPath);
   }
 
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'stage-audit-'));
-  const { scenes, problems: seen, errors, stuck, portrait, shots } = await auditOnLambda({ dir, rel, ed, at, shotDir: tmp });
+  const swap = await intraCopies(dir, ed);
+  const { scenes, problems: seen, errors, stuck, portrait, shots } = await auditOnLambda({ dir, rel, ed, at, shotDir: tmp, swap });
   problems.push(...seen);
 
   const deletable = path.join(dir, 'materials', ed.name, 'deletable');

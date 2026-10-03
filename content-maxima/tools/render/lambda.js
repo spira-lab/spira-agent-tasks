@@ -132,10 +132,10 @@ async function renderChunks({ dir, rel, ed, swap, fps, frames, tmp }) {
   return segs;
 }
 
-/** inspect.js on the Lambda; the sheet frames are written to `shotDir`. */
-async function auditOnLambda({ dir, rel, ed, at, shotDir }) {
+/** inspect.js on the Lambda; the sheet frames are written to `shotDir`. `swap` is intra.js's copies. */
+async function auditOnLambda({ dir, rel, ed, at, shotDir, swap = {} }) {
   const { s3, lambda } = clients();
-  const { job, site } = await uploadSite(s3, { dir, rel, ed, swap: {} });
+  const { job, site } = await uploadSite(s3, { dir, rel, ed, swap });
   try {
     return await twice('audit', async () => {
       const r = await invoke(lambda, { mode: 'audit', bucket: BUCKET, site, rel, at, durationMs: ed.durationMs, key: `${job}/audit/` });

@@ -4,9 +4,9 @@
 //   * the capture runs on AWS Lambda in chunks (lambda.js: CM_RENDER_LAMBDA names the
 //     function, CM_RENDER_BUCKET the bucket); the segments are concatenated here
 //   * frames captured as JPEG q92: PNG encode + transfer was two thirds of the per-frame cost
-//   * every <video> is swapped for an all-keyframe copy before capture: a seek then
-//     decodes one frame instead of everything since the last keyframe (120 s -> 40 s
-//     on a 29 s video with five clips)
+//   * every <video> is swapped for an all-keyframe copy before capture (intra.js): a
+//     seek then decodes one frame instead of everything since the last keyframe. The
+//     copies are cached in materials/<name>/deletable/intra/ and shared with audit.js
 //   * sound effects are the editable's <audio class="sfx" data-at="ms"> tags, mixed
 //     data-sfx-under LU (on #vo, default 8) under the voice
 //   * stage size is read from the page (window.STAGE), so any ratio works
@@ -14,10 +14,11 @@
 //     is checked (duration, frames, stereo), and a one-frame-per-second sheet for
 //     choosing the cover is written to the materials deletable/
 // process.exit(0) at the end is needed: the AWS clients keep their sockets open.
-const { spawn, execFileSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path'), os = require('os');
 const { readEditable } = require('./stage');
 const { renderChunks } = require('./lambda');
+const { intraCopies, probe } = require('./intra');
 
 const [htmlArg, outArg, fpsArg] = process.argv.slice(2);
 if (!htmlArg || !outArg) { console.error('usage: render.js <editable.html> <out.mp4> [fps]'); process.exit(2); }
@@ -32,31 +33,6 @@ if (!ed.durationMs) throw new Error(`${rel} has no data-duration on #stage`);
 const frames = Math.round(ed.durationMs / 1000 * fps);
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'stage-render-'));
 fs.mkdirSync(path.dirname(out), { recursive: true });
-
-const run = (cmd, args) => new Promise((res, rej) => {
-  const p = spawn(cmd, args, { stdio: ['ignore', 'ignore', 'pipe'] }); let err = '';
-  p.stderr.on('data', d => { err += d; });
-  p.on('close', c => c === 0 ? res() : rej(new Error(`${cmd} ${c}: ${err.slice(-400)}`)));
-});
-const probe = (file, entries) => execFileSync('ffprobe', ['-v', 'error', '-show_entries', entries, '-of', 'default=nw=1', file], { encoding: 'utf8' });
-
-// All-keyframe copy of each clip, alpha kept for VP9 cut-outs.
-async function intraCopies() {
-  const swap = {};
-  await Promise.all(ed.videos.map(async (src, i) => {
-    const file = path.join(dir, src);
-    if (!fs.existsSync(file)) { console.error(`warning: ${src} not found`); return; }
-    const alpha = /alpha_mode=1/i.test(probe(file, 'stream_tags=alpha_mode'));
-    const copy = path.join(tmp, `clip${i}${path.extname(src)}`);
-    const args = alpha
-      ? ['-y', '-c:v', 'libvpx-vp9', '-i', file, '-an', '-c:v', 'libvpx-vp9', '-pix_fmt', 'yuva420p', '-g', '1',
-         '-deadline', 'realtime', '-cpu-used', '8', '-row-mt', '1', '-crf', '20', '-b:v', '0', copy]
-      : ['-y', '-i', file, '-an', '-c:v', 'libx264', '-preset', 'ultrafast', '-g', '1', '-crf', '16', '-pix_fmt', 'yuv420p', copy];
-    await run('ffmpeg', args);
-    swap[src] = copy;
-  }));
-  return swap;
-}
 
 function mixAudio(silent, secs) {
   const inputs = ['-i', silent], parts = [], labels = [];
@@ -122,7 +98,7 @@ function coverSheet() {
 (async () => {
   archivePrevious();
   const t0 = Date.now();
-  const swap = await intraCopies();
+  const swap = await intraCopies(dir, ed);
   const tPrep = Date.now();
   const segs = await renderChunks({ dir, rel, ed, swap, fps, frames, tmp });
   console.log(`  capture done in ${((Date.now() - tPrep) / 1000).toFixed(0)}s`);

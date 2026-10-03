@@ -233,6 +233,14 @@ one line per problem:
 - `file:` a referenced file that is missing, or sits in `deletable/` or
   `jobs/`.
 - `console:` a page error.
+- `N video seeks timed out`: the Lambda was slow to decode a clip. It is
+  not a problem in the editable: run the audit once more, and never
+  remove, swap, or re-cut a clip because of it. IF it is still there,
+  render anyway and say so in the final message.
+
+The first audit of a video also prepares the all-keyframe copies of its
+clips that the render uses (`intra: N encoded`), so it takes longer;
+later audits and the render reuse them.
 
 Each line says how to fix it; fix them all in as few edits as you can,
 then run it the second time. It also writes

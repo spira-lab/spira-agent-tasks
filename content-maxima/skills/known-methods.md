@@ -12,14 +12,18 @@ tool the entry points to; this file holds the why.
 ## Talking head on the stage
 
 - **Works:** the alpha WebM cut-out placed as a `<video>` inside `#stage`
-  with `data-start`. The harness drives it, and the renderer swaps in an
-  all-keyframe copy so each frame costs one decode.
+  with `data-start`. The harness drives it, and the renderer and the
+  audit both swap in an all-keyframe copy so each frame costs one decode.
 - **Fails:** extracting the clip to a frame sequence and stepping it
   with CSS: 775 frames, minutes of conversion, and a hand-written
   converter that hung for ten minutes. Also slow: the renderer seeking
   the original clip, which decodes from the last keyframe on every
-  frame and took 120 s for a 29 s video against 48 s now.
-- **Where:** stage-canvas-html, rule 11; `tools/render/render.js`.
+  frame and took 120 s for a 29 s video against 48 s now. The audit
+  seeking the original clips reported "video seeks timed out" on every
+  run, and sessions cut clips out of scenes to silence it; it is a
+  Lambda hiccup now, fixed by running the audit again, never by
+  changing the scenes.
+- **Where:** stage-canvas-html, rule 11; `tools/render/intra.js`.
 
 ## Writing the editable
 
