@@ -254,6 +254,12 @@ Count each chunk's words against this table before submitting. Never
 write a segment that needs 5, 9, or 15 seconds; trim the words to the
 slot, never stretch the slot to the words.
 
+**Keep the longest clip short.** The clips render in parallel, so the
+longest one decides when the batch, and every cut-out after it, can
+start. Split into 8-second chunks by default, with one 4-second chunk for
+the remainder; use 12 seconds only when 8-second chunks would number more
+than four. Twenty seconds is 8 + 8 + 4, not 12 + 8.
+
 **All chunks are one batch.** Write every chunk's payload
 (`jobs/th-01.json`, `jobs/th-02.json`, ...), submit them all with
 `submit_ai_job` in one turn, wait on them all with `wait_ai_job` in one
