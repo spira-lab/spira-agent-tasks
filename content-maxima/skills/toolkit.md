@@ -38,8 +38,9 @@ Every generation is three steps:
 3. **Collect** with `wait_ai_job`: `jobId`, and `saveTo` set to
    `<materials>/<name>/<out-file>`. It waits (300 s by default; pass
    `timeoutSec` up to 600 for video), saves the result there (a job's extra
-   results land beside it as `<name>-2.<ext>`), and returns `status` and
-   `resultUrls`. Delete the `.pending` file once the result is saved.
+   results land beside it as `<name>-2.<ext>`), and returns `status`,
+   `resultUrls` and `saved`. Delete the `.pending` file once the result is
+   saved. Never download a result yourself with `curl`.
 
 Pass `resultUrls[0]` into the next job that needs the result.
 
@@ -48,15 +49,19 @@ payload before resubmitting once (a new `submit_ai_job`, a new
 `.pending`); never resubmit an unchanged payload in a loop.
 
 `stillRunning: true` means the wait timed out, not that the job failed:
-call `wait_ai_job` again with the same `jobId`. IF a session was cut off
+call `wait_ai_job` again with the same `jobId` and `saveTo`. `saveError`
+means the job finished but its download failed: call `wait_ai_job` again
+with the same `jobId` and `saveTo` — it returns at once and is not charged
+again. IF a session was cut off
 (a restart), read every `jobs/*.pending` and call `wait_ai_job` on the id
 it holds. **Never call `submit_ai_job` for an output that has a `.pending`
 record** — that pays twice for one output. Delete a `.pending` file only
 to deliberately replace that job.
 
-`wait_ai_job` checks alpha itself: a saved `.webm`, and a `.png` whose
-payload asked for a transparent background, come back with a `warnings`
-entry when they have no alpha channel.
+`wait_ai_job` checks alpha itself: every saved `.png` and `.webm` comes
+back in `saved` with `hasAlpha`. `hasAlpha: false` on a file whose payload
+asked for a transparent background means it has no alpha channel and must
+be regenerated.
 
 **Independent jobs run in parallel.** Whenever jobs do not depend on each
 other's results, submit them all in one turn — one `submit_ai_job` call
@@ -199,7 +204,7 @@ with one object at `1:1` `1K`.
 
 The prompt must say transparent background in those words; it does not
 happen by default, and a white or grey backdrop cannot be keyed cleanly
-afterwards. `wait_ai_job` warns when the PNG came back without alpha.
+afterwards. `wait_ai_job` reports `hasAlpha: false` when the PNG came back without alpha.
 
 ## 3d. Stock stills for b-roll: `gpt-image-2`
 
@@ -303,7 +308,7 @@ only solid colours and says transparent output is not available; both
 are wrong for this purpose and are ignored. `Transparent` returns a VP9
 WebM with true alpha (verified 2026-09-20); a colour mode returns an
 opaque MP4. Never use a colour mode and never add a chroma-key step.
-`wait_ai_job` warns when the WebM came back without alpha.
+`wait_ai_job` reports `hasAlpha: false` when the WebM came back without alpha.
 
 **The Bria output is final.** Do not mask, matte, crop, re-key, or
 otherwise adjust it. IF it keeps an object the person holds or touches,
