@@ -30,6 +30,22 @@ The task may come as different types of video: a UGC video with a
 talking head, a VO explainer video, an animated short, a product ad, a
 video ad, and sometimes a video that mimics a provided video.
 
+**Every video has a talking head.** A presenter is the default, whatever
+the type: an explainer, a product ad, or a list of tips still has a
+person speaking it. WHEN the request gives no presenter photo or video,
+make one: the persona from toolkit 3a, then the route section 3 of the
+toolkit names for the voice. A chosen voice, a voice-over recording, a
+product image, or a script that reads like an explainer never means no
+talking head. Leave the presenter out only WHEN:
+
+- the request explicitly says so: no talking head, no presenter, no
+  avatar, faceless, voice-over only, or the like;
+- a brand file that applies says never to use one; or
+- the request supplies `Footage:`, which is the video source itself.
+
+Only then is the video presenter-less, with the voice-over from toolkit
+3i. Not being sure a presenter fits is not a reason to leave one out.
+
 Elements to consider:
 
 - Infographic animation that illustrates what the script represents.
