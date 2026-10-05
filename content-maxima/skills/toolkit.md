@@ -107,8 +107,13 @@ three sources, and the request says which:
 
 With a voice ID or a recording, the voice-over exists before the
 talking head, so a talking head is HeyGen lip-synced to it (3j), never
-Seedance, whose clips make their own speech. A video with no presenter
-uses it as the voice-over directly (3i).
+Seedance, whose clips make their own speech.
+
+The voice source picks the route to the talking head, never whether
+there is one: every video has a talking head unless the request
+explicitly says otherwise (creative-video-production section 1). Only a
+video that is presenter-less by that rule uses the voice-over directly
+(3i).
 
 | Step | Model ID | Credits |
 |------|----------|---------|
@@ -384,7 +389,9 @@ credits per second.
 
 ## 3i. Voice-over without a presenter: `elevenlabs-text-to-speech`
 
-For a VO explainer with no talking head. WHEN the voice comes from a
+Only for a video the request explicitly makes presenter-less
+(creative-video-production section 1); a VO explainer otherwise still
+has a talking head and never comes here. WHEN the voice comes from a
 voice ID or a recording (section 3), the voice-over is 3j step 1
 instead, and nothing here applies. Payload:
 `{"text":"<the script>","voiceId":"21m00Tcm4TlvDq8ikWAM","providerModelId":"eleven_v3"}`,
