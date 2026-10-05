@@ -461,11 +461,13 @@ session, before the concept: its words are what the video is about.
    `ffmpeg -y -v error -i "<url>" -c:v libx264 -crf 17 -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart <materials>/<name>/th-01.mp4`.
 3. **Submit its cut-out (3f) at once**, with the hosted `th-01.mp4` as
    the input, and do steps 4 and 5 while it renders.
-4. **Voice-over, timings, and script from the clip's own audio**, in one
-   command:
+4. **The clip's own speech is the voice, and Whisper transcribes it**,
+   in one command:
    `python3 tools/make-timings.py <materials>/<name>/vo.mp3 --recording <materials>/<name>/th-01.mp4`.
-   It writes `vo.mp3`, `timings.json`, and the transcript to
-   `script.txt`. Read the transcript it prints and settle the concept
+   It takes the audio out of the clip as `vo.mp3` (the speech heard in
+   the finished video), runs Whisper on it for every word's timing
+   (`timings.json`), and writes Whisper's transcript to `script.txt` as
+   the script. Read the transcript it prints and settle the concept
    from it. Correct only the spelling of names in `script.txt` (captions
    carry it). Whisper detects the language: a clip in Hindi stays in
    Hindi. Never cut, retime, mute, or re-voice the clip's speech: it is
@@ -483,8 +485,14 @@ session, before the concept: its words are what the video is about.
 
 On the stage the clip goes in at `data-start="0"`, as a HeyGen clip
 does, and its cut-out carries the scenes like any talking head
-(creative-video-production section 5). The output ratio is the clip's
-own ratio.
+(creative-video-production section 5). The video elements stay muted;
+`vo.mp3` plays the clip's speech from the same start, so the lips and
+the voice stay in sync. The output ratio is the clip's own ratio.
+
+**Captions follow the clip's speech.** `tools/captions.py` (stage skill
+section 6) times every word from Whisper's `timings.json` and writes it
+as `script.txt` has it, so the subtitles match what the person says,
+word for word, in the clip's language.
 
 ## 4. Do not use
 
