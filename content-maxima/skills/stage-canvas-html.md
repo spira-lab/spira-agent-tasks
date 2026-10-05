@@ -211,6 +211,13 @@ only those frames are shot, and only that stretch is checked, so it takes
 seconds instead of a full pass. Use it instead of writing a script to
 screenshot or inspect the page.
 
+The audit is the measurement of the layout, so the layout is written
+before it is measured. Where a cut-out, a headline or a layer lands on
+the stage is checked by writing the scenes and running `--at` on them,
+never worked out beforehand by probing the materials with ffmpeg or
+Python, or by reading the audit's code: what it relies on is section 3,
+and each line it prints says what is wrong and where.
+
 ```bash
 node tools/render/audit.js <root>/editable/<name>.html --at 7400,8100,9000
 ```
