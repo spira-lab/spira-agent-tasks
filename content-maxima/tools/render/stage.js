@@ -156,7 +156,6 @@ function readEditable(htmlPath) {
   return {
     html, name, durationMs, videos, sfx,
     voSrc: attr(voTag, 'src'), bgmSrc: attr(bgmTag, 'src'),
-    sfxUnder: parseFloat(attr(voTag, 'data-sfx-under')) || 8,
   };
 }
 

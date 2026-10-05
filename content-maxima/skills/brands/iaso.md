@@ -13,8 +13,6 @@ again.
   ```json
   {"text":"…","voiceId":"cgSgspJ2msm6clMCkdW9","providerModelId":"eleven_v3"}
   ```
-
-  The voice is ElevenLabs, so `data-sfx-under="14"` on `#vo`.
 - Transitions are always effortful and purposeful, and elements enter
   and exit dynamically. No element simply appears or simply disappears.
 - Do not add the IASO logo or the word IASO as text on screen. Avoid

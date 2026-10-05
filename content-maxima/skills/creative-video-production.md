@@ -64,8 +64,8 @@ Elements to consider:
   The audio is hosted, not in the package: fetch each sound you use into
   the video's materials with `python3 tools/fetch-resource.py sfx/<file>
   editable/materials/<name>/sfx/<file>`.
-  How a chosen sound is placed and how loud it plays is in the stage
-  skill.
+  Each sound plays at the volume stored in its file; never adjust it.
+  How a chosen sound is placed is in the stage skill.
 - Background music. Three cases, decided by what the user said:
   - WHEN the user says to use music from the library, choose from
     `music/Music metadata.json` (read it whole with `cat`); never open
@@ -294,7 +294,9 @@ empties them, never the session.
   icon column at x 890; keep the wrap width within that and never shift
   the block sideways.
 - The voice is always the loudest thing in the mix. Sound effects sit
-  under it and above the music bed; the renderer sets the levels.
+  under it and above the music bed. The levels are fixed: each effect
+  plays at the volume stored in its file and the renderer sets the voice
+  and the bed; a session never adjusts any of them.
 - Never invent a brand logo. A logo is used only when the user provides
   it. IF none is provided, the brand is shown by its name in text, and
   nothing is drawn, generated, or approximated to stand in for a logo.
