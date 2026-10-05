@@ -32,19 +32,31 @@ video ad, and sometimes a video that mimics a provided video.
 
 **Every video has a talking head.** A presenter is the default, whatever
 the type: an explainer, a product ad, or a list of tips still has a
-person speaking it. WHEN the request gives no presenter photo or video,
-make one: the persona from toolkit 3a, then the route section 3 of the
-toolkit names for the voice. A chosen voice, a voice-over recording, a
+person speaking it. WHEN the request gives no presenter photo, no
+presenter video, and no supplied talking-head video, make one: the
+persona from toolkit 3a, then the route section 3 of the toolkit names
+for the voice. A chosen voice, a voice-over recording, a
 product image, or a script that reads like an explainer never means no
 talking head. Leave the presenter out only WHEN:
 
 - the request explicitly says so: no talking head, no presenter, no
   avatar, faceless, voice-over only, or the like;
-- a brand file that applies says never to use one; or
-- the request supplies `Footage:`, which is the video source itself.
+- a brand file that applies says never to use one.
 
 Only then is the video presenter-less, with the voice-over from toolkit
 3i. Not being sure a presenter fits is not a reason to leave one out.
+
+**A supplied talking-head video is the talking head.** WHEN the request
+has `Talking head supplied video:`, that exact video is the talking
+head of the finished video, and its own voice is the voice-over. It
+replaces every step that makes a presenter or speech: no Soul persona
+(toolkit 3a), no GPT Image 2 avatar edit (3b), no Seedance clips (3e),
+no HeyGen (3j), and no ElevenLabs (3i). Go straight to building the
+video with it. Its speech is the script, word for word and in its own
+language: nothing is written around it, and it is never muted,
+re-voiced, cut, or retimed. Everything else applies as for any talking
+head: the Bria cut-out (3f), the animated elements, and the scene
+variety of section 5. Toolkit 3k is the procedure.
 
 Elements to consider:
 
@@ -254,7 +266,8 @@ empties them, never the session.
 
 - Read only what the skills tell you to: the essential skills in
   section 10, `skills/working-memory.md`, `sfx/SFX metadata.json`,
-  `music/Music metadata.json`, `fonts/fonts.md`, the stage template, the one rolled sheet in `styles/`, and the editable you are
+  `music/Music metadata.json`, `fonts/fonts.md`, the stage template, the one rolled sheet in `styles/`, the contact sheet of a
+  supplied talking-head video (toolkit 3k), and the editable you are
   working on. Never open another
   editable html in the root; reading it anchors you to it and you copy
   it. Open `skills/add-ons.md` only WHEN the user asks for an add-on by name
