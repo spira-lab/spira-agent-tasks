@@ -95,7 +95,7 @@ URL.
 ## 3. Tool map
 
 **Where the voice comes from decides the talking head.** There are
-three sources, and the request says which:
+four sources, and the request says which:
 
 - **Auto** (nothing said about the voice): the talking-head clips speak
   the script, and their audio is the voice-over (3e).
@@ -104,6 +104,10 @@ three sources, and the request says which:
 - **The user's own recording** (`Voice-over:` in the request, an audio
   file in place of the script): it is the voice-over as it is. Nothing
   spoken is generated, and its words are the script (3j step 1).
+- **A supplied talking-head video** (`Talking head supplied video:` in
+  the request): the video is the talking head and its own audio the
+  voice-over; its words are the script. Nothing is generated for the
+  presenter or the speech (3k).
 
 With a voice ID or a recording, the voice-over exists before the
 talking head, so a talking head is HeyGen lip-synced to it (3j), never
@@ -123,6 +127,7 @@ video that is presenter-less by that rule uses the voice-over directly
 | Stock still for b-roll | `gpt-image-2` | same |
 | Talking-head clip | `seedance-1.5-pro` | per second, see 3e |
 | Talking head speaking a given voice-over (voice ID or recording) | `heygen-avatar-4` | see 3j |
+| Talking head supplied by the user | none: the video itself | 0, see 3k |
 | Talking-head cut-out | `bria-video-background-removal` | 0.42 per source second |
 | Background music | `suno-music` | 6.6 per track |
 | Avatar motion control, persona driven by a reference video | `kling-3.0-motion-control` pro | 9.52 per second |
@@ -135,7 +140,10 @@ never skipped: no other model produces the base likeness.
 **The one exception: the user provides the photo.** WHEN the user
 hands over a photo to use as the avatar (or a video, from which a clear
 frame is taken), skip Soul. Host the photo only if it is not already a
-public URL (section 2). Then:
+public URL (section 2). This is a `Presenter photo:` or a `Presenter
+reference video:`, which give only the face. A `Talking head supplied
+video:` is not this: it is the finished talking head and skips 3a
+entirely (3k). Then:
 
 - **With a voice ID or a recording** (section 3): skip the clean-up
   edit (3b) and Seedance too. The talking head is HeyGen from the photo
@@ -309,7 +317,7 @@ tests and `1080p` for the final.
 
 ## 3f. Talking-head cut-out: `bria-video-background-removal`
 
-Removes the background from a Seedance or HeyGen clip so the talking head sits on
+Removes the background from a Seedance, HeyGen, or supplied (3k) clip so the talking head sits on
 the stage with real transparency. Payload:
 `{"referenceVideo":["<clip url>"],"mode":"Transparent","preserveAudio":true,"autoZoom":false}`,
 written to `<name>.webm`.
@@ -436,6 +444,55 @@ steps, in order:
 One clip covers the whole voice-over: no 4/8/12-second chunks. It is cut
 out with 3f like any talking-head clip and goes on the stage at
 `data-start="0"`. Cost is 10 credits a second.
+
+## 3k. Talking head supplied by the user: no generation
+
+WHEN the request has `Talking head supplied video: <url>`. That exact
+video is the talking head of the finished video, and its own audio is
+the voice-over. Skip the persona (3a), the avatar edit (3b), Seedance
+(3e), and HeyGen (3j); generate no speech (3i). It comes first in the
+session, before the concept: its words are what the video is about.
+
+1. **Start the video with no script**:
+   `tools/new-video.sh "<brand, or talking head>" < /dev/null`.
+2. **Bring the clip in as `th-01.mp4`**, re-encoded to H.264 so the
+   stage and the renderer play it (an upload may be MOV or HEVC), then
+   host it (section 2):
+   `ffmpeg -y -v error -i "<url>" -c:v libx264 -crf 17 -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart <materials>/<name>/th-01.mp4`.
+3. **Submit its cut-out (3f) at once**, with the hosted `th-01.mp4` as
+   the input, and do steps 4 and 5 while it renders.
+4. **The clip's own speech is the voice, and Whisper transcribes it**,
+   in one command:
+   `python3 tools/make-timings.py <materials>/<name>/vo.mp3 --recording <materials>/<name>/th-01.mp4`.
+   It takes the audio out of the clip as `vo.mp3` (the speech heard in
+   the finished video), runs Whisper on it for every word's timing
+   (`timings.json`), and writes Whisper's transcript to `script.txt` as
+   the script. Read the transcript it prints and settle the concept
+   from it. Correct only the spelling of names in `script.txt` (captions
+   carry it). Whisper detects the language: a clip in Hindi stays in
+   Hindi. Never cut, retime, mute, or re-voice the clip's speech: it is
+   the narration, and its length is the video's length.
+5. **Look at where the person is**, from a contact sheet of frames
+   across the clip:
+   `tools/style-sheet.sh <materials>/<name>/th-01.mp4 <materials>/<name>/deletable`.
+   Open only `deletable/contact-sheet.jpg`. Note where the face and the
+   body sit in the frame, how much of it they fill, whether they move,
+   and where the free space is, and plan where every animated element
+   lands from that: beside, above, or below the person, never over the
+   face (creative-video-production section 9). A generated clip keeps
+   `persona.png`'s framing; a supplied clip has no such image, so this
+   sheet is how its framing is known.
+
+On the stage the clip goes in at `data-start="0"`, as a HeyGen clip
+does, and its cut-out carries the scenes like any talking head
+(creative-video-production section 5). The video elements stay muted;
+`vo.mp3` plays the clip's speech from the same start, so the lips and
+the voice stay in sync. The output ratio is the clip's own ratio.
+
+**Captions follow the clip's speech.** `tools/captions.py` (stage skill
+section 6) times every word from Whisper's `timings.json` and writes it
+as `script.txt` has it, so the subtitles match what the person says,
+word for word, in the clip's language.
 
 ## 4. Do not use
 
