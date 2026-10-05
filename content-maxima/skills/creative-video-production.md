@@ -177,7 +177,11 @@ cut-out on screen is wrong; the audit flags it. Wherever the figure is cropped b
 its own frame (the body at the bottom, often a shoulder or an arm at the
 sides), that side of the cut-out runs past the canvas edge; placed or
 scaled so a cropped side ends inside the canvas, the person ends in a
-straight line in mid-air, which the audit flags.
+straight line in mid-air, which the audit flags. The clip keeps the
+framing of `persona.png`, so that image already shows which sides are
+cropped: the scene table places the cut-out from it, with its frame
+flush with or past the canvas on those sides, and the audit's `edge`
+line confirms it on the stage.
 
 **Type is designed, never default.** Every video has a type system
 taken from its style reference (the rolled one included): a headline
