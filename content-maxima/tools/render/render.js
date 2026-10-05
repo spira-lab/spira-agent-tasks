@@ -7,8 +7,9 @@
 //   * every <video> is swapped for an all-keyframe copy before capture (intra.js): a
 //     seek then decodes one frame instead of everything since the last keyframe. The
 //     copies are cached in materials/<name>/deletable/intra/ and shared with audit.js
-//   * sound effects are the editable's <audio class="sfx" data-at="ms"> tags, mixed
-//     data-sfx-under LU (on #vo, default 8) under the voice
+//   * sound effects are the editable's <audio class="sfx" data-at="ms"> tags, mixed at
+//     the level stored in each file: the library is levelled against a -16 LUFS voice,
+//     so no gain or loudness normalisation is applied to an effect
 //   * stage size is read from the page (window.STAGE), so any ratio works
 //   * a render already at <out.mp4> is moved to renders/deletable first; the new one
 //     is checked (duration, frames, stereo), and a one-frame-per-second sheet for
@@ -46,7 +47,7 @@ function mixAudio(silent, secs) {
     if (!fs.existsSync(file)) { console.error(`warning: sound effect ${s.src} not found, skipped`); return; }
     const ms = Math.max(0, Math.round(s.at));
     inputs.push('-i', file);
-    parts.push(`[${idx}:a]loudnorm=I=${-16 - ed.sfxUnder}:TP=-3,aformat=channel_layouts=stereo,adelay=${ms}|${ms}[fx${k}]`); labels.push(`[fx${k}]`); idx++;
+    parts.push(`[${idx}:a]aformat=sample_rates=48000:channel_layouts=stereo,adelay=${ms}|${ms}[fx${k}]`); labels.push(`[fx${k}]`); idx++;
   });
   if (ed.bgmSrc) {
     const bed = path.join(tmp, 'bed.wav');

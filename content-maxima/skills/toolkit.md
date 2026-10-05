@@ -399,7 +399,7 @@ written to `vo.mp3`, then `python3 tools/make-timings.py <materials>/<name>/vo.m
 Voices proven on this account: `21m00Tcm4TlvDq8ikWAM` (female) and
 `iP95p4xoKVk53GoZ742B` (male), both on `eleven_v3`; use the one that fits
 the video, unless a brand file names its own. Cost is 0.01 credits a
-character. The voice is ElevenLabs, so `data-sfx-under="14"` on `#vo`.
+character.
 
 ## 3j. Talking head speaking a given voice-over: `heygen-avatar-4`
 
@@ -414,7 +414,6 @@ steps, in order:
      `{"text":"<the script>","voiceId":"<the voice ID from the request>","providerModelId":"eleven_multilingual_v2"}`,
      written to `vo.mp3`, then its timings:
      `python3 tools/make-timings.py <materials>/<name>/vo.mp3`.
-     `data-sfx-under="14"` on `#vo`.
    - **A recording:** no job, and it comes first in the session, before
      the concept: its words are what the video is about. Start the
      video with the request's script, or with none
@@ -427,7 +426,6 @@ steps, in order:
      a written `script.txt` correct only the spelling of names
      (captions carry it). Never cut, retime, or regenerate the
      recording: its length is the video's length.
-     `data-sfx-under="8"` on `#vo`.
 
    Then host `vo.mp3` with `spira assets upload` (section 2); it is a
    file on disk either way.

@@ -165,11 +165,15 @@ Each cue is one tag inside `#stage`, next to the audio slots:
 on the cut it serves, not after it. Fetch each sound you use into
 `materials/<name>/sfx/` first: `python3 tools/fetch-resource.py
 sfx/<file> editable/materials/<name>/sfx/<file>` (the audio is hosted,
-not in the package). The renderer mixes
-every cue at `data-sfx-under` LU under the voice, set on `#vo`: 8 for
-most voices, 14 WHEN the voice was made with ElevenLabs (directly or as
-talking-head speech), whose speech lands quieter against effects. The
-music bed sits 20 LU under the voice. Do not pre-mix effects into
+not in the package).
+
+Every effect plays at the volume stored in its file. The library is
+already levelled, one sound at a time, against a voice at −16 LUFS, the
+level the renderer sets every voice-over to; the renderer adds no gain
+to an effect. Never set, scale, or calibrate an effect's volume: no
+volume attribute, no gain filter, no re-encoded copy. WHEN a sound feels
+too loud or too soft for a moment, choose a different sound. The music
+bed sits 20 LU under the voice. Do not pre-mix effects into
 `vo.mp3`; the VO file stays the dry voice that the timings came from.
 
 ## 6. Captions

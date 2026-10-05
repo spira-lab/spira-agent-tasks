@@ -130,9 +130,8 @@
 </div>
 
 <div id="stage" class="is-paused" data-duration="0"> <!-- ms; last spoken word end + 1000, see setup skill -->
-  <!-- Voice-over: keep the file next to this html. Remove the tag if there is no VO.
-       data-sfx-under: how many LU the sound effects sit under the voice (8; 14 for ElevenLabs voices). -->
-  <audio id="vo" src="materials/EDITABLE-NAME/vo.mp3" preload="auto" data-sfx-under="8"></audio>
+  <!-- Voice-over: keep the file next to this html. Remove the tag if there is no VO. -->
+  <audio id="vo" src="materials/EDITABLE-NAME/vo.mp3" preload="auto"></audio>
   <!-- Background music: loops, previewed at data-volume (0..1). Remove the tag if there is none. -->
   <audio id="bgm" src="materials/EDITABLE-NAME/bgm.mp3" preload="auto" loop data-volume="0.14"></audio>
   <!-- Sound effects: one tag per cue, data-at = stage ms it starts; the renderer mixes them.
@@ -211,8 +210,8 @@
       .then(b => { bgm.src = URL.createObjectURL(b); bgm.load(); }).catch(() => {});
   }
   const bgmSeek = ms => { if (bgm && bgm.duration) bgm.currentTime = (ms / 1000) % bgm.duration; };
-  // Each effect plays once as the clock crosses its data-at; a seek re-arms it.
-  sfx.forEach(a => { a.volume = 0.6; a.fired = false; });
+  // Each effect plays once as the clock crosses its data-at, at its file's own level; a seek re-arms it.
+  sfx.forEach(a => { a.volume = 1; a.fired = false; });
   function sfxSync(ms) {
     sfx.forEach(a => {
       const at = parseFloat(a.dataset.at) || 0;
