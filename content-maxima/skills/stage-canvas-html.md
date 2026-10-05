@@ -272,28 +272,14 @@ the editable; there is nothing else to configure. It moves an existing
 render to `renders/deletable/` first, captures every frame on AWS Lambda
 in parallel chunks, mixes the audio (voice at -16 LUFS, effects and bed
 under it, bed faded in 1 s and out 1.5 s), checks the file (duration,
-frame count, stereo), and writes
-`materials/<name>/deletable/cover-sheet.jpg`. Output is 1080 x 1920,
-30 fps, H.264, stereo AAC.
+frame count, stereo). Output is 1080 x 1920, 30 fps, H.264, stereo
+AAC: the render is final as it comes out, with no cover or other step
+after it.
 
 Expect about a minute for a video up to two minutes long. IF it prints `check FAILED` or `video seeks
 timed out`, fix the cause before anything else. Render once, after the
 audit is clean and the sound effects are placed: every re-render is
-another minute of capture. Choose the cover moment before the render,
-from the audit sheet, and look at it once with `audit.js --at <ms>`: a
-defect first seen on the cover (text over the chin, a sliver at the
-edge) otherwise costs a second render.
-
-**Then set the cover.** The cover is the still a player shows before the
-video plays, stored beside the video so the first frame keeps its motion:
-the clearest poster frame (the key element fully built, sharp, and
-readable, nothing mid-transition), never the first frame. Use the moment
-chosen before the render; the cover sheet (tile n is the frame at n
-minus 1 seconds) is there to confirm it:
-
-```bash
-tools/set-cover.sh <root>/renders/<name>.mp4 <seconds>
-```
+another minute of capture.
 
 ## 9. Other aspect ratios
 

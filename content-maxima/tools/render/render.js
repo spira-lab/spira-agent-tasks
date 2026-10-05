@@ -12,8 +12,7 @@
 //     so no gain or loudness normalisation is applied to an effect
 //   * stage size is read from the page (window.STAGE), so any ratio works
 //   * a render already at <out.mp4> is moved to renders/deletable first; the new one
-//     is checked (duration, frames, stereo), and a one-frame-per-second sheet for
-//     choosing the cover is written to the materials deletable/
+//     is checked (duration, frames, stereo)
 // process.exit(0) at the end is needed: the AWS clients keep their sockets open.
 const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path'), os = require('os');
@@ -86,16 +85,6 @@ function archivePrevious() {
   console.log(`previous render moved to ${path.relative(process.cwd(), target)}`);
 }
 
-function coverSheet() {
-  const deletable = path.join(dir, 'materials', ed.name, 'deletable');
-  if (!fs.existsSync(path.dirname(deletable))) return;
-  fs.mkdirSync(deletable, { recursive: true });
-  const sheet = path.join(deletable, 'cover-sheet.jpg');
-  const rows = Math.ceil(ed.durationMs / 1000 / 6);
-  execFileSync('ffmpeg', ['-y','-v','error','-i', out, '-vf', `fps=1,scale=216:-1,tile=6x${rows}`, '-frames:v', '1', sheet]);
-  console.log(`  cover sheet: ${sheet} (tile n = second n-1; pick one, then tools/set-cover.sh ${path.relative(process.cwd(), out)} <second>)`);
-}
-
 (async () => {
   archivePrevious();
   const t0 = Date.now();
@@ -114,7 +103,6 @@ function coverSheet() {
   console.log(`  concat+audio in ${((Date.now()-tTail)/1000).toFixed(0)}s | total ${((Date.now()-t0)/1000).toFixed(0)}s`);
 
   checkRender();
-  coverSheet();
   console.log('done:', out);
   process.exit(0);
 })().catch(e => { console.error(e); process.exit(1); });

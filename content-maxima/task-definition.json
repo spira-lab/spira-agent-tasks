@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "packageVersion": "1.17.9",
+  "packageVersion": "1.17.10",
   "description": "Turn a script, brief, or idea into a finished short video, 9:16 for Reels and TikTok unless another aspect ratio is asked for, following the skills in skills/ (start with skills/creative-video-production.md).",
   "requirements": [
     {"name": "ffmpeg", "kind": "system", "purpose": "Encoding, mixing, frame extraction and probing (render, gen, add-ons)", "check": "ffmpeg -version && ffprobe -version"},
@@ -20,7 +20,7 @@
     {"id": "setup", "title": "Preflight, read skills, settle concept and script"},
     {"id": "assets", "title": "Generate voice, talking head, visuals and music; build word timings"},
     {"id": "build", "title": "Build scenes, animation, captions and sound effects; pass the audit"},
-    {"id": "render", "title": "Render MP4, set the cover, host it and report"}
+    {"id": "render", "title": "Render MP4, host it and report"}
   ],
   "outputs": [
     {"key": "video", "kind": "file", "required": true, "accept": [".mp4"], "description": "The current render under renders/"},
