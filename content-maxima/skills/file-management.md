@@ -82,8 +82,7 @@ carry on from there, and generate nothing that is already in.
   collision). The generation's payload stays in `jobs/`, so the asset can
   be made again.
 - Never delete. The `deletable/` folders are the operator's to empty.
-- Tool working files (audit and cover sheets, the cover still, a
-  reference video and its frames) are written straight to `deletable/`
+- Tool working files (audit sheets, a reference video and its frames) are written straight to `deletable/`
   by the tools.
 
 ## 6. Renders
@@ -91,7 +90,7 @@ carry on from there, and generate nothing that is already in.
 - `tools/render/render.js` writes `renders/NN-name-MM-DD.mp4`, moving a
   previous render to `renders/deletable/NN-name-MM-DD_<YYYYMMDD-HHMM>.mp4`
   first, so `renders/` holds exactly the current render of each editable.
-- A finished render (rendered, checked, cover set) is hosted, so it can
+- A finished render (rendered and checked) is hosted, so it can
   be handed over as a URL:
 
   ```bash

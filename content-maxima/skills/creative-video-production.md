@@ -248,8 +248,8 @@ the speech is usually right.
 
 ## 8. When done
 
-A video is done when it is rendered, its cover is set, and it is
-hosted (file-management section 6). Then:
+A video is done when it is rendered and hosted (file-management
+section 6). Then:
 
 1. WHEN the `submit_result` tool is available, call it with the render
    as `video`, the hosted URL as `publicUrl`, and a post caption as

@@ -40,7 +40,6 @@ python3 tools/cut-sheet.py grid|elements <sheet.png> ... --names a,b  # cut one 
 python3 tools/captions.py <root>/editable/<name>.html            # word-per-word captions from the timings
 node tools/render/audit.js <root>/editable/<name>.html [--at ms,...]  # leaks, text, files, frame sheet
 node tools/render/render.js <root>/editable/<name>.html <root>/renders/<name>.mp4 30
-tools/set-cover.sh <root>/renders/<name>.mp4 <seconds>
 spira assets upload <root>/renders/<name>.mp4                  # host the finished render
 tools/style-sheet.sh <url or path> <materials>/<name>/deletable # style reference contact sheet
 node docs/render-steps.js                                       # refresh the README cards
