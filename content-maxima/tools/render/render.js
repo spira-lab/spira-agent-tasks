@@ -10,6 +10,9 @@
 //   * sound effects are the editable's <audio class="sfx" data-at="ms"> tags, mixed at
 //     the level stored in each file: the library is levelled against a -16 LUFS voice,
 //     so no gain or loudness normalisation is applied to an effect
+//   * the music bed plays at the level stored in its file when the file is from the library
+//     (its sha256 is in resources.json): each track was levelled by ear against a -16 LUFS
+//     voice. Any other bed (generated music) is levelled to -19 LUFS, the library's median.
 //   * stage size is read from the page (window.STAGE), so any ratio works
 //   * a render already at <out.mp4> is moved to renders/deletable first; the new one
 //     is checked (duration, frames, stereo)
@@ -19,6 +22,16 @@ const fs = require('fs'), path = require('path'), os = require('os');
 const { readEditable } = require('./stage');
 const { renderChunks } = require('./lambda');
 const { intraCopies, probe } = require('./intra');
+const crypto = require('crypto');
+
+const OTHER_BED_LUFS = -19;
+const LIBRARY_MUSIC = (() => {
+  try {
+    const m = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'resources.json'), 'utf8'));
+    return new Set(Object.entries(m.files || {}).filter(([k]) => k.startsWith('music/')).map(([, f]) => f.sha256));
+  } catch (e) { return new Set(); }
+})();
+const fromLibrary = file => LIBRARY_MUSIC.has(crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'));
 
 const [htmlArg, outArg, fpsArg] = process.argv.slice(2);
 if (!htmlArg || !outArg) { console.error('usage: render.js <editable.html> <out.mp4> [fps]'); process.exit(2); }
@@ -52,7 +65,12 @@ function mixAudio(silent, secs) {
     const bed = path.join(tmp, 'bed.wav');
     execFileSync('python3', [path.join(__dirname, '..', 'bgm-extend.py'), path.join(dir, ed.bgmSrc), bed, secs], { stdio: 'inherit' });
     inputs.push('-i', bed);
-    parts.push(`[${idx}:a]loudnorm=I=-36:TP=-6:LRA=9,afade=t=in:d=1,afade=t=out:st=${(ed.durationMs/1000-1.5).toFixed(2)}:d=1.5[bed]`); labels.push('[bed]'); idx++;
+    let level = 'aformat=sample_rates=48000:channel_layouts=stereo';
+    if (!fromLibrary(path.join(dir, ed.bgmSrc))) {
+      level = `loudnorm=I=${OTHER_BED_LUFS}:TP=-2:LRA=9,aresample=48000`;
+      console.log(`  ${ed.bgmSrc} is not a library track: levelled to ${OTHER_BED_LUFS} LUFS`);
+    }
+    parts.push(`[${idx}:a]${level},afade=t=in:d=1,afade=t=out:st=${(ed.durationMs/1000-1.5).toFixed(2)}:d=1.5[bed]`); labels.push('[bed]'); idx++;
   }
   const fc = labels.length ? `${parts.join(';')};${labels.join('')}amix=inputs=${labels.length}:normalize=0,atrim=0:${secs}[a]` : '';
   execFileSync('ffmpeg', ['-y','-v','error', ...inputs, ...(fc ? ['-filter_complex', fc, '-map', '0:v', '-map', '[a]', '-c:a', 'aac', '-b:a', '192k'] : []),
