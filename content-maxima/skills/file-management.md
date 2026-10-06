@@ -82,7 +82,8 @@ carry on from there, and generate nothing that is already in.
   collision). The generation's payload stays in `jobs/`, so the asset can
   be made again.
 - Never delete. The `deletable/` folders are the operator's to empty.
-- Tool working files (audit sheets, a reference video and its frames) are written straight to `deletable/`
+- Tool working files (audit sheets, a reference video and its frames,
+  the original of a Seedance clip `pace-clips.py` sped up) are written straight to `deletable/`
   by the tools.
 
 ## 6. Renders
