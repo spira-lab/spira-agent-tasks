@@ -296,8 +296,8 @@ timeout).
 uses the clips.** A chunk with fewer words than its slot holds is spoken
 slowly to fill the 4, 8, or 12 seconds. The fix is the clip's speed, never
 the script: the chunks stay as they were written and are never rewritten,
-re-split, or padded for this. One or two words short, the clip is left as
-it is; three or more short, the output video is sped up, picture and voice
+re-split, or padded for this. Up to four words short, the clip is left as
+it is; five or more short, the output video is sped up, picture and voice
 together, to the length its words take at 3.3 words a second. One command
 checks every clip, in stage order, with its chunk's word count:
 

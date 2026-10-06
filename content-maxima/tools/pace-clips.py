@@ -6,7 +6,7 @@
 Each argument is a clip in the materials folder and the number of words in its
 chunk, in stage order. Seedance clips are exactly 4, 8 or 12 seconds, and a chunk
 with fewer words than its slot holds (13, 26 or 38) is spoken slowly to fill it.
-A chunk 1 or 2 words short is left alone. A chunk 3 or more words short is sped
+A chunk 1 to 4 words short is left alone. A chunk 5 or more words short is sped
 up, picture and voice together (the voice keeps its pitch), to the length its
 words take at 3.3 words a second. The clip is replaced in place; the original is
 kept as deletable/<clip>.unpaced.mp4.
@@ -19,7 +19,7 @@ import json, pathlib, shutil, subprocess, sys
 
 WPS = 3.3
 SLOT_WORDS = {4: 13, 8: 26, 12: 38}  # the fewest words each Seedance slot holds (toolkit 3e)
-MIN_SHORTFALL = 3
+MIN_SHORTFALL = 5
 
 
 def probe(path):
