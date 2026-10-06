@@ -29,7 +29,7 @@ const LIBRARY_MUSIC = (() => {
   try {
     const m = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'resources.json'), 'utf8'));
     return new Set(Object.entries(m.files || {}).filter(([k]) => k.startsWith('music/')).map(([, f]) => f.sha256));
-  } catch (e) { return new Set(); }
+  } catch { return new Set(); }
 })();
 const fromLibrary = file => LIBRARY_MUSIC.has(crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'));
 
