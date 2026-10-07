@@ -12,7 +12,7 @@
 //     so no gain or loudness normalisation is applied to an effect
 //   * the music bed plays at the level stored in its file when the file is from the library
 //     (its sha256 is in resources.json): each track was levelled by ear against a -16 LUFS
-//     voice. Any other bed (generated music) is levelled to -19 LUFS, the library's median.
+//     voice. Any other bed (generated music) is levelled to -26 LUFS, 10 LU under the voice.
 //   * stage size is read from the page (window.STAGE), so any ratio works
 //   * a render already at <out.mp4> is moved to renders/deletable first; the new one
 //     is checked (duration, frames, stereo)
@@ -24,7 +24,7 @@ const { renderChunks } = require('./lambda');
 const { intraCopies, probe } = require('./intra');
 const crypto = require('crypto');
 
-const OTHER_BED_LUFS = -19;
+const OTHER_BED_LUFS = -26;
 const LIBRARY_MUSIC = (() => {
   try {
     const m = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'resources.json'), 'utf8'));
