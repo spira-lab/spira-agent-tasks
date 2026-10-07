@@ -173,7 +173,10 @@ level the renderer sets every voice-over to; the renderer adds no gain
 to an effect. Never set, scale, or calibrate an effect's volume: no
 volume attribute, no gain filter, no re-encoded copy. WHEN a sound feels
 too loud or too soft for a moment, choose a different sound. The music
-bed sits 20 LU under the voice. Do not pre-mix effects into
+bed plays at the level stored in its file, set by ear for each library
+track; never set, scale, or re-encode its volume either. Generated
+music, which has no stored level, is levelled to -26 LUFS. Do not
+pre-mix effects into
 `vo.mp3`; the VO file stays the dry voice that the timings came from.
 
 ## 6. Captions

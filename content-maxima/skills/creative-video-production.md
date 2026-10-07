@@ -79,15 +79,19 @@ Elements to consider:
   Each sound plays at the volume stored in its file; never adjust it.
   How a chosen sound is placed is in the stage skill.
 - Background music. Three cases, decided by what the user said:
-  - WHEN the user says to use music from the library, choose from
-    `music/Music metadata.json` (read it whole with `cat`); never open
-    the tracks to learn them. Each entry gives the track's genre and
-    style, mood, energy, tempo, instruments, structure, what it is
-    best for and what to avoid it for. Shortlist every track that fits
-    the video's topic and tone, and the style the user asked for if
-    they named one. Leave out tracks whose entry has
-    `starts_immediately: false` or a `longest_silence_s` above 2,
-    unless nothing else fits. Count the shortlist, N, then roll:
+  - WHEN the user says no music or no bgm, use none: nothing generated,
+    nothing picked.
+  - WHEN the user asks for new, original or generated music, generate
+    it with the toolkit.
+  - Otherwise, including WHEN the user says nothing about music, choose
+    from the library, `music/Music metadata.json` (read it whole with
+    `cat`); never open the tracks to learn them. Each entry gives the
+    track's genre and style, mood, energy, tempo, instruments,
+    structure, what it is best for and what to avoid it for. Shortlist
+    every track that fits the video's topic and tone, and the style the
+    user asked for if they named one. Leave out tracks whose entry has
+    `starts_immediately: false` or a `longest_silence_s` above 2, unless
+    nothing else fits. Count the shortlist, N, then roll:
 
     ```bash
     python3 -c "import secrets; print(secrets.randbelow(N) + 1)"
@@ -101,10 +105,6 @@ Elements to consider:
     `python3 tools/fetch-resource.py music/<file>
     editable/materials/<name>/bgm.mp3`. WHEN the chosen entry carries
     a `mix_note`, follow it when laying the bed.
-  - WHEN the user says nothing about music, generate it with the
-    toolkit.
-  - WHEN the user says no music or no bgm, use none: nothing generated,
-    nothing picked.
 
 Generate several visuals as one image, then cut them apart:
 
