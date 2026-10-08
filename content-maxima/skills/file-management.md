@@ -81,7 +81,12 @@ carry on from there, and generate nothing that is already in.
   `mv` it to `deletable/` under the same name (adding `_2`, `_3` on a
   collision). The generation's payload stays in `jobs/`, so the asset can
   be made again.
-- Never delete. The `deletable/` folders are the operator's to empty.
+- Never delete, and never free space: no step needs room made, and no
+  failure is fixed by removing files. On a size or resource error, `mv`
+  a file the error names that the video does not use to `deletable/`;
+  otherwise retry once, then `report_error`. The only `rm` is a saved
+  `.pending` record (toolkit section 1). The `deletable/` folders are
+  the operator's to empty.
 - Tool working files (audit sheets, a reference video and its frames,
   the original of a Seedance clip `pace-clips.py` sped up) are written straight to `deletable/`
   by the tools.
