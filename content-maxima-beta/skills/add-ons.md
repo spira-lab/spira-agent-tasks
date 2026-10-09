@@ -36,7 +36,8 @@ every hard cut, keeps up to 20 spread over the whole video, and writes
 
 Hard rules:
 
-- Open only `contact-sheet.jpg`. Never watch the video, read its other
+- Open only `contact-sheet.jpg`, through `tools/view-image.sh`
+  (CLAUDE.md, Looking at images). Never watch the video, read its other
   frames, or read its transcript: from then on you build its story
   instead of your own. The reference is for visual styling only, never
   for what the video is about.

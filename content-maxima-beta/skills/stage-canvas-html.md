@@ -287,7 +287,8 @@ Each line says how to fix it; fix them all in as few edits as you can,
 then run it the second time. It also writes
 `materials/<name>/deletable/audit-sheet.jpg`: the first frame, each scene
 0.6 s in, and the last frame, or the `--at` moments. Look at it on the
-first run; it is the check a render would otherwise be spent on. The
+first run, through `tools/view-image.sh` (CLAUDE.md, Looking at images);
+it is the check a render would otherwise be spent on. The
 tool's output is the whole interface: do not read its source.
 
 ## 8. Render

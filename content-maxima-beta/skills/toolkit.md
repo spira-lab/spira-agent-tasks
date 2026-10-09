@@ -328,7 +328,9 @@ python3 tools/make-timings.py <materials>/<name>/vo.mp3 --from th-01.mp4 th-02.m
 ```
 
 The clips keep the persona image's framing: the face sits where it sits
-in `persona.png`, so plan the layout around it from that image, and check
+in `persona.png`, so plan the layout around it from that image (looked at
+through `tools/view-image.sh`, its positions scaled back to the original),
+and check
 it on the stage with `audit.js --at`. Do not cut frames out of the clips
 to look at them.
 
@@ -509,7 +511,8 @@ session, before the concept: its words are what the video is about.
 5. **Look at where the person is**, from a contact sheet of frames
    across the clip:
    `tools/style-sheet.sh <materials>/<name>/th-01.mp4 <materials>/<name>/deletable`.
-   Open only `deletable/contact-sheet.jpg`. Note where the face and the
+   Open only `deletable/contact-sheet.jpg`, through `tools/view-image.sh`
+   (CLAUDE.md, Looking at images). Note where the face and the
    body sit in the frame, how much of it they fill, whether they move,
    and where the free space is, and plan where every animated element
    lands from that: beside, above, or below the person, never over the

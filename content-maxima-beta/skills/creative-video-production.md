@@ -173,7 +173,9 @@ python3 -c "import secrets; print(secrets.randbelow(N) + 1)"
 The sheets are numbered, `Style1.jpg`, `Style2.jpg`, and so on; the
 rolled number is the style. The roll comes from the command's output,
 never from judgement, and it is not rerolled. Open only the rolled
-sheet, and treat it exactly as a style reference the user provided:
+sheet, through `tools/view-image.sh styles/StyleN.jpg
+<materials>/<name>/deletable` (CLAUDE.md, Looking at images), and treat
+it exactly as a style reference the user provided:
 its look, never its story, its people, or its words.
 
 ## 5. Tips
@@ -190,7 +192,8 @@ its own frame (the body at the bottom, often a shoulder or an arm at the
 sides), that side of the cut-out runs past the canvas edge; placed or
 scaled so a cropped side ends inside the canvas, the person ends in a
 straight line in mid-air, which the audit flags. The clip keeps the
-framing of `persona.png`, so that image already shows which sides are
+framing of `persona.png`, so that image (looked at through
+`tools/view-image.sh`) already shows which sides are
 cropped: the scene table places the cut-out from it, with its frame
 flush with or past the canvas on those sides, and the audit's `edge`
 line confirms it on the stage.
@@ -268,7 +271,8 @@ empties them, never the session.
   section 10, `skills/working-memory.md`, `sfx/SFX metadata.json`,
   `music/Music metadata.json`, `fonts/fonts.md`, the stage template, the one rolled sheet in `styles/`, the contact sheet of a
   supplied talking-head video (toolkit 3k), and the editable you are
-  working on. Never open another
+  working on. Every image among them is opened as CLAUDE.md's Looking
+  at images says, and used as its original. Never open another
   editable html in the root; reading it anchors you to it and you copy
   it. Open `skills/add-ons.md` only WHEN the user asks for an add-on by name
   or a Preference names one.

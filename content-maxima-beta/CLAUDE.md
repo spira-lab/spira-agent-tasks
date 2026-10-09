@@ -22,6 +22,31 @@ read from, never written to. Session output goes to the root, the folder
 the session was opened in, under `editable/` and `renders/`, which are
 gitignored. `file-management.md` governs every path.
 
+## Looking at images
+
+Every image the session looks at (a style sheet, a contact sheet, the
+audit sheet, a generated sheet or persona, a photo the user supplied) is
+opened through the tool, never by reading the image file itself:
+
+```bash
+tools/view-image.sh <image> <materials>/<name>/deletable [--crop x,y,w,h]
+```
+
+Read the path it prints. An image whose long edge is 1024 px or less is
+printed as it is; a larger one is scaled to half its width and height,
+never below a 1024 px long edge, into `deletable/view/`. For small type
+or an edge, look at a region at full resolution with `--crop` (source
+pixels) instead of the whole image larger.
+
+The copy is only for knowing what the image shows. Everything the video
+uses takes the original: what the editable references, the sheet given
+to `cut-sheet.py`, a file passed to `spira assets upload`, and every job
+input such as `referenceImage` (the original or its hosted URL), never a
+file from `deletable/view/`. A position or size measured on the copy is
+scaled back by the `source WxH` the tool prints before it is used. The
+audit flags an editable that references the copy; nothing checks an
+upload or a job input, so this rule is the only guard there.
+
 ## Record a corrected approach in known-methods
 
 WHEN a session takes an approach that turns out to be wrong and is only
@@ -43,6 +68,7 @@ node tools/render/audit.js <root>/editable/<name>.html [--at ms,...]  # leaks, t
 node tools/render/render.js <root>/editable/<name>.html <root>/renders/<name>.mp4
 spira assets upload <root>/renders/<name>.mp4                  # host the finished render
 tools/style-sheet.sh <url or path> <materials>/<name>/deletable # style reference contact sheet
+tools/view-image.sh <image> <materials>/<name>/deletable [--crop x,y,w,h]  # the copy of an image to look at
 node docs/render-steps.js                                       # refresh the README cards
 ```
 
