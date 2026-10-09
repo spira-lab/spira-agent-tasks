@@ -348,6 +348,12 @@ WebM with true alpha (verified 2026-09-20); a colour mode returns an
 opaque MP4. Never use a colour mode and never add a chroma-key step.
 `wait_ai_job` reports `hasAlpha: false` when the WebM came back without alpha.
 
+**Bria takes at most 60 s of source.** A longer clip is divided at a
+segment boundary (the `segments` in `timings.json`) into parts of 60 s or
+less, re-encoded H.264, then hosted and cut out in one batch, each
+`.webm` at its own `data-start` (3e). A longer source fails the job, so
+this is not a way to save a generation.
+
 **The Bria output is final.** Do not mask, matte, crop, re-key, or
 otherwise adjust it. IF it keeps an object the person holds or touches,
 such as a laptop, a phone, or a mug, that object is part of the
@@ -461,8 +467,8 @@ steps, in order:
    written to `th-01.mp4`. Use `720p` for tests.
 
 One clip covers the whole voice-over: no 4/8/12-second chunks. It is cut
-out with 3f like any talking-head clip and goes on the stage at
-`data-start="0"`. Cost is 10 credits a second.
+out with 3f like any talking-head clip (split first if over 60 s) and
+goes on the stage at `data-start="0"`. Cost is 10 credits a second.
 
 ## 3k. Talking head supplied by the user: no generation
 
