@@ -132,6 +132,15 @@ video that is presenter-less by that rule uses the voice-over directly
 | Background music | `suno-music` | 6.6 per track |
 | Avatar motion control, persona driven by a reference video | `kling-3.0-motion-control` pro | 9.52 per second |
 
+**Frame rate.** The render is always 24 fps, the rate of
+`seedance-1.5-pro`; Bria keeps the rate of the clip it is given. HeyGen
+and a supplied clip are not guaranteed to be 24 fps. A clip at any other
+rate repeats or drops frames in the render, which shows as the presenter
+juddering, and the renderer names it in a warning. Before switching a
+step to another video model, or adding one, check the frame rate it
+outputs; if it is not 24, the render rate or the clip has to change
+first, and the finding is recorded here.
+
 ## 3a. Persona base image: `ai-influencer-image`
 
 This is Higgsfield Soul. It is the first step of every persona and is

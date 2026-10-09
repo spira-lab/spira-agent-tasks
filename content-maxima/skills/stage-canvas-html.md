@@ -276,10 +276,12 @@ moves an existing render to `renders/deletable/` first, captures every
 frame on AWS Lambda in parallel chunks, mixes the audio (voice at -16
 LUFS, effects and bed under it, bed faded in 1 s and out 1.5 s), checks
 the file (duration, frame count, stereo). Output is 1080 x 1920 H.264
-with stereo AAC, at the frame rate of the clips on the stage (24 fps for
-Seedance, so each output frame is one clip frame) or 30 fps when there
-are none: the render is final as it comes out, with no cover or other
-step after it.
+with stereo AAC at 24 fps, the rate of Seedance clips, so each output
+frame is one clip frame. A clip at any other rate repeats or drops
+frames on the stage, which shows as the presenter juddering; the
+renderer names such a clip in a warning (toolkit section 3, Frame rate).
+The render is final as it comes out, with no cover or other step after
+it.
 
 Expect about a minute for a video up to two minutes long. IF it prints `check FAILED` or `video seeks
 timed out`, fix the cause before anything else. Render once, after the

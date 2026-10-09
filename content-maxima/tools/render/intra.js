@@ -49,33 +49,18 @@ async function intraCopies(dir, ed) {
   return swap;
 }
 
-/**
- * The render frame rate: the clips' own, so each output frame is one clip frame
- * (Seedance is 24 fps; sampling it at 30 repeats every fourth frame, a visible
- * judder). Rates above 30 are halved while even (60 -> 30), clips that disagree
- * are settled by the most stage time, and a stage with no clips renders at 30.
- */
-function clipFps(dir, ed) {
-  const byRate = new Map(), warnings = [];
+// A clip whose rate is not the render's repeats or drops frames when it is seeked, a judder on the presenter.
+function clipFpsWarnings(dir, ed, fps) {
+  const warnings = [];
   for (const src of ed.videos) {
     const file = path.join(dir, src);
     if (!fs.existsSync(file)) continue;
-    const out = probe(file, 'stream=codec_type,r_frame_rate:format=duration');
-    const m = out.match(/codec_type=video\s+r_frame_rate=(\d+)\/(\d+)/);
-    const raw = m && +m[2] ? +m[1] / +m[2] : NaN;
-    if (!(raw >= 10 && raw <= 120)) { warnings.push(`${src} has no usable frame rate (${m ? `${m[1]}/${m[2]}` : 'none'}), ignored`); continue; }
-    let rate = Math.round(raw);
-    while (rate > 30 && rate % 2 === 0) rate /= 2;
-    const secs = parseFloat((out.match(/duration=([\d.]+)/) || [])[1]) || 0;
-    const e = byRate.get(rate) || { secs: 0, clips: [] };
-    e.secs += secs; e.clips.push(path.basename(src));
-    byRate.set(rate, e);
+    const m = probe(file, 'stream=codec_type,r_frame_rate').match(/codec_type=video\s+r_frame_rate=(\d+)\/(\d+)/);
+    const rate = m && +m[2] ? Math.round(+m[1] / +m[2]) : NaN;
+    if (!Number.isFinite(rate)) warnings.push(`${src} has no readable frame rate; the render is ${fps} fps`);
+    else if (rate !== fps) warnings.push(`${src} is ${rate} fps, the render is ${fps}: its frames will repeat or drop (a judder)`);
   }
-  if (!byRate.size) return { fps: 30, note: '30 fps (no clips on the stage)', warnings };
-  const ranked = [...byRate].sort((a, b) => b[1].secs - a[1].secs);
-  const [fps, top] = ranked[0];
-  if (ranked.length > 1) warnings.push(`clips disagree on frame rate (${ranked.map(([r, e]) => `${r} fps: ${e.clips.join(', ')}`).join('; ')}); rendering at ${fps}, the rate with the most stage time`);
-  return { fps, note: `${fps} fps from ${top.clips.join(', ')}`, warnings };
+  return warnings;
 }
 
-module.exports = { intraCopies, probe, clipFps };
+module.exports = { intraCopies, probe, clipFpsWarnings };
