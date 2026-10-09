@@ -156,9 +156,11 @@ function readEditable(htmlPath) {
   return {
     html, name, durationMs, videos, sfx,
     voSrc: attr(voTag, 'src'), bgmSrc: attr(bgmTag, 'src'),
-    // The bed's gain, measured per track and written by fetch-resource.py. Absent
-    // means 0 dB: a generated bed is levelled by loudnorm instead.
-    bgmLevelDb: parseFloat(attr(bgmTag, 'data-level-db')) || 0,
+    // The bed's gain, measured per track and written by fetch-resource.py. null when
+    // the attribute is absent, which is a different state from a written 0 dB: one
+    // means the bed was never levelled, the other that it needs no gain. A generated
+    // bed has neither and is levelled by loudnorm instead.
+    bgmLevelDb: attr(bgmTag, 'data-level-db') === undefined ? null : parseFloat(attr(bgmTag, 'data-level-db')),
   };
 }
 

@@ -86,6 +86,11 @@ function mixAudio(silent, secs) {
       // No measured level to work from, so normalise the bed itself.
       level = `loudnorm=I=${BED_LUFS}:TP=-2:LRA=9,aresample=48000`;
       console.log(`  ${ed.bgmSrc} is not a library track: levelled to ${BED_LUFS} LUFS`);
+    } else if (ed.bgmLevelDb === null) {
+      // A library bed with no written gain is the state this change exists to end: the
+      // track would play at whatever its file carries, up to 6 LU above the voice. Say
+      // so rather than render it silently.
+      console.error(`warning: ${ed.bgmSrc} is a library track with no data-level-db, so it will play at its own level; re-fetch it with tools/fetch-resource.py --write-level <editable.html>`);
     } else if (ed.bgmLevelDb) {   // 0 dB is the no-op case, so a falsy check is enough
       level += `,volume=${ed.bgmLevelDb}dB`;
       console.log(`  ${ed.bgmSrc}: ${ed.bgmLevelDb} dB, to reach ${BED_LUFS} LUFS`);
