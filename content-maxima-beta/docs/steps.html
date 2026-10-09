@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Content Maxima: how to use</title>
+<style>
+  :root { --bg:#f4f3ef; --ink:#17161a; --muted:#6c6a72; --accent:#ff6f00; --line:rgba(23,22,26,.12);
+          --glow-peach:#ffcfae; --glow-orange:#ffa66a; --glow-yellow:#ffcd7a; --code:#17161a; --card:#ffffff; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#fff; font-family:"Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; color:var(--ink); -webkit-font-smoothing:antialiased; }
+  .step { width:1920px; height:1080px; background:var(--bg); position:relative; overflow:hidden; padding:186px 140px 250px; display:flex; flex-direction:row; align-items:center; gap:70px; }
+  .step::before { content:""; position:absolute; inset:0; background:
+    radial-gradient(760px 520px at 88% 8%, var(--glow-peach) 0%, rgba(255,207,174,0) 62%),
+    radial-gradient(620px 420px at 96% 40%, var(--glow-yellow) 0%, rgba(255,205,122,0) 60%),
+    radial-gradient(520px 380px at 6% 96%, var(--glow-orange) 0%, rgba(255,166,106,0) 62%); opacity:.85; }
+  .step > * { position:relative; }
+  .text { flex:0 0 900px; }
+  .fig { flex:1 1 auto; display:flex; align-items:center; justify-content:center; }
+  .fig svg { width:100%; max-width:700px; height:auto; overflow:visible; font-family:inherit; }
+  .single { flex-direction:column; align-items:flex-start; justify-content:flex-start; }
+  .single .text { flex:none; width:100%; }
+  .logo { position:absolute; left:140px; top:72px; height:52px; width:auto; }
+  .num { font-size:30px; font-weight:700; letter-spacing:.14em; color:var(--accent); text-transform:uppercase; margin-bottom:22px; }
+  .guide .num { color:var(--muted); }
+  h1 { font-size:84px; line-height:1.04; letter-spacing:-.03em; margin:0 0 30px; font-weight:800; }
+  p { font-size:36px; line-height:1.4; color:var(--muted); margin:0 0 18px; letter-spacing:-.005em; }
+  p b { color:var(--ink); font-weight:600; }
+  pre { margin:30px 0 0; background:var(--code); border-radius:18px; padding:28px 34px; font:30px/1.45 "SF Mono", Menlo, Consolas, monospace; color:#f4f3ef; white-space:pre-wrap; box-shadow:0 18px 50px rgba(23,22,26,.12); }
+  .brand { position:absolute; right:140px; bottom:190px; font-size:26px; font-weight:600; color:var(--muted); letter-spacing:.08em; }
+  .of { position:absolute; left:140px; bottom:190px; font-size:26px; font-weight:600; color:var(--muted); }
+  .legal { position:absolute; left:140px; right:140px; bottom:44px; padding-top:26px; border-top:1px solid var(--line); font-size:27px; line-height:1.4; color:var(--muted); }
+  /* chat panel (step 3) */
+  .single h1 { font-size:72px; margin-bottom:18px; }
+  .single .num { margin-bottom:14px; }
+  .single > .text > p { font-size:32px; margin-bottom:0; }
+  .chat { margin:22px 0 0; background:var(--card); border:1px solid var(--line); border-radius:22px; padding:22px 32px 20px; max-width:1560px; box-shadow:0 18px 50px rgba(23,22,26,.10); color:var(--ink); }
+  .chat .bar { display:flex; align-items:center; gap:14px; font-size:20px; color:var(--muted); margin-bottom:12px; letter-spacing:.02em; }
+  .chat .dot { width:14px; height:14px; border-radius:50%; background:var(--accent); display:inline-block; }
+  .chat p { font-size:26px; line-height:1.38; color:var(--ink); margin:0 0 8px; }
+  .chat ul { margin:0 0 8px 34px; padding:0; font-size:26px; line-height:1.38; }
+  .chat .ph { color:var(--muted); }
+  .chat .send { margin-top:8px; display:flex; justify-content:flex-end; }
+  .chat .send span { background:var(--ink); color:#fff; border-radius:12px; padding:6px 16px; font-size:19px; font-weight:600; letter-spacing:.04em; }
+  /* svg figure primitives */
+  .fig text { fill:var(--ink); font-weight:600; }
+  .fig .mu { fill:var(--muted); font-weight:500; }
+  .fig .ac { fill:var(--accent); }
+  .fig .box { fill:var(--card); stroke:var(--line); stroke-width:2; }
+  .fig .ink { fill:var(--ink); }
+  .fig .ln { stroke:var(--ink); stroke-width:4; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  .fig .lnm { stroke:var(--muted); stroke-width:4; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  .fig .lna { stroke:var(--accent); stroke-width:5; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  .fig .soft { fill:rgba(23,22,26,.07); }
+  .fig .peach { fill:var(--glow-peach); }
+  .cover { flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:120px 140px 250px; gap:0; }
+  .cover .biglogo { height:150px; width:auto; margin-bottom:44px; }
+  .cover .text { flex:none; width:1300px; }
+  .cover h1 { font-size:120px; margin:0 0 22px; }
+  .cover .sub { font-size:40px; color:var(--muted); margin:0 0 40px; }
+  .cover .perf { display:inline-block; text-align:left; background:var(--card); border:1px solid var(--line); border-radius:20px; padding:22px 34px; box-shadow:0 18px 50px rgba(23,22,26,.08); }
+  .cover .perf .k { font-size:22px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+  .cover .perf p { font-size:30px; margin:0; color:var(--ink); }
+  .cover .perf p b { font-weight:700; }
+  .cover .legal { text-align:left; }
+</style>
+</head>
+<body>
+
+
+<section class="step cover" id="cover">
+  <img class="biglogo" src="spira-logo.svg" alt="Spira">
+  <div class="text">
+    <h1>Content Maxima</h1>
+    <p class="sub">Video production orchestration that uses HTML as its editor.</p>
+    <div class="perf">
+      <div class="k">Performance expectation</div>
+      <p><b>10 to 15 minutes</b> for a VO video &nbsp;·&nbsp; <b>20 to 25 minutes</b> for a talking head video</p>
+    </div>
+  </div>
+  <div class="of">1 / 13</div><div class="brand">CONTENT MAXIMA</div>
+  <div class="legal">This repository is for Spira.ai and its team only. It is the intellectual property of Jeff Mouie Ramirez, strictly confidential, and is not to be shared outside the team or used for personal gain. Upon leaving the company, the copy on your local device must be removed, as it is subject to your NDA. Any misuse of this material is a breach of that NDA and will be treated as one.</div>
+</section>
+
+<section class="step guide" id="not">
+  <img class="logo" src="spira-logo.svg" alt="Spira">
+  <div class="text">
+    <div class="num">Scope</div>
+    <h1>What it is not</h1>
+    <p>This is not a skill that writes scripts. This is not the skill that generates Seedance 2.5 cinematic video. This is not the skill for repurposing.</p>
+  </div>
+  <div class="fig"><svg viewBox="0 0 680 560">
+  <g transform="translate(0,20)"><rect class="box" width="660" height="128" rx="20"/>
+    <g transform="translate(26,24)"><rect x="12" y="6" width="56" height="68" rx="8" fill="#ffcd7a"/><rect x="24" y="24" width="32" height="6" rx="3" fill="#17161a"/><rect x="24" y="38" width="32" height="6" rx="3" fill="#17161a"/><rect x="24" y="52" width="20" height="6" rx="3" fill="#17161a"/><path d="M6 6 L74 74 M74 6 L6 74" stroke="#17161a" stroke-width="7" stroke-linecap="round" opacity=".9"/></g>
+    <text x="132" y="56" font-size="27">Not a script writer</text><text class="mu" x="132" y="92" font-size="21">the script is written and approved before the session</text></g>
+  <g transform="translate(0,190)"><rect class="box" width="660" height="128" rx="20"/>
+    <g transform="translate(26,24)"><rect x="6" y="26" width="68" height="48" rx="8" fill="#ffcfae"/><path d="M6 34 L74 18 L74 30 L6 46 Z" fill="#ff6f00"/><text x="40" y="64" text-anchor="middle" font-size="16" font-weight="700">2.5</text><path d="M6 6 L74 74 M74 6 L6 74" stroke="#17161a" stroke-width="7" stroke-linecap="round" opacity=".9"/></g>
+    <text x="132" y="56" font-size="27">Not a Seedance 2.5 cinematic generator</text><text class="mu" x="132" y="92" font-size="21">it builds scenes on a stage instead</text></g>
+  <g transform="translate(0,360)"><rect class="box" width="660" height="128" rx="20"/>
+    <g transform="translate(26,24)"><path d="M40 8 a32 32 0 1 1 -22 9" stroke="#ff6f00" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M12 6 L20 20 L4 22 Z" fill="#ff6f00"/><rect x="28" y="30" width="24" height="20" rx="4" fill="#17161a"/><path d="M6 6 L74 74 M74 6 L6 74" stroke="#17161a" stroke-width="7" stroke-linecap="round" opacity=".9"/></g>
+    <text x="132" y="56" font-size="27">Not a repurposing tool</text><text class="mu" x="132" y="92" font-size="21">it does not cut down or re-edit existing videos</text></g>
+</svg></div>
+  <div class="of">2 / 13</div><div class="brand">CONTENT MAXIMA</div>
+  <div class="legal">This repository is for Spira.ai and its team only. It is the intellectual property of Jeff Mouie Ramirez, strictly confidential, and is not to be shared outside the team or used for personal gain. Upon leaving the company, the copy on your local device must be removed, as it is subject to your NDA. Any misuse of this material is a breach of that NDA and will be treated as one.</div>
+</section>
+<section class="step" id="step-1">
+  <img class="logo" src="spira-logo.svg" alt="Spira">
+  <div class="text">
+    <div class="num">Step 1</div>
+    <h1>Clone the package</h1>
+    <p>Content Maxima is a folder of skills, a stage template, tools, and sound libraries. Put it anywhere; the skills find each other by their own folder.</p>
+  <pre>git clone https://github.com/JeffHM14/content-maxima.git</pre>
+  </div>
+  <div class="fig"><svg viewBox="0 0 680 560">
+  <path class="box" d="M200 92 a52 52 0 0 1 100 -22 a44 44 0 0 1 84 26 a40 40 0 0 1 -8 80 H208 a42 42 0 0 1 -8 -84z"/>
+  <text x="340" y="132" text-anchor="middle" font-size="22">github.com/JeffHM14/content-maxima</text>
+  <path class="lna" d="M340 182 L340 238"/><path class="lna" d="M324 224 L340 238 L324 252"/>
+  <rect class="box" x="120" y="246" width="440" height="64" rx="14"/>
+  <rect class="ac" x="140" y="264" width="30" height="24" rx="5"/><rect class="ac" x="140" y="258" width="14" height="8" rx="3"/>
+  <text x="188" y="286" font-size="26">content-maxima/</text>
+  <path class="lnm" d="M170 310 V520"/>
+  <g font-size="24">
+    <path class="lnm" d="M170 352 H206"/><rect class="soft" x="212" y="332" width="26" height="20" rx="4"/><text x="250" y="359">skills/</text><text class="mu" x="340" y="359" font-size="20">the procedures</text>
+    <path class="lnm" d="M170 396 H206"/><rect class="soft" x="212" y="376" width="26" height="20" rx="4"/><text x="250" y="403">stage/</text><text class="mu" x="340" y="403" font-size="20">the 9:16 canvas</text>
+    <path class="lnm" d="M170 440 H206"/><rect class="soft" x="212" y="420" width="26" height="20" rx="4"/><text x="250" y="447">tools/</text><text class="mu" x="340" y="447" font-size="20">render, timings, upload</text>
+    <path class="lnm" d="M170 484 H206"/><rect class="soft" x="212" y="464" width="26" height="20" rx="4"/><text x="250" y="491">sfx/</text><text class="mu" x="320" y="491" font-size="20">sound effects</text>
+    <path class="lnm" d="M170 520 H206"/><rect class="soft" x="212" y="500" width="26" height="20" rx="4"/><text x="250" y="527">music/</text><text class="mu" x="350" y="527" font-size="20">the music library</text>
+  </g>
+</svg></div>
+  <div class="of">3 / 13</div><div class="brand">CONTENT MAXIMA</div>
+  <div class="legal">This repository is for Spira.ai and its team only. It is the intellectual property of Jeff Mouie Ramirez, strictly confidential, and is not to be shared outside the team or used for personal gain. Upon leaving the company, the copy on your local device must be removed, as it is subject to your NDA. Any misuse of this material is a breach of that NDA and will be treated as one.</div>
+</section>
+
+<section class="step" id="step-2">
+  <img class="logo" src="spira-logo.svg" alt="Spira">
+  <div class="text">
+    <div class="num">Step 2</div>
+    <h1>Install what the tools need</h1>
+    <p><b>Node</b>, <b>ffmpeg</b>, <b>Google Chrome</b>, <b>yt-dlp</b>, and <b>Whisper</b> on the machine, plus the renderer's one dependency and the Spira CLI.</p>
+  <pre>cd content-maxima/tools/render && npm install
+npm install -g @spira-lab/cli
+spira auth login
+pip install openai-whisper</pre>
+  </div>
+  <div class="fig"><svg viewBox="0 0 680 560">
+  <text class="mu" x="0" y="30" font-size="22">On the machine</text>
+  <g transform="translate(0,50)"><rect class="box" width="300" height="86" rx="18"/><circle class="ac" cx="44" cy="43" r="20"/><path d="M34 44 l8 8 l16 -18" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="80" y="38" font-size="24">Node</text><text class="mu" x="80" y="66" font-size="18">runs the renderer</text></g><g transform="translate(340,50)"><rect class="box" width="300" height="86" rx="18"/><circle class="ac" cx="44" cy="43" r="20"/><path d="M34 44 l8 8 l16 -18" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="80" y="38" font-size="24">ffmpeg</text><text class="mu" x="80" y="66" font-size="18">frames and audio</text></g>
+  <g transform="translate(0,150)"><rect class="box" width="300" height="86" rx="18"/><circle class="ac" cx="44" cy="43" r="20"/><path d="M34 44 l8 8 l16 -18" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="80" y="38" font-size="24">Google Chrome</text><text class="mu" x="80" y="66" font-size="18">paints the stage</text></g><g transform="translate(340,150)"><rect class="box" width="300" height="86" rx="18"/><circle class="ac" cx="44" cy="43" r="20"/><path d="M34 44 l8 8 l16 -18" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="80" y="38" font-size="24">yt-dlp</text><text class="mu" x="80" y="66" font-size="18">fetches references</text></g>
+  <g transform="translate(0,250)"><rect class="box" width="300" height="86" rx="18"/><circle class="ac" cx="44" cy="43" r="20"/><path d="M34 44 l8 8 l16 -18" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="80" y="38" font-size="24">Whisper</text><text class="mu" x="80" y="66" font-size="18">word timings</text></g><g transform="translate(340,250)"><rect class="box" width="300" height="86" rx="18"/><circle class="ac" cx="44" cy="43" r="20"/><path d="M34 44 l8 8 l16 -18" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="80" y="38" font-size="24">Spira CLI</text><text class="mu" x="80" y="66" font-size="18">every generation</text></g>
+  <rect class="ink" x="0" y="380" width="640" height="170" rx="18"/>
+  <g font-family="SF Mono, Menlo, Consolas, monospace" font-size="22" fill="#f4f3ef" font-weight="500">
+    <text x="28" y="422" style="fill:#f4f3ef">$ npm install</text>
+    <text x="28" y="458" style="fill:#f4f3ef">$ npm install -g @spira-lab/cli</text>
+    <text x="28" y="494" style="fill:#f4f3ef">$ spira auth login</text>
+    <text x="28" y="530" style="fill:#ffd23f" font-size="20">✓ signed in · credits available</text>
+  </g>
+</svg></div>
+  <div class="of">4 / 13</div><div class="brand">CONTENT MAXIMA</div>
+  <div class="legal">This repository is for Spira.ai and its team only. It is the intellectual property of Jeff Mouie Ramirez, strictly confidential, and is not to be shared outside the team or used for personal gain. Upon leaving the company, the copy on your local device must be removed, as it is subject to your NDA. Any misuse of this material is a breach of that NDA and will be treated as one.</div>
+</section>
+
+<section class="step" id="step-3">
+  <img class="logo" src="spira-logo.svg" alt="Spira">
+  <div class="text">
+    <div class="num">Step 3</div>
+    <h1>Set your working folder</h1>
+    <p>Open a <b>new chat</b> in Claude Code, click the <b>folder button</b> beside Local, and choose the folder where the files should be saved.</p>
+    <p>That folder is the <b>root</b>. Every editable, material, render, and metadata file is created there, whatever folder the package lives in.</p>
+  <p>Do it <b>first</b>. The picker sits above the chat box at the start of a session and disappears the moment you send your first message.</p>
+  </div>
+  <div class="fig"><svg viewBox="0 0 680 560">
+  <!-- picker dropdown -->
+  <g transform="translate(40,0)">
+    <rect class="box" width="330" height="372" rx="18"/>
+    <text x="24" y="42" font-size="22">No folder</text>
+    <path d="M286 34 l8 8 l14 -16" stroke="#0a84ff" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path class="lnm" d="M24 62 H306" stroke-width="2"/>
+    <text class="mu" x="24" y="94" font-size="18">Recent</text>
+    <g font-size="20" font-weight="500">
+      <text x="24" y="132">Content Creation</text>
+      <text x="24" y="168">Cookiy + Spira</text>
+      <text x="24" y="204">Creative</text>
+    </g>
+    <path class="lnm" d="M24 232 H306" stroke-width="2"/>
+    <rect x="12" y="248" width="306" height="52" rx="12" fill="#ff6f00" opacity=".14"/>
+    <rect x="12" y="248" width="306" height="52" rx="12" fill="none" stroke="#ff6f00" stroke-width="3"/>
+    <text x="24" y="281" font-size="20" font-weight="600">Open folder…</text>
+    <text class="mu" x="24" y="332" font-size="17">pick the folder the files</text>
+    <text class="mu" x="24" y="356" font-size="17">should be saved in</text>
+  </g>
+  <path class="lnm" d="M281 372 V392" stroke-dasharray="4 8"/>
+  <!-- bar above the chat box: Local + folder button -->
+  <g transform="translate(0,398)">
+    <rect class="box" width="130" height="52" rx="13"/><text x="34" y="34" font-size="19">Local</text>
+    <path class="lnm" d="M14 21 h14 M14 21 v9 h14 v-9" stroke-width="2.5"/>
+    <rect x="146" y="0" width="200" height="52" rx="13" fill="#fff" stroke="#ff6f00" stroke-width="4"/>
+    <path class="ln" d="M164 19 h9 l4 5 h13 v13 h-26 z" stroke-width="2.5"/>
+    <text x="192" y="34" font-size="19">No folder</text>
+    <path class="lna" d="M470 26 C440 26 430 26 380 26"/><path class="lna" d="M394 12 L380 26 L394 40"/>
+    <g transform="translate(480,-4)"><rect class="box" width="200" height="60" rx="14"/><text x="100" y="26" text-anchor="middle" font-size="18">click here first,</text><text class="mu" x="100" y="50" text-anchor="middle" font-size="16">before any message</text></g>
+  </g>
+  <!-- chat box -->
+  <g transform="translate(0,470)">
+    <rect class="box" width="680" height="76" rx="20"/>
+    <text class="mu" x="26" y="46" font-size="21" font-weight="500">Describe a task or ask a question</text>
+    <path class="lnm" d="M636 30 v10 h-14 M628 34 l-6 6 l6 6" stroke-width="2.5"/>
+  </g>
+</svg></div>
+  <div class="of">5 / 13</div><div class="brand">CONTENT MAXIMA</div>
+  <div class="legal">This repository is for Spira.ai and its team only. It is the intellectual property of Jeff Mouie Ramirez, strictly confidential, and is not to be shared outside the team or used for personal gain. Upon leaving the company, the copy on your local device must be removed, as it is subject to your NDA. Any misuse of this material is a breach of that NDA and will be treated as one.</div>
+</section>
+
+<section class="step single" id="step-4">
+  <img class="logo" src="spira-logo.svg" alt="Spira">
+  <div class="text">
+    <div class="num">Step 4</div>
+    <h1>How to prompt</h1>
+    <p>Start by asking it to read <b>creative-video-production.md</b>, then give the rest of your preferences and instructions. The request always has this shape.</p>
+  <div class="chat">
+    <div class="bar"><span class="dot"></span> Claude Code</div>
+    <p>Read the <span class="ph">[absolute path]</span>/content-maxima/skills/creative-video-production.md</p>
+    <p>Use this Style ref: <span class="ph">https://www.tiktok.com/@brand/video/0000000000</span></p>
+    <ul>
+      <li>Talking head</li>
+      <li>Use music library</li>
+      <li>Avatar description: A white American woman aged 25 wearing a casual outfit</li>
+    </ul>
+    <p>The script: <span class="ph">[paste the approved script here, verbatim]</span></p>
+    <div class="send"><span>SEND</span></div>
+  </div>
+  </div>
+  <div class="of">6 / 13</div><div class="brand">CONTENT MAXIMA</div>
+  <div class="legal">This repository is for Spira.ai and its team only. It is the intellectual property of Jeff Mouie Ramirez, strictly confidential, and is not to be shared outside the team or used for personal gain. Upon leaving the company, the copy on your local device must be removed, as it is subject to your NDA. Any misuse of this material is a breach of that NDA and will be treated as one.</div>
+</section>
+
+<section class="step guide" id="guide-1">
+  <img class="logo" src="spira-logo.svg" alt="Spira">
+  <div class="text">
+    <div class="num">How to use</div>
+    <h1>Providing a file</h1>
+    <p>Provide the <b>absolute path</b> to where the file is on the machine, instead of uploading the file in the chat.</p>
+  </div>
+  <div class="fig"><svg viewBox="0 0 680 560">
+  <g transform="translate(0,40)">
+    <rect class="box" width="300" height="220" rx="20"/>
+    <path class="lnm" d="M150 70 V150 M118 102 L150 70 L182 102"/>
+    <rect class="soft" x="70" y="168" width="160" height="14" rx="7"/>
+    <text class="mu" x="150" y="270" text-anchor="middle" font-size="24">upload in chat</text>
+    <path d="M40 40 L260 180 M260 40 L40 180" stroke="#17161a" stroke-width="10" stroke-linecap="round" opacity=".85"/>
+  </g>
+  <g transform="translate(380,40)">
+    <rect class="box" width="300" height="220" rx="20"/>
+    <rect x="24" y="86" width="252" height="52" rx="12" fill="#f4f3ef" stroke="#ff6f00" stroke-width="3"/>
+    <text x="40" y="120" font-size="18" font-family="SF Mono, Menlo, monospace" font-weight="500">/Users/you/avatar.png</text>
+    <circle class="ac" cx="150" cy="184" r="20"/><path d="M140 185 l8 8 l16 -18" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="150" y="270" text-anchor="middle" font-size="24">absolute path</text>
+  </g>
+  <rect class="box" x="60" y="380" width="560" height="120" rx="20"/>
+  <circle class="ac" cx="100" cy="440" r="8"/>
+  <text x="124" y="428" font-size="22">Use this image as the talking head avatar:</text>
+  <text class="mu" x="124" y="464" font-size="20" font-family="SF Mono, Menlo, monospace">/Users/you/Desktop/avatar.png</text>
+</svg></div>
+  <div class="of">7 / 13</div><div class="brand">CONTENT MAXIMA</div>
+  <div class="legal">This repository is for Spira.ai and its team only. It is the intellectual property of Jeff Mouie Ramirez, strictly confidential, and is not to be shared outside the team or used for personal gain. Upon leaving the company, the copy on your local device must be removed, as it is subject to your NDA. Any misuse of this material is a breach of that NDA and will be treated as one.</div>
+</section>
+
+<section class="step guide" id="guide-2">
+  <img class="logo" src="spira-logo.svg" alt="Spira">
+  <div class="text">
+    <div class="num">How to use</div>
+    <h1>Style sheet</h1>
+    <p>You may provide an image style sheet you made yourself, or provide a video as the style reference.</p>
+  <p>It is only a style reference. The video is not going to be cloned exactly.</p>
+  </div>
+  <div class="fig"><svg viewBox="0 0 680 560">
+  <text class="mu" x="0" y="30" font-size="22">style reference</text>
+  <g transform="translate(0,50)"><rect class="box" width="100" height="96" rx="10"/><rect x="14" y="60" width="72" height="14" rx="4" fill="#ff6f00"/><circle cx="50" cy="34" r="12" fill="#17161a"/></g><g transform="translate(112,50)"><rect class="box" width="100" height="96" rx="10"/><rect x="12" y="12" width="76" height="40" rx="6" fill="#ffcd7a"/><rect x="18" y="64" width="50" height="10" rx="4" fill="#17161a"/></g><g transform="translate(224,50)"><rect class="box" width="100" height="96" rx="10"/><circle cx="50" cy="40" r="16" fill="#17161a"/><rect x="20" y="70" width="60" height="10" rx="4" fill="#ff6f00"/></g><g transform="translate(0,158)"><rect class="box" width="100" height="96" rx="10"/><rect x="14" y="14" width="30" height="30" rx="6" fill="#ff6f00"/><rect x="52" y="14" width="34" height="8" rx="4" fill="#17161a"/><rect x="52" y="28" width="26" height="8" rx="4" fill="#6c6a72"/></g><g transform="translate(112,158)"><rect class="box" width="100" height="96" rx="10"/><rect x="14" y="20" width="72" height="50" rx="8" fill="#ffcfae"/><rect x="24" y="34" width="52" height="8" rx="4" fill="#17161a"/></g><g transform="translate(224,158)"><rect class="box" width="100" height="96" rx="10"/><circle cx="34" cy="36" r="14" fill="#17161a"/><rect x="56" y="26" width="30" height="20" rx="5" fill="#ff6f00"/><rect x="14" y="66" width="72" height="10" rx="4" fill="#6c6a72"/></g>
+  <text class="mu" x="0" y="300" font-size="20">an image sheet, or a video</text>
+  <path class="lna" d="M360 170 L430 170"/><path class="lna" d="M414 156 L430 170 L414 184"/>
+  <g transform="translate(470,44)"><rect class="box" x="0" y="0" width="160" height="284" rx="22"/><rect class="soft" x="50.0" y="10" width="60" height="8" rx="4"/><rect x="18" y="60" width="124" height="70" rx="10" fill="#ffcd7a"/><rect x="28" y="80" width="80" height="10" rx="4" fill="#17161a"/><rect x="28" y="98" width="56" height="8" rx="4" fill="#6c6a72"/><circle cx="60" cy="184" r="16" fill="#17161a"/><rect x="18" y="230" width="124" height="18" rx="5" fill="#ff6f00"/></g>
+  <text x="550" y="356" text-anchor="middle" font-size="22">your video</text>
+  <rect class="box" x="40" y="400" width="600" height="110" rx="20"/>
+  <text x="340" y="446" text-anchor="middle" font-size="24">takes the look: type, colour, layout, rhythm</text>
+  <text class="mu" x="340" y="484" text-anchor="middle" font-size="22">not the content, not a clone</text>
+</svg></div>
+  <div class="of">8 / 13</div><div class="brand">CONTENT MAXIMA</div>
+  <div class="legal">This repository is for Spira.ai and its team only. It is the intellectual property of Jeff Mouie Ramirez, strictly confidential, and is not to be shared outside the team or used for personal gain. Upon leaving the company, the copy on your local device must be removed, as it is subject to your NDA. Any misuse of this material is a breach of that NDA and will be treated as one.</div>
+</section>
+
+<section class="step guide" id="guide-3">
+  <img class="logo" src="spira-logo.svg" alt="Spira">
+  <div class="text">
+    <div class="num">How to use</div>
+    <h1>Talking head or voice-over video</h1>
+    <p>Saying <b>talking head</b> generates an avatar and creates a talking video. Saying <b>VO video</b> creates a video without a talking head.</p>
+  <p>The script is important to provide. Script writing is not part of the skill.</p>
+  </div>
+  <div class="fig"><svg viewBox="0 0 680 560">
+  <g transform="translate(60,20)"><rect class="box" x="0" y="0" width="220" height="392" rx="22"/><rect class="soft" x="80.0" y="10" width="60" height="8" rx="4"/><circle cx="110.0" cy="150.0" r="35.2" fill="#17161a"/><path d="M32.6 269.7 C32.6 202.8 187.4 202.8 187.4 269.7 Z" fill="#17161a"/><rect x="24" y="330" width="172" height="22" rx="6" fill="#ffd23f"/><rect x="32" y="337" width="94.60000000000001" height="8" rx="4" fill="#17161a"/></g>
+  <text x="170" y="450" text-anchor="middle" font-size="26">Talking head</text>
+  <text class="mu" x="170" y="482" text-anchor="middle" font-size="20">avatar generated, speaks the script</text>
+  <g transform="translate(400,20)"><rect class="box" x="0" y="0" width="220" height="392" rx="22"/><rect class="soft" x="80.0" y="10" width="60" height="8" rx="4"/><rect x="30" y="70" width="160" height="90" rx="12" fill="#ffcd7a"/><rect x="46" y="96" width="100" height="12" rx="5" fill="#17161a"/><rect x="46" y="118" width="70" height="10" rx="5" fill="#6c6a72"/><rect x="30" y="190" width="70" height="70" rx="12" fill="#ff6f00"/><rect x="118" y="190" width="72" height="70" rx="12" fill="#ffcfae"/><rect x="24" y="330" width="172" height="22" rx="6" fill="#ffd23f"/><rect x="32" y="337" width="94.60000000000001" height="8" rx="4" fill="#17161a"/></g>
+  <text x="510" y="450" text-anchor="middle" font-size="26">VO video</text>
+  <text class="mu" x="510" y="482" text-anchor="middle" font-size="20">voice over visuals, no avatar</text>
+  <rect class="box" x="120" y="512" width="440" height="44" rx="12"/>
+  <text x="340" y="542" text-anchor="middle" font-size="20">both need the script, written by you</text>
+</svg></div>
+  <div class="of">9 / 13</div><div class="brand">CONTENT MAXIMA</div>
+  <div class="legal">This repository is for Spira.ai and its team only. It is the intellectual property of Jeff Mouie Ramirez, strictly confidential, and is not to be shared outside the team or used for personal gain. Upon leaving the company, the copy on your local device must be removed, as it is subject to your NDA. Any misuse of this material is a breach of that NDA and will be treated as one.</div>
+</section>
+
+<section class="step guide" id="guide-4">
+  <img class="logo" src="spira-logo.svg" alt="Spira">
+  <div class="text">
+    <div class="num">How to use</div>
+    <h1>Your own talking head</h1>
+    <p>Providing an image for the avatar makes it the image used for the talking head. You have to say it: <b>use this image as the talking head avatar</b>.</p>
+  </div>
+  <div class="fig"><svg viewBox="0 0 680 560">
+  <g transform="translate(30,90)"><rect class="box" width="220" height="220" rx="20"/><rect class="peach" x="14" y="14" width="192" height="192" rx="14"/><circle cx="110.0" cy="78" r="32" fill="#17161a"/><path d="M39.6 186.8 C39.6 126.0 180.4 126.0 180.4 186.8 Z" fill="#17161a"/></g>
+  <text class="mu" x="140" y="350" text-anchor="middle" font-size="20" font-family="SF Mono, Menlo, monospace">avatar.png</text>
+  <path class="lna" d="M280 200 L360 200"/><path class="lna" d="M344 186 L360 200 L344 214"/>
+  <g transform="translate(400,44)"><rect class="box" x="0" y="0" width="190" height="338" rx="22"/><rect class="soft" x="65.0" y="10" width="60" height="8" rx="4"/><rect class="peach" x="14" y="40" width="162" height="200" rx="12"/><circle cx="105.0" cy="116" r="30" fill="#17161a"/><path d="M39.0 218.0 C39.0 161.0 171.0 161.0 171.0 218.0 Z" fill="#17161a"/><rect x="20" y="290" width="150" height="22" rx="6" fill="#ffd23f"/><rect x="28" y="297" width="82.5" height="8" rx="4" fill="#17161a"/></g>
+  <text x="495" y="420" text-anchor="middle" font-size="22">same face, talking</text>
+  <rect class="box" x="20" y="460" width="640" height="80" rx="20"/>
+  <circle class="ac" cx="56" cy="500" r="8"/>
+  <text x="80" y="510" font-size="23">“Use this image as the talking head avatar”</text>
+</svg></div>
+  <div class="of">10 / 13</div><div class="brand">CONTENT MAXIMA</div>
+  <div class="legal">This repository is for Spira.ai and its team only. It is the intellectual property of Jeff Mouie Ramirez, strictly confidential, and is not to be shared outside the team or used for personal gain. Upon leaving the company, the copy on your local device must be removed, as it is subject to your NDA. Any misuse of this material is a breach of that NDA and will be treated as one.</div>
+</section>
+
+<section class="step guide" id="guide-5">
+  <img class="logo" src="spira-logo.svg" alt="Spira">
+  <div class="text">
+    <div class="num">How to use</div>
+    <h1>Music</h1>
+    <p>Saying <b>use music library</b> picks a track from the library at random, unless you name the exact title of a track in the library.</p>
+  <p>Not mentioning music defaults to Suno-generated music, with genre and style based on the context of the script.</p>
+  </div>
+  <div class="fig"><svg viewBox="0 0 680 560">
+  <text x="0" y="30" font-size="24">“Use music library”</text>
+  <g transform="translate(0,54)"><rect width="76" height="56" rx="10" fill="#ffffff" stroke="rgba(23,22,26,.12)" stroke-width="2"/><text x="38" y="35" text-anchor="middle" font-size="18" font-weight="600" style="fill:#17161a">Music1</text></g><g transform="translate(86,54)"><rect width="76" height="56" rx="10" fill="#ffffff" stroke="rgba(23,22,26,.12)" stroke-width="2"/><text x="38" y="35" text-anchor="middle" font-size="18" font-weight="600" style="fill:#17161a">Music2</text></g><g transform="translate(172,54)"><rect width="76" height="56" rx="10" fill="#ff6f00" stroke="rgba(23,22,26,.12)" stroke-width="2"/><text x="38" y="35" text-anchor="middle" font-size="18" font-weight="600" style="fill:#fff">Music3</text></g><g transform="translate(258,54)"><rect width="76" height="56" rx="10" fill="#ffffff" stroke="rgba(23,22,26,.12)" stroke-width="2"/><text x="38" y="35" text-anchor="middle" font-size="18" font-weight="600" style="fill:#17161a">Music4</text></g><g transform="translate(344,54)"><rect width="76" height="56" rx="10" fill="#ffffff" stroke="rgba(23,22,26,.12)" stroke-width="2"/><text x="38" y="35" text-anchor="middle" font-size="18" font-weight="600" style="fill:#17161a">Music5</text></g><g transform="translate(430,54)"><rect width="76" height="56" rx="10" fill="#ffffff" stroke="rgba(23,22,26,.12)" stroke-width="2"/><text x="38" y="35" text-anchor="middle" font-size="18" font-weight="600" style="fill:#17161a">Music6</text></g><g transform="translate(516,54)"><rect width="76" height="56" rx="10" fill="#ffffff" stroke="rgba(23,22,26,.12)" stroke-width="2"/><text x="38" y="35" text-anchor="middle" font-size="18" font-weight="600" style="fill:#17161a">Music7</text></g>
+  <g transform="translate(596,48)"><rect width="66" height="66" rx="14" fill="#17161a"/><circle cx="20" cy="20" r="6" fill="#fff"/><circle cx="46" cy="20" r="6" fill="#fff"/><circle cx="33" cy="33" r="6" fill="#fff"/><circle cx="20" cy="46" r="6" fill="#fff"/><circle cx="46" cy="46" r="6" fill="#fff"/></g>
+  <text class="mu" x="0" y="150" font-size="21">picked at random, unless you name the title</text>
+  <path class="lnm" d="M0 200 H660" stroke-dasharray="6 10"/>
+  <text x="0" y="252" font-size="24">Nothing said about music</text>
+  <g transform="translate(0,280)" fill="#ff6f00">
+    <rect x="0" y="52" width="8" height="16" rx="4"/><rect x="14" y="42" width="8" height="36" rx="4"/><rect x="28" y="30" width="8" height="60" rx="4"/><rect x="42" y="16" width="8" height="88" rx="4"/><rect x="56" y="24" width="8" height="72" rx="4"/><rect x="70" y="38" width="8" height="44" rx="4"/><rect x="84" y="20" width="8" height="80" rx="4"/><rect x="98" y="6" width="8" height="108" rx="4"/><rect x="112" y="14" width="8" height="92" rx="4"/><rect x="126" y="30" width="8" height="60" rx="4"/><rect x="140" y="42" width="8" height="36" rx="4"/><rect x="154" y="34" width="8" height="52" rx="4"/><rect x="168" y="22" width="8" height="76" rx="4"/><rect x="182" y="10" width="8" height="100" rx="4"/><rect x="196" y="18" width="8" height="84" rx="4"/><rect x="210" y="32" width="8" height="56" rx="4"/><rect x="224" y="44" width="8" height="32" rx="4"/><rect x="238" y="36" width="8" height="48" rx="4"/><rect x="252" y="24" width="8" height="72" rx="4"/><rect x="266" y="12" width="8" height="96" rx="4"/><rect x="280" y="20" width="8" height="80" rx="4"/><rect x="294" y="34" width="8" height="52" rx="4"/><rect x="308" y="46" width="8" height="28" rx="4"/><rect x="322" y="40" width="8" height="40" rx="4"/><rect x="336" y="28" width="8" height="64" rx="4"/><rect x="350" y="16" width="8" height="88" rx="4"/><rect x="364" y="26" width="8" height="68" rx="4"/><rect x="378" y="38" width="8" height="44" rx="4"/><rect x="392" y="48" width="8" height="24" rx="4"/><rect x="406" y="42" width="8" height="36" rx="4"/><rect x="420" y="32" width="8" height="56" rx="4"/><rect x="434" y="20" width="8" height="80" rx="4"/><rect x="448" y="28" width="8" height="64" rx="4"/><rect x="462" y="40" width="8" height="40" rx="4"/><rect x="476" y="50" width="8" height="20" rx="4"/><rect x="490" y="44" width="8" height="32" rx="4"/><rect x="504" y="34" width="8" height="52" rx="4"/><rect x="518" y="24" width="8" height="72" rx="4"/><rect x="532" y="32" width="8" height="56" rx="4"/><rect x="546" y="42" width="8" height="36" rx="4"/><rect x="560" y="52" width="8" height="16" rx="4"/><rect x="574" y="46" width="8" height="28" rx="4"/><rect x="588" y="38" width="8" height="44" rx="4"/><rect x="602" y="30" width="8" height="60" rx="4"/><rect x="616" y="36" width="8" height="48" rx="4"/><rect x="630" y="44" width="8" height="32" rx="4"/><rect x="644" y="54" width="8" height="12" rx="4"/>
+  </g>
+  <rect class="box" x="0" y="420" width="660" height="110" rx="20"/>
+  <text x="24" y="464" font-size="23">Suno, instrumental only</text>
+  <text class="mu" x="24" y="500" font-size="21">genre and style from the context of the script</text>
+</svg></div>
+  <div class="of">11 / 13</div><div class="brand">CONTENT MAXIMA</div>
+  <div class="legal">This repository is for Spira.ai and its team only. It is the intellectual property of Jeff Mouie Ramirez, strictly confidential, and is not to be shared outside the team or used for personal gain. Upon leaving the company, the copy on your local device must be removed, as it is subject to your NDA. Any misuse of this material is a breach of that NDA and will be treated as one.</div>
+</section>
+
+<section class="step guide" id="guide-6">
+  <img class="logo" src="spira-logo.svg" alt="Spira">
+  <div class="text">
+    <div class="num">How to use</div>
+    <h1>Add-on skills</h1>
+    <p>WHEN you have a specific production technique in mind for a scene, add it to the add-on skill. An add-on does not fire on its own: mention it in the chat to use it, or record it in the working memory Preferences section to use it every time, for the condition you set.</p>
+  </div>
+  <div class="fig"><svg viewBox="0 0 680 560">
+  <text class="mu" x="0" y="30" font-size="22">add-ons.md</text>
+  <g transform="translate(0,50)"><rect class="box" width="420" height="78" rx="16"/><text x="24" y="47" font-size="24">Style ref contact sheet</text><g transform="translate(320,19)"><rect width="74" height="40" rx="20" fill="#ff6f00"/><circle cx="54" cy="20" r="14" fill="#fff"/></g></g>
+  <g transform="translate(0,140)"><rect class="box" width="420" height="78" rx="16"/><text x="24" y="47" font-size="24">Your technique</text><g transform="translate(320,19)"><rect width="74" height="40" rx="20" fill="rgba(23,22,26,.18)"/><circle cx="20" cy="20" r="14" fill="#fff"/></g></g>
+  <g transform="translate(0,230)"><rect class="box" width="420" height="78" rx="16"/><text x="24" y="47" font-size="24">Another technique</text><g transform="translate(320,19)"><rect width="74" height="40" rx="20" fill="rgba(23,22,26,.18)"/><circle cx="20" cy="20" r="14" fill="#fff"/></g></g>
+  <path class="lna" d="M470 24 C440 24 430 60 400 78"/><path class="lna" d="M414 66 L400 78 L418 82"/>
+  <path class="lna" d="M470 160 C440 160 430 120 400 100"/><path class="lna" d="M418 96 L400 100 L414 112"/>
+  <g transform="translate(470,-6)"><rect class="box" width="210" height="60" rx="16"/><text x="16" y="38" font-size="19">“use the … add-on”</text></g>
+  <g transform="translate(470,122)"><rect class="box" width="210" height="80" rx="16"/><text class="mu" x="16" y="30" font-size="16">working memory · Preferences</text><text x="16" y="60" font-size="19">WHEN … use it</text></g>
+  <text class="mu" x="0" y="360" font-size="21">fires only when mentioned in chat,</text>
+  <text class="mu" x="0" y="392" font-size="21">or when a preference names it for a condition</text>
+  <rect class="box" x="0" y="430" width="660" height="100" rx="20"/>
+  <text x="24" y="470" font-size="23">A technique you want for a scene</text>
+  <text class="mu" x="24" y="504" font-size="21">write it as a section; nothing fires on its own</text>
+</svg></div>
+  <div class="of">12 / 13</div><div class="brand">CONTENT MAXIMA</div>
+  <div class="legal">This repository is for Spira.ai and its team only. It is the intellectual property of Jeff Mouie Ramirez, strictly confidential, and is not to be shared outside the team or used for personal gain. Upon leaving the company, the copy on your local device must be removed, as it is subject to your NDA. Any misuse of this material is a breach of that NDA and will be treated as one.</div>
+</section>
+
+<section class="step guide" id="guide-7">
+  <img class="logo" src="spira-logo.svg" alt="Spira">
+  <div class="text">
+    <div class="num">How to use</div>
+    <h1>Working memory</h1>
+    <p>The model automatically records words it catches being mispronounced by the AI generation tools, so prompts can be corrected. It does not record preferences on its own; you tell it to.</p>
+  </div>
+  <div class="fig"><svg viewBox="0 0 680 560">
+  <g transform="translate(0,20)">
+    <rect class="box" width="320" height="300" rx="20"/>
+    <text x="24" y="44" font-size="24">Reword</text>
+    <rect x="212" y="20" width="88" height="34" rx="17" fill="#ff6f00"/><text x="256" y="43" text-anchor="middle" font-size="17" style="fill:#fff">automatic</text>
+    <g font-size="21">
+      <text x="24" y="104">Claude</text><text class="ac" x="150" y="104">→</text><text x="190" y="104">Clawed</text>
+      <text x="24" y="150">GitHub</text><text class="ac" x="150" y="150">→</text><text x="190" y="150">Git-Hub</text>
+      <text class="mu" x="24" y="196">…</text>
+    </g>
+    <text class="mu" x="24" y="262" font-size="18">words the speech models get wrong,</text>
+    <text class="mu" x="24" y="288" font-size="18">recorded as they are caught</text>
+  </g>
+  <g transform="translate(360,20)">
+    <rect class="box" width="320" height="300" rx="20"/>
+    <text x="24" y="44" font-size="24">Preferences</text>
+    <g transform="translate(236,14)"><rect x="6" y="18" width="34" height="26" rx="6" fill="#17161a"/><path d="M13 18 v-6 a10 10 0 0 1 20 0 v6" stroke="#17161a" stroke-width="5" fill="none"/></g>
+    <g font-size="20">
+      <text x="24" y="104">IASO only:</text><text class="mu" x="24" y="132" font-size="19">never use a talking head</text>
+      <text x="24" y="182">Style ref provided:</text><text class="mu" x="24" y="210" font-size="19">use the contact sheet add-on</text>
+    </g>
+    <text class="mu" x="24" y="288" font-size="18">written only when you say so</text>
+  </g>
+  <rect class="box" x="60" y="370" width="560" height="150" rx="20"/>
+  <text x="340" y="420" text-anchor="middle" font-size="23">Spoken line uses the reword.</text>
+  <text x="340" y="456" text-anchor="middle" font-size="23">Captions and on-screen text use the original.</text>
+  <text class="mu" x="340" y="494" text-anchor="middle" font-size="20">the viewer reads the real word and hears it said right</text>
+</svg></div>
+  <div class="of">13 / 13</div><div class="brand">CONTENT MAXIMA</div>
+  <div class="legal">This repository is for Spira.ai and its team only. It is the intellectual property of Jeff Mouie Ramirez, strictly confidential, and is not to be shared outside the team or used for personal gain. Upon leaving the company, the copy on your local device must be removed, as it is subject to your NDA. Any misuse of this material is a breach of that NDA and will be treated as one.</div>
+</section>
+
+</body>
+</html>
