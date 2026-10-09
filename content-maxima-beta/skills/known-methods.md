@@ -57,11 +57,16 @@ tool the entry points to; this file holds the why.
 ## Checking the stage
 
 - **Works:** `tools/render/audit.js` twice on the whole video, once with
-  every scene written and once after the fixes, and `--at` for a quick
-  look at a stretch while building (seconds, not a full pass).
+  every scene written and once after the fixes, `--at` for a quick look at
+  a stretch while building (seconds, not a full pass), and `--measure` for
+  a size or a wrap width, which runs the browser here and answers in
+  seconds without uploading anything.
 - **Fails:** writing a Playwright screenshot or probe script in every
   session, and a full audit after every scene: on staging each full run
-  grew from 1 s to 38 s as the file grew, sixteen times over.
+  grew from 1 s to 38 s as the file grew, sixteen times over. Measuring the
+  same file again without editing it is the same waste in miniature: one
+  09-22 run measured the same four headlines three times over, the last two
+  runs byte for byte identical.
 - **Where:** stage-canvas-html, section 7.
 
 ## Waiting on a background batch

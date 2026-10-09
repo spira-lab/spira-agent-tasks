@@ -7,6 +7,65 @@ const { seekTo } = require('./stage');
 // Safe zone on the 1080 x 1920 canvas; the icon column narrows it below y 1255.
 const ZONE = { left: 70, top: 230, right: 1005, bottom: 1615, stepY: 1255, stepRight: 890 };
 
+/** Every .scene with an id, and the moment it starts (its earliest animation). */
+const sceneList = page => page.evaluate(() => [...document.querySelectorAll('#stage .scene[id]')].map(s => {
+  const delays = window.__anims.filter(a => a.effect && a.effect.target && s.contains(a.effect.target))
+    .map(a => a.effect.getTiming().delay || 0);
+  return { id: s.id, start: delays.length ? Math.min(...delays) : 0 };
+}));
+
+/**
+ * When each text block lands, so it can be measured once it is where it will
+ * stay: a phrase at its last word's delay + 500 ms, every other block at its
+ * entry's end + 200 ms, or 600 ms into its scene when nothing animates it.
+ * Blocks are marked with data-audit-* so any later pass can find them back.
+ *
+ * `inspect` and `measure` share this, so the problems one reports and the sizes
+ * the other reports are about the same elements, measured at the same moments.
+ */
+async function textTargets(page, scenes, durationMs, portrait) {
+  const phrases = await page.evaluate(() => [...new Set([...document.querySelectorAll('#stage .w')].map(w => w.parentElement))]
+    .map((p, i) => {
+      p.dataset.auditId = i;
+      const last = Math.max(...[...p.querySelectorAll('.w, :scope > .w')].map(w => {
+        const a = w.getAnimations()[0];
+        return a ? (a.effect.getTiming().delay || 0) : 0;
+      }));
+      return { id: i, t: last + 500 };
+    }));
+  const blocks = !portrait ? [] : await page.evaluate(() => {
+    const hidden = kf => kf && (kf.opacity === '0' || /inset\(\s*100%|inset\([^)]*100%\s*\)/.test(kf.clipPath || '') || /scale\(0\)/.test(kf.transform || ''));
+    const ownText = e => [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
+    const all = [...document.querySelectorAll('#stage *')].filter(e => ownText(e) && !e.closest('#captions') && !e.closest('.w') && !e.querySelector('.w'));
+    // the outermost element with text of its own stands for the block
+    const tops = all.filter(e => { for (let p = e.parentElement; p && p.id !== 'stage'; p = p.parentElement) if (all.includes(p)) return false; return true; });
+    return tops.map((e, i) => {
+      e.dataset.auditText = i;
+      let end = null;
+      for (let p = e; p && p.id !== 'stage'; p = p.parentElement) {
+        p.getAnimations().forEach(a => {
+          if (!hidden(a.effect.getKeyframes()[0])) return;
+          const tm = a.effect.getTiming();
+          end = Math.max(end || 0, (tm.delay || 0) + (tm.duration || 0));
+        });
+      }
+      const scene = e.closest('.scene');
+      return { id: i, t: end, scene: scene ? scene.id : null };
+    });
+  });
+  const sceneStart = Object.fromEntries(scenes.map(s => [s.id, s.start]));
+  const byTime = new Map();
+  for (const b of blocks) {
+    const t = Math.min(b.t != null ? b.t + 200 : (sceneStart[b.scene] || 0) + 600, durationMs - 100);
+    if (!byTime.has(t)) byTime.set(t, { t, scene: b.scene, ids: [] });
+    byTime.get(t).ids.push(b.id);
+  }
+  // Left to right, top to bottom at each moment: measuring must be repeatable,
+  // so nothing here may depend on the order the page happened to hand back.
+  const rows = [...byTime.values()].sort((a, b) => a.t - b.t).map(r => ({ ...r, ids: r.ids.sort((a, b) => a - b) }));
+  return { phrases, rows };
+}
+
 /**
  * `at`: null for the whole video, or the ms to look around (0.5 s either side).
  * Frames for the sheet are written to `shotDir` as 000.jpg, 001.jpg, ...
@@ -18,11 +77,7 @@ async function inspect(page, { at, durationMs, shotDir }) {
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
 
-  const scenes = await page.evaluate(() => [...document.querySelectorAll('#stage .scene[id]')].map(s => {
-    const delays = window.__anims.filter(a => a.effect && a.effect.target && s.contains(a.effect.target))
-      .map(a => a.effect.getTiming().delay || 0);
-    return { id: s.id, start: delays.length ? Math.min(...delays) : 0 };
-  }));
+  const scenes = await sceneList(page);
 
   // Leaks.
   const leakTimes = [0, ...scenes.filter(s => s.start >= 400).map(s => s.start - 400)].filter(inWindow);
@@ -90,18 +145,7 @@ async function inspect(page, { at, durationMs, shotDir }) {
 
   // Text. The safe zone is a 9:16 rule; other ratios get the caption and lonely-word checks only.
   const portrait = await page.evaluate(() => window.STAGE.width === 1080 && window.STAGE.height === 1920);
-  const phrases = await page.evaluate(() => {
-    const parents = [...new Set([...document.querySelectorAll('#stage .w')].map(w => w.parentElement))];
-    return parents.map((p, i) => {
-      p.dataset.auditId = i;
-      const words = [...p.querySelectorAll(':scope > .w, :scope .w')];
-      const last = Math.max(...words.map(w => {
-        const a = w.getAnimations()[0];
-        return a ? (a.effect.getTiming().delay || 0) : 0;
-      }));
-      return { id: i, t: last + 500 };
-    });
-  });
+  const { phrases, rows } = await textTargets(page, scenes, durationMs, portrait);
   for (const ph of phrases.filter(p => inWindow(p.t))) {
     await seekTo(page, ph.t, false);
     const r = await page.evaluate(({ id, Z }) => {
@@ -112,7 +156,7 @@ async function inspect(page, { at, durationMs, shotDir }) {
       const b = p.getBoundingClientRect();
       const box = { left: b.left - st.left, right: b.right - st.left, top: b.top - st.top, bottom: b.bottom - st.top };
       const lines = [];
-      p.querySelectorAll('.w').forEach(w => {
+      [...new Set([...p.querySelectorAll('.w, :scope > .w')])].forEach(w => {
         const wr = w.getBoundingClientRect(); const cy = (wr.top + wr.bottom) / 2;
         let L = lines.find(l => Math.abs(l.cy - cy) < wr.height * 0.6);
         if (!L) { L = { cy, words: [] }; lines.push(L); }
@@ -138,33 +182,7 @@ async function inspect(page, { at, durationMs, shotDir }) {
   // Other text: every text block that is not a .w phrase (headlines, labels, pills, card copy),
   // checked against the safe zone once its entry has finished.
   if (portrait) {
-    const blocks = await page.evaluate(() => {
-      const hidden = kf => kf && (kf.opacity === '0' || /inset\(\s*100%|inset\([^)]*100%\s*\)/.test(kf.clipPath || '') || /scale\(0\)/.test(kf.transform || ''));
-      const ownText = e => [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
-      const all = [...document.querySelectorAll('#stage *')].filter(e => ownText(e) && !e.closest('#captions') && !e.closest('.w') && !e.querySelector('.w'));
-      // the outermost element with text of its own stands for the block
-      const tops = all.filter(e => { for (let p = e.parentElement; p && p.id !== 'stage'; p = p.parentElement) if (all.includes(p)) return false; return true; });
-      return tops.map((e, i) => {
-        e.dataset.auditText = i;
-        let end = null;
-        for (let p = e; p && p.id !== 'stage'; p = p.parentElement) {
-          p.getAnimations().forEach(a => {
-            if (!hidden(a.effect.getKeyframes()[0])) return;
-            const tm = a.effect.getTiming();
-            end = Math.max(end || 0, (tm.delay || 0) + (tm.duration || 0));
-          });
-        }
-        const scene = e.closest('.scene');
-        return { id: i, t: end, scene: scene ? scene.id : null };
-      });
-    });
-    const sceneStart = Object.fromEntries(scenes.map(s => [s.id, s.start]));
-    const byTime = new Map();
-    blocks.forEach(b => {
-      const t = Math.min(b.t != null ? b.t + 200 : (sceneStart[b.scene] || 0) + 600, durationMs - 100);
-      if (inWindow(t)) byTime.set(t, [...(byTime.get(t) || []), b.id]);
-    });
-    for (const [t, ids] of [...byTime].sort((a, b) => a[0] - b[0])) {
+    for (const { t, ids } of rows.filter(r => inWindow(r.t))) {
       await seekTo(page, t, false);
       const out = await page.evaluate(({ ids, Z }) => ids.map(id => {
         const el = document.querySelector(`[data-audit-text="${id}"]`);
@@ -311,4 +329,82 @@ async function inspect(page, { at, durationMs, shotDir }) {
   return { scenes, problems, errors, stuck, portrait, shots };
 }
 
-module.exports = { inspect };
+/**
+ * What each piece of text measures on the stage: where it sits, how many lines
+ * it wrapped to, how wide each line is, and the type size it was set in. For
+ * audit.js's --measure, where the point is to see the numbers rather than to be
+ * told they are wrong: this returns measurements, never a problem and never a
+ * suggested size, because a size that fits one wrapping does not fit the next.
+ *
+ * Same elements and same moments as `inspect`, so a size here and a `text @t`
+ * line there are about the same thing.
+ */
+async function measure(page, { at, durationMs }) {
+  const inWindow = t => !at || at.some(a => Math.abs(t - a) <= 500);
+  const { phrases, rows } = await textTargets(page, await sceneList(page), durationMs, true);
+
+  const box = async (sel, attr) => page.evaluate(({ sel, attr, Z }) => {
+    const p = document.querySelector(`[data-audit-${attr}="${sel}"]`);
+    if (!p) return null;
+    let o = 1;
+    for (let e = p; e && e.id !== 'stage'; e = e.parentElement) {
+      const cs = getComputedStyle(e);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return null;
+      o *= parseFloat(cs.opacity);
+    }
+    if (o < 0.5) return null;
+    const st = document.getElementById('stage').getBoundingClientRect();
+    // A phrase is measured by its parent's box, any other block by the ink of
+    // its text: the same two measures `inspect` judges against the zone.
+    const words = [...new Set([...p.querySelectorAll('.w, :scope > .w')])];
+    const r = words.length ? p.getBoundingClientRect() : (() => {
+      const range = document.createRange(); range.selectNodeContents(p); return range.getBoundingClientRect();
+    })();
+    const b = { left: r.left - st.left, right: r.right - st.left, top: r.top - st.top, bottom: r.bottom - st.top };
+    if (r.width < 2 || r.height < 2) return null;
+    if (b.right < 0 || b.left > st.width || b.bottom < 0 || b.top > st.height) return null;
+    const lines = [];
+    if (words.length) {
+      words.forEach(w => {
+        const wr = w.getBoundingClientRect(); const cy = (wr.top + wr.bottom) / 2;
+        let L = lines.find(l => Math.abs(l.cy - cy) < wr.height * 0.6);
+        if (!L) { L = { cy, x0: Infinity, x1: -Infinity, n: 0 }; lines.push(L); }
+        L.x0 = Math.min(L.x0, wr.left); L.x1 = Math.max(L.x1, wr.right); L.n++;
+      });
+      lines.sort((a, b) => a.cy - b.cy);
+    }
+    const limit = b.bottom > Z.stepY ? Z.stepRight : Z.right;
+    const scene = p.closest('.scene');
+    const face = words.length ? words[0] : p;
+    const cs = getComputedStyle(face);
+    return {
+      scene: scene ? scene.id : null,
+      text: p.textContent.trim().replace(/\s+/g, ' ').slice(0, 48),
+      font: cs.fontFamily.split(',')[0].replace(/["']/g, ''),
+      size: parseFloat(cs.fontSize),
+      // Only a phrase is split into lines by its words; any other block is one
+      // run of text, so its wrapping is not known here and is left out.
+      lines: lines.length ? lines.map(l => ({ words: l.n, width: Math.round(l.x1 - l.x0) })) : null,
+      box: { left: Math.round(b.left), right: Math.round(b.right), top: Math.round(b.top), bottom: Math.round(b.bottom) },
+      over: { left: Math.round(Z.left - b.left), right: Math.round(b.right - limit), top: Math.round(Z.top - b.top), bottom: Math.round(b.bottom - Z.bottom) },
+    };
+  }, { sel, attr, Z: ZONE });
+
+  const out = [];
+  for (const ph of phrases.filter(p => inWindow(p.t))) {
+    await seekTo(page, ph.t, false);
+    const r = await box(ph.id, 'id');
+    if (r) out.push({ ...r, t: ph.t, kind: 'phrase' });
+  }
+  for (const { t, ids } of rows.filter(r => inWindow(r.t))) {
+    await seekTo(page, t, false);
+    for (const id of ids) {
+      const r = await box(id, 'text');
+      if (r) out.push({ ...r, t, kind: 'block' });
+    }
+  }
+  out.sort((a, b) => a.t - b.t || (a.scene || '').localeCompare(b.scene || '') || a.box.top - b.box.top || a.box.left - b.box.left);
+  return { rows: out, portrait: await page.evaluate(() => window.STAGE.width === 1080 && window.STAGE.height === 1920) };
+}
+
+module.exports = { inspect, measure };

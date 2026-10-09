@@ -252,6 +252,33 @@ one line per problem:
   remove, swap, or re-cut a clip because of it. IF it is still there,
   render anyway and say so in the final message.
 
+### When you want the numbers, not the verdict
+
+How wide a headline came out, how many lines it wrapped to, what size it is
+actually set in: those are measurements, and the audit does not print them.
+Ask for them directly:
+
+```bash
+node tools/render/audit.js <root>/editable/<name>.html --measure [--at 7400,8100]
+```
+
+This one runs the browser **here**, not on the Lambda: nothing is uploaded and
+nothing cold-starts, so it answers in seconds. It prints one line per piece of
+text — scene, moment, the text, the size, the box on the canvas, the wrap width
+of each line of a phrase, and how far outside the safe zone it falls — and says
+nothing about whether any of it is right. That verdict is the audit's, above.
+
+**Measure once per edit, never twice for the same file.** The numbers are the
+page's own, so the same editable measures the same way every time: running it
+again without changing the HTML cannot tell you anything the first run did not.
+Change the scene, then measure again if you want a number; if you would rather
+be told what is wrong, run the audit.
+
+It replaces probing the page for dimensions — a Playwright script of your own,
+a headless screenshot, measuring a font by hand — for the same reason `--at`
+replaces screenshotting: it is the same measurement, taken by the same code the
+audit judges with, at the same moments.
+
 The first audit of a video also prepares the all-keyframe copies of its
 clips that the render uses (`intra: N encoded`), so it takes longer;
 later audits and the render reuse them.
