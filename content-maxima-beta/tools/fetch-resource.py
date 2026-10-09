@@ -28,7 +28,7 @@ PKG = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Where a music bed belongs in the mix, in LUFS under the voice's -16. Kept in step
 # with render.js's BED_LUFS: the two must agree, and the renderer is the one that
 # applies it, so a change here is a change there too.
-BED_LUFS = -26
+BED_LUFS = -30
 
 
 def lufs_of(rel):

@@ -108,7 +108,7 @@ Elements to consider:
     ```
 
     `--write-level` is what sets the bed's level: it puts the gain this
-    track's measured `lufs_i` needs, to sit at -26 LUFS under the voice,
+    track's measured `lufs_i` needs, to sit at -30 LUFS under the voice,
     on the editable's `#bgm` tag (stage skill section 5). Pass it every
     time; the level is not something you work out or adjust. WHEN the
     chosen entry carries a `mix_note`, follow it when laying the bed.

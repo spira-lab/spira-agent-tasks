@@ -13,7 +13,7 @@
 //   * sound effects are the editable's <audio class="sfx" data-at="ms"> tags, mixed at
 //     the level stored in each file: the library is levelled against a -16 LUFS voice,
 //     so no gain or loudness normalisation is applied to an effect
-//   * the music bed lands at BED_LUFS, 10 LU under the voice. A library bed reaches it
+//   * the music bed lands at BED_LUFS, 14 LU under the voice. A library bed reaches it
 //     through the gain measured for its own track and written to the editable as
 //     data-level-db: the files were documented as levelled by ear, and measured they
 //     are not (they span 20.7 LU, six of them louder than the voice), so the level is
@@ -33,9 +33,9 @@ const crypto = require('crypto');
 // Seedance's rate. Switching or adding a video model means checking its output rate against this.
 const FPS = 24;
 
-// Where a music bed belongs, 10 LU under the -16 voice. fetch-resource.py targets the
+// Where a music bed belongs, 14 LU under the -16 voice. fetch-resource.py targets the
 // same value when it works out a track's data-level-db; the two must stay in step.
-const BED_LUFS = -26;
+const BED_LUFS = -30;
 const LIBRARY_MUSIC = (() => {
   try {
     const m = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'resources.json'), 'utf8'));

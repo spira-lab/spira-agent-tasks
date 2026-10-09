@@ -177,12 +177,12 @@ too loud or too soft for a moment, choose a different sound.
 The music bed is different: each track's loudness is measured and stored
 as `lufs_i` in `music/Music metadata.json`, because the files are not
 levelled as evenly as they were taken to be. `fetch-resource.py` writes
-the gain that places the track at -26 LUFS, 10 LU under the voice, into
+the gain that places the track at -30 LUFS, 14 LU under the voice, into
 the editable's `#bgm` tag as `data-level-db`, and the renderer applies it.
 That is the only music level there is: never set, scale, or re-encode a
 track's volume yourself, and never touch `data-level-db` (a track quieter
 than the target is left where it is, which is why it can read `0.0`).
-Generated music has no measured level and is levelled to -26 LUFS by the
+Generated music has no measured level and is levelled to -30 LUFS by the
 renderer instead. Do not pre-mix effects into
 `vo.mp3`; the VO file stays the dry voice that the timings came from.
 
