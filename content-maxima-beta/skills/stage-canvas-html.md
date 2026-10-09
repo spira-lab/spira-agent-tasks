@@ -168,15 +168,22 @@ sfx/<file> editable/materials/<name>/sfx/<file>` (the audio is hosted,
 not in the package).
 
 Every effect plays at the volume stored in its file. The library is
-already levelled, one sound at a time, against a voice at −16 LUFS, the
+levelled, one sound at a time, against a voice at −16 LUFS, the
 level the renderer sets every voice-over to; the renderer adds no gain
 to an effect. Never set, scale, or calibrate an effect's volume: no
 volume attribute, no gain filter, no re-encoded copy. WHEN a sound feels
-too loud or too soft for a moment, choose a different sound. The music
-bed plays at the level stored in its file, set by ear for each library
-track; never set, scale, or re-encode its volume either. Generated
-music, which has no stored level, is levelled to -26 LUFS. Do not
-pre-mix effects into
+too loud or too soft for a moment, choose a different sound.
+
+The music bed is different: each track's loudness is measured and stored
+as `lufs_i` in `music/Music metadata.json`, because the files are not
+levelled as evenly as they were taken to be. `fetch-resource.py` writes
+the gain that places the track at -26 LUFS, 10 LU under the voice, into
+the editable's `#bgm` tag as `data-level-db`, and the renderer applies it.
+That is the only music level there is: never set, scale, or re-encode a
+track's volume yourself, and never touch `data-level-db` (a track quieter
+than the target is left where it is, which is why it can read `0.0`).
+Generated music has no measured level and is levelled to -26 LUFS by the
+renderer instead. Do not pre-mix effects into
 `vo.mp3`; the VO file stays the dry voice that the timings came from.
 
 ## 6. Captions
