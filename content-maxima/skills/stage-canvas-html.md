@@ -266,18 +266,20 @@ tool's output is the whole interface: do not read its source.
 ## 8. Render
 
 ```bash
-node tools/render/render.js <root>/editable/<name>.html <root>/renders/<name>.mp4 30
+node tools/render/render.js <root>/editable/<name>.html <root>/renders/<name>.mp4
 ```
 
-Arguments are the editable, the output, and the frame rate. The
-renderer reads `data-duration`, `#vo`, `#bgm`, and the `.sfx` tags from
-the editable; there is nothing else to configure. It moves an existing
-render to `renders/deletable/` first, captures every frame on AWS Lambda
-in parallel chunks, mixes the audio (voice at -16 LUFS, effects and bed
-under it, bed faded in 1 s and out 1.5 s), checks the file (duration,
-frame count, stereo). Output is 1080 x 1920, 30 fps, H.264, stereo
-AAC: the render is final as it comes out, with no cover or other step
-after it.
+Arguments are the editable and the output; there is no frame-rate
+argument. The renderer reads `data-duration`, `#vo`, `#bgm`, and the
+`.sfx` tags from the editable; there is nothing else to configure. It
+moves an existing render to `renders/deletable/` first, captures every
+frame on AWS Lambda in parallel chunks, mixes the audio (voice at -16
+LUFS, effects and bed under it, bed faded in 1 s and out 1.5 s), checks
+the file (duration, frame count, stereo). Output is 1080 x 1920 H.264
+with stereo AAC, at the frame rate of the clips on the stage (24 fps for
+Seedance, so each output frame is one clip frame) or 30 fps when there
+are none: the render is final as it comes out, with no cover or other
+step after it.
 
 Expect about a minute for a video up to two minutes long. IF it prints `check FAILED` or `video seeks
 timed out`, fix the cause before anything else. Render once, after the

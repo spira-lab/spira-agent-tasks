@@ -8,7 +8,8 @@ chunk, in stage order. Seedance clips are exactly 4, 8 or 12 seconds, and a chun
 with fewer words than its slot holds (13, 26 or 38) is spoken slowly to fill it.
 A chunk 1 to 4 words short is left alone. A chunk 5 or more words short is sped
 up, picture and voice together (the voice keeps its pitch), to the length its
-words take at 3.3 words a second. The clip is replaced in place; the original is
+words take at 3.3 words a second. The picture keeps its frame rate, its frames
+blended rather than dropped. The clip is replaced in place; the original is
 kept as deletable/<clip>.unpaced.mp4.
 
 Prints every clip's length and its data-start on the stage (the clips back to
@@ -61,7 +62,9 @@ def main():
             keep = mat / "deletable" / f"{clip.stem}.unpaced.mp4"
             keep.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(clip), keep)
-            cmd = ["ffmpeg", "-y", "-v", "error", "-i", str(keep), "-filter:v", f"setpts=PTS/{factor:.6f}", "-r", str(fps)]
+            # framerate blends neighbouring frames into the new ones: `-r` alone drops frames
+            # in a fixed pattern, a visible judder on the talking head.
+            cmd = ["ffmpeg", "-y", "-v", "error", "-i", str(keep), "-filter:v", f"setpts=PTS/{factor:.6f},framerate=fps={fps}"]
             # apad + -shortest: the voice runs exactly as long as the picture, so clips joined by
             # make-timings.py --from never drift from their data-start.
             cmd += ["-filter:a", atempo(factor) + ",apad", "-shortest", "-c:a", "aac", "-b:a", "192k"] if has_audio else ["-an"]

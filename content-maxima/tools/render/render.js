@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Frame-by-frame render of a stage editable to H.264 MP4 with VO, sound effects and music.
-// Usage: node tools/render/render.js <editable.html> <out.mp4> [fps]
+// Usage: node tools/render/render.js <editable.html> <out.mp4>
+//   * the frame rate is the clips' own (intra.js clipFps: 24 for Seedance), 30 with no clips
 //   * the capture runs on AWS Lambda in chunks (lambda.js: CM_RENDER_LAMBDA names the
 //     function, CM_RENDER_BUCKET the bucket); the segments are concatenated here
 //   * frames captured as JPEG q92: PNG encode + transfer was two thirds of the per-frame cost
@@ -21,7 +22,7 @@ const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path'), os = require('os');
 const { readEditable } = require('./stage');
 const { renderChunks } = require('./lambda');
-const { intraCopies, probe } = require('./intra');
+const { intraCopies, probe, clipFps } = require('./intra');
 const crypto = require('crypto');
 
 const OTHER_BED_LUFS = -26;
@@ -33,16 +34,22 @@ const LIBRARY_MUSIC = (() => {
 })();
 const fromLibrary = file => LIBRARY_MUSIC.has(crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'));
 
-const [htmlArg, outArg, fpsArg] = process.argv.slice(2);
-if (!htmlArg || !outArg) { console.error('usage: render.js <editable.html> <out.mp4> [fps]'); process.exit(2); }
+const [htmlArg, outArg, ...extra] = process.argv.slice(2);
+if (!htmlArg || !outArg || extra.length) {
+  console.error('usage: render.js <editable.html> <out.mp4>  (no frame rate argument: it is taken from the clips on the stage)');
+  process.exit(2);
+}
 const htmlPath = path.resolve(htmlArg), out = path.resolve(outArg);
 const dir = path.dirname(htmlPath);            // the editable's folder; everything it references is below it
 const rel = path.basename(htmlPath);
-const fps = parseInt(fpsArg || '30', 10);
 const inRoot = path.basename(path.dirname(out)) === 'renders';
 
 const ed = readEditable(htmlPath);
 if (!ed.durationMs) throw new Error(`${rel} has no data-duration on #stage`);
+const rate = clipFps(dir, ed);
+rate.warnings.forEach(w => console.error(`warning: ${w}`));
+console.log(`  frame rate: ${rate.note}`);
+const fps = rate.fps;
 const frames = Math.round(ed.durationMs / 1000 * fps);
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'stage-render-'));
 fs.mkdirSync(path.dirname(out), { recursive: true });
