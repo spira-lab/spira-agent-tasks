@@ -14,8 +14,10 @@ names the other skills, which are essential and never skipped:
 `toolkit.md`, `prompting.md`, `stage-canvas-html.md`, `file-management.md`,
 `known-methods.md`, plus `skills/working-memory.md` for its Preferences,
 `fonts/fonts.md`, and the sound-effect index `sfx/SFX index.md`. Read
-them all in one turn. The music index is read by a subagent, never by
-this session (creative-video-production section 1). This file
+them all in one turn, and run every requirement check of the task
+contract in that same turn, one Bash call each, not one per turn. The
+music index is read by a subagent, never by this session
+(creative-video-production section 1). This file
 is a map; where it and a skill disagree, the skill wins.
 
 ## Package and root
@@ -83,6 +85,7 @@ python3 tools/pace-clips.py <materials>/<name> th-01.mp4=<words> ...  # speed up
 python3 tools/make-timings.py <materials>/<name>/vo.mp3 [--from clips... | --recording <url>]  # word timings (and the VO from clips or a recording)
 python3 tools/cut-sheet.py grid|elements <sheet.png> ... --names a,b  # cut one generated sheet into its images
 python3 tools/captions.py <root>/editable/<name>.html            # word-per-word captions from the timings
+python3 tools/assemble-scenes.py <root>/editable/<name>.html     # put the subagents' scene fragments into the editable
 node tools/render/audit.js <root>/editable/<name>.html [--at ms,...]  # leaks, text, files, frame sheet
 node tools/render/render.js <root>/editable/<name>.html <root>/renders/<name>.mp4
 spira assets upload <root>/renders/<name>.mp4                  # host the finished render

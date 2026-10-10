@@ -79,8 +79,9 @@ Elements to consider:
   - Otherwise, including WHEN the user says nothing about music, choose
     from the library. **The choice is made by a subagent**, so the
     library index never enters this session's context: run the Agent
-    tool once, as soon as the concept is settled (it runs beside the
-    generations), with this brief, filled in:
+    tool once, as soon as the concept is settled, **in the background**
+    (`run_in_background`), and carry on with the generations; collect
+    its reply before the bed is fetched. The brief, filled in:
 
     > Pick one background-music track from `music/Music index.md` (one
     > track per line: file, genre and style, mood, energy, tempo, best
@@ -263,7 +264,8 @@ empties them, never the session.
   at the start, not one per turn. Never read the stage template (stage
   skill section 3), `music/Music index.md` (the music subagent's,
   section 1), or the two metadata JSON files the indexes are built
-  from. Every image among them is opened as
+  from. A scene subagent (stage skill section 3b) reads only stage
+  skill sections 3 and 4 and its brief. Every image among them is opened as
   CLAUDE.md's Looking at images says, and used as its original. Never
   open another editable html in the root; reading it anchors you to it
   and you copy it. Open `skills/add-ons.md` only WHEN the user asks for

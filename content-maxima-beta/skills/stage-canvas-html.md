@@ -78,23 +78,23 @@ it has no exit.
   elements with the class `w` (a key word also `k`), each phrase in its
   own parent; the audit checks phrases by it. Captions are not written by
   hand: section 6.
-- **Plan the scenes once, then build in a few edits.** A scene is one
-  look that holds for a few seconds; the changes inside it (cards, words,
-  zooms) carry the pace. A 30-second video has at most 6 or 7 scenes,
-  about one per sentence; more scenes are more to write and check, not
-  a better video. Decide them all before the first edit, as one scene
-  table (time window, what it shows, which assets), and build from it
-  without re-deciding each scene as you reach it. Then write the
-  skeleton (scene containers, the audio and sfx tags, `data-duration`),
-  then the scenes two or three per edit. Never the whole file in one
-  write: a very large write takes minutes with nothing on disk.
-- **Write the editable by hand. Never build a helper that writes it.** No
-  build script, generator, or template filler that takes timings and
-  emits the html. You are the generator: read `timings.json`, write the
-  CSS and markup with the numbers in them. A helper costs the time to
-  write it, run it, and debug it, and can stall at each step. The one
-  exception is the captions, which the package's own tool writes
-  (section 6).
+- **Plan the scenes once, then build skeleton first, scenes in parallel.**
+  A scene is one look that holds for a few seconds; the changes inside
+  it (cards, words, zooms) carry the pace. A 30-second video has at most
+  6 or 7 scenes, about one per sentence; more scenes are more to write
+  and check, not a better video. Decide them all before the first edit,
+  as one scene table (time window, what it shows, which assets), and
+  build from it without re-deciding each scene as you reach it. Then
+  write the skeleton in one edit and have the scenes written in parallel
+  by subagents (section 3b). Never the whole file in one write: a very
+  large write takes minutes with nothing on disk.
+- **No session-built helper writes the editable.** No build script,
+  generator, or template filler that takes timings and emits the html;
+  a helper costs the time to write it, run it, and debug it, and can
+  stall at each step. The package's own tools are the only other
+  writers: `tools/captions.py` (section 6) and `tools/assemble-scenes.py`
+  (section 3b). Everything else is written by hand from `timings.json`,
+  with the numbers in the CSS and markup.
 - **Do not read the stage template.** Section 1 is its interface; the
   copy is your editable, and reading 23 KB of harness only fills the
   context.
@@ -107,6 +107,83 @@ it has no exit.
   only, never the video's type; `Noto Color Emoji` is the emoji font. Do
   not list or inspect the system fonts. The audit flags a font that
   failed to load and a video whose text is all in system fonts.
+
+## 3b. Scenes in parallel
+
+Writing six scenes one after another is the longest stretch of a
+session. The skeleton is yours; the scenes are written at the same time
+by subagents, each from the same scene table, and one tool puts them in.
+
+**1. The skeleton, in one edit**, once the scene table is final and the
+timings exist. It is everything the scenes share, so they come out as
+one video:
+
+- In the video CSS: the `@font-face` declarations; the type system as
+  classes (a headline class, an accent, a pill, a card, a caption face)
+  with the reference's treatment; the palette as CSS variables on
+  `#stage`; the shared `@keyframes` the video will use (an entry, a pop,
+  a slide, a wipe); each scene's **exit** on its container, `#sN { … }`
+  (rule 10); and one marker pair per scene for its own rules:
+
+  ```css
+  /* scene:s1 */
+  /* /scene:s1 */
+  ```
+
+- Inside `#stage`: the audio slots, the `.sfx` tags, `data-duration`,
+  and one container per scene with its marker pair:
+
+  ```html
+  <section class="scene" id="s1"><!-- scene:s1 --><!-- /scene:s1 --></section>
+  ```
+
+Then run `tools/captions.py` (section 6) so the caption block exists and
+its position is known.
+
+**2. The scenes, in one turn.** Launch the subagents with the Agent
+tool, all in the same turn, two or three adjacent scenes each, and wait
+for them. Each brief carries what that subagent cannot see:
+
+- Its rows of the scene table: time window, what the scene shows, the
+  assets it uses as `materials/<name>/<file>` with their pixel size (for
+  the persona cut-out, which sides are cropped), and the words spoken in
+  its window with their `s` and `e` from `timings.json`, pasted in.
+- The skeleton's vocabulary: the class names, the CSS variables, the
+  shared `@keyframes`, and where the captions sit (`--top`), so nothing
+  lands on them. It uses these and adds nothing that duplicates them.
+- The rules: it reads `skills/stage-canvas-html.md` sections 3 and 4
+  itself, and no other skill.
+- What it writes: `materials/<name>/scenes/sN.html`, the markup that
+  goes inside `#sN` (no `<script>`, no `<style>`, no exit animation: the
+  container has it), and `materials/<name>/scenes/sN.css`, with every
+  selector scoped to `#sN` and every scene-local `@keyframes` named
+  `sN-…`. It never touches the editable, never references `deletable/`
+  or `jobs/`, and never generates or fetches an asset: a missing one is
+  reported, not made.
+- Its reply: one line per scene, what it placed and any asset it could
+  not use and why.
+
+**3. Assemble**, once every subagent has replied:
+
+```bash
+python3 tools/assemble-scenes.py <root>/editable/<name>.html
+```
+
+It checks every fragment (markers present, no `<script>`, selectors
+scoped, no `transition` / `vw` / `vh` / `animation: none`, files exist
+and are not in `deletable/` or `jobs/`, no id used twice) and prints one
+line per problem, writing nothing until all pass; then it puts each
+fragment between its markers and moves `scenes/` to `deletable/scenes/`.
+From here the editable is the only source: the audit's fixes (section 7)
+are made in it directly, never by rewriting a fragment. A problem the
+tool reports in a fragment is fixed in that fragment and the tool run
+again; a scene the subagent could not finish is written by hand into
+its markers.
+
+Look at the first audit sheet for the join between scenes as much as
+for each scene: the same type, the same palette, entries of one family.
+A scene that looks like a different video is restyled with the
+skeleton's classes, not left as its own.
 
 ## 4. Rules for animating inside the stage
 

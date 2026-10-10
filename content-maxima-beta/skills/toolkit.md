@@ -215,6 +215,19 @@ another object is cleared from its crop. Move the sheet to `deletable/`
 once the cut-outs are in. A single element on its own is the same prompt
 with one object at `1:1` `1K`.
 
+**Cutting and checking a sheet is a subagent's job**, for elements and
+for b-roll (3d) alike, so the sheet and its cut-outs never enter this
+session's context. When the sheet is saved, launch the Agent tool (in
+the background, while the clips render) with: the sheet's path, the
+`cut-sheet.py` command to run with the names in reading order, and the
+instruction to look at each cut-out through `tools/view-image.sh <file>
+<materials>/<name>/deletable --max 320` (elements) or `--max 640`
+(stills), then move the sheet to `deletable/` and reply one line per
+cut-out: name, pixel size, whether it is usable (whole, the right
+object, clean alpha edge or a clean frame), and anything wrong. Plan the
+scenes from that reply; look at a cut-out yourself only when the reply
+says it is doubtful.
+
 The prompt must say transparent background in those words; it does not
 happen by default, and a white or grey backdrop cannot be keyed cleanly
 afterwards. `wait_ai_job` reports `hasAlpha: false` when the PNG came back without alpha.
@@ -227,7 +240,8 @@ frames of exactly 1080 x 1920, full-bleed on the stage, for 6.15 credits
 in all. Payload:
 `{"prompt":"A 2x2 collage of four separate photographs in four equally divided frames, edge to edge, no border, no outline, no gaps, no dividing lines. Top left: <scene>. Top right: <scene>. Bottom left: <scene>. Bottom right: <scene>. Photographic, natural light, no text, no logos","size":"9:16","resolution":"4K"}`.
 
-Then cut the frames out, named in reading order:
+Then cut the frames out, named in reading order, by the same subagent
+as an element sheet (3c), which also reports the frame size:
 
 ```bash
 python3 tools/cut-sheet.py grid <materials>/<name>/broll-sheet.png 2x2 --names broll-track,broll-engine,broll-cockpit,broll-daily

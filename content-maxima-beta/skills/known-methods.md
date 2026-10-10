@@ -27,14 +27,15 @@ tool the entry points to; this file holds the why.
 
 ## Writing the editable
 
-- **Works:** 6 or 7 scenes planned up front, a skeleton, then two or
-  three scenes per edit, written by hand from `timings.json`.
+- **Works:** 6 or 7 scenes planned up front, a skeleton in one edit,
+  then the scenes written in parallel by subagents from the same scene
+  table and put in by `tools/assemble-scenes.py`.
 - **Fails:** the whole editable in one write (an 80 KB file takes minutes
   with nothing visible), a generator script that emits the html (paid for
   three times: writing, running, fixing), and ten scenes written one per
   edit with an audit after each: twenty minutes of round trips on staging
   for a 30-second video.
-- **Where:** stage-canvas-html, section 3.
+- **Where:** stage-canvas-html, sections 3 and 3b.
 
 ## Captions
 
