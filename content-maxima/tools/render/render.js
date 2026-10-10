@@ -13,9 +13,10 @@
 //   * sound effects are the editable's <audio class="sfx" data-at="ms"> tags, mixed at
 //     the level stored in each file: the library is levelled against a -16 LUFS voice,
 //     so no gain or loudness normalisation is applied to an effect
-//   * the music bed plays at the level stored in its file when the file is from the library
-//     (its sha256 is in resources.json): each track was levelled by ear against a -16 LUFS
-//     voice. Any other bed (generated music) is levelled to -26 LUFS, 10 LU under the voice.
+//   * the music bed is at its file's level when the file is from the library (its sha256 is in
+//     resources.json): each track was levelled by ear against a -16 LUFS voice. Any other bed
+//     (generated music) is levelled to -26 LUFS instead. Either way the bed is then attenuated
+//     by BED_GAIN_DB: the voice stays the loudest thing in the mix.
 //   * stage size is read from the page (window.STAGE), so any ratio works
 //   * a render already at <out.mp4> is moved to renders/deletable first; the new one
 //     is checked (duration, frames, stereo)
@@ -31,6 +32,10 @@ const crypto = require('crypto');
 const FPS = 24;
 
 const OTHER_BED_LUFS = -26;
+// Every music bed is attenuated by this before the fade. A library bed carries its own level
+// and a generated one is normalised to OTHER_BED_LUFS, but both still sit too close to the
+// voice, so the whole bed comes down here rather than in the 48 files or in the target.
+const BED_GAIN_DB = -4;
 const LIBRARY_MUSIC = (() => {
   try {
     const m = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'resources.json'), 'utf8'));
@@ -81,7 +86,7 @@ function mixAudio(silent, secs) {
       level = `loudnorm=I=${OTHER_BED_LUFS}:TP=-2:LRA=9,aresample=48000`;
       console.log(`  ${ed.bgmSrc} is not a library track: levelled to ${OTHER_BED_LUFS} LUFS`);
     }
-    parts.push(`[${idx}:a]${level},afade=t=in:d=1,afade=t=out:st=${(ed.durationMs/1000-1.5).toFixed(2)}:d=1.5[bed]`); labels.push('[bed]'); idx++;
+    parts.push(`[${idx}:a]${level},volume=${BED_GAIN_DB}dB,afade=t=in:d=1,afade=t=out:st=${(ed.durationMs/1000-1.5).toFixed(2)}:d=1.5[bed]`); labels.push('[bed]'); idx++;
   }
   const fc = labels.length ? `${parts.join(';')};${labels.join('')}amix=inputs=${labels.length}:normalize=0,atrim=0:${secs}[a]` : '';
   execFileSync('ffmpeg', ['-y','-v','error', ...inputs, ...(fc ? ['-filter_complex', fc, '-map', '0:v', '-map', '[a]', '-c:a', 'aac', '-b:a', '192k'] : []),

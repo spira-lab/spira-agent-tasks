@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "packageVersion": "1.19.3",
+  "packageVersion": "1.19.4",
   "description": "Turn a script, brief, or idea into a finished short video, 9:16 for Reels and TikTok unless another aspect ratio is asked for, following the skills in skills/ (start with skills/creative-video-production.md).",
   "requirements": [
     {"name": "ffmpeg", "kind": "system", "purpose": "Encoding, mixing, frame extraction and probing (render, gen, add-ons)", "check": "ffmpeg -version && ffprobe -version"},
