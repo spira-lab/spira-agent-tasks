@@ -168,22 +168,15 @@ sfx/<file> editable/materials/<name>/sfx/<file>` (the audio is hosted,
 not in the package).
 
 Every effect plays at the volume stored in its file. The library is
-levelled, one sound at a time, against a voice at −16 LUFS, the
+already levelled, one sound at a time, against a voice at −16 LUFS, the
 level the renderer sets every voice-over to; the renderer adds no gain
 to an effect. Never set, scale, or calibrate an effect's volume: no
 volume attribute, no gain filter, no re-encoded copy. WHEN a sound feels
-too loud or too soft for a moment, choose a different sound.
-
-The music bed is different: each track's loudness is measured and stored
-as `lufs_i` in `music/Music metadata.json`, because the files are not
-levelled as evenly as they were taken to be. `fetch-resource.py` writes
-the gain that places the track at -30 LUFS, 14 LU under the voice, into
-the editable's `#bgm` tag as `data-level-db`, and the renderer applies it.
-That is the only music level there is: never set, scale, or re-encode a
-track's volume yourself, and never touch `data-level-db` (a track quieter
-than the target is left where it is, which is why it can read `0.0`).
-Generated music has no measured level and is levelled to -30 LUFS by the
-renderer instead. Do not pre-mix effects into
+too loud or too soft for a moment, choose a different sound. The music
+bed plays at the level stored in its file, set by ear for each library
+track; never set, scale, or re-encode its volume either. Generated
+music, which has no stored level, is levelled to -26 LUFS. Do not
+pre-mix effects into
 `vo.mp3`; the VO file stays the dry voice that the timings came from.
 
 ## 6. Captions
@@ -259,33 +252,6 @@ one line per problem:
   remove, swap, or re-cut a clip because of it. IF it is still there,
   render anyway and say so in the final message.
 
-### When you want the numbers, not the verdict
-
-How wide a headline came out, how many lines it wrapped to, what size it is
-actually set in: those are measurements, and the audit does not print them.
-Ask for them directly:
-
-```bash
-node tools/render/audit.js <root>/editable/<name>.html --measure [--at 7400,8100]
-```
-
-This one runs the browser **here**, not on the Lambda: nothing is uploaded and
-nothing cold-starts, so it answers in seconds. It prints one line per piece of
-text — scene, moment, the text, the size, the box on the canvas, the wrap width
-of each line of a phrase, and how far outside the safe zone it falls — and says
-nothing about whether any of it is right. That verdict is the audit's, above.
-
-**Measure once per edit, never twice for the same file.** The numbers are the
-page's own, so the same editable measures the same way every time: running it
-again without changing the HTML cannot tell you anything the first run did not.
-Change the scene, then measure again if you want a number; if you would rather
-be told what is wrong, run the audit.
-
-It replaces probing the page for dimensions — a Playwright script of your own,
-a headless screenshot, measuring a font by hand — for the same reason `--at`
-replaces screenshotting: it is the same measurement, taken by the same code the
-audit judges with, at the same moments.
-
 The first audit of a video also prepares the all-keyframe copies of its
 clips that the render uses (`intra: N encoded`), so it takes longer;
 later audits and the render reuse them.
@@ -294,8 +260,8 @@ Each line says how to fix it; fix them all in as few edits as you can,
 then run it the second time. It also writes
 `materials/<name>/deletable/audit-sheet.jpg`: the first frame, each scene
 0.6 s in, and the last frame, or the `--at` moments. Look at it on the
-first run, through `tools/view-image.sh` (CLAUDE.md, Looking at images);
-it is the check a render would otherwise be spent on. The
+first run (this sheet is read as it is, never scaled: it is the check a
+render would otherwise be spent on). The
 tool's output is the whole interface: do not read its source.
 
 ## 8. Render

@@ -102,16 +102,9 @@ Elements to consider:
     is not rerolled; it keeps one favourite from being picked every
     time. IF nothing fits, shortlist the whole file. The track is
     hosted, not in the package: fetch it as the bed with
-
-    ```bash
-    python3 tools/fetch-resource.py music/<file> editable/materials/<name>/bgm.mp3 --write-level editable/<name>.html
-    ```
-
-    `--write-level` is what sets the bed's level: it puts the gain this
-    track's measured `lufs_i` needs, to sit at -30 LUFS under the voice,
-    on the editable's `#bgm` tag (stage skill section 5). Pass it every
-    time; the level is not something you work out or adjust. WHEN the
-    chosen entry carries a `mix_note`, follow it when laying the bed.
+    `python3 tools/fetch-resource.py music/<file>
+    editable/materials/<name>/bgm.mp3`. WHEN the chosen entry carries
+    a `mix_note`, follow it when laying the bed.
 
 Generate several visuals as one image, then cut them apart:
 
@@ -181,8 +174,8 @@ The sheets are numbered, `Style1.jpg`, `Style2.jpg`, and so on; the
 rolled number is the style. The roll comes from the command's output,
 never from judgement, and it is not rerolled. Open only the rolled
 sheet, through `tools/view-image.sh styles/StyleN.jpg
-<materials>/<name>/deletable` (CLAUDE.md, Looking at images), and treat
-it exactly as a style reference the user provided:
+<materials>/<name>/deletable --max 1100` (CLAUDE.md, Looking at images),
+and treat it exactly as a style reference the user provided:
 its look, never its story, its people, or its words.
 
 ## 5. Tips
@@ -319,10 +312,8 @@ empties them, never the session.
   the block sideways.
 - The voice is always the loudest thing in the mix. Sound effects sit
   under it and above the music bed. The levels are fixed: each effect
-  plays at the volume stored in its file, the renderer sets the voice,
-  and the bed's gain comes from `fetch-resource.py --write-level`, worked
-  out from the track's measured loudness. A session never adjusts any of
-  them, and never edits the bed's `data-level-db`.
+  plays at the volume stored in its file and the renderer sets the voice
+  and the bed; a session never adjusts any of them.
 - Never invent a brand logo. A logo is used only when the user provides
   it. IF none is provided, the brand is shown by its name in text, and
   nothing is drawn, generated, or approximated to stand in for a logo.

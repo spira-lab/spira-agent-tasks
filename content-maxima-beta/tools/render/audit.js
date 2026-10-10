@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Pre-render audit of a stage editable, in the renderer's own ?render view.
-// Usage: node tools/render/audit.js <editable.html> [--at ms,ms,...] [--measure]
+// Usage: node tools/render/audit.js <editable.html> [--at ms,ms,...]
 //   Without --at: the whole video is checked (run it when every scene is written,
 //   and again after the fixes). With --at: a quick look at what you just built.
 //   Only those frames are shot, and leaks and text are checked only within 0.5 s
@@ -25,66 +25,23 @@
 //   * sheet: the frames at --at, or by default the first frame, each scene 0.6 s in
 //     and the last frame, written to materials/<name>/deletable/audit-sheet.jpg.
 // Prints "audit clean" or one line per problem. Fix every line, then run it again.
-// --measure prints measurements instead of problems: every piece of text with its
-// size, box, per-line wrap widths and distance outside the safe zone, the same
-// elements at the same moments the audit judges, identical run to run.
 // The browser half (leaks, text, frames; inspect.js) runs on the render Lambda
-// (lambda.js); the file checks and the sheet are done here — except under
-// --measure, where the browser is this machine's (stage.js's launch) and the
-// Lambda and its S3 client are never loaded, so the run needs no credentials.
+// (lambda.js); the file checks and the sheet are done here.
+const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path'), os = require('os');
-const { readEditable, serve, launch, openStage } = require('./stage');
+const { readEditable } = require('./stage');
+const { auditOnLambda } = require('./lambda');
+const { intraCopies } = require('./intra');
 
 const args = process.argv.slice(2);
 const atIdx = args.indexOf('--at');
 const at = atIdx >= 0 ? args.splice(atIdx, 2)[1].split(',').map(Number) : null;
-const measureIdx = args.indexOf('--measure');
-const measuring = measureIdx >= 0;
-if (measuring) args.splice(measureIdx, 1);
-if (!args[0]) { console.error('usage: audit.js <editable.html> [--at ms,ms,...] [--measure]'); process.exit(2); }
+if (!args[0]) { console.error('usage: audit.js <editable.html> [--at ms,ms,...]'); process.exit(2); }
 const htmlPath = path.resolve(args[0]);
 const dir = path.dirname(htmlPath), rel = path.basename(htmlPath);
 const ed = readEditable(htmlPath);
 
-/**
- * Measure the video's text here, not on the Lambda: the browser is in this
- * image too (stage.js's launch), so nothing has to be uploaded, nothing has to
- * cold-start, and a number comes back in seconds. Prints one line per piece of
- * text: where it is, how many lines it wrapped to, how wide each is, and the
- * size it was set in. It never says a size is wrong, and never suggests one —
- * for that, run the audit proper, which judges the same elements.
- */
-async function measureHere() {
-  const server = await serve(dir);
-  const browser = await launch();
-  try {
-    const { page, W, H } = await openStage(browser, server.address().port, rel);
-    const { rows, portrait } = await require('./inspect').measure(page, { at, durationMs: ed.durationMs });
-    if (!portrait) console.log(`stage is ${W}x${H}, not 9:16: the safe-zone columns are left out`);
-    console.log('scene  at      text                                          size  x, y on the canvas        lines');
-    for (const r of rows) {
-      const over = Object.entries(r.over).filter(([, d]) => d > 0).map(([side, d]) => `${side} +${d}`);
-      const lines = r.lines ? r.lines.map(l => `${l.words}w ${l.width}px`).join(' | ') : '';
-      console.log(`${(r.scene || '--').padEnd(6)} ${(r.t / 1000).toFixed(2).padStart(5)}s  "${r.text.padEnd(44)}" ${String(r.size).padStart(3)}px  x ${r.box.left}-${r.box.right}, y ${r.box.top}-${r.box.bottom}${over.length ? `  outside ${over.join(' ')}` : ''}${lines ? `  ${lines}` : ''}`);
-    }
-    const out = rows.filter(r => Object.values(r.over).some(d => d > 0)).length;
-    console.log(`${rows.length} text block${rows.length === 1 ? '' : 's'}${portrait ? `; ${out} outside the safe zone` : ''}. These are the page's own measurements: run the audit to be told what is wrong.`);
-    return;
-  } finally {
-    await browser.close();
-    server.closeAllConnections && server.closeAllConnections();
-    server.close();
-  }
-}
-
-if (measuring) measureHere().then(() => process.exit(0)).catch(e => { console.error(e); process.exit(1); });
-else auditVideo().catch(e => { console.error(e); process.exit(1); });
-
-/** The whole-video audit: file checks here, the browser half on the Lambda. */
-async function auditVideo() {
-  const { execFileSync } = require('child_process');
-  const { auditOnLambda } = require('./lambda');
-  const { intraCopies } = require('./intra');
+(async () => {
   const problems = [];
 
   // Files, from tags and from CSS url()s (fonts, background images).
@@ -122,4 +79,4 @@ async function auditVideo() {
   console.log(`sheet: ${sheet} (${shots.map(s => (s.t / 1000).toFixed(1) + 's').join(' ')})`);
   console.log(problems.length ? problems.join('\n') : 'audit clean');
   process.exit(0);
-}
+})().catch(e => { console.error(e); process.exit(1); });

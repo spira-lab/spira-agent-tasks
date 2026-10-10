@@ -13,12 +13,9 @@
 //   * sound effects are the editable's <audio class="sfx" data-at="ms"> tags, mixed at
 //     the level stored in each file: the library is levelled against a -16 LUFS voice,
 //     so no gain or loudness normalisation is applied to an effect
-//   * the music bed lands at BED_LUFS, 14 LU under the voice. A library bed reaches it
-//     through the gain measured for its own track and written to the editable as
-//     data-level-db: the files were documented as levelled by ear, and measured they
-//     are not (they span 20.7 LU, six of them louder than the voice), so the level is
-//     worked out per track rather than trusted. Generated music, which has no measured
-//     level, is levelled to BED_LUFS instead.
+//   * the music bed plays at the level stored in its file when the file is from the library
+//     (its sha256 is in resources.json): each track was levelled by ear against a -16 LUFS
+//     voice. Any other bed (generated music) is levelled to -26 LUFS, 10 LU under the voice.
 //   * stage size is read from the page (window.STAGE), so any ratio works
 //   * a render already at <out.mp4> is moved to renders/deletable first; the new one
 //     is checked (duration, frames, stereo)
@@ -33,9 +30,7 @@ const crypto = require('crypto');
 // Seedance's rate. Switching or adding a video model means checking its output rate against this.
 const FPS = 24;
 
-// Where a music bed belongs, 14 LU under the -16 voice. fetch-resource.py targets the
-// same value when it works out a track's data-level-db; the two must stay in step.
-const BED_LUFS = -30;
+const OTHER_BED_LUFS = -26;
 const LIBRARY_MUSIC = (() => {
   try {
     const m = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'resources.json'), 'utf8'));
@@ -83,17 +78,8 @@ function mixAudio(silent, secs) {
     inputs.push('-i', bed);
     let level = 'aformat=sample_rates=48000:channel_layouts=stereo';
     if (!fromLibrary(path.join(dir, ed.bgmSrc))) {
-      // No measured level to work from, so normalise the bed itself.
-      level = `loudnorm=I=${BED_LUFS}:TP=-2:LRA=9,aresample=48000`;
-      console.log(`  ${ed.bgmSrc} is not a library track: levelled to ${BED_LUFS} LUFS`);
-    } else if (ed.bgmLevelDb === null) {
-      // A library bed with no written gain is the state this change exists to end: the
-      // track would play at whatever its file carries, up to 6 LU above the voice. Say
-      // so rather than render it silently.
-      console.error(`warning: ${ed.bgmSrc} is a library track with no data-level-db, so it will play at its own level; re-fetch it with tools/fetch-resource.py --write-level <editable.html>`);
-    } else if (ed.bgmLevelDb) {   // 0 dB is the no-op case, so a falsy check is enough
-      level += `,volume=${ed.bgmLevelDb}dB`;
-      console.log(`  ${ed.bgmSrc}: ${ed.bgmLevelDb} dB, to reach ${BED_LUFS} LUFS`);
+      level = `loudnorm=I=${OTHER_BED_LUFS}:TP=-2:LRA=9,aresample=48000`;
+      console.log(`  ${ed.bgmSrc} is not a library track: levelled to ${OTHER_BED_LUFS} LUFS`);
     }
     parts.push(`[${idx}:a]${level},afade=t=in:d=1,afade=t=out:st=${(ed.durationMs/1000-1.5).toFixed(2)}:d=1.5[bed]`); labels.push('[bed]'); idx++;
   }
