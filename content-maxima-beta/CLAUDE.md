@@ -12,7 +12,10 @@ Spira CLI) and assembling them in an HTML stage that renders to MP4.
 Read `skills/creative-video-production.md` first. It is the entry point and
 names the other skills, which are essential and never skipped:
 `toolkit.md`, `prompting.md`, `stage-canvas-html.md`, `file-management.md`,
-`known-methods.md`, plus `skills/working-memory.md` for its Preferences. This file
+`known-methods.md`, plus `skills/working-memory.md` for its Preferences,
+`fonts/fonts.md`, and the sound-effect index `sfx/SFX index.md`. Read
+them all in one turn. The music index is read by a subagent, never by
+this session (creative-video-production section 1). This file
 is a map; where it and a skill disagree, the skill wins.
 
 ## Package and root

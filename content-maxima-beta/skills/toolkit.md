@@ -47,13 +47,9 @@ Pass `resultUrls[0]` into the next job that needs the result.
 `status: "FAILED"` carries the provider's error. Read it and fix the
 payload before resubmitting once (a new `submit_ai_job`, a new
 `.pending`); never resubmit an unchanged payload in a loop.
-
-`stillRunning: true` means the wait timed out, not that the job failed:
-call `wait_ai_job` again with the same `jobId` and `saveTo`. `saveError`
-means the job finished but its download failed: call `wait_ai_job` again
-with the same `jobId` and `saveTo` — it returns at once and is not charged
-again. IF a session was cut off
-(a restart), read every `jobs/*.pending` and call `wait_ai_job` on the id
+`stillRunning` and `saveError` are retried as your instructions say,
+with the same `jobId` and `saveTo`. IF a session was cut off (a
+restart), read every `jobs/*.pending` and call `wait_ai_job` on the id
 it holds. **Never call `submit_ai_job` for an output that has a `.pending`
 record** — that pays twice for one output. Delete a `.pending` file only
 to deliberately replace that job.
@@ -63,19 +59,14 @@ back in `saved` with `hasAlpha`. `hasAlpha: false` on a file whose payload
 asked for a transparent background means it has no alpha channel and must
 be regenerated.
 
-**Independent jobs run in parallel.** Whenever jobs do not depend on each
-other's results, submit them all in one turn — one `submit_ai_job` call
-each — then wait on them all in one turn — one `wait_ai_job` call each.
-Calls in the same turn run at once; one after another costs the sum of
-the job times.
-
-Serial waiting costs the sum of the job times; parallel costs the
-longest one. A job that depends on another's output starts the moment
-that output is in, not after the whole batch. Plan the order so the
-longest chain starts first: for a talking head that is Soul, then the
-persona edit, then the clips, then the cut-outs (with the user's own
-photo the chain starts at the persona edit, or at the voice-over in 3j); music, b-roll, and elements
-run beside it.
+**Independent jobs run in parallel**, all submitted in one turn and all
+waited on in one turn, so a batch costs its longest job, not the sum. A
+job that depends on another's output starts the moment that output is
+in, not after the whole batch. Plan the order so the longest chain
+starts first: for a talking head that is Soul, then the persona edit,
+then the clips, then the cut-outs (with the user's own photo the chain
+starts at the persona edit, or at the voice-over in 3j); music, b-roll,
+and elements run beside it.
 
 To inspect a model's inputs and prices: `spira ai models get <modelId>`.
 
@@ -433,10 +424,8 @@ credits per second.
 ## 3i. Voice-over without a presenter: `elevenlabs-text-to-speech`
 
 Only for a video the request explicitly makes presenter-less
-(creative-video-production section 1); a VO explainer otherwise still
-has a talking head and never comes here. WHEN the voice comes from a
-voice ID or a recording (section 3), the voice-over is 3j step 1
-instead, and nothing here applies. Payload:
+(creative-video-production section 1), on Auto voice; with a voice ID
+or a recording the voice-over is 3j step 1 instead. Payload:
 `{"text":"<the script>","voiceId":"21m00Tcm4TlvDq8ikWAM","providerModelId":"eleven_v3"}`,
 written to `vo.mp3`, then `python3 tools/make-timings.py <materials>/<name>/vo.mp3`.
 Voices proven on this account: `21m00Tcm4TlvDq8ikWAM` (female) and

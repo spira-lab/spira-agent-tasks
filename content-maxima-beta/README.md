@@ -39,8 +39,8 @@
 | `skills/` | The procedures a session reads: creative video production, toolkit, prompting, stage canvas HTML, file management, known methods, add-ons, working memory |
 | `stage/` | The 9:16 stage template every editable is copied from |
 | `tools/` | The renderer and stage audit, the generation and captions scripts, the Whisper timings and music bed scripts |
-| `sfx/` | Sound-effect metadata; the audio is hosted (see `resources.json`) |
-| `music/` | Music metadata; the audio is hosted (see `resources.json`) |
+| `sfx/` | Sound-effect metadata and the one-line-per-effect index a session reads; the audio is hosted (see `resources.json`) |
+| `music/` | Music metadata and the one-line-per-track index a session reads; the audio is hosted (see `resources.json`). Both indexes are built by `apps/cc-engine/scripts/build-media-index.mjs` |
 | `styles/` | The style library, numbered contact sheets rolled for a video with no style reference |
 | `fonts/` | The type library (SIL OFL), indexed in `fonts/fonts.md` |
 | `docs/` | These cards and the script that renders them |

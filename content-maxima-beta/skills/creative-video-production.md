@@ -48,15 +48,11 @@ Only then is the video presenter-less, with the voice-over from toolkit
 
 **A supplied talking-head video is the talking head.** WHEN the request
 has `Talking head supplied video:`, that exact video is the talking
-head of the finished video, and its own voice is the voice-over. It
-replaces every step that makes a presenter or speech: no Soul persona
-(toolkit 3a), no GPT Image 2 avatar edit (3b), no Seedance clips (3e),
-no HeyGen (3j), and no ElevenLabs (3i). Go straight to building the
-video with it. Its speech is the script, word for word and in its own
-language: nothing is written around it, and it is never muted,
-re-voiced, cut, or retimed. Everything else applies as for any talking
-head: the Bria cut-out (3f), the animated elements, and the scene
-variety of section 5. Toolkit 3k is the procedure.
+head and its own voice is the voice-over: nothing is generated for the
+presenter or the speech, and the speech is never muted, re-voiced, cut,
+or retimed. Toolkit 3k is the procedure; the cut-out (3f), the animated
+elements, and the scene variety of section 5 apply as for any talking
+head.
 
 Elements to consider:
 
@@ -68,57 +64,49 @@ Elements to consider:
 - Sensible b-roll visuals only, never visuals that mean nothing and are
   there just to match a word in the speech.
 - Sound effects, added for immersion. Choose them from
-  `sfx/SFX metadata.json` (read it whole with `cat`), which names each sound, says what it is, and
-  says when it is best used; never open the audio files to learn them.
-  Each entry also has a category, tags and an intensity (subtle, medium
-  or strong): subtle effects suit small on-screen moments, strong ones
-  only the big moments.
-  The audio is hosted, not in the package: fetch each sound you use into
-  the video's materials with `python3 tools/fetch-resource.py sfx/<file>
-  editable/materials/<name>/sfx/<file>`.
-  Each sound plays at the volume stored in its file; never adjust it.
-  How a chosen sound is placed is in the stage skill.
+  `sfx/SFX index.md`, one effect per line: file, category, intensity
+  (subtle effects suit small on-screen moments, strong ones only the
+  big moments), length, and what it is and when it is best used. Never
+  open the audio files to learn them. The audio is hosted, not in the
+  package: fetch each sound you use with `python3
+  tools/fetch-resource.py sfx/<file> editable/materials/<name>/sfx/<file>`.
+  Placement and levels are in the stage skill (section 5).
 - Background music. Three cases, decided by what the user said:
   - WHEN the user says no music or no bgm, use none: nothing generated,
     nothing picked.
   - WHEN the user asks for new, original or generated music, generate
     it with the toolkit.
   - Otherwise, including WHEN the user says nothing about music, choose
-    from the library, `music/Music metadata.json` (read it whole with
-    `cat`); never open the tracks to learn them. Each entry gives the
-    track's genre and style, mood, energy, tempo, instruments,
-    structure, what it is best for and what to avoid it for. Shortlist
-    every track that fits the video's topic and tone, and the style the
-    user asked for if they named one. Leave out tracks whose entry has
-    `starts_immediately: false` or a `longest_silence_s` above 2, unless
-    nothing else fits. Count the shortlist, N, then roll:
+    from the library. **The choice is made by a subagent**, so the
+    library index never enters this session's context: run the Agent
+    tool once, as soon as the concept is settled (it runs beside the
+    generations), with this brief, filled in:
 
-    ```bash
-    python3 -c "import secrets; print(secrets.randbelow(N) + 1)"
-    ```
+    > Pick one background-music track from `music/Music index.md` (one
+    > track per line: file, genre and style, mood, energy, tempo, best
+    > for, avoid for, flags) for a short video about <topic>, with a
+    > <tone> tone<, in the style the user asked for: <style>>. Read the
+    > whole index; never open the audio. Shortlist every track that
+    > fits the topic and tone (and the style); leave out tracks flagged
+    > `late-start` or `silence` unless nothing else fits; if nothing
+    > fits, the shortlist is the whole index. Count the shortlist, N,
+    > then run `python3 -c "import secrets; print(secrets.randbelow(N) + 1)"`
+    > and take the track at that position: the roll comes from the
+    > command's output, never from judgement, and is not rerolled.
+    > Reply with one line only: `<file> | mix_note: <text or none> |
+    > N=<shortlist size>, rolled <n>`. Do not fetch, write, or change
+    > any file.
 
-    The rolled number is the track's position in the shortlist. The
-    roll comes from the command's output, never from judgement, and it
-    is not rerolled; it keeps one favourite from being picked every
-    time. IF nothing fits, shortlist the whole file. The track is
-    hosted, not in the package: fetch it as the bed with
+    The subagent's reply names the track. Fetch it as the bed with
     `python3 tools/fetch-resource.py music/<file>
-    editable/materials/<name>/bgm.mp3`. WHEN the chosen entry carries
-    a `mix_note`, follow it when laying the bed.
+    editable/materials/<name>/bgm.mp3`, and WHEN the reply carries a
+    `mix_note`, follow it when laying the bed. Never read
+    `music/Music index.md` yourself: it is the subagent's to read.
 
-Generate several visuals as one image, then cut them apart:
-
-- WHEN several transparent-background elements are needed, generate
-  them all together in one GPT Image 2 image at high resolution, each in
-  its own section with empty space around it, then cut them out one by
-  one. Cutting one out never takes anything from the others.
-- WHEN several b-roll stills are needed, generate them as one
-  high-resolution GPT Image 2 collage of equally divided frames, with no
-  border, no outline, and no gaps, then cut the frames out right after.
-
-One image costs less per visual than one image each, and it is one
-generation to wait for instead of several. The sheet formats and the
-cutting tool are in the toolkit, sections 3c and 3d.
+Several visuals are one generation: transparent elements go on one
+sheet, b-roll stills in one collage, each cut apart afterwards. One
+image costs less per visual and is one wait instead of several. The
+formats and the cutting tool are in the toolkit, sections 3c and 3d.
 
 ## 2. Principles
 
@@ -268,14 +256,18 @@ empties them, never the session.
 ## 9. Hard rules
 
 - Read only what the skills tell you to: the essential skills in
-  section 10, `skills/working-memory.md`, `sfx/SFX metadata.json`,
-  `music/Music metadata.json`, `fonts/fonts.md`, the stage template, the one rolled sheet in `styles/`, the contact sheet of a
-  supplied talking-head video (toolkit 3k), and the editable you are
-  working on. Every image among them is opened as CLAUDE.md's Looking
-  at images says, and used as its original. Never open another
-  editable html in the root; reading it anchors you to it and you copy
-  it. Open `skills/add-ons.md` only WHEN the user asks for an add-on by name
-  or a Preference names one.
+  section 10, `skills/working-memory.md`, `sfx/SFX index.md`,
+  `fonts/fonts.md`, the one rolled sheet in `styles/`, the contact
+  sheet of a supplied talking-head video (toolkit 3k), and the editable
+  you are working on. Read all the text files among them in one turn,
+  at the start, not one per turn. Never read the stage template (stage
+  skill section 3), `music/Music index.md` (the music subagent's,
+  section 1), or the two metadata JSON files the indexes are built
+  from. Every image among them is opened as
+  CLAUDE.md's Looking at images says, and used as its original. Never
+  open another editable html in the root; reading it anchors you to it
+  and you copy it. Open `skills/add-ons.md` only WHEN the user asks for
+  an add-on by name or a Preference names one.
 - Respect the Meta and TikTok guidelines and their UI. Nothing that
   must be seen or read may be obstructed by the app's UI. The safe
   zone, in pixels on the 1080 x 1920 canvas, is x 70 to 1005 and y 230
@@ -310,31 +302,23 @@ empties them, never the session.
   on the safe zone. A block up to 700 wide centred there clears the
   icon column at x 890; keep the wrap width within that and never shift
   the block sideways.
-- The voice is always the loudest thing in the mix. Sound effects sit
-  under it and above the music bed. The levels are fixed: each effect
-  plays at the volume stored in its file and the renderer sets the voice
-  and the bed; a session never adjusts any of them.
+- The voice is always the loudest thing in the mix, effects under it,
+  the bed under them. The levels are fixed and a session never adjusts
+  any of them (stage skill section 5).
 - Never invent a brand logo. A logo is used only when the user provides
   it. IF none is provided, the brand is shown by its name in text, and
   nothing is drawn, generated, or approximated to stand in for a logo.
 
 ## 10. The other skills
 
-These skills are essential. None of them is skipped.
-
-- **toolkit**: the one model for each job, how a generation is run
-  (`submit_ai_job`, then `wait_ai_job`), and what each costs.
-- **prompting**: the fixed prompt format for each model. IF a
-  generation is not listed there, prompt as you see fit under its
-  principles. It points to the Reword table in `skills/working-memory.md`,
-  which you may add to when you learn a pronunciation fix.
-- **stage-canvas-html**: the HTML stage. How the editable is set up,
-  the rules for animating inside it, the audit, the sound effects, and
-  the render.
-- **file-management**: where every file lives, what it is called, what
-  happens to it when it is replaced, and how a render is handed over.
-- **known-methods**: methods proven to work and to fail, with the
-  reason. Read it so a failure already paid for is not paid for again.
+These skills are essential. None of them is skipped: **toolkit** (the
+one model for each job, how a generation is run, what it costs),
+**prompting** (the fixed prompt format for each model, and the Reword
+table in `skills/working-memory.md`), **stage-canvas-html** (the
+editable, the animation rules, the audit, the render),
+**file-management** (where every file lives and how a render is handed
+over), **known-methods** (what has already been paid for; read it so it
+is not paid for again).
 
 One more file sits beside these and is not essential: **add-ons**, the
 user's exclusive techniques. WHEN the user asks for an add-on by name,

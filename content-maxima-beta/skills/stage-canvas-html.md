@@ -30,11 +30,8 @@ itself, and never build a video from a blank file. The copy gives you:
   exactly as it previews (rule 6).
 - Preview controls, guide overlays, and a word readout for the operator;
   `?render` hides them and places the canvas at 1:1. Do not edit them.
-  The guides are the stage grid every layout is placed on
-  (creative-video-production section 9): `TikTok UI` and `Reels UI` draw
-  the app UI and the one safe zone, `Centre` the X and Y axes through
-  x 540, y 960 with a tick every 5% (54 px across, 96 px down), and
-  `Thirds` the 3 x 3 lines at x 360 and 720, y 640 and 1280.
+  The guides (`TikTok UI`, `Reels UI`, `Centre`, `Thirds`) draw the safe
+  zone and the stage grid of creative-video-production section 9.
 
 ## 2. Voice-over timings (as soon as the VO file exists)
 
@@ -162,10 +159,9 @@ Each cue is one tag inside `#stage`, next to the audio slots:
 ```
 
 `data-at` is the stage millisecond the sound starts; put a whoosh's peak
-on the cut it serves, not after it. Fetch each sound you use into
-`materials/<name>/sfx/` first: `python3 tools/fetch-resource.py
-sfx/<file> editable/materials/<name>/sfx/<file>` (the audio is hosted,
-not in the package).
+on the cut it serves, not after it. The file is the one fetched into
+`materials/<name>/sfx/` when the sound was chosen
+(creative-video-production section 1).
 
 Every effect plays at the volume stored in its file. The library is
 already levelled, one sound at a time, against a voice at −16 LUFS, the
