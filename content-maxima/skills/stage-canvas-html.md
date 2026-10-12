@@ -172,11 +172,14 @@ already levelled, one sound at a time, against a voice at −16 LUFS, the
 level the renderer sets every voice-over to; the renderer adds no gain
 to an effect. Never set, scale, or calibrate an effect's volume: no
 volume attribute, no gain filter, no re-encoded copy. WHEN a sound feels
-too loud or too soft for a moment, choose a different sound. The music
-bed starts from the level stored in its file, set by ear for each library
-track, and the renderer then turns the whole bed down 4 dB; generated
-music, which has no stored level, is levelled to -26 LUFS first and comes
-down with it. Never set, scale, or re-encode the volume either. Do not
+too loud or too soft for a moment, choose a different sound. A library
+music bed is set 10 dB under the voice by the gain on its tag,
+`data-gain-db`, which is the chosen entry's `gain_db`
+(creative-video-production section 1): the renderer applies it as a
+fixed gain and stops before the capture when it is missing or is not
+that track's value. Never estimate, round, or change it, and never
+scale or re-encode the bed. Generated music, which has no stored gain,
+carries no `data-gain-db` and is levelled to -26 LUFS. Do not
 pre-mix effects into
 `vo.mp3`; the VO file stays the dry voice that the timings came from.
 
@@ -271,12 +274,12 @@ node tools/render/render.js <root>/editable/<name>.html <root>/renders/<name>.mp
 ```
 
 Arguments are the editable and the output; there is no frame-rate
-argument. The renderer reads `data-duration`, `#vo`, `#bgm`, and the
+argument. The renderer reads `data-duration`, `#vo` and `#bgm` (with its
+`data-gain-db`), and the
 `.sfx` tags from the editable; there is nothing else to configure. It
 moves an existing render to `renders/deletable/` first, captures every
 frame on AWS Lambda in parallel chunks, mixes the audio (voice at -16
-LUFS, effects under it, and the bed under both: its level as stored, then
-turned down 4 dB, faded in 1 s and out 1.5 s), checks
+LUFS, effects under it, bed 10 dB under it, faded in 1 s and out 1.5 s), checks
 the file (duration, frame count, stereo). Output is 1080 x 1920 H.264
 with stereo AAC at 24 fps, the rate of Seedance clips, so each output
 frame is one clip frame. A clip at any other rate repeats or drops

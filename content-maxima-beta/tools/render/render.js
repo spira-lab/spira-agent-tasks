@@ -13,9 +13,11 @@
 //   * sound effects are the editable's <audio class="sfx" data-at="ms"> tags, mixed at
 //     the level stored in each file: the library is levelled against a -16 LUFS voice,
 //     so no gain or loudness normalisation is applied to an effect
-//   * the music bed plays at the level stored in its file when the file is from the library
-//     (its sha256 is in resources.json): each track was levelled by ear against a -16 LUFS
-//     voice. Any other bed (generated music) is levelled to -26 LUFS, 10 LU under the voice.
+//   * a library music bed (its sha256 is in resources.json) gets the fixed gain on its tag,
+//     data-gain-db, which places it at -26 LUFS, 10 LU under the voice. The value is the
+//     track's gain_db in music/Music metadata.json (measured with ebur128); a library bed
+//     without it, or with another value, stops the render before the capture. Any other
+//     bed (generated music) is levelled to -26 LUFS by loudnorm.
 //   * stage size is read from the page (window.STAGE), so any ratio works
 //   * a render already at <out.mp4> is moved to renders/deletable first; the new one
 //     is checked (duration, frames, stereo)
@@ -31,13 +33,13 @@ const crypto = require('crypto');
 const FPS = 24;
 
 const OTHER_BED_LUFS = -26;
-const LIBRARY_MUSIC = (() => {
-  try {
-    const m = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'resources.json'), 'utf8'));
-    return new Set(Object.entries(m.files || {}).filter(([k]) => k.startsWith('music/')).map(([, f]) => f.sha256));
-  } catch { return new Set(); }
-})();
-const fromLibrary = file => LIBRARY_MUSIC.has(crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'));
+const PKG = path.join(__dirname, '..', '..');
+// sha256 -> package path of every library track, and package path -> its measured gain.
+const LIBRARY_MUSIC = new Map(Object.entries(JSON.parse(fs.readFileSync(path.join(PKG, 'resources.json'), 'utf8')).files || {})
+  .filter(([k]) => k.startsWith('music/')).map(([k, f]) => [f.sha256, k]));
+const LIBRARY_GAIN = new Map(JSON.parse(fs.readFileSync(path.join(PKG, 'music', 'Music metadata.json'), 'utf8'))
+  .map(t => [t.path, t.gain_db]));
+const libraryPath = file => LIBRARY_MUSIC.get(crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'));
 
 const [htmlArg, outArg, ...extra] = process.argv.slice(2);
 if (!htmlArg || !outArg || extra.length) {
@@ -54,6 +56,23 @@ if (!ed.durationMs) throw new Error(`${rel} has no data-duration on #stage`);
 const fps = FPS;
 console.log(`  frame rate: ${fps} fps`);
 clipFpsWarnings(dir, ed, fps).forEach(w => console.error(`warning: ${w}`));
+
+// Settled before the capture, so a bed without its gain costs a message, not a render.
+// null: generated music, levelled by loudnorm in the mix.
+const bedGainDb = (() => {
+  if (!ed.bgmSrc) return null;
+  const track = libraryPath(path.join(dir, ed.bgmSrc));
+  if (!track) {
+    if (ed.bgmGainDb !== null) console.error(`warning: ${ed.bgmSrc} is not a library track; its data-gain-db is ignored`);
+    return null;
+  }
+  const want = LIBRARY_GAIN.get(track);
+  const fail = msg => { console.error(`error: ${msg}`); process.exit(1); };
+  if (typeof want !== 'number') fail(`${track} has no gain_db in music/Music metadata.json`);
+  if (ed.bgmGainDb === null) fail(`#bgm (${track}) has no data-gain-db: copy the gain from the music pick's reply, data-gain-db="${want.toFixed(1)}"`);
+  if (!(Math.abs(ed.bgmGainDb - want) <= 0.05)) fail(`#bgm (${track}) has data-gain-db="${ed.bgmGainDb}", but the track's gain is ${want.toFixed(1)}: copy it as it is`);
+  return want;
+})();
 const frames = Math.round(ed.durationMs / 1000 * fps);
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'stage-render-'));
 fs.mkdirSync(path.dirname(out), { recursive: true });
@@ -76,10 +95,12 @@ function mixAudio(silent, secs) {
     const bed = path.join(tmp, 'bed.wav');
     execFileSync('python3', [path.join(__dirname, '..', 'bgm-extend.py'), path.join(dir, ed.bgmSrc), bed, secs], { stdio: 'inherit' });
     inputs.push('-i', bed);
-    let level = 'aformat=sample_rates=48000:channel_layouts=stereo';
-    if (!fromLibrary(path.join(dir, ed.bgmSrc))) {
+    let level = `aformat=sample_rates=48000:channel_layouts=stereo,volume=${bedGainDb}dB`;
+    if (bedGainDb === null) {
       level = `loudnorm=I=${OTHER_BED_LUFS}:TP=-2:LRA=9,aresample=48000`;
       console.log(`  ${ed.bgmSrc} is not a library track: levelled to ${OTHER_BED_LUFS} LUFS`);
+    } else {
+      console.log(`  ${ed.bgmSrc}: library bed at ${bedGainDb} dB`);
     }
     parts.push(`[${idx}:a]${level},afade=t=in:d=1,afade=t=out:st=${(ed.durationMs/1000-1.5).toFixed(2)}:d=1.5[bed]`); labels.push('[bed]'); idx++;
   }

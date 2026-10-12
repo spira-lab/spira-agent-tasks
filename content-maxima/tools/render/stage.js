@@ -153,9 +153,12 @@ function readEditable(htmlPath) {
   })).filter(s => s.src);
   const videos = [...new Set([...html.matchAll(/<video\b[^>]*\bsrc="([^"]+)"/g)].map(m => m[1]))];
   const name = path.basename(htmlPath).replace(/\.html?$/i, '');
+  // null means the tag never got a gain, which a library bed must not be rendered without.
+  const gainAttr = attr(bgmTag, 'data-gain-db');
   return {
     html, name, durationMs, videos, sfx,
     voSrc: attr(voTag, 'src'), bgmSrc: attr(bgmTag, 'src'),
+    bgmGainDb: gainAttr === undefined ? null : parseFloat(gainAttr),
   };
 }
 

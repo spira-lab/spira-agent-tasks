@@ -85,7 +85,7 @@ Elements to consider:
 
     > Pick one background-music track from `music/Music index.md` (one
     > track per line: file, genre and style, mood, energy, tempo, best
-    > for, avoid for, flags) for a short video about <topic>, with a
+    > for, avoid for, gain, flags) for a short video about <topic>, with a
     > <tone> tone<, in the style the user asked for: <style>>. Read the
     > whole index; never open the audio. Shortlist every track that
     > fits the topic and tone (and the style); leave out tracks flagged
@@ -94,15 +94,20 @@ Elements to consider:
     > then run `python3 -c "import secrets; print(secrets.randbelow(N) + 1)"`
     > and take the track at that position: the roll comes from the
     > command's output, never from judgement, and is not rerolled.
-    > Reply with one line only: `<file> | mix_note: <text or none> |
-    > N=<shortlist size>, rolled <n>`. Do not fetch, write, or change
-    > any file.
+    > Reply with one line only: `<file> | gain: <its gain> dB | mix_note:
+    > <text or none> | N=<shortlist size>, rolled <n>`, the gain copied
+    > from the track's line. Do not fetch, write, or change any file.
 
     The subagent's reply names the track. Fetch it as the bed with
     `python3 tools/fetch-resource.py music/<file>
-    editable/materials/<name>/bgm.mp3`, and WHEN the reply carries a
-    `mix_note`, follow it when laying the bed. Never read
+    editable/materials/<name>/bgm.mp3`, and put the reply's gain on the
+    music tag exactly as it reads: `<audio id="bgm" … data-gain-db="<gain>">`.
+    It sits that track 10 dB under the voice; it is never estimated,
+    rounded, or changed by ear, and the renderer refuses a library bed
+    without it or with a value that is not the track's. WHEN the reply
+    carries a `mix_note`, follow it when laying the bed. Never read
     `music/Music index.md` yourself: it is the subagent's to read.
+    Generated music carries no `data-gain-db`.
 
 Several visuals are one generation: transparent elements go on one
 sheet, b-roll stills in one collage, each cut apart afterwards. One

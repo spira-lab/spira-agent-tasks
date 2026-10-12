@@ -87,7 +87,8 @@ Elements to consider:
     from the library, `music/Music metadata.json` (read it whole with
     `cat`); never open the tracks to learn them. Each entry gives the
     track's genre and style, mood, energy, tempo, instruments,
-    structure, what it is best for and what to avoid it for. Shortlist
+    structure, what it is best for and what to avoid it for, and its
+    `gain_db`. Shortlist
     every track that fits the video's topic and tone, and the style the
     user asked for if they named one. Leave out tracks whose entry has
     `starts_immediately: false` or a `longest_silence_s` above 2, unless
@@ -103,8 +104,14 @@ Elements to consider:
     time. IF nothing fits, shortlist the whole file. The track is
     hosted, not in the package: fetch it as the bed with
     `python3 tools/fetch-resource.py music/<file>
-    editable/materials/<name>/bgm.mp3`. WHEN the chosen entry carries
-    a `mix_note`, follow it when laying the bed.
+    editable/materials/<name>/bgm.mp3`, and put the entry's `gain_db`
+    on the music tag exactly as it reads: `<audio id="bgm" …
+    data-gain-db="<gain_db>">`. It sits that track 10 dB under the
+    voice and already honours a `mix_note` about the level; it is never
+    estimated, rounded, or changed by ear, and the renderer refuses a
+    library bed without it or with a value that is not the track's.
+    Generated music carries no `data-gain-db`. WHEN the chosen entry
+    carries a `mix_note`, follow it when laying the bed.
 
 Generate several visuals as one image, then cut them apart:
 
@@ -309,7 +316,8 @@ empties them, never the session.
 - The voice is always the loudest thing in the mix. Sound effects sit
   under it and above the music bed. The levels are fixed: each effect
   plays at the volume stored in its file and the renderer sets the voice
-  and the bed; a session never adjusts any of them.
+  and the bed (a library bed at the `data-gain-db` copied from its entry);
+  a session never adjusts any of them.
 - Never invent a brand logo. A logo is used only when the user provides
   it. IF none is provided, the brand is shown by its name in text, and
   nothing is drawn, generated, or approximated to stand in for a logo.
