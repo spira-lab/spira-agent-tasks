@@ -119,12 +119,12 @@ video that is presenter-less by that rule uses the voice-over directly
 | Talking-head clip | `seedance-1.5-pro` | per second, see 3e |
 | Talking head speaking a given voice-over (voice ID or recording) | `heygen-avatar-4` | see 3j |
 | Talking head supplied by the user | none: the video itself | 0, see 3k |
-| Talking-head cut-out | `bria-video-background-removal` | 0.42 per source second |
+| Talking-head cut-out | `pixelcut-video-background-removal` | 2.2 per source second |
 | Background music | `suno-music` | 6.6 per track |
 | Avatar motion control, persona driven by a reference video | `kling-3.0-motion-control` pro | 9.52 per second |
 
 **Frame rate.** The render is always 24 fps, the rate of
-`seedance-1.5-pro`; Bria keeps the rate of the clip it is given. HeyGen
+`seedance-1.5-pro`; the cut-out (3f) keeps the rate of the clip it is given. HeyGen
 and a supplied clip are not guaranteed to be 24 fps. A clip at any other
 rate repeats or drops frames in the render, which shows as the presenter
 juddering, and the renderer names it in a warning. Before switching a
@@ -349,27 +349,25 @@ Cost per second at `standard`:
 An 8-second 1080p clip with sound is about 71 credits. Use `720p` for
 tests and `1080p` for the final.
 
-## 3f. Talking-head cut-out: `bria-video-background-removal`
+## 3f. Talking-head cut-out: `pixelcut-video-background-removal`
 
 Removes the background from a Seedance, HeyGen, or supplied (3k) clip so the talking head sits on
 the stage with real transparency. Payload:
-`{"referenceVideo":["<clip url>"],"mode":"Transparent","preserveAudio":true,"autoZoom":false}`,
+`{"referenceVideo":["<clip url>"],"mode":"Transparent"}`,
 written to `<name>.webm`.
 
-**`mode` must be the word `Transparent`.** `spira ai models get` lists
-only solid colours and says transparent output is not available; both
-are wrong for this purpose and are ignored. `Transparent` returns a VP9
-WebM with true alpha (verified 2026-09-20); a colour mode returns an
-opaque MP4. Never use a colour mode and never add a chroma-key step.
+**`mode` must be the word `Transparent`.** It returns a VP9 WebM with
+true alpha; a colour mode returns an opaque MP4. Never use a colour mode
+and never add a chroma-key step. The model takes no other field.
 `wait_ai_job` reports `hasAlpha: false` when the WebM came back without alpha.
 
-**Bria takes at most 60 s of source.** A longer clip is divided at a
+**The cut-out takes at most 60 s of source.** A longer clip is divided at a
 segment boundary (the `segments` in `timings.json`) into parts of 60 s or
 less, re-encoded H.264, then hosted and cut out in one batch, each
-`.webm` at its own `data-start` (3e). A longer source fails the job, so
-this is not a way to save a generation.
+`.webm` at its own `data-start` (3e). A longer source is rejected at
+submit, so this is not a way to save a generation.
 
-**The Bria output is final.** Do not mask, matte, crop, re-key, or
+**The cut-out is final.** Do not mask, matte, crop, re-key, or
 otherwise adjust it. IF it keeps an object the person holds or touches,
 such as a laptop, a phone, or a mug, that object is part of the
 cut-out. The only reasons to touch the result are a missing alpha
@@ -379,7 +377,7 @@ The WebM goes on the stage as a `<video>` element, never as extracted
 frames (stage-canvas-html, rule 11).
 
 **Every talking-head clip is cut out, in one batch.** As soon as the
-clips are in and paced (3e), submit every clip to Bria in one turn and wait on them in
+clips are in and paced (3e), submit every clip for its cut-out in one turn and wait on them in
 one turn (section 1), never one at a time, and never skip a clip because the
 scene plan shows it whole: the cut-out is what the scenes are layered
 with (creative-video-production section 5), and deciding per clip is
