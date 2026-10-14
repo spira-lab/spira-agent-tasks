@@ -170,9 +170,8 @@ not in the package).
 Every effect plays at the volume stored in its file. The library is
 already levelled, one sound at a time, against a voice at −16 LUFS, the
 level the renderer sets every voice-over to; the renderer adds no gain
-to an effect. Never set, scale, or calibrate an effect's volume: no
-volume attribute, no gain filter, no re-encoded copy. WHEN a sound feels
-too loud or too soft for a moment, choose a different sound. A library
+to an effect. WHEN a sound feels too loud or too soft for a moment,
+choose a different sound. A library
 music bed is set 10 dB under the voice by the gain on its tag,
 `data-gain-db`, which is the chosen entry's `gain_db`
 (creative-video-production section 1): the renderer applies it as a
@@ -182,6 +181,20 @@ scale or re-encode the bed. Generated music, which has no stored gain,
 carries no `data-gain-db` and is levelled to -26 LUFS. Do not
 pre-mix effects into
 `vo.mp3`; the VO file stays the dry voice that the timings came from.
+
+**Level adjustments, only when the request or a review comment asks for
+one.** These optional attributes are the only way to change a level;
+never a gain filter or a re-encoded file. The voice stays the loudest
+sound.
+
+| Attribute | On | Effect |
+|---|---|---|
+| `data-gain-db="-3"` | `#vo` | voice after its −16 LUFS levelling, −12 to +6 |
+| `data-gain-db="-6"` | an `audio.sfx` | that effect, −20 to +6 |
+| `data-gain-offset-db="-4"` | `#bgm` | on top of its `data-gain-db` (kept as copied), −20 to +6 |
+| `data-duck="1200-3400:-8,9000-12000:-6"` | `#bgm` | music lowered by dB in each ms range, 300 ms ramps, 0 to −30, no overlaps |
+
+The renderer stops before the capture on a value out of range.
 
 ## 6. Captions
 

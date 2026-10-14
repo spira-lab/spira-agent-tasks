@@ -89,7 +89,31 @@ re-deciding:
 
 Report `inspect` `completed`, `edit` `started`.
 
-## 5. Fix rules
+## 5. By kind of change
+
+Sort each fix-table row into one kind; section 6 rules apply to all.
+
+- **Stage** (animation, timing, text, captions, layout, effects): html
+  only, stage-canvas-html sections 3 to 6. No generation.
+- **Visual material** (background, b-roll, element): generate per toolkit
+  3d or 3c and prompting, in the video's look, and swap it in.
+- **Presenter**: appearance is 3b on the base, then redo the clips that
+  show it (3e, or 3j when the voice is given) and their cut-out (3f); a
+  new presenter is 3a and every clip; a gesture redoes those clips (3e
+  prompt, or 3h from a reference video); placement is html only.
+- **Sound**: a new track per creative-video-production section 1; a
+  volume or a lowered moment per stage-canvas-html section 5's
+  attributes; new words or voice remake the speech by its source (3e,
+  3j, 3i), then timings, captions and the scenes they move.
+- **Whole video** (script, length, style, hook, ratio): still this
+  editable; redo the scene table first, keep what the comment leaves.
+- **Brand**: colours and type from `<cm>/skills/brands/<brand>.md` when
+  the comment names that brand; a logo only from an image URL in the
+  comment or that file, fetched into materials. Never draw one; without
+  it the brand is its name in text.
+- **Out of scope** (post caption, cover): skip, say so.
+
+## 6. Fix rules
 
 - Change only what a comment asks: no restyling, reordering, new colours,
   effects or music unless named. One scene's comment never "improves"
@@ -110,11 +134,12 @@ Report `inspect` `completed`, `edit` `started`.
 - Hard rules beat comments (creative-video-production section 9: safe
   zone, grid, nothing over the face, levels): make the nearest allowed
   change and report it.
-- Levels are fixed (stage-canvas-html section 5): too loud/soft sfx means a
-  different sound, never a volume. Never change the bed's `data-gain-db`;
-  "music too loud" is reported as not fixable by level. Replace the bed
-  only WHEN a comment asks for other music, chosen per
-  creative-video-production section 1, its `gain_db` copied exactly.
+- Levels change only through stage-canvas-html section 5's attributes
+  (`#vo`/sfx `data-gain-db`, `#bgm` `data-gain-offset-db`, `data-duck`),
+  never a volume filter or re-encode; the bed's `data-gain-db` stays as
+  copied and the voice stays loudest. Replace the bed only WHEN a comment
+  asks for other music, chosen per creative-video-production section 1,
+  its `gain_db` copied exactly.
 - New material only WHEN a comment needs it, generated per toolkit
   section 1 with its models and prompting formats, matching the video's
   look. Payload and `.pending` go in `<cm>/<r>editable/materials/<video>/jobs/`.
@@ -127,7 +152,7 @@ Report `inspect` `completed`, `edit` `started`.
   impossible, past the end) is skipped with the reason; it never stops
   the rest.
 
-## 6. Verify and render
+## 7. Verify and render
 
 1. Rerun the same `--at` audit; each asked change is visible at its moment
    and nothing else moved.
@@ -137,15 +162,15 @@ Report `inspect` `completed`, `edit` `started`.
    (the previous render is kept in `<r>renders/deletable/`).
 4. Host: `cd "<cm>" && spira assets upload <r>renders/<video>.mp4`.
 
-## 7. Deliver
+## 8. Deliver
 
 1. `cp "<cm>/<r>renders/<video>.mp4" results/<video>.mp4`.
 2. `submit_result`: `video` = `results/<video>.mp4`, `publicUrl` = hosted
    URL, `report` = one line per comment in packet order, saying what
-   changed:
+   changed and, WHEN something was generated, what and its credits:
 
    ```
    #3 00:04.12 fixed: headline moved up to y 420, clear of the face
-   #5 00:11.20 partly: text asked at x 1040 is outside the safe zone; set at x 960
+   #4 00:06.00 fixed: new outfit; base edit + 3 clips regenerated (~60 credits)
    ```
 3. Report `render` `completed`; end with the same lines and the URL.
