@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "packageVersion": "0.1.0",
-  "description": "Edit a finished video according to a review comment file (a `video_review` JSON exported from the video editor, carrying a top-level `taskType` and `source` metadata about the task that made the video). Start with skills/edit-video-by-comment.md: it validates the JSON and routes to the editing skill for the video's source task type. The video is edited where it was made, in the linked task directory named in the file access rules.",
+  "packageVersion": "0.3.0",
+  "description": "Edit a finished video according to a review comment file (a `video_review` JSON the video editor writes under comments/ and the opening message names, carrying a top-level `taskType` and `source` metadata about the task that made the video). Start with skills/edit-video-by-comment.md: it validates the JSON and routes to the editing skill for the video's source task type. The video is edited where it was made, in the linked task directory named in the file access rules.",
   "linkedTaskTypes": ["content-maxima"],
   "requirements": [
     {"name": "ffmpeg", "kind": "system", "purpose": "Probing, frames and the render's audio mix (content-maxima tools)", "check": "ffmpeg -version && ffprobe -version"},
@@ -11,12 +11,9 @@
     {"name": "spira sign-in", "kind": "credential", "purpose": "The Spira CLI must be signed in as the operator to generate or upload anything", "check": "spira auth whoami"},
     {"name": "openai-whisper", "kind": "pip", "purpose": "Word timings, needed only when a comment changes what is said (content-maxima tools/make-timings.py)", "check": "python3 -c \"import importlib.util, sys; sys.exit(importlib.util.find_spec('whisper') is None)\"", "install": "pip install openai-whisper", "optional": true}
   ],
-  "workspaceDirs": ["reviews", "work", "results"],
-  "inputs": [
-    {"key": "review", "type": "string", "description": "The video_review JSON, raw. It may instead be pasted into the opening message"}
-  ],
+  "workspaceDirs": ["comments", "work", "results"],
   "stages": [
-    {"id": "route", "title": "Read and validate the review JSON, route to the editing skill"},
+    {"id": "route", "title": "Read and validate the review JSON from comments/, route to the editing skill"},
     {"id": "inspect", "title": "Find the video, map every comment onto it, write the fix table"},
     {"id": "edit", "title": "Generate what a comment needs, make the edits, pass the audit"},
     {"id": "render", "title": "Render, host and report each comment's outcome"}

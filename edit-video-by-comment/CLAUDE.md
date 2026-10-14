@@ -1,0 +1,17 @@
+# Edit Video by Comment
+
+Makes a reviewer's comments real in a finished video, where that video
+was made (today: a content-maxima render), and renders it again. It
+never makes a new video.
+
+## Start here
+
+The opening message names a review JSON under `comments/`. Read
+`skills/edit-video-by-comment.md` first: it checks the JSON and routes
+to the skill that edits.
+
+- `skills/edit-video-by-comment.md`: entry, check, route
+- `skills/edit-video-content-maxima.md`: edit a content-maxima video
+- `skills/file-management.md`: where files go
+
+This file is a map; where it and a skill disagree, the skill wins.
