@@ -46,6 +46,7 @@ Other `source` fields are informational. Each comment:
 | `index` | the `#n` the reviewer saw, from 1 |
 | `time` | seconds from the start; `frame`/`timecode` are the same at the draft's fps |
 | `region` | `{x, y, width, height}` 0 to 1 on the canvas, top-left; `null` = whole frame; `regionPx` in canvas pixels |
+| `scope` | optional: `video` = the whole video (ignore `time`), `frame` = the frame at `time`, `region` = `region` at `time`; absent: `region` decides |
 | `text` | what to change |
 | `targets`, `stale`, `madeAgainstVersion` | about the editor draft, not the video |
 
