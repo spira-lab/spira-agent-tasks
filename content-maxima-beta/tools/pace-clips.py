@@ -82,7 +82,7 @@ def main():
         print(f"{name:<12}{words:>6}{slot:>5}s{short:>7}  {action:<22}{dur:>7.2f}s{at:>10} ms")
     print(f"total {start_ms / 1000:.2f}s")
     if paced:
-        print("sped up: " + " ".join(paced) + " — host each again (spira assets upload) and give Bria that URL")
+        print("sped up: " + " ".join(paced) + " — host each with the host_file tool and give Bria that URL")
 
 
 if __name__ == "__main__":

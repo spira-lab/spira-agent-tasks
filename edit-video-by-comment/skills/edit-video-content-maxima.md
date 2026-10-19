@@ -147,6 +147,11 @@ Sort each fix-table row into one kind; section 6 rules apply to all.
   then `mv` it into the materials folder and delete the `.pending`. IF
   interrupted, wait on the ids in existing `.pending` records before
   submitting. The replaced file goes to that video's `deletable/`.
+- A job input is a URL (toolkit section 2): a job's output by its
+  `resultUrls[0]`; a file made or changed on disk (a re-paced clip, a
+  converted voice-over) hosted with `host_file`. Never host one with
+  `spira assets upload`, which puts it in the user's own uploads; that
+  CLI hosts only the new render (section 7).
 - A vague comment: take its most likely meaning from frame and region, do
   it, state the reading. One that cannot be done (contradicts another,
   impossible, past the end) is skipped with the reason; it never stops

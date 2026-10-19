@@ -62,7 +62,7 @@ for placing a cropped element roughly, never for the layout.
 
 The copy is for looking only. Everything the video uses takes the
 original: what the editable references, the sheet given to
-`cut-sheet.py`, a file passed to `spira assets upload`, and every job
+`cut-sheet.py`, a file passed to `host_file`, and every job
 input such as `referenceImage` (the original or its hosted URL), never a
 file from `deletable/view/`. The audit flags an editable that references
 the copy; nothing checks an upload or a job input, so this rule is the

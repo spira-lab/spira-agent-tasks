@@ -20,7 +20,7 @@ sessions share it, and the platform measures what this run spends.
 **Never run a job through the `spira` CLI** — no `spira ai jobs create`,
 `wait` or `status`, in any form. A CLI submission charges the operator on
 the spot, outside this task's bill. The CLI is used only for what this
-skill names below (hosting a file, model docs).
+skill names below (hosting the finished render, model docs).
 
 Run every command from the root, with root-relative paths; never `cd`
 into a folder (a later command then resolves its paths from the wrong
@@ -72,16 +72,22 @@ To inspect a model's inputs and prices: `spira ai models get <modelId>`.
 
 ## 2. Hosting local files
 
-Every model input that is an image or a video must be a public HTTPS
-URL.
+Every model input that is an image, a video, or audio must be a public
+HTTPS URL. Everything else stays on disk: the stage and the renderer
+read the materials folder, and nothing is hosted for them.
 
-- **The file came from a job.** Its `url:` is already hosted. Pass it
-  straight into the next job; never re-upload a job's output.
+- **The file came from a job.** Its `resultUrls[0]` is already hosted.
+  Pass it straight into the next job; never host a job's saved output.
 - **The request already gives a public URL** (an avatar photo, a product
-  image). Pass it straight into the job; never download and re-upload it.
-- **The file exists only on disk** (a frame cut locally, a render). Host
-  it with `spira assets upload <file>`; the hosted address is its
-  `url:` line.
+  image). Pass it straight into the job; never download and re-host it.
+- **The file exists only on disk and goes into a job** (a clip
+  `pace-clips.py` sped up, a clip cut into parts, a re-encoded supplied
+  clip, a voice-over converted from a recording). Host it with the
+  `host_file` tool (`worker_tools`), `path` root-relative; the URL it
+  returns is the job's input. Host nothing a job does not take.
+- **Never host an intermediate file with `spira assets upload`.** That
+  files it among the user's own uploads, where the user sees it. The
+  CLI hosts only the finished render (file-management section 6).
 
 ## 3. Tool map
 
@@ -321,8 +327,9 @@ python3 tools/pace-clips.py <materials>/<name> th-01.mp4=26 th-02.mp4=27 th-03.m
 
 It replaces a sped-up clip in place (the original goes to `deletable/`)
 and prints every clip's length and `data-start`. Host each clip it sped
-up again (section 2): that URL, not the Seedance result, is the clip's
-cut-out input (3f). Only then submit the cut-outs and build the timings.
+up with `host_file` (section 2): that URL, not the Seedance result, is
+the clip's cut-out input (3f). A clip it left alone keeps its Seedance
+URL. Only then submit the cut-outs and build the timings.
 
 The clips' own audio is the voice-over. Build it and its timings in one
 step, clips in order, then place the clips back to back on the stage at
@@ -363,7 +370,8 @@ and never add a chroma-key step. The model takes no other field.
 
 **The cut-out takes at most 60 s of source.** A longer clip is divided at a
 segment boundary (the `segments` in `timings.json`) into parts of 60 s or
-less, re-encoded H.264, then hosted and cut out in one batch, each
+less, re-encoded H.264, then each part hosted with `host_file` (section
+2) and cut out in one batch, each
 `.webm` at its own `data-start` (3e). A longer source is rejected at
 submit, so this is not a way to save a generation.
 
@@ -471,8 +479,10 @@ steps, in order:
      (captions carry it). Never cut, retime, or regenerate the
      recording: its length is the video's length.
 
-   Then host `vo.mp3` with `spira assets upload` (section 2); it is a
-   file on disk either way.
+   The `vo.mp3 url` the talking head takes (section 2): with a voice ID
+   it is the ElevenLabs job's `resultUrls[0]` (the timings step only
+   reads the file); with a recording, `vo.mp3` was converted on disk, so
+   host it with `host_file`.
 2. **Talking head**, the presenter lip-synced to that voice-over:
    `{"referenceImage":["<photo or persona url>"],"referenceAudio":["<vo.mp3 url>"],"size":"9:16","resolution":"1080p","mode":"stable","talkingStyle":"stable"}`,
    written to `th-01.mp4`. Use `720p` for tests.
@@ -493,7 +503,7 @@ session, before the concept: its words are what the video is about.
    `tools/new-video.sh "<brand, or talking head>" < /dev/null`.
 2. **Bring the clip in as `th-01.mp4`**, re-encoded to H.264 so the
    stage and the renderer play it (an upload may be MOV or HEVC), then
-   host it (section 2):
+   host it with `host_file` (section 2):
    `ffmpeg -y -v error -i "<url>" -c:v libx264 -crf 17 -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart <materials>/<name>/th-01.mp4`.
 3. **Submit its cut-out (3f) at once**, with the hosted `th-01.mp4` as
    the input, and do steps 4 and 5 while it renders.
