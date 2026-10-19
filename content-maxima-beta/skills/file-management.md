@@ -100,11 +100,8 @@ carry on from there, and generate nothing that is already in.
   previous render to `renders/deletable/NN-name-MM-DD_<YYYYMMDD-HHMM>.mp4`
   first, so `renders/` holds exactly the current render of each editable.
 - A finished render (rendered and checked) is hosted, so it can
-  be handed over as a URL:
-
-  ```bash
-  spira assets upload renders/NN-name-MM-DD.mp4
-  ```
-
-  It prints nothing but the hosted URL.
+  be handed over as a URL: call the `host_file` tool (`worker_tools`)
+  with `path` `renders/NN-name-MM-DD.mp4` and use the `url` it
+  returns. Never `spira assets upload`: that puts the render in the
+  user's own uploads.
 - Only the current render is hosted. A re-render is hosted again.

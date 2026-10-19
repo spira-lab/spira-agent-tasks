@@ -149,9 +149,9 @@ Sort each fix-table row into one kind; section 6 rules apply to all.
   submitting. The replaced file goes to that video's `deletable/`.
 - A job input is a URL (toolkit section 2): a job's output by its
   `resultUrls[0]`; a file made or changed on disk (a re-paced clip, a
-  converted voice-over) hosted with `host_file`. Never host one with
-  `spira assets upload`, which puts it in the user's own uploads; that
-  CLI hosts only the new render (section 7).
+  converted voice-over) hosted with `host_file`. Never host any file
+  with `spira assets upload`, which puts it in the user's own uploads;
+  the new render is hosted with `host_file` too (section 7).
 - A vague comment: take its most likely meaning from frame and region, do
   it, state the reading. One that cannot be done (contradicts another,
   impossible, past the end) is skipped with the reason; it never stops
@@ -165,7 +165,8 @@ Sort each fix-table row into one kind; section 6 rules apply to all.
    Report `edit` `completed`, `render` `started`.
 3. Render once per stage-canvas-html section 8 to `<r>renders/<video>.mp4`
    (the previous render is kept in `<r>renders/deletable/`).
-4. Host: `cd "<cm>" && spira assets upload <r>renders/<video>.mp4`.
+4. Host: `host_file` (`worker_tools`) with `path` the absolute
+   `<cm>/<r>renders/<video>.mp4`; its `url` is the `publicUrl`.
 
 ## 8. Deliver
 

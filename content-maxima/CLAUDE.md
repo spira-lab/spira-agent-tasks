@@ -41,7 +41,7 @@ python3 tools/cut-sheet.py grid|elements <sheet.png> ... --names a,b  # cut one 
 python3 tools/captions.py <root>/editable/<name>.html            # word-per-word captions from the timings
 node tools/render/audit.js <root>/editable/<name>.html [--at ms,...]  # leaks, text, files, frame sheet
 node tools/render/render.js <root>/editable/<name>.html <root>/renders/<name>.mp4
-spira assets upload <root>/renders/<name>.mp4                  # host the finished render
+host_file renders/<name>.mp4 (worker_tools)                   # host the finished render; returns its URL
 tools/style-sheet.sh <url or path> <materials>/<name>/deletable # style reference contact sheet
 node docs/render-steps.js                                       # refresh the README cards
 ```
@@ -55,4 +55,4 @@ Node, ffmpeg (with libvpx), Python 3, and curl. Run `npm install` once in
 `CM_RENDER_LAMBDA` and `CM_RENDER_BUCKET` name the function and its bucket
 (set on the worker), with AWS credentials allowed to use them. Timings need `pip install openai-whisper`; reference
 videos from a URL need `yt-dlp`. The Spira CLI (`npm install -g
-@spira-lab/cli`) must be signed in.
+@spira-lab/cli`) must be signed in: jobs and `host_file` run as that account.

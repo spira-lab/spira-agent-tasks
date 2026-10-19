@@ -94,9 +94,10 @@ read the materials folder, and nothing is hosted for them.
   clip, a voice-over converted from a recording). Host it with the
   `host_file` tool (`worker_tools`), `path` root-relative; the URL it
   returns is the job's input. Host nothing a job does not take.
-- **Never host an intermediate file with `spira assets upload`.** That
-  files it among the user's own uploads, where the user sees it. The
-  CLI hosts only the finished render (file-management section 6).
+- **Never host any file with `spira assets upload`**, intermediate or
+  finished. That files it among the user's own uploads, where the user
+  sees it. The finished render is hosted with `host_file` too
+  (file-management section 6).
 
 ## 3. Tool map
 

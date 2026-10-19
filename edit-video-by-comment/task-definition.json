@@ -1,14 +1,14 @@
 {
   "version": 1,
-  "packageVersion": "0.5.1",
+  "packageVersion": "0.5.2",
   "description": "Edit a finished video according to a review comment file (a `video_review` JSON the video editor writes under comments/ and the opening message names, carrying a top-level `taskType` and `source` metadata about the task that made the video). Start with skills/edit-video-by-comment.md: it validates the JSON and routes to the editing skill for the video's source task type. The video is edited where it was made, in the linked task directory named in the file access rules.",
   "linkedTaskTypes": ["content-maxima"],
   "requirements": [
     {"name": "ffmpeg", "kind": "system", "purpose": "Probing, frames and the render's audio mix (content-maxima tools)", "check": "ffmpeg -version && ffprobe -version"},
     {"name": "python3", "kind": "system", "purpose": "content-maxima tools/captions.py, tools/make-timings.py, tools/fetch-resource.py and the music bed", "check": "python3 --version"},
     {"name": "@aws-sdk/client-s3 + client-lambda", "kind": "npm", "purpose": "content-maxima tools/render/render.js and audit.js run their browser on AWS Lambda (CM_RENDER_LAMBDA / CM_RENDER_BUCKET)", "check": "node -e \"require('@aws-sdk/client-s3'); require('@aws-sdk/client-lambda')\"", "install": "npm install -g @aws-sdk/client-s3@3.1142.0 @aws-sdk/client-lambda@3.1142.0"},
-    {"name": "@spira-lab/cli", "kind": "npm", "purpose": "Hosting the new render and model docs. Never used to submit, wait on or check a job", "check": "spira --version", "install": "npm install -g @spira-lab/cli"},
-    {"name": "spira sign-in", "kind": "credential", "purpose": "The Spira CLI must be signed in as the operator to generate or upload anything", "check": "spira auth whoami"},
+    {"name": "@spira-lab/cli", "kind": "npm", "purpose": "Model docs only. Never used to host a file, or to submit, wait on or check a job", "check": "spira --version", "install": "npm install -g @spira-lab/cli"},
+    {"name": "spira sign-in", "kind": "credential", "purpose": "The Spira CLI must be signed in as the operator: jobs and host_file run as that account", "check": "spira auth whoami"},
     {"name": "openai-whisper", "kind": "pip", "purpose": "Word timings, needed only when a comment changes what is said (content-maxima tools/make-timings.py)", "check": "python3 -c \"import importlib.util, sys; sys.exit(importlib.util.find_spec('whisper') is None)\"", "install": "pip install openai-whisper", "optional": true}
   ],
   "workspaceDirs": ["comments", "work", "results"],
@@ -20,7 +20,7 @@
   ],
   "outputs": [
     {"key": "video", "kind": "file", "required": true, "accept": [".mp4"], "description": "A copy of the new render under results/"},
-    {"key": "publicUrl", "kind": "url", "required": true, "description": "Hosted URL of the new render (spira assets upload)"},
+    {"key": "publicUrl", "kind": "url", "required": true, "description": "Hosted URL of the new render (host_file)"},
     {"key": "report", "kind": "text", "required": true, "description": "One line per comment: #n timecode, fixed / partly / not fixed, what changed"}
   ]
 }
