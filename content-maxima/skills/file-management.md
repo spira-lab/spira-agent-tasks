@@ -87,8 +87,7 @@ carry on from there, and generate nothing that is already in.
   otherwise retry once, then `report_error`. The only `rm` is a saved
   `.pending` record (toolkit section 1). The `deletable/` folders are
   the operator's to empty.
-- Tool working files (audit sheets, a reference video and its frames,
-  the original of a Seedance clip `pace-clips.py` sped up) are written straight to `deletable/`
+- Tool working files (audit sheets, a reference video and its frames,) are written straight to `deletable/`
   by the tools.
 
 ## 6. Renders
