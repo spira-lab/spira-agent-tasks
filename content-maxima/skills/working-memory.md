@@ -29,3 +29,4 @@ Captions, subtitles, and any text on screen always use the original.
 | Claude | Clawed |
 | GitHub | Git-Hub |
 | Cookiy | Cookie |
+| B-roll | Bee roll |

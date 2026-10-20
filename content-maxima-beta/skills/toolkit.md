@@ -81,8 +81,7 @@ read the materials folder, and nothing is hosted for them.
 - **The request already gives a public URL** (an avatar photo, a product
   image). Pass it straight into the job; never download and re-host it.
 - **The file exists only on disk and goes into a job** (a clip
-  `pace-clips.py` sped up, a clip cut into parts, a re-encoded supplied
-  clip, a voice-over converted from a recording). Host it with the
+  cut into parts, a re-encoded supplied clip, a voice-over converted from a recording). Host it with the
   `host_file` tool (`worker_tools`), `path` root-relative; the URL it
   returns is the job's input. Host nothing a job does not take.
 - **Never host any file with `spira assets upload`**, intermediate or
@@ -313,28 +312,8 @@ never with `sleep`, `pgrep` or a polling loop (a `pgrep -f` loop matches
 itself and never ends; on staging one ran into the tool's 10-minute
 timeout).
 
-**Speed up a returned clip whose chunk is short, before anything else
-uses the clips.** A chunk with fewer words than its slot holds is spoken
-slowly to fill the 4, 8, or 12 seconds. The fix is the clip's speed, never
-the script: the chunks stay as they were written and are never rewritten,
-re-split, or padded for this. Up to four words short, the clip is left as
-it is; five or more short, the output video is sped up, picture and voice
-together, to the length its words take at 3.3 words a second. One command
-checks every clip, in stage order, with its chunk's word count:
-
-```bash
-python3 tools/pace-clips.py <materials>/<name> th-01.mp4=26 th-02.mp4=27 th-03.mp4=9
-```
-
-It replaces a sped-up clip in place (the original goes to `deletable/`)
-and prints every clip's length and `data-start`. Host each clip it sped
-up with `host_file` (section 2): that URL, not the Seedance result, is
-the clip's cut-out input (3f). A clip it left alone keeps its Seedance
-URL. Only then submit the cut-outs and build the timings.
-
 The clips' own audio is the voice-over. Build it and its timings in one
-step, clips in order, then place the clips back to back on the stage at
-the `data-start` values `pace-clips.py` printed:
+step, clips in order, then place the clips back to back on the stage:
 
 ```bash
 python3 tools/make-timings.py <materials>/<name>/vo.mp3 --from th-01.mp4 th-02.mp4 th-03.mp4
@@ -386,7 +365,7 @@ The WebM goes on the stage as a `<video>` element, never as extracted
 frames (stage-canvas-html, rule 11).
 
 **Every talking-head clip is cut out, in one batch.** As soon as the
-clips are in and paced (3e), submit every clip for its cut-out in one turn and wait on them in
+clips are in, submit every clip for its cut-out in one turn and wait on them in
 one turn (section 1), never one at a time, and never skip a clip because the
 scene plan shows it whole: the cut-out is what the scenes are layered
 with (creative-video-production section 5), and deciding per clip is
