@@ -61,6 +61,13 @@ time is stage time.
   the `#stage` size (1080 x 1920 unless made at another ratio,
   stage-canvas-html section 9). `regionPx` only WHEN `canvas` equals it.
 - Ignore `targets`, `stale`, `madeAgainstVersion`.
+- Attachments: each `attachments[].path` is relative to the **edit task**
+  directory (the one whose `comments/` holds the JSON), not to `<cm>`.
+  Copy it in before referencing it:
+  `cp "<edit-task>/comments/media/<run>/<file>" "<cm>/<r>editable/materials/<video>/<sub>/"`
+  (`<sub>`: `sfx/`, `img/` or `elements/`). Keep the JSON's file where it
+  is. Never reference a path under `comments/` from the stage, and never
+  treat `path` as a URL.
 
 Check: `durationSeconds` within 0.1 s of `data-duration`/1000 and `canvas`
 the aspect of `#stage`. IF not, scale times by
@@ -112,6 +119,51 @@ Sort each fix-table row into one kind; section 6 rules apply to all.
   comment or that file, fetched into materials. Never draw one; without
   it the brand is its name in text.
 - **Out of scope** (post caption, cover): skip, say so.
+
+### 5a. A comment that carries a `selection`
+
+WHEN a comment has `selection`, it is a choice the reviewer made in a
+picker. Do what it says, in place of re-reading `text` for that part;
+`text` still covers anything the selection does not. Each kind below is
+otherwise an ordinary stage or visual-material fix.
+
+- **`subtitle`** — `selection.style` holds `{behavior, font, size, color,
+  highlightColor, top, textTransform?, outline?, background?, wordScale?}`.
+  Run `tools/captions.py` with `--style <behavior> --top <top> --size
+  <size> --color <color> --hl <highlightColor>`, then, after the marker
+  block, set `.cc-phrase` to `font-family: '<font>'`, the
+  `text-transform`, `-webkit-text-stroke: <outline>px rgba(0,0,0,.55)`
+  (`0` when `outline` is absent), `background`/`padding`/`border-radius`
+  when `background` is set, and `wordScale` as a larger `.w` font-size.
+  Copy the font from `<cm>/fonts/` into the materials and declare it.
+  Never edit inside the markers and never rewrite caption words; this
+  comment changes the look only.
+- **`audio`** — `role: 'sfx'` is a cue at the comment's moment:
+  `<audio class="sfx" src="materials/<video>/sfx/<file>" data-at="<ms>"
+  data-gain-db="<gainDb>">`, alongside the existing slots. `role: 'bed'`
+  replaces the music bed (`#bgm`), and its `gainDb` is applied as that
+  tag's `data-gain-offset-db`, never by re-encoding the file. The voice
+  stays the loudest sound; the four level attributes of
+  stage-canvas-html section 5 are the only way to change a level.
+- **`image`** — its own absolutely positioned layer inside `#stage` at
+  the `anchor` and `scale` given (nine-point anchor, stage pixels, not
+  free coordinates), entering and leaving on CSS animations
+  (stage-canvas-html section 4, rule 10). A comment with a `region` uses
+  the region as the box, so `anchor`/`scale` are ignored.
+- **`element`** — `element.kind` decides the markup:
+  `text` writes a text layer with the given `font`, `size`, `color`;
+  `shape` writes the inline SVG in the given `color`;
+  `emoji` writes the glyph at the given `size`;
+  `animated` is a `<video muted playsinline preload="auto"
+  data-start="<ms>">` pointing at the copied `elements/` file, kept to
+  `holdMs` when it is given and to the end when it is not.
+  All of them sit at the comment's `anchor`/`scale`, in the stage's safe
+  area, never over the face (creative-video-production section 9).
+
+IF a selection cannot be honoured as written (its font is missing from
+`<cm>/fonts/`, an attachment's file will not open, the anchor is outside
+the safe area), make the nearest allowed change and report what you
+changed instead — `partly`, naming it.
 
 ## 6. Fix rules
 

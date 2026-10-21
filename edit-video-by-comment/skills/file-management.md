@@ -8,14 +8,17 @@ description: Layout of this task directory and what may be written where. Apply 
 Paths are relative to this task directory.
 
 ```
-CLAUDE.md, skills/   the package: read only
-comments/            review JSON files the video editor writes, one per submission
-work/<video>/        where wait_ai_job saves, before the file is moved on
-results/<video>.mp4  copy of the new render, delivered by submit_result
+CLAUDE.md, skills/        the package: read only
+comments/                 review JSON files, one per submission
+comments/media/<run>/     media those comments bring (a sound, a still, a sticker)
+work/<video>/             where wait_ai_job saves, before the file is moved on
+results/<video>.mp4       copy of the new render, delivered by submit_result
 ```
 
-- `comments/` is read only: never edit, move or delete a file there. It is
-  the record of what each run was asked.
+- `comments/` is read only, `comments/media/` included: never edit, move
+  or delete a file there. It is the record of what each run was asked.
+  A comment's media is *copied* from there into the video's materials; the
+  original stays.
 - Write only under `work/` and `results/`. Create no other folder.
 - Never delete a file and never free space. On a size error, retry once,
   then `report_error`.

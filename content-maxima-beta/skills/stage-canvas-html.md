@@ -280,6 +280,38 @@ their own: set `.cc-phrase` to the caption face of the video's type
 system (creative-video-production section 5). Never edit inside the markers, never
 write caption words by hand, and do not reuse the `cc-` names.
 
+A caption **style chosen by the user** arrives with its own numbers
+(behaviour, font, size, colour, highlight colour, top). The generator's
+flags take behaviour/top/size/colours; everything else — the face, the
+case, the outline, a box behind the phrase, a larger spoken word — is the
+`.cc-phrase` / `.cc-phrase .w` CSS after the markers. Restyling never
+changes which words appear when: that comes from the timings.
+
+## 6b. Layers a change adds
+
+An edit may bring its own files (a sound, a still, an animated sticker).
+They must be copied into `materials/<name>/` first — the stage loads
+nothing from the network (section 4, rule 8) and nothing from outside the
+editable's own folder.
+
+- **Image**: `<img>` in an absolutely positioned wrapper inside `#stage`,
+  sized in stage pixels, entering and leaving on CSS animations
+  (section 4, rule 10). Give it a wrapper if it needs both an entry and an
+  exit, exactly like a scene element.
+- **Animated sticker**: `<video muted playsinline preload="auto"
+  data-start="<ms>" src="materials/<name>/elements/<file>">`. The harness
+  and the renderer seek it; write no sync script and extract no frames
+  (section 4, rule 11). WebM only: its transparency has to survive.
+- **Extra sound**: a short cue is one more `<audio class="sfx" data-at>`
+  (section 5). A different music bed replaces `#bgm`, with the library
+  entry's own `data-gain-db` copied exactly, or a generated bed levelled
+  by loudnorm. There is no fourth audio slot.
+- **Text or emoji**: ordinary absolutely positioned text inside `#stage`
+  — the same rules as any other type in the video (section 3).
+
+These layers are content, not chrome: they live inside `#stage`, they do
+not touch the harness CSS, and the audit must pass with them in place.
+
 ## 7. Audit
 
 Run the whole-video audit twice: once when every scene is written, and

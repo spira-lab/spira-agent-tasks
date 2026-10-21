@@ -22,7 +22,11 @@ Required, else `report_error` naming each problem and change nothing:
   no workspace to edit);
 - `source` an object with `"kind": "agent-job"`;
 - `source.video.path` relative, no `..` (content-maxima: a `.mp4` under a
-  `renders/` folder).
+  `renders/` folder);
+- every `attachments[].path` starts with `comments/media/`, has no `..`,
+  and names a file that exists here. IF one is missing: `report_error`
+  naming it and change nothing — a comment whose media did not arrive
+  cannot be honoured.
 
 IF `comments` is empty, say so and stop without editing.
 
@@ -48,7 +52,13 @@ Other `source` fields are informational. Each comment:
 | `region` | `{x, y, width, height}` 0 to 1 on the canvas, top-left; `null` = whole frame; `regionPx` in canvas pixels |
 | `scope` | optional: `video` = the whole video (ignore `time`), `frame` = the frame at `time`, `region` = `region` at `time`; absent: `region` decides |
 | `text` | what to change |
+| `attachments` | optional: media this comment brings, each `{kind, path, mime, durationMs?, width?, height?}`. `path` is relative to **this** task directory (`comments/media/<run>/…`) and the file is already there — copy it into the video's materials and reference it; never fetch a URL |
+| `selection` | optional: what the reviewer picked instead of describing it (a subtitle style, an element, an attachment's role or placement). Its shape is that picker's; read it as data and follow it exactly |
 | `targets`, `stale`, `madeAgainstVersion` | about the editor draft, not the video |
+
+A comment's `selection` beats its prose where they describe the same
+thing: it is a choice, not a suggestion. `attachments` without a
+`selection` means `text` says what to do with them.
 
 ## 4. Route
 
