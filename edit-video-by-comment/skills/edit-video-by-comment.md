@@ -52,13 +52,15 @@ Other `source` fields are informational. Each comment:
 | `region` | `{x, y, width, height}` 0 to 1 on the canvas, top-left; `null` = whole frame; `regionPx` in canvas pixels |
 | `scope` | optional: `video` = the whole video (ignore `time`), `frame` = the frame at `time`, `region` = `region` at `time`; absent: `region` decides |
 | `text` | what to change |
-| `attachments` | optional: media this comment brings, each `{kind, path, mime, durationMs?, width?, height?}`. `path` is relative to **this** task directory (`comments/media/<run>/…`) and the file is already there — copy it into the video's materials and reference it; never fetch a URL |
-| `selection` | optional: what the reviewer picked instead of describing it (a subtitle style, an element, an attachment's role or placement). Its shape is that picker's; read it as data and follow it exactly |
+| `attachments` | optional: media this comment brings, each `{kind, path, mime, durationMs?, width?, height?}` (`kind`: `audio`, `image`, `animated`, or `video` for a timeline edit's clips). `path` is relative to **this** task directory (`comments/media/<run>/…`) and the file is already there — copy it into the video's materials and reference it; never fetch a URL. A selection's index (`attachmentIndex`, `source.index`) counts in this list from 0 |
+| `selection` | optional: what the reviewer picked instead of describing it (a subtitle style, an element, an attachment's role or placement, or `type: "timeline"`: the reviewer's own cut of the video). Its shape is that picker's; read it as data and follow it exactly |
 | `targets`, `stale`, `madeAgainstVersion` | about the editor draft, not the video |
 
 A comment's `selection` beats its prose where they describe the same
 thing: it is a choice, not a suggestion. `attachments` without a
-`selection` means `text` says what to do with them.
+`selection` means `text` says what to do with them. A packet holds at
+most one timeline edit; it is done **after** every other comment (their
+times are on the video before the cut).
 
 ## 4. Route
 

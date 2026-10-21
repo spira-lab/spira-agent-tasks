@@ -65,7 +65,7 @@ time is stage time.
   directory (the one whose `comments/` holds the JSON), not to `<cm>`.
   Copy it in before referencing it:
   `cp "<edit-task>/comments/media/<run>/<file>" "<cm>/<r>editable/materials/<video>/<sub>/"`
-  (`<sub>`: `sfx/`, `img/` or `elements/`). Keep the JSON's file where it
+  (`<sub>`: `sfx/`, `img/`, `elements/` or `clips/`). Keep the JSON's file where it
   is. Never reference a path under `comments/` from the stage, and never
   treat `path` as a URL.
 
@@ -172,6 +172,96 @@ IF a selection cannot be honoured as written (its font is missing from
 the safe area), make the nearest allowed change and report what you
 changed instead — `partly`, naming it.
 
+### 5b. A timeline edit (`selection.type: "timeline"`)
+
+The reviewer cut the video by hand on a timeline; this comment is that
+cut. Make the stage play exactly the timeline, **seamlessly**: nobody
+watching may see or hear where it was cut. Do it last, after every other
+comment (their times are pre-cut stage times).
+
+**Read it.** `timeline` follows the video editor's model, all in
+seconds: `elements[]` each `{id, type, source, start, length, startFrom,
+volume, region?}` and `tracks[]` each `{kind, elementIds}`.
+- `start`/`length`: where it plays on the **new** video. `startFrom`: the
+  in-point in its source.
+- `source.kind`: `base` = the stage as it is now (picture and its whole
+  mix), the range `[startFrom, startFrom+length]` of stage time;
+  `attachment` = `attachments[source.index]`, a clip (`video`) or a
+  sound (`audio`); `detached` = the sound of clip `source.from`, on that
+  clip's own timeline.
+- `volume`: 1 = as it is, 0 = silent, up to 2. As a gain:
+  `dB = 20*log10(volume)`, clamped to -20..+6.
+- `main` track: the new video, end to end from 0; its end is the new
+  `data-duration`. `overlay` track: clips over it in their `region`.
+  `audio` track: sounds over it.
+
+**Plan it** as one table before touching anything, from the main track:
+the new video is its elements back to back.
+
+| new from–to | source | stage from–to (base) or file | volume | note |
+
+`base` rows in source order; a range of stage time that no `base` row
+covers is **cut**. IF `base` rows are out of source order or overlap,
+report `partly` and keep source order.
+
+1. **Cuts.** For each cut range of stage time:
+   - Snap each edge to the nearest gap between spoken words
+     (`materials/<video>/timings.json`) within ±150 ms, else to a
+     scene boundary within ±150 ms; never cut inside a word. Write the
+     snapped edges in the table; report each shift over 40 ms.
+   - Voice: move `materials/<video>/vo.mp3` to that folder's `deletable/`,
+     then write the cut version back as `vo.mp3`: the range taken out
+     with ffmpeg and the two sides joined by a 40 ms crossfade
+     (`atrim` both sides + `acrossfade=d=0.04`). `#vo` keeps its src.
+   - Script: drop the words that fall wholly inside the range from
+     `materials/<video>/script.txt`, then rerun `tools/make-timings.py`
+     on the new `vo.mp3` and `tools/captions.py` (stage-canvas-html
+     section 2).
+   - Stage: a scene, layer, `sfx` cue or clip wholly inside the range is
+     removed; one that straddles it is trimmed to the side that stays.
+     Every `animation-delay`, `data-start`, `data-at` and duck range after
+     the range moves earlier by its length; then `data-duration` drops by
+     it.
+2. **A clip spliced into main** (an `attachment` row): at its `start`,
+   the new video makes room for its `length`. Everything after it moves
+   later by `length`; the voice-over gets that much silence there
+   (ffmpeg `anullsrc` + concat, written back as `vo.mp3` the same way;
+   `tools/make-timings.py` and `tools/captions.py` again). The clip fills the
+   frame as its own scene:
+   `<video muted playsinline preload="auto" data-start="<ms>">` on a
+   file trimmed to `[startFrom, startFrom+length]` without sound
+   (`ffmpeg -ss <startFrom> -t <length> -i <file> -an …` into
+   `materials/<video>/clips/`), cover-fit to the stage.
+3. **Overlay clips**: the same trimmed, silent file in a wrapper placed
+   exactly at `region` (section 3 maps it to stage px, its own aspect,
+   centred, never stretched), from `start` for `length`, then gone.
+4. **Sound of clips and the audio track.** Every clip whose `volume` > 0
+   and every `audio` element is one cue:
+   cut its sound to `[startFrom, startFrom+length]` with ffmpeg
+   (`-vn -ss -t`, 30 ms fade in and out) into `materials/<video>/sfx/`,
+   then `<audio class="sfx" src="…" data-at="<start ms>"
+   data-gain-db="<dB>">`. A `detached` element cuts from its clip's file.
+   `volume: 0` writes nothing; below 0.1 (-20 dB) use -20.
+5. **Volume of a `base` row other than 1** (the stage's own mix in that
+   range): there is no level for the whole mix. Lower the bed with one
+   `#bgm data-duck` entry for that range (`dB` < 0 only), and set each
+   `sfx` cue inside it to its gain plus `dB`. The voice is left as it is;
+   report `partly` saying the voice keeps its level. A row above 1 can
+   only be met on cues: report `partly`.
+6. **Seams.** At every join on main (a cut, a spliced clip) the picture
+   crossfades over 6–12 frames (CSS opacity on the scene wrappers, rule 10)
+   unless the two sides are the same shot, where a clean cut is smoother.
+   The music bed is **not** cut: the renderer lays it to the new length,
+   so it runs straight through every join. No clip sound starts or stops
+   without its 30 ms fade.
+7. **Check.** `data-duration` = the main track's end within one frame
+   (42 ms); audit at each join (`--at` 200 ms before and after) and see
+   no jump, no doubled frame, no half word in captions.
+
+Report it as **one** line: `#n fixed: cut at 0:06.2–0:09.0 (snapped
++60 ms), clip beach.mp4 2.0–7.0 s spliced at 0:06.2, 2 cuts, new length
+0:22.0`, or `partly` with each shortfall named.
+
 ## 6. Fix rules
 
 - Change only what a comment asks: no restyling, reordering, new colours,
@@ -196,7 +286,9 @@ changed instead — `partly`, naming it.
 - Levels change only through stage-canvas-html section 5's attributes
   (`#vo`/sfx `data-gain-db`, `#bgm` `data-gain-offset-db`, `data-duck`),
   never a volume filter or re-encode; the bed's `data-gain-db` stays as
-  copied and the voice stays loudest. Replace the bed only WHEN a comment
+  copied and the voice stays loudest. The one exception is a timeline
+  edit (5b): it cuts and joins the voice-over and trims clip sounds with
+  ffmpeg, but still sets every level by attribute. Replace the bed only WHEN a comment
   asks for other music, chosen per creative-video-production section 1,
   its `gain_db` copied exactly.
 - New material only WHEN a comment needs it, generated per toolkit
