@@ -145,11 +145,9 @@ otherwise an ordinary stage or visual-material fix.
   tag's `data-gain-offset-db`, never by re-encoding the file. The voice
   stays the loudest sound; the four level attributes of
   stage-canvas-html section 5 are the only way to change a level.
-- **`image`** — its own absolutely positioned layer inside `#stage` at
-  the `anchor` and `scale` given (nine-point anchor, stage pixels, not
-  free coordinates), entering and leaving on CSS animations
-  (stage-canvas-html section 4, rule 10). A comment with a `region` uses
-  the region as the box, so `anchor`/`scale` are ignored.
+- **`image`** — its own absolutely positioned layer inside `#stage`,
+  entering and leaving on CSS animations (stage-canvas-html section 4,
+  rule 10).
 - **`element`** — `element.kind` decides the markup:
   `text` writes a text layer with the given `font`, `size`, `color`;
   `shape` writes the inline SVG in the given `color`;
@@ -157,8 +155,17 @@ otherwise an ordinary stage or visual-material fix.
   `animated` is a `<video muted playsinline preload="auto"
   data-start="<ms>">` pointing at the copied `elements/` file, kept to
   `holdMs` when it is given and to the end when it is not.
-  All of them sit at the comment's `anchor`/`scale`, in the stage's safe
-  area, never over the face (creative-video-production section 9).
+
+**Where an image or element goes.** The reviewer placed it by hand, so
+the comment's `region` (its `regionPx` on the stage, section 3) **is**
+its box: put it exactly there, from the comment's moment. A picture or
+an animated sticker fits inside the box at its own aspect, centred,
+never stretched; text uses the box as its block (left/top/width from the
+box, font size as given, shrunk only if the text would overflow it).
+`anchor`/`scale` only describe the same box in words — use them only for
+a comment without a `region`. A box in the face area or outside the safe
+area (creative-video-production section 9) moves to the nearest allowed
+spot, reported as `partly`.
 
 IF a selection cannot be honoured as written (its font is missing from
 `<cm>/fonts/`, an attachment's file will not open, the anchor is outside
