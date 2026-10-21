@@ -54,13 +54,18 @@ Other `source` fields are informational. Each comment:
 | `text` | what to change |
 | `attachments` | optional: media this comment brings, each `{kind, path, mime, durationMs?, width?, height?}` (`kind`: `audio`, `image`, `animated`, or `video` for a timeline edit's clips). `path` is relative to **this** task directory (`comments/media/<run>/…`) and the file is already there — copy it into the video's materials and reference it; never fetch a URL. A selection's index (`attachmentIndex`, `source.index`) counts in this list from 0 |
 | `selection` | optional: what the reviewer picked instead of describing it (a subtitle style, an element, an attachment's role or placement, or `type: "timeline"`: the reviewer's own cut of the video). Its shape is that picker's; read it as data and follow it exactly |
+| `cutAnchor` | optional: the change was written on a cut that has not run yet. `{cutNoteId, outputSeconds, source}` — `source.kind: "base"` gives the second of the video as it is now, `source.kind: "clip"` a second into the clip with that `elementId` in the cut |
 | `targets`, `stale`, `madeAgainstVersion` | about the editor draft, not the video |
 
 A comment's `selection` beats its prose where they describe the same
 thing: it is a choice, not a suggestion. `attachments` without a
-`selection` means `text` says what to do with them. A packet holds at
-most one timeline edit; it is done **after** every other comment (their
-times are on the video before the cut).
+`selection` means `text` says what to do with them.
+
+**Order.** A packet holds at most one timeline edit. Do the comments
+without `cutAnchor` first (their `time` is on the video as it is), then
+the timeline edit, then the comments with `cutAnchor` — those were
+written on the cut's output, and `source` says where each lands, so never
+re-map their `time` yourself.
 
 ## 4. Route
 

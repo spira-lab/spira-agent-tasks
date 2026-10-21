@@ -262,6 +262,21 @@ Report it as **one** line: `#n fixed: cut at 0:06.2–0:09.0 (snapped
 +60 ms), clip beach.mp4 2.0–7.0 s spliced at 0:06.2, 2 cuts, new length
 0:22.0`, or `partly` with each shortfall named.
 
+**Changes written on the cut's output.** A comment with a `cutAnchor`
+was written while the cut was still a preview. Do it **after** this
+section, and place it by its anchor, not by its `time`:
+- `source.kind: "base"`, `seconds`: that second of the video as it was —
+  find the main piece that plays it (it is a `base` row whose
+  `[startFrom, startFrom+length]` holds `seconds`) and use
+  `start + (seconds - startFrom)` on the new timeline.
+- `source.kind: "clip"`, `elementId`, `offsetSeconds`: inside that
+  spliced clip, `offsetSeconds` from its in-point, so it is inside the
+  window that clip now occupies. Never place it outside that window: if
+  the clip was cut away since (no such element), skip the comment and
+  report it `not fixed, the clip it was written on is gone`.
+Everything else about such a comment (its region, its `selection`, its
+attachments) applies as usual.
+
 ## 6. Fix rules
 
 - Change only what a comment asks: no restyling, reordering, new colours,
