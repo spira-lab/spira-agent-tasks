@@ -102,8 +102,18 @@ Sort each fix-table row into one kind; section 6 rules apply to all.
 
 - **Stage** (animation, timing, text, captions, layout, effects): html
   only, stage-canvas-html sections 3 to 6. No generation.
-- **Visual material** (background, b-roll, element): generate per toolkit
-  3d or 3c and prompting, in the video's look, and swap it in.
+- **Supplied material** (the comment's `attachments` hold an `image`,
+  `animated` or `video` file): that file **is** the material, used exactly
+  as supplied; `needs generation` is `no`. Never regenerate it, edit it
+  with an image model, upscale, cut out, recolour, crop, filter or
+  restyle it, or bring it "into the video's look". Only WHEN the
+  comment's `text` asks for a change to the file itself (remove its
+  background, make it black and white) do that one change, to a new
+  file beside the original, and say so in the report. Placement and
+  appearance per 5a.
+- **Visual material** (background, b-roll, element) that a comment asks
+  for **without supplying a file**: generate per toolkit 3d or 3c and
+  prompting, in the video's look, and swap it in.
 - **Presenter**: appearance is 3b on the base, then redo the clips that
   show it (3e, or 3j when the voice is given) and their cut-out (3f); a
   new presenter is 3a and every clip; a gesture redoes those clips (3e
@@ -125,7 +135,9 @@ Sort each fix-table row into one kind; section 6 rules apply to all.
 WHEN a comment has `selection`, it is a choice the reviewer made in a
 picker. Do what it says, in place of re-reading `text` for that part;
 `text` still covers anything the selection does not. Each kind below is
-otherwise an ordinary stage or visual-material fix.
+otherwise an ordinary stage fix; one that names an attachment is
+supplied material (section 5) and never goes to visual-material
+generation.
 
 - **`subtitle`** — `selection.style` holds `{behavior, font, size, color,
   highlightColor, top, textTransform?, outline?, background?, wordScale?}`.
@@ -165,7 +177,20 @@ box, font size as given, shrunk only if the text would overflow it).
 `anchor`/`scale` only describe the same box in words — use them only for
 a comment without a `region`. A box in the face area or outside the safe
 area (creative-video-production section 9) moves to the nearest allowed
-spot, reported as `partly`.
+spot, its size kept, reported as `partly`.
+
+**How a supplied picture or sticker looks.** Exactly like its file:
+- `<img>` or `<video>` sized to the box with `object-fit: contain`, the
+  copied file as its `src`. It is not a frame-filling layer: when its
+  aspect differs from the box or the frame, the margin stays empty and
+  it is never switched to `cover`; an audit note that it falls short of
+  an edge is reported, not "fixed".
+- No `filter`, `backdrop-filter`, `mix-blend-mode`, `clip-path`, `mask`,
+  `border-radius`, `border`, `box-shadow`, or resting `opacity` below 1
+  on it or any wrapper around it.
+- Entry and exit use only opacity, translate and uniform scale, on a
+  wrapper, and rest at `opacity: 1; transform: none` while it shows.
+- Nothing is layered over its box except the captions.
 
 IF a selection cannot be honoured as written (its font is missing from
 `<cm>/fonts/`, an attachment's file will not open, the anchor is outside
@@ -231,7 +256,10 @@ report `partly` and keep source order.
    `<video muted playsinline preload="auto" data-start="<ms>">` on a
    file trimmed to `[startFrom, startFrom+length]` without sound
    (`ffmpeg -ss <startFrom> -t <length> -i <file> -an …` into
-   `materials/<video>/clips/`), cover-fit to the stage.
+   `materials/<video>/clips/`), cover-fit to the stage. Trimming and this
+   cover-fit are the only changes a spliced clip gets; otherwise it is
+   supplied material (section 5), its picture never re-graded or
+   regenerated.
 3. **Overlay clips**: the same trimmed, silent file in a wrapper placed
    exactly at `region` (section 3 maps it to stage px, its own aspect,
    centred, never stretched), from `start` for `length`, then gone.
@@ -306,7 +334,8 @@ attachments) applies as usual.
   ffmpeg, but still sets every level by attribute. Replace the bed only WHEN a comment
   asks for other music, chosen per creative-video-production section 1,
   its `gain_db` copied exactly.
-- New material only WHEN a comment needs it, generated per toolkit
+- New material only WHEN a comment needs it and supplies no file,
+  generated per toolkit
   section 1 with its models and prompting formats, matching the video's
   look. Payload and `.pending` go in `<cm>/<r>editable/materials/<video>/jobs/`.
   `wait_ai_job` saves only here, so `saveTo` is `work/<video>/<file>`;
@@ -326,7 +355,11 @@ attachments) applies as usual.
 ## 7. Verify and render
 
 1. Rerun the same `--at` audit; each asked change is visible at its moment
-   and nothing else moved.
+   and nothing else moved. Each supplied image or sticker: its copy under
+   `materials/` has the same `sha256sum` as its file under `comments/media/`
+   (a spliced or overlay clip is trimmed, so it is checked by eye), its
+   layer's `src` is that copy, and its CSS has none of what 5a forbids.
+   Fix any miss before going on.
 2. Whole-video audit per stage-canvas-html section 7, fix, run again.
    Report `edit` `completed`, `render` `started`.
 3. Render once per stage-canvas-html section 8 to `<r>renders/<video>.mp4`
@@ -339,10 +372,13 @@ attachments) applies as usual.
 1. `cp "<cm>/<r>renders/<video>.mp4" results/<video>.mp4`.
 2. `submit_result`: `video` = `results/<video>.mp4`, `publicUrl` = hosted
    URL, `report` = one line per comment in packet order, saying what
-   changed and, WHEN something was generated, what and its credits:
+   changed and, WHEN something was generated, what and its credits; a
+   supplied file is "used as supplied", or names the one change its
+   comment asked for:
 
    ```
    #3 00:04.12 fixed: headline moved up to y 420, clear of the face
    #4 00:06.00 fixed: new outfit; base edit + 3 clips regenerated (~60 credits)
+   #5 00:09.50 fixed: logo image placed top right, used as supplied
    ```
 3. Report `render` `completed`; end with the same lines and the URL.
