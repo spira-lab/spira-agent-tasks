@@ -219,6 +219,17 @@ volume, region?}` and `tracks[]` each `{kind, elementIds}`.
 - `main` track: the new video, end to end from 0; its end is the new
   `data-duration`. `overlay` track: clips over it in their `region`.
   `audio` track: sounds over it.
+- There may be several `overlay` and several `audio` tracks. Nothing
+  overlaps within one track. Overlay tracks stack in their order in
+  `tracks[]`: a later one is drawn above an earlier one.
+- Besides `video` and `audio`, an overlay track may hold:
+  `type: "image"` (`{id, type, source: {kind: "attachment", index},
+  start, length, region}`, an `image` attachment);
+  `type: "graphic"` (`{id, type, graphic, start, length, region}`, where
+  `graphic` is a `text`, `shape` or `emoji` exactly as in a section 5a
+  `element`); and a `video` with `loop: true`, an animated sticker (its
+  attachment is `animated`), silent, repeating its file for `length`.
+  These have no `startFrom` and no `volume`.
 
 **Plan it** as one table before touching anything, from the main track:
 the new video is its elements back to back.
@@ -263,6 +274,16 @@ report `partly` and keep source order.
 3. **Overlay clips**: the same trimmed, silent file in a wrapper placed
    exactly at `region` (section 3 maps it to stage px, its own aspect,
    centred, never stretched), from `start` for `length`, then gone.
+3b. **Stills, drawings and stickers on overlay tracks**: each is a layer
+   placed exactly at its `region`, from `start` for `length`, then gone —
+   made and styled as the section 5a `image` / `element` of the same
+   kind (its box is `region`, never stretched). A `loop` sticker
+   longer than its file is laid as back-to-back copies of
+   `<video muted playsinline preload="auto" data-start="<ms>">`, the
+   last one cut at the element's end. Stack the layers in track order
+   (a later overlay track above an earlier one); captions stay above
+   all of them. Report them on the same one line (`2 stills, 1 text,
+   1 sticker over`).
 4. **Sound of clips and the audio track.** Every clip whose `volume` > 0
    and every `audio` element is one cue:
    cut its sound to `[startFrom, startFrom+length]` with ffmpeg
