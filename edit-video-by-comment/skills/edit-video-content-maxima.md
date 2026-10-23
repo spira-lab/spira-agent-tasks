@@ -57,6 +57,9 @@ Comments were written on the whole render placed from 0 s, so comment
 time is stage time.
 
 - Moment: `ms = round(time * 1000)`; never `frame` (render is 24 fps).
+- Span (`endTime` present): `endMs = round(endTime * 1000)`. A layer or
+  sound the comment adds gets `data-start = ms` and lasts `endMs - ms`;
+  a change to what is already there applies only between them.
 - Region: `null` = whole frame; else `x*W, y*H, width*W, height*H`, `W x H`
   the `#stage` size (1080 x 1920 unless made at another ratio,
   stage-canvas-html section 9). `regionPx` only WHEN `canvas` equals it.
@@ -332,6 +335,8 @@ section, and place it by its anchor, not by its `time`:
   window that clip now occupies. Never place it outside that window: if
   the clip was cut away since (no such element), skip the comment and
   report it `not fixed, the clip it was written on is gone`.
+- `end`, when present: place it the same way; the span runs between the
+  two placed points.
 Everything else about such a comment (its region, its `selection`, its
 attachments) applies as usual.
 
