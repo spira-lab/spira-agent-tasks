@@ -88,7 +88,8 @@ const levels = (() => {
   };
   const vo = inRange(ed.voGainDb, -12, 6, '#vo data-gain-db');
   const bed = inRange(ed.bgmOffsetDb, -20, 6, '#bgm data-gain-offset-db');
-  ed.sfx.forEach(s => inRange(s.gainDb, -20, 6, `sfx ${s.src} data-gain-db`));
+  // As low as 1%: a manual edit's sound turned down below 10% stays a cue at its own level.
+  ed.sfx.forEach(s => inRange(s.gainDb, -40, 6, `sfx ${s.src} data-gain-db`));
   const duck = (ed.bgmDuck === null ? [] : ed.bgmDuck.split(',')).map(part => {
     const m = part.trim().match(/^(\d+)-(\d+):(-?\d+(?:\.\d+)?)$/);
     if (!m) fail(`#bgm data-duck entries are "startMs-endMs:dB", got "${part.trim()}"`);
@@ -119,7 +120,9 @@ function mixAudio(silent, secs) {
   let idx = 1;
   if (ed.voSrc) {
     inputs.push('-i', path.join(dir, ed.voSrc));
-    parts.push(`[${idx}:a]loudnorm=I=-16:TP=-1.5:LRA=7${dbFilter(levels.vo)},aformat=channel_layouts=stereo,apad[vo]`); labels.push('[vo]'); idx++;
+    // A voice an edit levelled before cutting it is not levelled again: a shorter voice levels to another gain.
+    const level = ed.voLevelled ? 'aresample=48000' : 'loudnorm=I=-16:TP=-1.5:LRA=7';
+    parts.push(`[${idx}:a]${level}${dbFilter(levels.vo)},aformat=channel_layouts=stereo,apad[vo]`); labels.push('[vo]'); idx++;
   }
   ed.sfx.forEach((s, k) => {
     const file = path.join(dir, s.src);

@@ -121,7 +121,8 @@ Sort each fix-table row into one kind; section 6 rules apply to all.
 - **Sound**: a new track per creative-video-production section 1; a
   volume or a lowered moment per stage-canvas-html section 5's
   attributes; new words or voice remake the speech by its source (3e,
-  3j, 3i), then timings, captions and the scenes they move.
+  3j, 3i), then timings, captions and the scenes they move. A remade
+  voice is not levelled yet: take `data-levelled` off `#vo`.
 - **Whole video** (script, length, style, hook, ratio): still this
   editable; redo the scene table first, keep what the comment leaves.
 - **Brand**: colours and type from `<cm>/skills/brands/<brand>.md` when
@@ -215,7 +216,7 @@ volume, region?}` and `tracks[]` each `{kind, elementIds}`.
   sound (`audio`); `detached` = the sound of clip `source.from`, on that
   clip's own timeline.
 - `volume`: 1 = as it is, 0 = silent, up to 2. As a gain:
-  `dB = 20*log10(volume)`, clamped to -20..+6.
+  `dB = 20*log10(volume)`, clamped to -40..+6.
 - `main` track: the new video, end to end from 0; its end is the new
   `data-duration`. `overlay` track: clips over it in their `region`.
   `audio` track: sounds over it.
@@ -240,6 +241,14 @@ the new video is its elements back to back.
 covers is **cut**. IF `base` rows are out of source order or overlap,
 report `partly` and keep source order.
 
+0. **The voice keeps its level.** IF `#vo` has no `data-levelled` yet and
+   this edit rewrites `materials/<video>/vo.mp3` (a cut or a splice), first
+   level it once exactly as the renderer does: move it to
+   `deletable/vo-original.mp3`, then `ffmpeg -i deletable/vo-original.mp3
+   -af loudnorm=I=-16:TP=-1.5:LRA=7 -ar 48000 -b:a 320k vo.mp3`, and add
+   `data-levelled` to `#vo`. Cut and join that file. A voice already
+   marked is never levelled again: a shorter voice levelled again comes
+   out at another level.
 1. **Cuts.** For each cut range of stage time:
    - Snap each edge to the nearest gap between spoken words
      (`materials/<video>/timings.json`) within ±150 ms, else to a
@@ -290,7 +299,7 @@ report `partly` and keep source order.
    (`-vn -ss -t`, 30 ms fade in and out) into `materials/<video>/sfx/`,
    then `<audio class="sfx" src="…" data-at="<start ms>"
    data-gain-db="<dB>">`. A `detached` element cuts from its clip's file.
-   `volume: 0` writes nothing; below 0.1 (-20 dB) use -20.
+   `volume: 0` writes nothing; below 0.01 (-40 dB) use -40.
 5. **Volume of a `base` row other than 1** (the stage's own mix in that
    range): there is no level for the whole mix. Lower the bed with one
    `#bgm data-duck` entry for that range (`dB` < 0 only), and set each
@@ -344,6 +353,10 @@ attachments) applies as usual.
 - Captions: restyle via `.cc-phrase` CSS after the marker block and
   regenerate with `tools/captions.py`; never edit inside the markers
   (stage-canvas-html section 6). A misspelt word follows the script.
+- A comment is `fixed` only when the video does what it asked and nothing
+  it did not. Anything the work or the renderer adds or moves that the
+  comment did not ask for (a fade, a level, a sound laid on another slot)
+  is a shortfall: `partly`, naming it.
 - Hard rules beat comments (creative-video-production section 9: safe
   zone, grid, nothing over the face, levels): make the nearest allowed
   change and report it.
@@ -351,8 +364,8 @@ attachments) applies as usual.
   (`#vo`/sfx `data-gain-db`, `#bgm` `data-gain-offset-db`, `data-duck`),
   never a volume filter or re-encode; the bed's `data-gain-db` stays as
   copied and the voice stays loudest. The one exception is a timeline
-  edit (5b): it cuts and joins the voice-over and trims clip sounds with
-  ffmpeg, but still sets every level by attribute. Replace the bed only WHEN a comment
+  edit (5b): it levels the voice-over once (step 0), cuts and joins it and
+  trims clip sounds with ffmpeg, but still sets every level by attribute. Replace the bed only WHEN a comment
   asks for other music, chosen per creative-video-production section 1,
   its `gain_db` copied exactly.
 - New material only WHEN a comment needs it and supplies no file,

@@ -190,7 +190,8 @@ sound.
 | Attribute | On | Effect |
 |---|---|---|
 | `data-gain-db="-3"` | `#vo` | voice after its −16 LUFS levelling, −12 to +6 |
-| `data-gain-db="-6"` | an `audio.sfx` | that effect, −20 to +6 |
+| `data-levelled` | `#vo` | the file is already levelled to −16 LUFS (an edit levels it before cutting it), so the renderer does not level it again; a voice made anew drops it |
+| `data-gain-db="-6"` | an `audio.sfx` | that effect, −40 to +6 |
 | `data-gain-offset-db="-4"` | `#bgm` | on top of its `data-gain-db` (kept as copied), −20 to +6 |
 | `data-duck="1200-3400:-8,9000-12000:-6"` | `#bgm` | music lowered by dB in each ms range, 300 ms ramps, 0 to −30, no overlaps |
 

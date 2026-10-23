@@ -162,6 +162,7 @@ function readEditable(htmlPath) {
     bgmGainDb: gainAttr === undefined ? null : parseFloat(gainAttr),
     // Optional level adjustments, only when asked for (stage-canvas-html section 5); validated by render.js.
     voGainDb: num(attr(voTag, 'data-gain-db')),
+    voLevelled: /\bdata-levelled\b/.test(voTag),
     bgmOffsetDb: num(attr(bgmTag, 'data-gain-offset-db')),
     bgmDuck: attr(bgmTag, 'data-duck') ?? null,
   };
