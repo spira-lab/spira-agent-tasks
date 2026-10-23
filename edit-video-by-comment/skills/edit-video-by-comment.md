@@ -7,6 +7,11 @@ description: Entry of the edit-video-by-comment task. Reads the review JSON the 
 
 This skill reads and routes only; it edits nothing.
 
+**Estimate run.** IF the opening message asks for an estimate: read the
+review JSON, check it (section 2), then follow only
+`skills/edit-cost-estimate.md` and stop. A later message confirming the
+estimate starts the edit: begin at section 1 here.
+
 ## 1. Read the review JSON
 
 Read the `comments/` file the opening message names. IF no file is
