@@ -152,6 +152,43 @@ rendering all behave. Break them and playback or the MP4 will be wrong.
     after its end its last, so put its entry and exit on a wrapper with
     CSS animations, as for any element. An alpha WebM keeps its
     transparency on the stage and in the render.
+12. **One person on screen, never a ghost.** Two copies of the presenter
+    visible at once, at different sizes or places, read as a phantom.
+    - When the scene before and the scene after both show the person, the
+      change between them is a cut for the person: the outgoing scene's
+      exit is a one-frame step on the incoming scene's first frame, never
+      a fade, and the incoming scene shows its person at full opacity from
+      that frame. The new look arrives with the new scene's background and
+      elements, never with a fading person.
+    - Every element that holds a clip hides, as a cut, at its clip's end
+      (its `data-start` plus its length) or at its scene's end, whichever
+      comes first. A clip holds its last frame after it ends, so nothing
+      that is not hidden stays frozen behind the next shot.
+    - Cover before you uncover: when the room goes away behind a cut-out,
+      the new background is fully in before the full shot starts to fade;
+      when the room comes back, the full shot is fully in before the
+      background leaves. Time both from the same millisecond values.
+13. **The cut-out sits exactly on the person.** A clip and its cut-out,
+    when both are in a scene, go in one wrapper and both videos fill it the
+    same way (`position: absolute; left: 0; top: 0; width: 100%; height:
+    100%; object-fit: cover; object-position: 50% 50%`). Every size or
+    position change, a zoom, a resize, a move, is an animation of that
+    wrapper, never of one video inside it; the room shows or hides with the
+    full shot's opacity alone. Then a resize into or out of the room never
+    pulls the cut-out off the person.
+14. **Gradient text gets room on all four sides.** `background-clip: text`
+    paints the letters only inside the element's box, and tight headline
+    leading makes that box smaller than the letters: the tails of g, j, p,
+    q and y, tall capitals, accents and italic overhangs are cut flat.
+    Every gradient-text element is an inline-block with padding on all
+    four sides and the same negative margin, so the box grows and the
+    layout does not move, and its parents never have `overflow: hidden`:
+
+    ```css
+    .grad { display: inline-block; padding: 0.25em 0.15em; margin: -0.25em -0.15em;
+      background: <the gradient>; -webkit-background-clip: text; background-clip: text;
+      color: transparent; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+    ```
 
 ## 5. Sound effects
 
@@ -295,7 +332,7 @@ moves an existing render to `renders/deletable/` first, captures every
 frame on AWS Lambda in parallel chunks, mixes the audio (voice at -16
 LUFS, effects under it, bed 10 dB under it, faded in 1 s and out 1.5 s), checks
 the file (duration, frame count, stereo). Output is 1080 x 1920 H.264
-with stereo AAC at 24 fps, the rate of Seedance clips, so each output
+with stereo AAC at 24 fps, the rate of the Omni clips, so each output
 frame is one clip frame. A clip at any other rate repeats or drops
 frames on the stage, which shows as the presenter juddering; the
 renderer names such a clip in a warning (toolkit section 3, Frame rate).

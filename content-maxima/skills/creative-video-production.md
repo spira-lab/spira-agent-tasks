@@ -19,7 +19,8 @@ a named style means that style.
 
 **The script.** WHEN the user gives a script, it is spoken word for word:
 never shorten, reword, or speed it up to fit a target length. Before any
-generation, count its words: at 3.3 words a second that is its length.
+generation, plan it with `tools/chunker.py` (toolkit 3e): the clip
+lengths it adds up to, at 4.7 to 5.0 syllables a second, are its length.
 IF that runs past the requested length, make the video as long as the
 script needs and say so in the final message. Only a brief or an idea is
 written to length. WHEN the user gives a voice-over recording, the
@@ -50,12 +51,12 @@ Only then is the video presenter-less, with the voice-over from toolkit
 has `Talking head supplied video:`, that exact video is the talking
 head of the finished video, and its own voice is the voice-over. It
 replaces every step that makes a presenter or speech: no Soul persona
-(toolkit 3a), no GPT Image 2 avatar edit (3b), no Seedance clips (3e),
+(toolkit 3a), no GPT Image 2 avatar edit (3b), no talking-head clips (3e),
 no HeyGen (3j), and no ElevenLabs (3i). Go straight to building the
 video with it. Its speech is the script, word for word and in its own
 language: nothing is written around it, and it is never muted,
 re-voiced, cut, or retimed. Everything else applies as for any talking
-head: the Bria cut-out (3f), the animated elements, and the scene
+head: the cut-out (3f), the animated elements, and the scene
 variety of section 5. Toolkit 3k is the procedure.
 
 Elements to consider:
@@ -197,9 +198,10 @@ cut-out on screen is wrong; the audit flags it. Wherever the figure is cropped b
 its own frame (the body at the bottom, often a shoulder or an arm at the
 sides), that side of the cut-out runs past the canvas edge; placed or
 scaled so a cropped side ends inside the canvas, the person ends in a
-straight line in mid-air, which the audit flags. The clip keeps the
-framing of `persona.png`, so that image already shows which sides are
-cropped: the scene table places the cut-out from it, with its frame
+straight line in mid-air, which the audit flags. Without a product the
+clip keeps the framing of `persona.png`, so that image already shows
+which sides are cropped (with a product the framing can shift, so the
+contact sheet of `th-01.mp4` shows it instead, toolkit 3e): the scene table places the cut-out from it, with its frame
 flush with or past the canvas on those sides, and the audit's `edge`
 line confirms it on the stage.
 
@@ -275,7 +277,8 @@ empties them, never the session.
 - Read only what the skills tell you to: the essential skills in
   section 10, `skills/working-memory.md`, `sfx/SFX metadata.json`,
   `music/Music metadata.json`, `fonts/fonts.md`, the stage template, the one rolled sheet in `styles/`, the contact sheet of a
-  supplied talking-head video (toolkit 3k), and the editable you are
+  supplied talking-head video (toolkit 3k) or of a product talking-head
+  clip (toolkit 3e), and the editable you are
   working on. Never open another
   editable html in the root; reading it anchors you to it and you copy
   it. Open `skills/add-ons.md` only WHEN the user asks for an add-on by name

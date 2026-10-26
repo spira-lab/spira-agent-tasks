@@ -104,7 +104,8 @@ read the materials folder, and nothing is hosted for them.
 four sources, and the request says which:
 
 - **Auto** (nothing said about the voice): the talking-head clips speak
-  the script, and their audio is the voice-over (3e).
+  the script, and their audio is the voice-over (3e: Gemini Omni Flash
+  1.1).
 - **An ElevenLabs voice ID** (`ElevenLabs voice ID:` in the request):
   the script is spoken with that voice (3j step 1).
 - **The user's own recording** (`Voice-over:` in the request, an audio
@@ -117,7 +118,7 @@ four sources, and the request says which:
 
 With a voice ID or a recording, the voice-over exists before the
 talking head, so a talking head is HeyGen lip-synced to it (3j), never
-Seedance, whose clips make their own speech.
+Omni, whose clips make their own speech.
 
 The voice source picks the route to the talking head, never whether
 there is one: every video has a talking head unless the request
@@ -131,15 +132,17 @@ video that is presenter-less by that rule uses the voice-over directly
 | Persona clean-up edit | `gpt-image-2` | 3.3 (1K), 3.45 (2K), 6.15 (4K) |
 | Transparent-background element | `gpt-image-2` | same |
 | Stock still for b-roll | `gpt-image-2` | same |
-| Talking-head clip | `seedance-1.5-pro` | per second, see 3e |
+| Talking-head clip | `gemini-omni-flash-1.1` | per clip, see 3e |
 | Talking head speaking a given voice-over (voice ID or recording) | `heygen-avatar-4` | see 3j |
 | Talking head supplied by the user | none: the video itself | 0, see 3k |
-| Talking-head cut-out | `bria-video-background-removal` | 0.42 per source second |
+| Talking-head cut-out | `pixelcut-video-background-removal` | 2.2 per source second |
+| Talking-head cut-out, fallback only | `bria-video-background-removal` | 0.42 per source second |
 | Background music | `suno-music` | 6.6 per track |
 | Avatar motion control, persona driven by a reference video | `kling-3.0-motion-control` pro | 9.52 per second |
 
 **Frame rate.** The render is always 24 fps, the rate of
-`seedance-1.5-pro`; Bria keeps the rate of the clip it is given. HeyGen
+`gemini-omni-flash-1.1` (240 frames in a 10 s clip); the cut-out (3f)
+keeps the rate of the clip it is given. HeyGen
 and a supplied clip are not guaranteed to be 24 fps. A clip at any other
 rate repeats or drops frames in the render, which shows as the presenter
 juddering, and the renderer names it in a warning. Before switching a
@@ -161,12 +164,12 @@ video:` is not this: it is the finished talking head and skips 3a
 entirely (3k). Then:
 
 - **With a voice ID or a recording** (section 3): skip the clean-up
-  edit (3b) and Seedance too. The talking head is HeyGen from the photo
+  edit (3b) and the talking-head clips (3e) too. The talking head is HeyGen from the photo
   as given, section 3j.
 - **On Auto voice:** the photo takes Soul's
   place as the reference for the clean-up edit (3b), which still gives
-  the headspace above the head. The edited image goes into Seedance (3e)
-  as usual.
+  the headspace above the head. The edited image goes into the
+  talking-head clips (3e) as usual.
 
 Payload: `{"prompt":"<persona description>","size":"9:16","resolution":"1080p"}`.
 `size` also takes 16:9, 4:3, 3:4, 1:1, 2:3, 3:2; `resolution` 720p or
@@ -191,19 +194,10 @@ The prompt (format in the prompting skill) must:
   the model crops the crown, and the image is useless as a talking-head
   reference.
 
-**With a product.** When the persona must hold or wear a product, the
-product image (a hosted URL) is the second reference:
-`"referenceImage":["<soul url>","<product url>"]`. The prompt then also:
-
-- Says which reference is the person and which is the product, and that
-  the product is reproduced exactly as in its reference: shape, colour,
-  label, proportions.
-- States whether the product is **worn** or **held**, and if held, how:
-  which hand, the grip (fingers wrapped around it, pinched by the cap,
-  resting flat in the palm), where it sits in frame (chest height,
-  beside the face, toward the camera), and which side faces the camera.
-- States that it is **held steadily**: still hand, firm grip, product
-  fully in focus, no motion, not tilting or slipping.
+**A product never goes into this edit.** With or without a product, the
+edit is the same: the Soul output (or the user's photo) alone, cleaned
+and reframed. The product enters in the talking-head clips, where Omni
+takes the persona and the product image together (3e).
 
 Inputs: `referenceImage` (array of URLs), `size` (`auto`, 1:1, 9:16,
 16:9, 4:3, 3:4), `resolution` (`1K`, `2K`, `4K`). Unsupported:
@@ -258,35 +252,61 @@ on its own. A single still on its own is
 (1152 x 2048); never `1K` for a full-bleed still, which comes back
 640 x 1136.
 
-## 3e. Talking-head clip: `seedance-1.5-pro`
+## 3e. Talking-head clips: `gemini-omni-flash-1.1`
 
-Animates the cleaned persona image into a speaking clip. Payload:
-`{"prompt":"<line and delivery>","referenceImage":["<persona url>"],"duration":"8","size":"9:16","resolution":"1080p","sound":true}`.
+Animates the cleaned persona image into speaking clips. **One model for
+the whole video.** Every clip of a video comes from Gemini Omni Flash 1.1;
+there is no other talking-head clip model. IF a clip comes back `FAILED`
+again after its one corrected resubmission (section 1), or every
+submission fails at once (`provider_error` on submit: Omni is down), stop
+and say so in the final message; never make the clips with another model.
 
-Inputs: `referenceImage` (up to 2 URLs; one for a talking head),
-`duration` (`4`, `8`, or `12`, nothing else), `size`, `resolution`
-(`480p`, `720p`, `1080p`), `sound` (boolean). `referenceAudio` and
-`referenceVideo` are not supported; the spoken line goes in the prompt.
+Omni makes only 9:16 and 16:9. A video whose output ratio is neither
+(1:1) still uses 9:16 clips: the cut-out (3f) places the person on the
+stage at that ratio.
 
-**Clips are exactly 4, 8, or 12 seconds.** The script is split into
-chunks that each read aloud inside one of those lengths, one job per
-chunk, at 3.2 to 3.4 words per second:
+**Chunking is by syllables, with `tools/chunker.py`.** The script is
+never changed: the tool splits it at sentence ends (and at a comma,
+colon or dash only when that is what lands a chunk in the band) and
+gives each chunk a clip length so it is spoken at 4.7 to 5.0 syllables a
+second (never over
+5.2: above that Omni cuts the end off or rewrites the line). Run it on
+the saved script before any clip is written:
 
-| Duration | Words per chunk |
-|----------|-----------------|
-| 4 s | 13 to 14 |
-| 8 s | 26 to 27 |
-| 12 s | 38 to 41 |
+```bash
+python3 tools/chunker.py <materials>/<name>/script.txt <materials>/<name>/jobs/plan.json
+```
 
-Count each chunk's words against this table before submitting. Never
-write a segment that needs 5, 9, or 15 seconds; trim the words to the
-slot, never stretch the slot to the words.
+It prints one line per chunk (length, syllables, pace, its exact text)
+and writes `plan.json`; one job per chunk, in order, with that text and
+that `duration`. A chunk flagged `[fallback]` (4.0 to 5.2) is fine; one
+flagged `[UNDER 4.0]` risks silence at its end, and is used only when
+the tool finds nothing better. The tool counts English by rules: WHEN
+it gets a brand name or an odd word wrong, write the script as
+`script.json`, `{"text": "<the script>", "syllables": {"<word>": <n>}}`,
+and run the tool on that instead. WHEN it stops on a stretch too long
+for any clip with no comma in it, tell the user the sentence is too long
+to say in one clip; never reword it.
 
-**Keep the longest clip short.** The clips render in parallel, so the
-longest one decides when the batch, and every cut-out after it, can
-start. Split into 8-second chunks by default, with one 4-second chunk for
-the remainder; use 12 seconds only when 8-second chunks would number more
-than four. Twenty seconds is 8 + 8 + 4, not 12 + 8.
+**Payload**, persona only:
+`{"prompt":"<line and delivery>","referenceImage":["<persona url>"],"duration":"8","size":"9:16","resolution":"1080p"}`.
+`duration` is `4`, `6`, `8` or `10`; `size` `9:16` or `16:9`;
+`resolution` `1080p` (720p and 1080p cost the same). No
+`generationType`: with one image Omni opens on the persona image, so the
+clip keeps `persona.png`'s framing.
+
+**With a product** (a product image in the request, to be shown in the
+presenter's hand): the product image is the second reference, and the
+prompt says the person holds it and does one or two simple things with
+it (prompting skill section 5):
+`{"prompt":"<line, product and delivery>","generationType":"reference_to_video","referenceImage":["<persona url>","<product url>"],"duration":"8","size":"9:16","resolution":"1080p"}`.
+Every clip of the video takes the same two references. In this mode Omni
+does not open on the persona image, so the room or the framing can shift
+(a test put the presenter on a different chair): plan the layout from
+the clips, not from `persona.png`. Once `th-01.mp4` is in, make its
+contact sheet, `tools/style-sheet.sh <materials>/<name>/th-01.mp4
+<materials>/<name>/deletable`, look at it as in 3k step 5, and check the
+layout on the stage with `audit.js --at`.
 
 **All chunks are one batch.** Write every chunk's payload
 (`jobs/th-01.json`, `jobs/th-02.json`, ...), submit them all with
@@ -294,7 +314,7 @@ than four. Twenty seconds is 8 + 8 + 4, not 12 + 8.
 turn (section 1), then every cut-out the same way (3f). Running the
 clips one at a time is the single biggest waste of time in the kit.
 
-**Plan while the clips render.** The clips take three to four minutes.
+**Plan while the clips render.** The clips take two to four minutes.
 Submit the whole batch, then do not wait yet: decide every scene (what
 it shows, which assets, roughly where each sentence falls) and write the
 CSS and skeleton that do not depend on exact timings. When the plan is
@@ -314,44 +334,45 @@ step, clips in order, then place the clips back to back on the stage:
 python3 tools/make-timings.py <materials>/<name>/vo.mp3 --from th-01.mp4 th-02.mp4 th-03.mp4
 ```
 
-The clips keep the persona image's framing: the face sits where it sits
-in `persona.png`, so plan the layout around it from that image, and check
-it on the stage with `audit.js --at`. Do not cut frames out of the clips
-to look at them.
+Without a product, the clips keep the persona image's framing: the face
+sits where it sits in `persona.png`, so plan the layout around it from
+that image, and check it on the stage with `audit.js --at`. Do not cut
+frames out of the clips to look at them; the one contact sheet of a
+product clip (above) is the exception.
 
-Cost per second at `standard`:
+Cost per clip (the same at 720p and 1080p): 4 s 41, 6 s 54, 8 s 68,
+10 s 81 credits.
 
-| Resolution | Sound off | Sound on |
-|------------|-----------|----------|
-| 480p | 0.88 | 1.75 |
-| 720p | 1.97 | 3.94 |
-| 1080p | 4.43 | 8.86 |
+## 3f. Talking-head cut-out: `pixelcut-video-background-removal` (fallback `bria-video-background-removal`)
 
-An 8-second 1080p clip with sound is about 71 credits. Use `720p` for
-tests and `1080p` for the final.
-
-## 3f. Talking-head cut-out: `bria-video-background-removal`
-
-Removes the background from a Seedance, HeyGen, or supplied (3k) clip so the talking head sits on
+Removes the background from an Omni, HeyGen, or supplied (3k) clip so the talking head sits on
 the stage with real transparency. Payload:
-`{"referenceVideo":["<clip url>"],"mode":"Transparent","preserveAudio":true,"autoZoom":false}`,
+`{"referenceVideo":["<clip url>"],"mode":"Transparent"}`,
 written to `<name>.webm`.
 
-**`mode` must be the word `Transparent`.** `spira ai models get` lists
-only solid colours and says transparent output is not available; both
-are wrong for this purpose and are ignored. `Transparent` returns a VP9
-WebM with true alpha (verified 2026-09-20); a colour mode returns an
-opaque MP4. Never use a colour mode and never add a chroma-key step.
+**`mode` must be the word `Transparent`.** It returns a VP9 WebM with
+true alpha; a colour mode returns an opaque MP4. Never use a colour mode
+and never add a chroma-key step. The model takes no other field.
 `wait_ai_job` reports `hasAlpha: false` when the WebM came back without alpha.
 
-**Bria takes at most 60 s of source.** A longer clip is divided at a
+**Bria is only the fallback.** WHEN a clip's Pixelcut job comes back
+`FAILED` again after its one corrected resubmission (section 1), or
+Pixelcut fails every submission at once (it is down), cut that clip out
+with Bria instead:
+`{"referenceVideo":["<clip url>"],"mode":"Transparent","preserveAudio":true,"autoZoom":false}`,
+written to the same `<name>.webm`. `mode` must be `Transparent` here too
+(Bria's default is green). Bria costs 0.42 credits per source second
+and takes the same 60 s at most. Never run both on the same clip, and
+say in the final message which clips fell back.
+
+**The cut-out takes at most 60 s of source.** A longer clip is divided at a
 segment boundary (the `segments` in `timings.json`) into parts of 60 s or
 less, re-encoded H.264, then each part hosted with `host_file` (section
 2) and cut out in one batch, each
-`.webm` at its own `data-start` (3e). A longer source fails the job, so
-this is not a way to save a generation.
+`.webm` at its own `data-start` (3e). A longer source is rejected at
+submit, so this is not a way to save a generation.
 
-**The Bria output is final.** Do not mask, matte, crop, re-key, or
+**The cut-out is final.** Do not mask, matte, crop, re-key, or
 otherwise adjust it. IF it keeps an object the person holds or touches,
 such as a laptop, a phone, or a mug, that object is part of the
 cut-out. The only reasons to touch the result are a missing alpha
@@ -361,7 +382,7 @@ The WebM goes on the stage as a `<video>` element, never as extracted
 frames (stage-canvas-html, rule 11).
 
 **Every talking-head clip is cut out, in one batch.** As soon as the
-clips are in, submit every clip to Bria in one turn and wait on them in
+clips are in, submit every clip for its cut-out in one turn and wait on them in
 one turn (section 1), never one at a time, and never skip a clip because the
 scene plan shows it whole: the cut-out is what the scenes are layered
 with (creative-video-production section 5), and deciding per clip is
@@ -465,7 +486,7 @@ steps, in order:
    `{"referenceImage":["<photo or persona url>"],"referenceAudio":["<vo.mp3 url>"],"size":"9:16","resolution":"1080p","mode":"stable","talkingStyle":"stable"}`,
    written to `th-01.mp4`. Use `720p` for tests.
 
-One clip covers the whole voice-over: no 4/8/12-second chunks. It is cut
+One clip covers the whole voice-over: no chunks. It is cut
 out with 3f like any talking-head clip (split first if over 60 s) and
 goes on the stage at `data-start="0"`. Cost is 10 credits a second.
 
@@ -473,8 +494,8 @@ goes on the stage at `data-start="0"`. Cost is 10 credits a second.
 
 WHEN the request has `Talking head supplied video: <url>`. That exact
 video is the talking head of the finished video, and its own audio is
-the voice-over. Skip the persona (3a), the avatar edit (3b), Seedance
-(3e), and HeyGen (3j); generate no speech (3i). It comes first in the
+the voice-over. Skip the persona (3a), the avatar edit (3b), the
+talking-head clips (3e), and HeyGen (3j); generate no speech (3i). It comes first in the
 session, before the concept: its words are what the video is about.
 
 1. **Start the video with no script**:
@@ -523,6 +544,7 @@ word for word, in the clip's language.
 Anything not listed above, including other image models
 (`nano-banana-*`, `seedream-*`, `flux-kontext`), other video models
 (`kling-*` other than 3.0 motion control, `seedance-2.*`, `veo3.1`,
+`seedance-1.5-pro`, `gemini-omni-flash-1.1` outside 3e,
 `heygen-avatar-4` outside 3j), and any other lip-sync route. The one exception is a model
 the user names explicitly in the request: then use it for that request,
 reading its inputs and prices with `spira ai models get <modelId>`.

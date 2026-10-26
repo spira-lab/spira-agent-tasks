@@ -91,7 +91,7 @@ tool the entry points to; this file holds the why.
 
 ## Persona cut-outs
 
-- **Works:** every talking-head clip cut out in one Bria batch, and the
+- **Works:** every talking-head clip cut out in one batch, and the
   cut-out layered over most talking-head scenes: over an animated
   background or b-roll, in front of a headline, the room faded away.
 - **Fails:** cutting out only the clips the scene plan showed as a
