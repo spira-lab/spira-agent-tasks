@@ -59,7 +59,12 @@ time is stage time.
 - Moment: `ms = round(time * 1000)`; never `frame` (render is 24 fps).
 - Span (`endTime` present): `endMs = round(endTime * 1000)`. A layer or
   sound the comment adds gets `data-start = ms` and lasts `endMs - ms`;
-  a change to what is already there applies only between them.
+  a change to what is already there applies only in `[ms, endMs)`.
+  Preserve its original appearance before `ms` and restore it at `endMs`.
+  Never restyle its base CSS for a bounded change. Use a discrete timed
+  property override (no backwards/forwards fill outside the span), or a
+  restyled duplicate visible only in the span with the original hidden
+  only in that same span. Preserve existing motion and scene visibility.
 - Region: `null` = whole frame; else `x*W, y*H, width*W, height*H`, `W x H`
   the `#stage` size (1080 x 1920 unless made at another ratio,
   stage-canvas-html section 9). `regionPx` only WHEN `canvas` equals it.
@@ -85,7 +90,10 @@ skipped and reported.
 One audit with every comment's moment:
 `cd "<cm>" && node tools/render/audit.js <r>editable/<video>.html --at <ms>,<ms>,...`
 It writes `<r>editable/materials/<video>/deletable/audit-sheet.jpg`, what
-the reviewer saw. Then find in the editable:
+the reviewer saw. For each span, also capture its boundary reference
+frames listed in section 7 now, and keep a separate pre-edit audit sheet
+under `deletable/` so the later audit cannot overwrite the comparison.
+Then find in the editable:
 
 - the scene: `#s1`, `#s2`... stacked, later above; a scene ends at the
   delay of its exit animation on `#sN`;
@@ -181,9 +189,11 @@ an animated sticker fits inside the box at its own aspect, centred,
 never stretched; text uses the box as its block (left/top/width from the
 box, font size as given, shrunk only if the text would overflow it).
 `anchor`/`scale` only describe the same box in words — use them only for
-a comment without a `region`. A box in the face area or outside the safe
-area (creative-video-production section 9) moves to the nearest allowed
-spot, its size kept, reported as `partly`.
+a comment without a `region`. On every aspect ratio, a hand-placed
+`region` overrides safe-zone, face-avoidance, grid and aesthetic placement
+rules. Do not move, snap or resize it to satisfy those rules. Mention
+such a conflict in the report without changing the box. The same holds
+for the reviewer's overlay regions in section 5b.
 
 **How a supplied picture or sticker looks.** Exactly like its file:
 - `<img>` or `<video>` sized to the box with `object-fit: contain`, the
@@ -199,8 +209,8 @@ spot, its size kept, reported as `partly`.
 - Nothing is layered over its box except the captions.
 
 IF a selection cannot be honoured as written (its font is missing from
-`<cm>/fonts/`, an attachment's file will not open, the anchor is outside
-the safe area), make the nearest allowed change and report what you
+`<cm>/fonts/`, an attachment's file will not open), make the nearest
+allowed change and report what you
 changed instead — `partly`, naming it.
 
 ### 5b. A timeline edit (`selection.type: "timeline"`)
@@ -365,8 +375,9 @@ attachments) applies as usual.
   comment did not ask for (a fade, a level, a sound laid on another slot)
   is a shortfall: `partly`, naming it.
 - Hard rules beat comments (creative-video-production section 9: safe
-  zone, grid, nothing over the face, levels): make the nearest allowed
-  change and report it.
+  zone, grid, nothing over the face, levels), except the exact hand-placed
+  image/element and overlay regions in sections 5a/5b. Keep those boxes
+  unchanged. Otherwise make the nearest allowed change and report it.
 - Levels change only through stage-canvas-html section 5's attributes
   (`#vo`/sfx `data-gain-db`, `#bgm` `data-gain-offset-db`, `data-duck`),
   never a volume filter or re-encode; the bed's `data-gain-db` stays as
@@ -396,12 +407,25 @@ attachments) applies as usual.
 ## 7. Verify and render
 
 1. Rerun the same `--at` audit; each asked change is visible at its moment
-   and nothing else moved. Each supplied image or sticker: its copy under
+   and nothing else moved. For each span, also audit one render frame
+   before its start, its midpoint, its last included frame and the first
+   frame at/after its end (only frames inside the video). Compare with
+   the pre-edit frames: the change must be absent before the start,
+   present inside, and the original appearance restored at the end.
+   Capture those reference frames in section 4 before editing; never
+   infer an unchanged boundary from the modified editable alone.
+   Verify each hand-placed layer's CSS box against its normalized region
+   scaled to the stage (±1px rounding), including top and left, and audit
+   its visible placement; retain contain-fit centering within that box.
+   Each supplied image or sticker: its copy under
    `materials/` has the same `sha256sum` as its file under `comments/media/`
    (a spliced or overlay clip is trimmed, so it is checked by eye), its
    layer's `src` is that copy, and its CSS has none of what 5a forbids.
    Fix any miss before going on.
 2. Whole-video audit per stage-canvas-html section 7, fix, run again.
+   Exception: report any `text @t` or `edge @t` warning caused by an
+   exact hand-placed box (5a/5b) in that comment's report line; never
+   move, resize or reflow that box to clear the warning.
    Report `edit` `completed`, `render` `started`.
 3. Render once per stage-canvas-html section 8 to `<r>renders/<video>.mp4`
    (the previous render is kept in `<r>renders/deletable/`).
@@ -418,7 +442,7 @@ attachments) applies as usual.
    comment asked for:
 
    ```
-   #3 00:04.12 fixed: headline moved up to y 420, clear of the face
+   #3 00:04.12 fixed: headline colour changed only inside the requested span
    #4 00:06.00 fixed: new outfit; base edit + 3 clips regenerated (~60 credits)
    #5 00:09.50 fixed: logo image placed top right, used as supplied
    ```

@@ -54,8 +54,8 @@ Other `source` fields are informational. Each comment:
 |---|---|
 | `index` | the `#n` the reviewer saw, from 1 |
 | `time` | seconds from the start; `frame`/`timecode` are the same at the draft's fps |
-| `endTime`, `endTimecode` | optional: the change spans `time` to `endTime`, not one moment. What it adds (a layer, a sound, a caption style) plays only inside that span; `region` is read on the frame at `time` |
-| `region` | `{x, y, width, height}` 0 to 1 on the canvas, top-left; `null` = whole frame; `regionPx` in canvas pixels |
+| `endTime`, `endTimecode` | optional: the change applies only in `[time, endTime)`. Preserve the original before the start and restore it at the end; verify frames outside as well as inside. `region` is read on the frame at `time` |
+| `region` | `{x, y, width, height}` 0 to 1 on the canvas, top-left; `null` = whole frame; `regionPx` in canvas pixels. For a hand-placed image/element it is the exact box, overriding safe-zone, face and grid placement; do not relocate it |
 | `point` | optional: a spot the reviewer pinned on the frame at `time`, `{x, y}` 0 to 1 on the canvas, top-left; `pointPx` in canvas pixels. The change is about what is at that spot, not a box around it |
 | `scope` | optional: `video` = the whole video (ignore `time`), `frame` = the frame at `time`, `region` = `region` at `time`, `point` = what is at `point` at `time`; absent: `region` decides |
 | `text` | what to change |
