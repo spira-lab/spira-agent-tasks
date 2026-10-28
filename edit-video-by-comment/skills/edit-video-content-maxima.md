@@ -63,6 +63,8 @@ time is stage time.
 - Region: `null` = whole frame; else `x*W, y*H, width*W, height*H`, `W x H`
   the `#stage` size (1080 x 1920 unless made at another ratio,
   stage-canvas-html section 9). `regionPx` only WHEN `canvas` equals it.
+- Point: `x*W, y*H` on the same `#stage`; `pointPx` only WHEN `canvas`
+  equals it. It marks the element there, not an area to fill.
 - Ignore `targets`, `stale`, `madeAgainstVersion`.
 - Attachments: each `attachments[].path` is relative to the **edit task**
   directory (the one whose `comments/` holds the JSON), not to `<cm>`.
@@ -87,7 +89,7 @@ the reviewer saw. Then find in the editable:
 
 - the scene: `#s1`, `#s2`... stacked, later above; a scene ends at the
   delay of its exit animation on `#sN`;
-- the element under the region, by absolute px position and size
+- the element under the region (or at the point), by absolute px position and size
   (stage-canvas-html section 4, rule 1) and `animation-delay`; a clip's own
   time is `ms - data-start`, an effect plays from `data-at`.
 

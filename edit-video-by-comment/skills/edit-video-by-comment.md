@@ -56,7 +56,8 @@ Other `source` fields are informational. Each comment:
 | `time` | seconds from the start; `frame`/`timecode` are the same at the draft's fps |
 | `endTime`, `endTimecode` | optional: the change spans `time` to `endTime`, not one moment. What it adds (a layer, a sound, a caption style) plays only inside that span; `region` is read on the frame at `time` |
 | `region` | `{x, y, width, height}` 0 to 1 on the canvas, top-left; `null` = whole frame; `regionPx` in canvas pixels |
-| `scope` | optional: `video` = the whole video (ignore `time`), `frame` = the frame at `time`, `region` = `region` at `time`; absent: `region` decides |
+| `point` | optional: a spot the reviewer pinned on the frame at `time`, `{x, y}` 0 to 1 on the canvas, top-left; `pointPx` in canvas pixels. The change is about what is at that spot, not a box around it |
+| `scope` | optional: `video` = the whole video (ignore `time`), `frame` = the frame at `time`, `region` = `region` at `time`, `point` = what is at `point` at `time`; absent: `region` decides |
 | `text` | what to change |
 | `attachments` | optional: media this comment brings, each `{kind, path, mime, durationMs?, width?, height?}` (`kind`: `audio`, `image`, `animated`, or `video` — a timeline edit's clips, or on a plain comment a reference clip its `text` describes). `path` is relative to **this** task directory (`comments/media/<run>/…`) and the file is already there — copy it into the video's materials and reference it; never fetch a URL. It is the reviewer's own file, used exactly as supplied, never regenerated or restyled. A selection's index (`attachmentIndex`, `source.index`) counts in this list from 0 |
 | `selection` | optional: what the reviewer picked instead of describing it (a subtitle style, an element, an attachment's role or placement, or `type: "timeline"`: the reviewer's own cut of the video). Its shape is that picker's; read it as data and follow it exactly |
