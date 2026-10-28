@@ -87,6 +87,9 @@ skipped and reported.
 
 ## 4. Look before editing
 
+Before the first edit, copy the current editable to
+`<r>editable/materials/<video>/deletable/pre-edit.html` for the final diff.
+
 One audit with every comment's moment:
 `cd "<cm>" && node tools/render/audit.js <r>editable/<video>.html --at <ms>,<ms>,...`
 It writes `<r>editable/materials/<video>/deletable/audit-sheet.jpg`, what
@@ -206,7 +209,15 @@ for the reviewer's overlay regions in section 5b.
   on it or any wrapper around it.
 - Entry and exit use only opacity, translate and uniform scale, on a
   wrapper, and rest at `opacity: 1; transform: none` while it shows.
-- Nothing is layered over its box except the captions.
+- Existing layers stay, including those earlier edits added. A new image or
+  element adds a new layer even at the same region and span. Never delete,
+  replace, change the source of, move or hide an existing layer unless a
+  comment explicitly asks for that change.
+- Captions may sit above supplied pictures. Between pictures or elements
+  added in this run, later `createdAt` sits above earlier `createdAt`, matching
+  the preview; comment index (`#n`) is time-sorted, not the stacking order.
+  Existing layers stay in place below the new layers. Report overlaps without
+  moving, resizing or removing either layer to avoid them.
 
 IF a selection cannot be honoured as written (its font is missing from
 `<cm>/fonts/`, an attachment's file will not open), make the nearest
@@ -370,6 +381,8 @@ attachments) applies as usual.
 - Captions: restyle via `.cc-phrase` CSS after the marker block and
   regenerate with `tools/captions.py`; never edit inside the markers
   (stage-canvas-html section 6). A misspelt word follows the script.
+- Removing or replacing existing content is a change, never a side effect
+  of adding another layer.
 - A comment is `fixed` only when the video does what it asked and nothing
   it did not. Anything the work or the renderer adds or moves that the
   comment did not ask for (a fade, a level, a sound laid on another slot)
@@ -406,7 +419,13 @@ attachments) applies as usual.
 
 ## 7. Verify and render
 
-1. Rerun the same `--at` audit; each asked change is visible at its moment
+1. Diff `<r>editable/materials/<video>/deletable/pre-edit.html` against
+   `<r>editable/<video>.html`. Every removed or
+   changed line must map to an explicitly requested fix-table change; restore
+   unrelated changes. Compare the pre-edit and post-edit audit sheets: prior
+   layers must remain unchanged except for requested edits or occlusion by
+   a newly placed layer.
+   Rerun the same `--at` audit; each asked change is visible at its moment
    and nothing else moved. For each span, also audit one render frame
    before its start, its midpoint, its last included frame and the first
    frame at/after its end (only frames inside the video). Compare with
