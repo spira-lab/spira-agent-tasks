@@ -9,7 +9,7 @@
 //     set CHROME_PATH to override
 const { chromium } = require('playwright-core'); const profile = require('./profile');
 const { spawn, execFileSync } = require('child_process');
-const fs = require('fs'), path = require('path'), http = require('http'), os = require('os');
+const fs = require('fs'), path = require('path'), http = require('http');
 
 const args = process.argv.slice(2);
 const usePng = args.includes('--png');

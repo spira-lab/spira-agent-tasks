@@ -16,7 +16,7 @@
 //   7. Checks the output and prints one JSON line. Exit code 0 only if it passed.
 const { chromium } = require('playwright-core'); const profile = require('./profile');
 const { spawn, execFileSync, execFile } = require('child_process');
-const fs = require('fs'), path = require('path'), http = require('http'), os = require('os');
+const fs = require('fs'), path = require('path'), http = require('http');
 
 // ---------- arguments ----------
 const argv = process.argv.slice(2);
