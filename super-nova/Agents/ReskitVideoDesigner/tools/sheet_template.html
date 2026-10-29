@@ -1,0 +1,23 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  /* Seven-panel character sheet at 3840x2160 from individual photos (no generation).
+     Copy this file next to the photos (in the persona's folder in client-assets), set the seven src
+     attributes and the name, then: node <reskit>/tools/render_html.js sheet.html sheet_4k.png 3840 2160 1
+     Left: 3/4 waist-up. Top row: 3/4, front, profile headshots (square). Bottom row: 3/4, front, side full body (2:3). */
+  html, body { margin: 0; width: 3840px; height: 2160px; background: #000; overflow: hidden; }
+  .sheet { position: relative; width: 3840px; height: 2160px; }
+  img { position: absolute; display: block; object-fit: cover; }
+  .label { position: absolute; left: 0; right: 0; top: 2010px; text-align: center; color: #fff;
+    font: 700 92px/1 Georgia, "Times New Roman", serif; letter-spacing: 1px; }
+</style></head>
+<body><div class="sheet">
+  <img src="WAIST_UP_THREE_QUARTER.png" style="left:74px; top:32px; width:1300px; height:1938px;">
+  <img src="HEAD_THREE_QUARTER.png"     style="left:1406px; top:32px; width:765px; height:765px;">
+  <img src="HEAD_FRONT.png"             style="left:2203px; top:32px; width:765px; height:765px;">
+  <img src="HEAD_PROFILE.png"           style="left:3000px; top:32px; width:765px; height:765px;">
+  <img src="BODY_THREE_QUARTER.png"     style="left:1406px; top:829px; width:765px; height:1141px;">
+  <img src="BODY_FRONT.png"             style="left:2203px; top:829px; width:765px; height:1141px;">
+  <img src="BODY_SIDE.png"              style="left:3000px; top:829px; width:765px; height:1141px;">
+  <div class="label">NAME</div>
+</div></body></html>

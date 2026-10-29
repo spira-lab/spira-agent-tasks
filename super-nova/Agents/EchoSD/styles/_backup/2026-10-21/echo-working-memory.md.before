@@ -1,0 +1,16 @@
+# Echo — Working memory
+
+What the user asked Echo to remember, kept across sessions. Echo's tools read it; Echo writes
+to it only when the user (through Max) asks her to remember, change, or forget something.
+
+## Product writing styles
+
+A product listed here has its own writing styles. For that video style, its scripts cycle
+**only** through the styles listed, and those styles are **never** given to any other product,
+brand, or Brandless script. The cycling tool and the director tool apply this table; keep one
+row per product and video style, and write the styles exactly as in `styles/echo-styles.md`,
+separated by commas.
+
+| Product | Video style | Cycle only these writing styles |
+|---|---|---|
+| Cookiy Earn Text Agent | talking head edited | cookiy earn content creator, cookiy earn professional |

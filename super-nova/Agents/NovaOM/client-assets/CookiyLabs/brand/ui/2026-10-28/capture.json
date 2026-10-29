@@ -1,0 +1,55 @@
+{
+ "captured": "2026-10-28T02:31:08.990Z",
+ "pages": [
+  {
+   "url": "https://cookiylabs.com/agent/site/",
+   "files": [
+    "/Users/jefframirez/Super Nova/Agents/NovaOM/client-assets/CookiyLabs/brand/ui/2026-10-28/cookiylabs-com-agent-site-mobile.png",
+    "/Users/jefframirez/Super Nova/Agents/NovaOM/client-assets/CookiyLabs/brand/ui/2026-10-28/cookiylabs-com-agent-site-mobile-full.png",
+    "/Users/jefframirez/Super Nova/Agents/NovaOM/client-assets/CookiyLabs/brand/ui/2026-10-28/cookiylabs-com-agent-site-text.md",
+    "/Users/jefframirez/Super Nova/Agents/NovaOM/client-assets/CookiyLabs/brand/ui/2026-10-28/cookiylabs-com-agent-site-desktop.png",
+    "/Users/jefframirez/Super Nova/Agents/NovaOM/client-assets/CookiyLabs/brand/ui/2026-10-28/cookiylabs-com-agent-site-desktop-full.png"
+   ]
+  }
+ ],
+ "logos": [
+  {
+   "file": "/Users/jefframirez/Super Nova/Agents/NovaOM/client-assets/CookiyLabs/brand/ui/2026-10-28/logo-img-1.svg",
+   "url": "https://cookiylabs.com/images/cookiy-logo.svg",
+   "from": "https://cookiylabs.com/agent/site/"
+  },
+  {
+   "file": "/Users/jefframirez/Super Nova/Agents/NovaOM/client-assets/CookiyLabs/brand/ui/2026-10-28/logo-og-4.jpg",
+   "url": "https://cookiy.com/images/og.jpg",
+   "from": "https://cookiylabs.com/agent/site/"
+  }
+ ],
+ "colors": {
+  "backgrounds": [
+   "rgb(34, 34, 34)",
+   "rgb(246, 244, 241)",
+   "rgb(221, 221, 221)",
+   "rgb(13, 13, 13)",
+   "rgba(248, 248, 248, 0.92)",
+   "rgb(255, 255, 255)",
+   "rgba(255, 255, 255, 0.14)",
+   "rgba(255, 255, 255, 0.9)"
+  ],
+  "text": [
+   "rgb(17, 17, 17)",
+   "rgb(107, 107, 107)",
+   "rgb(74, 74, 74)",
+   "rgb(31, 157, 107)",
+   "rgb(255, 255, 255)",
+   "rgb(0, 0, 0)",
+   "rgb(138, 138, 142)",
+   "rgba(255, 255, 255, 0.82)"
+  ],
+  "buttons": [
+   "rgb(246, 244, 241)",
+   "rgb(17, 17, 17)",
+   "rgb(10, 132, 255)",
+   "rgba(0, 0, 0, 0.06)"
+  ]
+ }
+}

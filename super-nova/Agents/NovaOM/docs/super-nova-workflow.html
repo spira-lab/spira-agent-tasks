@@ -1,0 +1,560 @@
+<title>Super Nova Workflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column, each mechanism gets its own figure; diagrams scroll sideways on phones instead of shrinking. */
+:root {
+  --bg: #f4f3ef;
+  --surface: #ffffff;
+  --ink: #17161a;
+  --muted: #6c6a72;
+  --line: rgba(23, 22, 26, 0.14);
+  --accent: #d95a00;
+  --accent-soft: rgba(255, 111, 0, 0.10);
+  --ok: #2f7d4f;
+  --ok-soft: rgba(47, 125, 79, 0.12);
+  --bad: #b8382c;
+  --lark: #2f5fd0;
+  --lark-soft: rgba(51, 112, 255, 0.10);
+  --grey-soft: rgba(108, 106, 114, 0.14);
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131216; --surface: #1c1b20; --ink: #ecebe6; --muted: #a29fa9;
+    --line: rgba(236, 235, 230, 0.16); --accent: #ff8a33; --accent-soft: rgba(255, 138, 51, 0.12);
+    --ok: #5cc48a; --ok-soft: rgba(92, 196, 138, 0.14); --bad: #ff7a6b; --lark: #7aa2ff; --lark-soft: rgba(122, 162, 255, 0.14);
+    --grey-soft: rgba(162, 159, 169, 0.16); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131216; --surface: #1c1b20; --ink: #ecebe6; --muted: #a29fa9;
+  --line: rgba(236, 235, 230, 0.16); --accent: #ff8a33; --accent-soft: rgba(255, 138, 51, 0.12);
+  --ok: #5cc48a; --ok-soft: rgba(92, 196, 138, 0.14); --bad: #ff7a6b; --lark: #7aa2ff; --lark-soft: rgba(122, 162, 255, 0.14);
+  --grey-soft: rgba(162, 159, 169, 0.16); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.6 var(--font-body);
+  padding-inline: 20px;
+  padding-block: 48px 72px;
+}
+main { max-width: 1120px; margin-inline: auto; display: grid; gap: 64px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1.02; font-weight: 700; }
+h2 { font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.15; font-weight: 700; }
+h3 { font-size: 1.1rem; font-weight: 600; }
+p { margin: 0; max-width: 66ch; }
+code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+.eyebrow { font: 500 0.75rem/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.lede { font-size: 1.15rem; color: var(--muted); max-width: 60ch; }
+
+header { display: grid; gap: 18px; }
+.chain-line {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
+  font: 500 0.95rem/1.3 var(--font-mono);
+}
+.chain-line span { padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
+.chain-line span.key { border-color: var(--accent); color: var(--accent); }
+.chain-line i { font-style: normal; color: var(--muted); }
+.chain-line span.lark { display: inline-flex; align-items: center; gap: 7px; border-color: var(--lark); color: var(--lark); }
+.chain-line span.lark img { border-radius: 5px; background: #ffffff; }
+
+section { display: grid; gap: 20px; }
+section > header { gap: 10px; }
+
+figure { margin: 0; display: grid; gap: 14px; }
+.fig-scroll {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+}
+.fig-scroll svg { display: block; width: 100%; height: auto; min-width: 780px; color: var(--ink); }
+figcaption { color: var(--muted); font-size: 0.95rem; max-width: 72ch; }
+
+/* SVG roles */
+svg text { font-family: var(--font-body); fill: currentColor; }
+svg .t-title { font-family: var(--font-display); font-weight: 700; font-size: 19px; }
+svg .t-name { font-weight: 600; font-size: 13.5px; }
+svg .t-sub { font-size: 12px; fill: var(--muted); }
+svg .t-mono { font-family: var(--font-mono); font-size: 10.5px; fill: var(--muted); }
+svg .t-edge { font-size: 11.5px; fill: var(--muted); }
+svg .t-acc { font-family: var(--font-mono); font-size: 11px; fill: var(--accent); }
+svg .t-ok { font-family: var(--font-mono); font-size: 11px; fill: var(--ok); }
+svg .node { fill: var(--surface); stroke: currentColor; stroke-width: 1.4; }
+svg .node-key { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.8; }
+svg .node-plan { fill: var(--surface); stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 5 4; }
+svg .node-ok { fill: var(--surface); stroke: var(--ok); stroke-width: 1.8; }
+svg .node-bad { fill: var(--surface); stroke: var(--bad); stroke-width: 1.8; }
+svg .zone { fill: none; stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 7 6; }
+svg .edge { fill: none; stroke: currentColor; stroke-width: 1.4; }
+svg .edge-acc { fill: none; stroke: var(--accent); stroke-width: 2; }
+svg .edge-ok { fill: none; stroke: var(--ok); stroke-width: 1.6; }
+svg .edge-bad { fill: none; stroke: var(--bad); stroke-width: 1.4; }
+svg .edge-lark { fill: none; stroke: var(--lark); stroke-width: 1.6; }
+svg .node-lark { fill: var(--lark-soft); stroke: var(--lark); stroke-width: 1.8; }
+svg .t-lark { font-family: var(--font-display); font-weight: 700; font-size: 19px; fill: var(--lark); }
+svg .t-lark-edge { font-size: 11.5px; fill: var(--lark); }
+svg .arrow { fill: currentColor; }
+svg .arrow-acc { fill: var(--accent); }
+svg .arrow-ok { fill: var(--ok); }
+svg .arrow-bad { fill: var(--bad); }
+svg .arrow-lark { fill: var(--lark); }
+svg .bracket { fill: none; stroke: var(--muted); stroke-width: 1.2; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 0.85rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.sw { width: 26px; height: 14px; border-radius: 4px; border: 1.6px solid var(--ink); background: var(--surface); }
+.sw.key { border-color: var(--accent); background: var(--accent-soft); }
+.sw.lark { border-color: var(--lark); background: var(--lark-soft); }
+.sw.ok { border-color: var(--ok); background: var(--ok-soft); }
+.sw.zone { border-style: dashed; border-color: var(--muted); background: transparent; border-width: 1.2px; }
+
+/* Task numbers */
+.numbers { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 820px) { .numbers { grid-template-columns: 1fr; } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: grid; gap: 14px; min-width: 0; align-content: start; }
+.table-scroll { overflow-x: auto; }
+table.ids { border-collapse: collapse; font-variant-numeric: tabular-nums; font-family: var(--font-mono); font-size: 0.9rem; }
+table.ids th { text-align: left; font: 500 0.75rem/1 var(--font-body); color: var(--muted); padding: 8px 14px 8px 0; white-space: nowrap; }
+table.ids td { padding: 6px; text-align: center; min-width: 40px; }
+table.ids td b { display: block; padding: 4px 0; border-radius: 6px; font-weight: 500; }
+.bA { background: var(--accent-soft); color: var(--accent); }
+.bB { background: var(--ok-soft); color: var(--ok); }
+.bC { background: var(--grey-soft); color: var(--ink); }
+.folders { display: grid; gap: 10px; font-family: var(--font-mono); font-size: 0.88rem; }
+.folders div { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.folders .path { min-width: 150px; color: var(--muted); }
+.folders b { font-weight: 500; padding: 3px 9px; border-radius: 6px; }
+.note { font-size: 0.92rem; color: var(--muted); }
+.note strong { color: var(--ink); font-weight: 600; }
+
+/* After a batch */
+.after { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.step .who { font: 500 0.72rem/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.step p { font-size: 0.92rem; }
+
+/* Roster */
+.roster { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+.agent { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.agent.planned { background: transparent; border-style: dashed; }
+.agent .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.chip { font: 500 0.7rem/1 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.built { background: var(--ok-soft); color: var(--ok); }
+.chip.new { background: var(--accent-soft); color: var(--accent); }
+.chip.planned { border: 1px dashed var(--muted); color: var(--muted); }
+.agent p { font-size: 0.92rem; }
+.agent .runs { font: 400 0.78rem/1.4 var(--font-mono); color: var(--muted); }
+
+/* Rules */
+.rules { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px 28px; margin: 0; padding: 0; list-style: none; }
+.rules li { display: grid; gap: 4px; padding-block: 12px; border-top: 1px solid var(--line); min-width: 0; }
+.rules b { font-family: var(--font-display); font-weight: 600; font-size: 1.02rem; }
+.rules span { color: var(--muted); font-size: 0.93rem; }
+
+pre.tree {
+  margin: 0; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; font: 400 0.86rem/1.7 var(--font-mono); color: var(--ink);
+}
+pre.tree .c { color: var(--muted); }
+pre.tree .a { color: var(--accent); }
+
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); padding-top: 18px; }
+</style>
+
+<main>
+  <header>
+    <div class="eyebrow">Agent system · workflow</div>
+    <h1>Super Nova</h1>
+    <p class="lede">How a request travels from a message in Lark to a finished video, avatar or carousel on Spira, and who touches it on the way. Nova assigns, Atlas runs, designers build, Hermes uploads.</p>
+    <div class="chain-line" aria-label="You or your team, then Lark, then Nova, then the batch sheet, then Atlas, then designers, then the Project folder, then Hermes, then Spira">
+      <span>You &amp; the team</span><i>→</i><span class="lark"><img src="data:image/png;base64,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" alt="" width="18" height="18">Lark</span><i>→</i><span class="key">Nova</span><i>→</i><span>batch sheet</span><i>→</i><span class="key">Atlas</span><i>→</i><span>designers</span><i>→</i><span>Project/&lt;Brand&gt;/</span><i>→</i><span>Hermes</span><i>→</i><span>Spira</span>
+    </div>
+  </header>
+
+  <!-- 1. The hand-off -->
+  <section>
+    <header>
+      <div class="eyebrow">1 · The hand-off</div>
+      <h2>One request, one shared sheet, every video back to Lark</h2>
+      <p>Nova never talks to a designer and never reads a script. She hands Atlas the path to one batch sheet. Each designer messages her the moment its video is done, and she posts it to the request's Lark thread right away.</p>
+    </header>
+    <figure>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 1200 462" role="img" aria-label="A request in Lark reaches Nova through the Lark bridge. Quill writes brand DNA docs and hands Nova the brief. Nova issues numbers and builds a batch sheet; Echo fills the scripts. Nova runs Atlas in the background, or queues the sheet when Atlas is busy. Atlas runs up to 6 designers and 2 renders at a time across seven designer styles (talking head, explainer, podcast, which is not ready yet, avatar, clone, re-skit and corporate carousel), and takes the next queued sheet into free slots when the current one has nothing left to start. Designers write to the brand's Project folder and send Nova a VIDEO DONE message for each finished video, which Nova posts to the Lark thread. Atlas ends each run with a one-line report.">
+          <defs>
+            <marker id="f1-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow" d="M0,0 L10,5 L0,10 z"/></marker>
+            <marker id="f1-ah-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow-acc" d="M0,0 L10,5 L0,10 z"/></marker>
+            <marker id="f1-ah-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow-ok" d="M0,0 L10,5 L0,10 z"/></marker>
+            <marker id="f1-ah-lark" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow-lark" d="M0,0 L10,5 L0,10 z"/></marker>
+            <clipPath id="f1-lark-clip"><rect x="32" y="182" width="36" height="36" rx="9"/></clipPath>
+          </defs>
+
+          <!-- background session zone -->
+          <rect class="zone" x="712" y="100" width="476" height="290" rx="16"/>
+          <text class="t-mono" x="726" y="120">Background session · Project/</text>
+          <text class="t-mono" x="1174" y="120" text-anchor="end">≤6 designing · ≤2 rendering</text>
+
+          <!-- You, starting in Lark -->
+          <rect class="node" x="20" y="30" width="120" height="56" rx="10"/>
+          <text class="t-name" x="80" y="54" text-anchor="middle">You &amp; team</text>
+          <text class="t-sub" x="80" y="72" text-anchor="middle">@Nova in the group</text>
+          <path class="edge" d="M80,86 V166" marker-end="url(#f1-ah)"/>
+          <text class="t-edge" x="88" y="130">message</text>
+
+          <rect class="node-lark" x="20" y="168" width="120" height="64" rx="10"/>
+          <rect x="32" y="182" width="36" height="36" rx="9" fill="#ffffff" stroke="var(--line)"/>
+          <image href="data:image/png;base64,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" x="32" y="182" width="36" height="36" clip-path="url(#f1-lark-clip)" preserveAspectRatio="xMidYMid meet"/>
+          <text class="t-lark" x="78" y="203">Lark</text>
+          <text class="t-sub" x="78" y="220">group · DMs</text>
+          <path class="edge-lark" d="M140,186 H198" marker-end="url(#f1-ah-lark)"/>
+          <text class="t-lark-edge" x="170" y="178" text-anchor="middle">request</text>
+          <path class="edge-lark" d="M200,216 H142" marker-end="url(#f1-ah-lark)"/>
+          <text class="t-lark-edge" x="170" y="234" text-anchor="middle">videos</text>
+
+          <!-- Quill, brief writer -->
+          <path class="edge" d="M80,232 V318" marker-end="url(#f1-ah)"/>
+          <text class="t-edge" x="74" y="282" text-anchor="end">new client</text>
+          <rect class="node" x="20" y="320" width="120" height="56" rx="10"/>
+          <text class="t-name" x="80" y="343" text-anchor="middle">Quill</text>
+          <text class="t-sub" x="80" y="361" text-anchor="middle">brand DNA</text>
+          <path class="edge" d="M140,348 H180 V250" marker-end="url(#f1-ah)"/>
+          <text class="t-edge" x="160" y="340" text-anchor="middle">brief</text>
+
+          <!-- Nova -->
+          <rect class="node-key" x="200" y="150" width="180" height="100" rx="12"/>
+          <text class="t-title" x="290" y="186" text-anchor="middle">Nova</text>
+          <text class="t-sub" x="290" y="206" text-anchor="middle">Operations manager</text>
+          <text class="t-mono" x="290" y="228" text-anchor="middle">always-on session</text>
+
+          <!-- Nova's tools -->
+          <path class="edge" d="M220,250 V338" marker-end="url(#f1-ah)"/>
+          <text class="t-edge" x="228" y="300">issues IDs</text>
+          <rect class="node" x="160" y="340" width="110" height="48" rx="8"/>
+          <text class="t-name" x="215" y="361" text-anchor="middle">Task numbers</text>
+          <text class="t-mono" x="215" y="378" text-anchor="middle">nova-task-id.py</text>
+
+          <path class="edge" d="M330,250 V338" marker-end="url(#f1-ah)"/>
+          <text class="t-edge" x="338" y="300">logs</text>
+          <rect class="node" x="280" y="340" width="100" height="48" rx="8"/>
+          <text class="t-name" x="330" y="361" text-anchor="middle">Output log</text>
+          <text class="t-mono" x="330" y="378" text-anchor="middle">nova-output.py</text>
+
+          <!-- Echo, script director -->
+          <path class="edge" d="M300,150 V58 H468" marker-end="url(#f1-ah)"/>
+          <text class="t-edge" x="384" y="50" text-anchor="middle">sheet path</text>
+          <rect class="node" x="470" y="30" width="160" height="56" rx="10"/>
+          <text class="t-name" x="550" y="54" text-anchor="middle">Echo</text>
+          <text class="t-sub" x="550" y="72" text-anchor="middle">scripts · angle check</text>
+          <path class="edge" d="M550,86 V148" marker-end="url(#f1-ah)"/>
+          <text class="t-edge" x="558" y="122">fills scripts</text>
+
+          <!-- Batch sheet -->
+          <path class="edge" d="M380,180 H468" marker-end="url(#f1-ah)"/>
+          <text class="t-edge" x="425" y="172" text-anchor="middle">builds rows</text>
+          <path class="node" d="M470,150 H612 L630,168 V248 H470 Z"/>
+          <path class="edge" d="M612,150 V168 H630"/>
+          <text class="t-name" x="550" y="184" text-anchor="middle">Batch sheet</text>
+          <text class="t-sub" x="550" y="203" text-anchor="middle">1 row per video</text>
+          <text class="t-mono" x="550" y="222" text-anchor="middle">AtlasPM/batches/</text>
+          <text class="t-mono" x="550" y="238" text-anchor="middle">+ Source video (clones)</text>
+
+          <path class="edge" d="M630,200 H728" marker-end="url(#f1-ah)"/>
+          <text class="t-edge" x="680" y="192" text-anchor="middle">reads rows</text>
+
+          <!-- Batch queue -->
+          <rect class="node" x="470" y="312" width="160" height="48" rx="8"/>
+          <text class="t-name" x="550" y="333" text-anchor="middle">Batch queue</text>
+          <text class="t-mono" x="550" y="350" text-anchor="middle">when Atlas is busy</text>
+
+          <!-- Atlas -->
+          <rect class="node-key" x="730" y="150" width="180" height="100" rx="12"/>
+          <text class="t-title" x="820" y="186" text-anchor="middle">Atlas</text>
+          <text class="t-sub" x="820" y="206" text-anchor="middle">Project manager</text>
+          <text class="t-mono" x="820" y="228" text-anchor="middle">picks designer by Style</text>
+
+          <!-- run + report loop -->
+          <path class="edge-acc" d="M380,236 H430 V276 H760 V252" marker-end="url(#f1-ah-acc)"/>
+          <text class="t-acc" x="596" y="270" text-anchor="middle">nova-atlas.py run &lt;sheet&gt;</text>
+          <path class="edge" d="M890,250 V294 H400 V252" marker-end="url(#f1-ah)"/>
+          <text class="t-edge" x="650" y="289" text-anchor="middle">one-line report, one block per sheet</text>
+
+          <!-- tail handoff -->
+          <path class="edge" d="M630,336 H900 V252" marker-end="url(#f1-ah)"/>
+          <text class="t-edge" x="765" y="328" text-anchor="middle">tail handoff: next ready sheet</text>
+
+          <!-- Designers -->
+          <path class="edge" d="M910,200 L988,142" marker-end="url(#f1-ah)"/>
+          <path class="edge" d="M910,200 L988,174" marker-end="url(#f1-ah)"/>
+          <path class="edge" d="M910,200 L988,206" marker-end="url(#f1-ah)"/>
+          <path class="edge" d="M910,200 L988,238" marker-end="url(#f1-ah)"/>
+          <path class="edge" d="M910,200 L988,270" marker-end="url(#f1-ah)"/>
+          <path class="edge" d="M910,200 L988,302" marker-end="url(#f1-ah)"/>
+          <path class="edge" d="M910,200 L988,334" marker-end="url(#f1-ah)"/>
+          <text class="t-edge" x="944" y="126" text-anchor="middle">1 per row</text>
+          <rect class="node" x="990" y="128" width="180" height="28" rx="8"/>
+          <text class="t-name" x="1080" y="147" text-anchor="middle">Talking head edited</text>
+          <rect class="node" x="990" y="160" width="180" height="28" rx="8"/>
+          <text class="t-name" x="1080" y="179" text-anchor="middle">Explainer</text>
+          <rect class="node-plan" x="990" y="192" width="180" height="28" rx="8"/>
+          <text class="t-name" x="1080" y="211" text-anchor="middle">Podcast · not ready</text>
+          <rect class="node" x="990" y="224" width="180" height="28" rx="8"/>
+          <text class="t-name" x="1080" y="243" text-anchor="middle">Avatar</text>
+          <rect class="node" x="990" y="256" width="180" height="28" rx="8"/>
+          <text class="t-name" x="1080" y="275" text-anchor="middle">Clone</text>
+          <rect class="node" x="990" y="288" width="180" height="28" rx="8"/>
+          <text class="t-name" x="1080" y="307" text-anchor="middle">Re-skit</text>
+          <rect class="node" x="990" y="320" width="180" height="28" rx="8"/>
+          <text class="t-name" x="1080" y="339" text-anchor="middle" style="font-size:12.5px">Corporate carousel · new</text>
+
+          <path class="edge" d="M1080,348 V358" marker-end="url(#f1-ah)"/>
+          <rect class="node" x="982" y="360" width="196" height="52" rx="8"/>
+          <text class="t-name" x="1080" y="382" text-anchor="middle">Project/&lt;Brand&gt;/</text>
+          <text class="t-mono" x="1080" y="400" text-anchor="middle">editable · renders · carousels · metadata</text>
+
+          <!-- VIDEO DONE back to Nova -->
+          <path class="edge-ok" d="M1080,412 V436 H388 V252" marker-end="url(#f1-ah-ok)"/>
+          <text class="t-ok" x="740" y="452" text-anchor="middle">VIDEO DONE · each video or carousel the moment it finishes</text>
+        </svg>
+      </div>
+      <div class="legend" aria-hidden="true">
+        <span><i class="sw key"></i>manager</span>
+        <span><i class="sw"></i>agent or tool</span>
+        <span><i class="sw lark"></i>Lark, where requests start and videos land</span>
+        <span><i class="sw ok"></i>finished video, straight to Nova</span>
+        <span><i class="sw zone"></i>Atlas's background session</span>
+      </div>
+      <figcaption>Nova listens to the SuperMaxima group (anyone who tags @Nova) and to the owner's DMs. She only ever sends Atlas a sheet path (orange) and gets one line back per run. While Atlas is busy, new sheets wait in the queue; once his current sheet has no rows left to start, he takes the next ready sheet into his free slots. Atlas is reused while he is under 80% context, then replaced by a fresh session.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 2. Row lifecycle -->
+  <section>
+    <header>
+      <div class="eyebrow">2 · Inside a batch</div>
+      <h2>What happens to one row</h2>
+      <p>Every video is one row in the sheet. Its status moves left to right. A problem goes back to the video's own designer to fix first; redo or cancel only when a fix can't work, and the requester decides.</p>
+    </header>
+    <figure>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 1080 320" role="img" aria-label="A row moves from draft to pending when its script is filled (avatar, clone and re-skit rows need no script and start pending), to designing, to ready, to rendering, and to done. A failed or questioned row waits for the requester. Fix first sends it back to the same designer to repair only the faulty part. Redo archives the attempt and sends the row back to pending with the same numbers. Cancel archives it, removes the row and frees both numbers.">
+          <defs>
+            <marker id="f2-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow" d="M0,0 L10,5 L0,10 z"/></marker>
+            <marker id="f2-ah-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow-bad" d="M0,0 L10,5 L0,10 z"/></marker>
+            <marker id="f2-ah-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow-ok" d="M0,0 L10,5 L0,10 z"/></marker>
+          </defs>
+
+          <!-- phase brackets -->
+          <path class="bracket" d="M330,56 V48 H590 V56"/>
+          <text class="t-mono" x="460" y="38" text-anchor="middle">PHASE 1 · design, up to 6 at once</text>
+          <path class="bracket" d="M680,56 V48 H935 V56"/>
+          <text class="t-mono" x="807" y="38" text-anchor="middle">PHASE 2 · render, up to 2 at once</text>
+
+          <!-- states -->
+          <rect class="node" x="20" y="100" width="130" height="44" rx="22"/>
+          <text class="t-name" x="85" y="127" text-anchor="middle">draft</text>
+          <text class="t-sub" x="85" y="164" text-anchor="middle">Nova adds the row</text>
+
+          <rect class="node" x="195" y="100" width="130" height="44" rx="22"/>
+          <text class="t-name" x="260" y="127" text-anchor="middle">pending</text>
+          <text class="t-sub" x="260" y="164" text-anchor="middle">no-script rows start here</text>
+
+          <rect class="node" x="370" y="100" width="130" height="44" rx="22"/>
+          <text class="t-name" x="435" y="127" text-anchor="middle">designing</text>
+
+          <rect class="node" x="545" y="100" width="130" height="44" rx="22"/>
+          <text class="t-name" x="610" y="127" text-anchor="middle">ready</text>
+
+          <rect class="node" x="720" y="100" width="130" height="44" rx="22"/>
+          <text class="t-name" x="785" y="127" text-anchor="middle">rendering</text>
+
+          <rect class="node-ok" x="895" y="100" width="130" height="44" rx="22"/>
+          <text class="t-name" x="960" y="127" text-anchor="middle">done</text>
+          <text class="t-sub" x="960" y="164" text-anchor="middle">to Lark, then logged</text>
+
+          <!-- transitions -->
+          <path class="edge" d="M150,122 H193" marker-end="url(#f2-ah)"/>
+          <text class="t-edge" x="172" y="78" text-anchor="middle">script filled</text>
+          <text class="t-mono" x="172" y="92" text-anchor="middle">Echo</text>
+
+          <path class="edge" d="M325,122 H368" marker-end="url(#f2-ah)"/>
+          <text class="t-edge" x="347" y="78" text-anchor="middle">Atlas starts</text>
+          <text class="t-mono" x="347" y="92" text-anchor="middle">a designer</text>
+
+          <path class="edge" d="M500,122 H543" marker-end="url(#f2-ah)"/>
+          <text class="t-edge" x="522" y="78" text-anchor="middle">READY</text>
+          <text class="t-mono" x="522" y="92" text-anchor="middle">designer</text>
+
+          <path class="edge" d="M675,122 H718" marker-end="url(#f2-ah)"/>
+          <text class="t-edge" x="697" y="78" text-anchor="middle">same designer</text>
+          <text class="t-mono" x="697" y="92" text-anchor="middle">resumed</text>
+
+          <path class="edge" d="M850,122 H893" marker-end="url(#f2-ah)"/>
+          <text class="t-edge" x="872" y="78" text-anchor="middle">DONE</text>
+          <text class="t-mono" x="872" y="92" text-anchor="middle">path·credits·min</text>
+
+          <!-- failure -->
+          <path class="edge-bad" d="M420,144 V244 H543" marker-end="url(#f2-ah-bad)"/>
+          <path class="edge-bad" d="M785,144 V244 H677" marker-end="url(#f2-ah-bad)"/>
+          <rect class="node-bad" x="545" y="222" width="130" height="44" rx="22"/>
+          <text class="t-name" x="610" y="241" text-anchor="middle">problem</text>
+          <text class="t-mono" x="610" y="257" text-anchor="middle">requester decides</text>
+
+          <!-- fix first -->
+          <path class="edge-ok" d="M600,222 V200 H470 V146" marker-end="url(#f2-ah-ok)"/>
+          <text class="t-ok" x="535" y="194" text-anchor="middle">1 · fix first</text>
+          <text class="t-mono" x="533" y="215" text-anchor="middle">own designer</text>
+
+          <!-- redo -->
+          <path class="edge" d="M585,266 V296 H260 V146" marker-end="url(#f2-ah)"/>
+          <text class="t-edge" x="420" y="288" text-anchor="middle">2 · redo · archive attempt, same numbers</text>
+
+          <!-- cancel -->
+          <path class="edge" d="M640,266 V296 H960 V268" marker-end="url(#f2-ah)"/>
+          <text class="t-edge" x="800" y="288" text-anchor="middle">3 · cancel · archive, remove row, free numbers</text>
+          <rect class="node-plan" x="895" y="222" width="130" height="44" rx="22"/>
+          <text class="t-name" x="960" y="249" text-anchor="middle">cancelled</text>
+        </svg>
+      </div>
+      <figcaption>Fix first: the video's own designer repairs only the faulty part (a cut-off clip, a caption, the audio) and renders again, which costs a fraction of a redo. A problem found after a video is done goes the same way. The Data Cleaner does the archiving for redo and cancel.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 3. After a batch -->
+  <section>
+    <header>
+      <div class="eyebrow">3 · After a batch</div>
+      <h2>From finished video to Spira</h2>
+      <p>When Atlas's line comes in, Nova closes each sheet on its own and tags its requester. Everything after that runs only on someone's word.</p>
+    </header>
+    <div class="after">
+      <div class="step"><div class="who">Nova</div><h3>Close and log</h3><p>Tallies the sheet, logs the originals toward each brand's weekly target, totals the credits, and tags the requester in their thread.</p></div>
+      <div class="step"><div class="who">Hermes</div><h3>Upload to Spira</h3><p>On the requester's word: uploads each video under its tag, such as Cookiy / US or one IASO country tag per language. Upload only, never posts.</p></div>
+      <div class="step"><div class="who">Iris</div><h3>Report</h3><p>The track sheet: made vs target per brand, uploaded vs made, credits spent and their dollar value, storage, and recent changes.</p></div>
+      <div class="step"><div class="who">Jani</div><h3>Back up</h3><p>On the owner's word only: moves finished projects to the external drive. Task numbers never change.</p></div>
+    </div>
+  </section>
+
+  <!-- 4. Numbers -->
+  <section>
+    <header>
+      <div class="eyebrow">4 · Task numbers</div>
+      <h2>Two numbers per video</h2>
+      <p>The <strong>Task ID</strong> tracks a task across the whole system and names its files. The <strong>Brand number</strong> is each brand's own count, 01, 02, 03 with no gaps, however the brands are interleaved.</p>
+    </header>
+    <div class="numbers">
+      <div class="panel">
+        <h3>Issued in order of request</h3>
+        <div class="table-scroll">
+          <table class="ids">
+            <tr><th scope="row">Task ID</th><td>01</td><td>02</td><td>03</td><td>04</td><td>05</td><td>06</td><td>07</td><td>08</td></tr>
+            <tr><th scope="row">Brand</th><td><b class="bA">A</b></td><td><b class="bA">A</b></td><td><b class="bA">A</b></td><td><b class="bB">B</b></td><td><b class="bC">C</b></td><td><b class="bA">A</b></td><td><b class="bB">B</b></td><td><b class="bC">C</b></td></tr>
+            <tr><th scope="row">Brand number</th><td>01</td><td>02</td><td>03</td><td>01</td><td>01</td><td>04</td><td>02</td><td>02</td></tr>
+          </table>
+        </div>
+        <p class="note">Both come from one call to the batch tool, which issues every row's numbers at once. Nobody counts files in a folder, so backing videos up never restarts the count.</p>
+      </div>
+      <div class="panel">
+        <h3>Keeping the counts honest</h3>
+        <div class="folders">
+          <div><span class="path">Project/BrandA/</span><b class="bA">01</b><b class="bA">02</b><b class="bA">03</b><b class="bA">04</b></div>
+          <div><span class="path">Project/BrandB/</span><b class="bB">01</b><b class="bB">02</b></div>
+          <div><span class="path">Project/Avatar/</span><b class="bC">01</b><b class="bC">02</b></div>
+        </div>
+        <p class="note"><strong>Redo</strong> keeps both numbers. <strong>Cancel</strong> frees both, and the next task takes the lowest free number. Avatars count under their own brand, <strong>Avatar</strong>, so they never take a client's video numbers. A test run moves to <strong>Test</strong> and frees its brand number.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Roster -->
+  <section>
+    <header>
+      <div class="eyebrow">5 · The agents</div>
+      <h2>Who does what</h2>
+      <p>Only two agents keep a session open: Nova, always, and Atlas while he runs. Every other agent does one job, replies once, and is gone.</p>
+    </header>
+    <div class="roster">
+      <article class="agent"><div class="top"><h3>Nova</h3><span class="chip built">built</span></div><p>Operations manager. Takes requests from the Lark group and the owner's DMs, builds batches, queues them, posts every finished video to its thread, and DMs the owner when the team is blocked.</p><div class="runs">always-on desktop session · Lark bridge</div></article>
+      <article class="agent"><div class="top"><h3>Atlas</h3><span class="chip built">built</span></div><p>Project manager. Runs batch sheets with up to 6 designers and 2 renders at once, and pulls the next ready sheet into free slots.</p><div class="runs">background session · nova-atlas.py</div></article>
+      <article class="agent"><div class="top"><h3>Echo</h3><span class="chip built">built</span></div><p>Script director. Cycles each brand's writing styles and blocks repeats: no repeated angle (Cookiy picks from its profession list, never one of the last 30) and no near-copy phrasing.</p><div class="runs">Nova's helper · Agents/EchoSD/</div></article>
+      <article class="agent"><div class="top"><h3>Quill</h3><span class="chip built">built</span></div><p>Brief writer. Turns a brand's website and notes into a DNA doc in Lark for the owner's review, then hands Nova the brief: DNA link, colors, logo and product images.</p><div class="runs">Nova's helper · Agents/QuillBW/</div></article>
+      <article class="agent"><div class="top"><h3>Talking Head Edited Designer</h3><span class="chip built">built</span></div><p>9:16 talking-head videos with Omni Flash 1.1 clips. Chunks lines by speaking time (each clip minus 1 s of silence) and checks every clip with Scribe.</p><div class="runs">Atlas's helper · one per video</div></article>
+      <article class="agent"><div class="top"><h3>Explainer Designer</h3><span class="chip built">built</span></div><p>Narrated explainer videos over animated infographics, translated into the row's language, such as IASO's five markets.</p><div class="runs">Atlas's helper · one per video</div></article>
+      <article class="agent"><div class="top"><h3>Podcast Designer</h3><span class="chip planned">not ready</span></div><p>Two-speaker podcast videos from a podcast script, with captions timed to every word.</p><div class="runs">Atlas's helper · one per video</div></article>
+      <article class="agent"><div class="top"><h3>Avatar Designer</h3><span class="chip built">built</span></div><p>Avatar images only: Higgsfield Soul for the likeness, a GPT Image 2 edit to clean it. The one source of personas and character sheets; with no description, it picks the person itself.</p><div class="runs">Atlas's helper · style "avatar"</div></article>
+      <article class="agent"><div class="top"><h3>Hermes</h3><span class="chip built">built</span></div><p>Media uploader. Uploads finished videos to Spira under the right tag, on the requester's word. Never posts or schedules.</p><div class="runs">Nova's helper · Agents/HermesMU/</div></article>
+      <article class="agent"><div class="top"><h3>Iris</h3><span class="chip built">built</span></div><p>Report keeper. Builds the track sheet: targets, uploads, credits, storage and the dev notes of recent changes.</p><div class="runs">Nova's helper · Agents/IrisRP/</div></article>
+      <article class="agent"><div class="top"><h3>Jani</h3><span class="chip built">built</span></div><p>Backup agent. Moves finished projects to the external drive, on the owner's word only. Never frees numbers.</p><div class="runs">Nova's helper · Agents/JaniBA/</div></article>
+      <article class="agent"><div class="top"><h3>Data Cleaner</h3><span class="chip built">built</span></div><p>On a redo or cancel: archives the failed attempt; on cancel also removes the row and frees its numbers.</p><div class="runs">Nova's helper</div></article>
+      <article class="agent"><div class="top"><h3>Cloner</h3><span class="chip new">new</span></div><p>Rebuilds a source video's format for a brand: new lines, voice, persona and shots (Wan 3.0, Omni, Kling). Never the source creator's face; picks and keeps a voice per brand.</p><div class="runs">Atlas's helper · style "clone"</div></article>
+      <article class="agent"><div class="top"><h3>Re-skit</h3><span class="chip new">new</span></div><p>Re-skits a trend: keeps its motion and voices (always pitch-adjusted), recasts the person with our persona, and changes the meaning for the brand.</p><div class="runs">Atlas's helper · style "re-skit"</div></article>
+      <article class="agent"><div class="top"><h3>Corporate Carousel Designer</h3><span class="chip new">new</span></div><p>4–7 slide corporate brand carousels (1080×1350, 4:5) from Echo's topic angle and the brand's website: research, design brief, copy, GPT Image 2 assets, HTML layout, rendered JPEGs and captions. Carousel angles don't repeat within a brand's last 75 carousels. More carousel designers (e.g. lifestyle) will follow; all share output type carousel.</p><div class="runs">Atlas's helper · style "corporate carousel"</div></article>
+      <article class="agent planned"><div class="top"><h3>Repurpose</h3><span class="chip planned">decommissioned</span></div><p>Made repurposed cuts of a finished video. Hardly used; removed from the system on 24 October 2026.</p><div class="runs">retired · DesignerShared/retired/</div></article>
+    </div>
+  </section>
+
+  <!-- 6. Rules -->
+  <section>
+    <header>
+      <div class="eyebrow">6 · Standing rules</div>
+      <h2>How decisions get made</h2>
+    </header>
+    <ul class="rules">
+      <li><b>Fix before redo</b><span>Propose a targeted fix by the video's own designer first. Redo or cancel only when a fix can't work.</span></li>
+      <li><b>The requester decides</b><span>Whoever asked for a batch decides its fixes, redo or cancel. Jekylle and Angelica may also decide uploads and upload tags.</span></li>
+      <li><b>Every video, the moment it's done</b><span>Each finished video goes to the request's Lark thread one by one, never held back for the end of the batch.</span></li>
+      <li><b>Blocked means a DM</b><span>When Nova or any agent is blocked, the owner gets a Lark DM right away: what, why, and what is needed.</span></li>
+      <li><b>Spend is shared, balance is not</b><span>Reports show the credits the designers spent and their dollar value. The account balance stays private.</span></li>
+      <li><b>Every fix leaves a note</b><span>Each change to the system gets one dev note, shown under Recent changes on the report.</span></li>
+      <li><b>Back up before a major update</b><span>The whole system is zipped into Backup/ and checked before the first change of any major update.</span></li>
+      <li><b>Credits come from each job</b><span>Every generation records the exact charge Spira reports for it, at Spira's live prices.</span></li>
+      <li><b>No gates, full speed</b><span>Clone and re-skit run straight through, in the same 6 designing / 2 rendering as every other row. Slowing down to test is the team's call.</span></li>
+    </ul>
+  </section>
+
+  <!-- 7. Folders -->
+  <section>
+    <header>
+      <div class="eyebrow">7 · Where things live</div>
+      <h2>One folder for everything</h2>
+      <p>Every agent reads only from inside Super Nova. Older copies of these skills elsewhere on the machine are out of date and never used.</p>
+    </header>
+    <pre class="tree"><span class="a">Super Nova/</span>
+├── Backup/                             <span class="c">system backups (zips) and their ledger</span>
+├── Lark connect/                       <span class="c">the Lark bridge: listener, replies, DMs to the owner</span>
+├── Agents/
+│   ├── NovaOM/                          <span class="c">skill, ledger, brand memory, numbers, output log, queue, dev notes, roster</span>
+│   │   └── client-assets/&lt;Brand&gt;/       <span class="c">logos, personas/, brand/, voice.md (never cleared by backups)</span>
+│   ├── AtlasPM/                        <span class="c">skill, sheet tool, designer list, approved tools, batches/</span>
+│   ├── EchoSD/                         <span class="c">writing styles, scripts, angle records, profession list</span>
+│   ├── QuillBW/                        <span class="c">DNA docs in Lark</span>
+│   ├── DesignerShared/                 <span class="c">shared skills and tools: stage, chunker, timings (Scribe), render</span>
+│   ├── TalkingHeadEditedVideoDesigner/ <span class="c">talking-head style</span>
+│   ├── ExplainerVideoDesigner/         <span class="c">explainer style</span>
+│   ├── PodcastVideoDesigner/           <span class="c">podcast style</span>
+│   ├── AvatarDesigner/                 <span class="c">avatar images, personas</span>
+│   ├── ClonerVideoDesigner/            <span class="c">clone style</span>
+│   ├── ReskitVideoDesigner/            <span class="c">re-skit style</span>
+│   ├── CorporateCarouselDesigner/      <span class="c">corporate carousel style</span>
+│   ├── HermesMU/                       <span class="c">uploads to Spira, tags, upload log</span>
+│   ├── IrisRP/                         <span class="c">the track sheet report</span>
+│   ├── JaniBA/                         <span class="c">backups to the external drive</span>
+│   └── DataCleaner/                    <span class="c">archive tool</span>
+└── Project/                            <span class="c">where designers work</span>
+    ├── &lt;BrandName&gt;/                    <span class="c">editable/  renders/  metadata/</span>
+    └── Avatar/                         <span class="c">finished avatar images</span></pre>
+  </section>
+
+  <footer>Status as of 27 October 2026. Updated for the Corporate Carousel Designer (renamed from Carousel Designer; style corporate carousel, Echo's topic angles, slides in Project/&lt;Brand&gt;/carousels/), and before that for the Cloner and Re-skit designers, the Source video column, Spira's live prices with credits taken from each job, the backup-first rule, the Podcast Designer not ready yet, and Repurpose decommissioned.</footer>
+</main>

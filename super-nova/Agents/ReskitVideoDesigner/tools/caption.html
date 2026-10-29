@@ -1,0 +1,20 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  /* Main caption in the plain native style: white text, soft dark edge, balanced lines, no box.
+     Text from the URL hash. Optional ?top=<px at 360-wide scale> sets the vertical centre (default 433 ≈ mid-frame).
+     Render: node render_html.js "caption.html?top=<px>#<urlencoded text>" caption.png  → 1080x1920 transparent */
+  html, body { margin: 0; width: 360px; height: 640px; background: transparent; overflow: hidden; }
+  .frame { position: relative; width: 360px; height: 640px; overflow: hidden; }
+  .cap { position: absolute; left: 40px; right: 40px; top: 433px; transform: translateY(-50%);
+    font: 600 16.5px/1.22 -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    color: #fff; text-align: center; letter-spacing: -0.2px; text-wrap: balance;
+    text-shadow: 0 0 2px rgba(0,0,0,.85), 0 1px 3px rgba(0,0,0,.6), 0 0 8px rgba(0,0,0,.25); }
+</style></head>
+<body><div class="frame"><div class="cap" id="t"></div></div>
+<script>
+  const t = document.getElementById("t");
+  t.textContent = decodeURIComponent(location.hash.slice(1));
+  const capTop = new URLSearchParams(location.search).get("top");
+  if (capTop) t.style.top = capTop + "px";
+</script></body></html>

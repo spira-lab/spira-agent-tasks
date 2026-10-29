@@ -1,0 +1,56 @@
+# PartGenie: brand truth
+
+Facts that on-screen claims may rest on. Each row: the fact, its exact wording or number, the source, the date checked.
+
+| Fact | Exact wording / number | Source | Checked |
+|---|---|---|---|
+| What PartGenie is | "AI hardware companion for electronics"; search components, design hardware, analyze BOMs, source parts | Brand DNA (Lark QWXodgvmjo1drXxocERj7PVIp8e) | 2026-10-28 |
+| Site headline | "Build hardware with AI you can verify." | partgenie.ai home page | 2026-10-28 |
+| Answers cite sources | "Trace claims back to manufacturer datasheets, official component catalogs, manufacturer websites, and trusted technical sources." / FAQ: "Our AI also cites its sources" | partgenie.ai home page | 2026-10-28 |
+| Search mode | "Search — Find & understand: Look up MPNs, specs, and datasheets in natural language. Surface pin-compatible alternatives, compare tradeoffs" | partgenie.ai home page | 2026-10-28 |
+| Two modes in the search box | "Search" and "Work"; chips "Optimize BOM", "Design Hardware", "Tariff lookup"; placeholder "Search MPNs, specs & alternatives" | partgenie.ai home page (capture) | 2026-10-28 |
+| Lifecycle in sourcing | "Move from shortlist to procurement with lifecycle, pricing, and stock context in one place. Flag supply risk early" | partgenie.ai home page | 2026-10-28 |
+| BOM checks obsolete parts | "checks for obsolete components ... finds optimal alternatives" | partgenie.ai home page | 2026-10-28 |
+| Alternative Finder | "Find pin-compatible and functional replacements in minutes." | partgenie.ai home page, free tools | 2026-10-28 |
+| Scale (use the headline figure) | "Verified data across 56M+ parts from 12,700+ manufacturers" (FAQ's 35 million is out of date: designer-lessons 2026-10-27) | partgenie.ai home page | 2026-10-28 |
+| Free to start | "It is free to start." / "Get PartGenie free" / "Get started for free" | DNA; site header and footer | 2026-10-28 |
+| Platforms | web, iOS and Android apps, Chrome extension, KiCad and EDA workflows | DNA; site footer | 2026-10-28 |
+| Brand colors | #227F8E (teal), #222421 (near-black) | the request | 2026-10-28 |
+| Logo | PartGenie_logo.png (teal mark + "PartGenie" wordmark) | the request (client-assets/PartGenie/PartGenie_logo.png) | 2026-10-28 |
+| nRF51822 lifecycle | Nordic lists it as "nRF51822 Not Recommended for New Designs" | nordicsemi.com/Products/nRF51822 (page title text, seen through a web search snippet; the page itself refused a direct fetch, 403) | 2026-10-28 |
+| nRF51822 core and memory | Arm Cortex-M0, 256/128 KB flash, 32/16 KB RAM; Bluetooth LE and 2.4 GHz proprietary | nordicsemi.com/Products/nRF51822 (same snippet) | 2026-10-28 |
+| Nordic's migration path | "Migrating from the nRF51 Series to the nRF52 Series" migration guide | docs.nordicsemi.com/r/bundle/migration_nrf52 | 2026-10-28 |
+| nRF52832 | Cortex-M4 with FPU, 64 MHz, 512 KB flash / 64 KB RAM | docs.nordicsemi.com nRF52 Series IC comparison (struct_nrf52) | 2026-10-28 |
+| nRF52833 | Cortex-M4 with FPU, 64 MHz, 512 KB flash / 128 KB RAM | docs.nordicsemi.com nRF52 Series IC comparison | 2026-10-28 |
+| nRF52810 | Cortex-M4, 64 MHz, 192 KB flash / 24 KB RAM; "a baseline member of the nRF52 Series" | nordicsemi.com/Products/nRF52810; nRF52 comparison | 2026-10-28 |
+| nRF51822 page, captured directly (Task 405) | Badge "Not Recommended for New Designs"; "16 MHz Cortex-M0"; "256/128 KB Flash, 32/16 KB RAM"; "Bluetooth Low Energy and 2.4 GHz SoC"; "+4 dBm TX Power"; "31 GPIOs" | nordicsemi.com/Products/nRF51822, headless-browser capture | 2026-10-28 |
+| nRF52832 page, captured directly (Task 405) | "Arm Cortex-M4 CPU with floating point unit running at 64 MHz"; Bluetooth LE, Bluetooth mesh, NFC; no NRND badge on the page | nordicsemi.com/Products/nRF52832, headless-browser capture | 2026-10-28 |
+| nRF52810 page, captured directly (Task 405) | "Arm Cortex-M4 CPU running at 64 MHz"; "a baseline member of the nRF52 Series"; no NRND badge on the page | nordicsemi.com/Products/nRF52810, headless-browser capture | 2026-10-28 |
+| Chat with a datasheet instead of reading it all | "Get instant, expert answers without reading hundreds of pages." | partgenie.ai home page (Chat with Datasheet) | 2026-10-28 |
+| NRND is not the same label as obsolete | NRND = not recommended for new designs; obsolete is a separate lifecycle status | Jekylle's carousel NO.026-01 "Lifecycle Labels" (NRND, last time buy, obsolete as different labels) | 2026-10-28 |
+| MPU-6050 lifecycle (Task 407) | TDK Product Center: "Product Status: Obsolete" | product.tdk.com/en/search/sensor/mortion-inertial/imu/info?part_no=MPU-6050, headless-browser capture (Project/PartGenie/editable/materials/407-partgenie-10-28/source/tdk_mpu6050_capture) | 2026-10-28 |
+| TDK's alternate for MPU-6050 (Task 407) | "Recommended Alternate Part No. : ICM-42670-P (Interchangeability is not guaranteed.)" | same TDK Product Center page | 2026-10-28 |
+| MPU-6050 at DigiKey (Task 407) | Part Status "Obsolete", "This product is no longer manufactured."; PCN Obsolescence/EOL "EOL 23/Jul/2023"; package "24-QFN (4x4)"; I2C | digikey.com/en/products/detail/tdk-invensense/MPU-6050/4038010, capture | 2026-10-28 |
+| ICM-42670-P (Task 407) | TDK Product Center: "Product Status: Production"; 6-axis; 2.50 x 3.00 x 0.76 mm nom.; I2C, I3C, SPI; -40 to 85 °C; "Cost-Optimal Lowest power IMU with Advanced Motion Features" | product.tdk.com/...?part_no=ICM-42670-P, capture (.../407-partgenie-10-28/source/tdk_icm42670p_capture) | 2026-10-28 |
+| MPU-6050 size and interface, re-checked (Task 410) | TDK Product Center: "Obsolete"; alternate "ICM-42670-P (Interchangeability is not guaranteed.)"; 6-Axis MEMS MotionTracking Device; L 4.00 mm, W 4.00 mm, T 0.90 mm; I2C | own capture, Project/PartGenie/editable/materials/410-partgenie-10-28/source/tdk_mpu6050 (and tdk_icm42670p: Production, I2C/I3C/SPI, 2.50 x 3.00 x 0.76 mm) | 2026-10-28 |
+| Old TDK MPU-6050 product page (Task 407) | invensense.tdk.com/products/motion-tracking/6-axis/mpu-6050/ returns "Page Not Found" | capture | 2026-10-28 |
+| Datasheet AI (Task 408) | "AI Datasheet Assistant — Chat with Electronic Component Datasheets"; "Upload a datasheet PDF or enter a part number"; "Chat with the datasheet about specs, pinout, package, interface, thermal limits, application circuits, operating conditions"; FAQ: "Datasheet AI cites the relevant spec sections for engineering review." | partgenie.ai/datasheet-ai (capture brand/ui/2026-10-28/datasheet-ai) | 2026-10-28 |
+| Datasheet chat screen layout (Task 408) | PDF viewer on the left (file name, page "1 / 198", zoom, download), chat panel on the right headed by the part number and its short spec line; greeting "Hi, I'm your PartGenie AI Assistant. If you have any questions about STM32G431RBT3, feel free to ask me, I'll do my best to provide answers. I've carefully read all 198 pages. Ready to help!"; chips "Summarize this datasheet", "What application scenarios does it apply to?", "What are the main features and functions?"; input "Ask AI questions about this datasheet..." | partgenie.ai/images/tools/datasheet-ai-hero.webp (the site's own product screenshot) | 2026-10-28 |
+| nRF52833 page, captured directly (Task 409) | "64 MHz Arm Cortex-M4 with FPU, and has 512 KB flash and 128 KB RAM"; "qualified for operation at an extended temperature range of -40°C to 105°C"; no NRND badge on the page | nordicsemi.com/Products/nRF52833, headless-browser capture (Project/PartGenie/editable/materials/409-partgenie-10-28/source/nordic) | 2026-10-28 |
+| nRF51822 still NRND on a second capture (Task 409) | Page badge "Not Recommended for New Designs"; distributors still list NRF51822-QFAA-R7 in stock | nordicsemi.com/Products/nRF51822, headless-browser capture (same folder) | 2026-10-28 |
+| TPS54331 page-one headline (Task 408) | Features, page 1: "Typical 1-μA shutdown quiescent current"; "3.5 to 28-V input voltage range"; "Fixed 570-kHz switching frequency" | TI datasheet SLVS839H (Oct 2023), ti.com/lit/ds/symlink/tps54331.pdf, 41 pages | 2026-10-28 |
+| TPS54331 shutdown current conditions (Task 408) | Section 6.5 Electrical Characteristics, page 5: "Shutdown supply current — EN = 0 V, VIN = 12 V, –40°C to 85°C — TYP 1, MAX 4 μA" (table header: TJ = –40°C to 150°C, VIN = 3.5 to 28 V unless otherwise noted) | same TI datasheet, page 5 | 2026-10-28 |
+| SN65HVD230DR order code (Task 411, demo C) | TI part page: "SN65HVD230DR" badge "ACTIVE"; "3.3 V CAN Transceiver with Standby Mode \| D \| 8 \| -40 to 85"; Packaging "SOIC (D) \| 8"; "2,500 \| LARGE T&R"; "Same as: SN65HVD230DR.A, SN65HVD230DRG4" | ti.com/product/SN65HVD230/part-details/SN65HVD230DR, headless-browser capture (Project/PartGenie/editable/materials/411-partgenie-10-28/source/ti_sn65hvd230dr) | 2026-10-28 |
+| SN65HVD230D (tube) is obsolete (Task 411, demo C) | same TI page, "Additional package qty \| Carrier options": "SN65HVD230D" badge "OBSOLETE", "75 \| TUBE" | same capture | 2026-10-28 |
+| SN65HVD230 basics (Task 411) | "3.3 V CAN Transceiver with Standby Mode"; ISO 11898-2; data rates up to 1 Mbps; datasheet "SN65HVD23x 3.3-V CAN Bus Transceivers datasheet (Rev. O)" | ti.com/product/SN65HVD230 and the part page, captures in the same folder | 2026-10-28 |
+
+## What PartGenie does not have / must not be implied
+
+| Not true or not verified | Note | Checked |
+|---|---|---|
+| Real-time stock everywhere | site: reference pricing and stock "where available (not real-time)"; FAQ mentions live pricing from select distributors. Do not promise live stock. | 2026-10-28 |
+| ICM-42670-P as a drop-in for MPU-6050 | TDK itself: "Interchangeability is not guaranteed"; different package (2.5 x 3.0 mm vs 24-QFN 4x4). Never call it pin-compatible or drop-in. (Task 407) | 2026-10-28 |
+| A captured screen of PartGenie's MPU-6050 answer (demo B) | The demo B screen in video 407 is a design built from the site's look and TDK/DigiKey facts, not a capture of a real PartGenie answer (no sign-in). | 2026-10-28 |
+| A captured screen of PartGenie's nRF51822 answer | The demo A screens in videos 406 and 409 are designs (409 re-tried a guest run on 2026-10-28: "Log in to your account"); the demo A screen in video 406 is a design built from the site's look and Nordic's facts, not a capture of a real PartGenie answer. | 2026-10-28 |
+| A captured PartGenie answer for the SN65HVD230D/DR order-code question (Task 411, demo C) | The app needs a sign-in to answer (siblings 408/409, 2026-10-28), so the demo C screen in video 411 is a design built from the site's look and TI's own part page, not a capture of a real PartGenie answer. "D = SOIC-8 package, R = tape & reel" is read from TI's page (DR = SOIC (D), large T&R; D = tube), not from a TI naming-guide document. | 2026-10-28 |
+| A captured PartGenie answer for the TPS54331 shutdown-current question (Task 408) | The app's chat needs a sign-in (a guest run on 2026-10-28 hit "Log in to your account"), so the datasheet-chat flow could not be run. Video 408's screen is a design built from the site's own Datasheet AI screenshot and the real TI datasheet, not a capture of a real answer. Whether the live answer names the page number (the site says it "cites the relevant spec sections") is unverified. | 2026-10-28 |

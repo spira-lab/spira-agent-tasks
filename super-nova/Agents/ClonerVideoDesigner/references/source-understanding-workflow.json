@@ -1,0 +1,46 @@
+{
+ "name": "Clone Source Understanding <Task ID>",
+ "note": "Spira workflow definition: video in -> Gemini 3.1 Pro (textChatLlm) -> breakdown text. Used only as the source of the prompt (userPrompt): the agent runs it as a submit_ai_job per source, see the skill section 7. Read only.",
+ "workflowDefinition": {
+  "edges": [
+   {
+    "id": "e-207813b7-5bb6-4aeb-9ab1-f05eeb00e0b0-video-58701997-80bc-4dc4-977b-de2a1ec336df-video__slot_0",
+    "source": "207813b7-5bb6-4aeb-9ab1-f05eeb00e0b0",
+    "target": "58701997-80bc-4dc4-977b-de2a1ec336df",
+    "sourceHandle": "video",
+    "targetHandle": "video__slot_0"
+   }
+  ],
+  "nodes": [
+   {
+    "id": "207813b7-5bb6-4aeb-9ab1-f05eeb00e0b0",
+    "data": {
+     "label": "source_video",
+     "videoUrl": "",
+     "sourceType": "manual"
+    },
+    "type": "videoInput",
+    "position": {
+     "x": 0,
+     "y": 0
+    }
+   },
+   {
+    "id": "58701997-80bc-4dc4-977b-de2a1ec336df",
+    "data": {
+     "label": "Source Understanding",
+     "model": "gemini-3-1-pro",
+     "outputMode": "text",
+     "userPrompt": "You are analysing the SOURCE video of a short social reel that will be re-created (\"cloned\") with a different person and a brand's products. Watch AND listen to the whole video closely and report what you actually see and hear, concretely. Say \"unsure\" rather than guess.\n\n1. WHAT DRIVES IT: in one or two sentences, the mechanic or idea that makes this video work, and the hook in the first second.\n2. TIMELINE: every shot or beat with timestamps (start-end s): camera position and movement, framing, what the person does, props, outfit, and every cut or transition and how it is done.\n3. PERSON AND STYLING: build and body type, age range, hair, makeup, styling, energy and expression. (Describe, don't identify.)\n4. SETTING AND LOOK: location, set dressing, light (in plain words), colour palette, UGC phone footage or professional production.\n5. ON-SCREEN TEXT AND GRAPHICS: every text or graphic with its timing, position, font feel, size, colour and animation. Say \"none\" if none.\n6. MUSIC AND SOUND, like a music producer:\n   - genre, sub-genre, scene or era\n   - tempo in BPM (half-time or double-time feel?), and key if you can tell\n   - every instrument and sound you hear and its role (lead, chords, bass, drums, percussion, ear candy)\n   - vocals: none, sung, rapped, chopped, a vocal hook; language\n   - structure with timestamps (intro, hook, build, drop, switch-ups) and where the energy changes\n   - groove and drum pattern; mix character (warm or bright, lo-fi or polished, bass weight)\n   - what the music does at each cut in the video\n   - any sound effects or voice\n   - if you recognise the track, name it here (this line only)\n7. MUSIC PROMPT: ONE prompt under 80 words for a text-to-music model to make a NEW, original track in the same style, timed to this video's cuts. No artist names, no song titles. Concrete sounds only, no mood adjectives without a sound behind them.\n8. WHAT A CLONE MUST KEEP: the 3 to 5 things that, if lost, would break the video.",
+     "temperature": 0.2,
+     "systemPrompt": ""
+    },
+    "type": "textChatLlm",
+    "position": {
+     "x": 420,
+     "y": 0
+    }
+   }
+  ]
+ }
+}

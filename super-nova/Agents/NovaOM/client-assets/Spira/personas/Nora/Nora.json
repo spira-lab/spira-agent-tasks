@@ -1,0 +1,21 @@
+{
+  "name": "Nora",
+  "brand": "Spira",
+  "made_by_task_id": "268",
+  "brief": "26-year-old white American woman, chin-length wavy copper-red bob, light freckles, burnt orange cropped cardigan buttoned up, cream straight-leg trousers, white sneakers, small cream canvas shoulder bag; full body, sunny city park, daylight.",
+  "soul": {
+    "job_id": "ad6619d4-346c-48a0-af26-77a5275f589e",
+    "model": "ai-influencer-image",
+    "prompt": "UGC Casually taken shot of a 26 year old white American woman, pretty, beautiful and attractive with a natural easy smile and light freckles, chin-length wavy copper-red bob in a casual everyday outfit. She is wearing a burnt orange cropped cardigan buttoned up, cream straight-leg trousers, white sneakers and a small cream canvas shoulder bag on one shoulder. Framed full body from head to toe, standing relaxed in a sunny grassy city park daylight, hands empty and relaxed at the sides, looking at the camera, no posing, no filters, no text",
+    "url": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1792796233344-d32679d4-b675-4e7a-91fe-9d1d66fe68b7.png",
+    "credits": 7
+  },
+  "edit": {
+    "job_id": "d46b4982-5180-4b49-8fef-4d50422d6eb2",
+    "model": "gpt-image-2",
+    "prompt": "Edit this photo. Keep the same person with the exact same face, hair, expression, skin, body, outfit, pose, park and lighting. Sharpen and clean it, removing blur and artefacts. Also reframe slightly so there is clear empty space above her head, roughly a head height of room between the top of her hair and the top of the frame, still framed full body from head to toe. Keep the casual quick phone snapshot look, no filters, no text",
+    "url": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1792796516400-79283ba8-fe75-4dfa-ab88-1ae357d776d1.png",
+    "credits": 5
+  },
+  "total_credits": 12
+}

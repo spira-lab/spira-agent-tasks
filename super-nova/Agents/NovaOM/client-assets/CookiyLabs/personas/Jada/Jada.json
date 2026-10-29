@@ -1,0 +1,13 @@
+{
+  "name": "Jada",
+  "brief": "29-year-old Black American woman, short natural coily afro, mustard yellow crew-neck tee, small gold studs, confident and warm; seated in the driver's seat of a parked car in daylight, waist up. Cast against the source performer (Latina, very long dark wavy hair, black sleeveless dress).",
+  "soul_prompt": "UGC Casually taken shot of a 29 year old Black American woman, pretty, beautiful and attractive with a natural easy smile, short natural coily hair in a small curly afro in a casual everyday style. She is wearing a plain mustard yellow short-sleeve crew-neck t-shirt and small gold stud earrings. Framed from the waist up, sitting relaxed in the driver's seat of a parked car in daylight, hands empty and relaxed on her lap, looking at the camera, no posing, no filters, no text",
+  "edit_prompt": "Edit this photo. Keep the same person with the exact same face, hair, expression, skin, body, outfit, pose, car interior and lighting. Sharpen and clean the image, removing blur and artefacts. Also reframe slightly so there is clear empty space above her head, roughly a head height of room between the top of her hair and the top of the frame, still framed from the waist up. Keep the casual quick phone snapshot look, no filters, no text",
+  "jobs": {"soul": "675b8786-2f0a-4168-b54b-0b2a932a58ae", "edit": "8770be5d-7426-49e8-b513-46c182ce110e"},
+  "urls": {"soul": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1792793447934-fd809708-fbda-46e2-8219-a15c87c9d6a5.png",
+           "persona": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1792793707073-1f0e2c28-6635-4f6c-a162-a65b365e83c4.png"},
+  "credits": 12,
+  "made_by_task": "267",
+  "created": "2026-10-24",
+  "note": "Has a small nose ring and gold studs. Setting is a car interior (made for a driver's-seat talking head)."
+}

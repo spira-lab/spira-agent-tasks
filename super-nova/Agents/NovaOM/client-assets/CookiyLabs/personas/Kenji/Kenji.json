@@ -1,0 +1,12 @@
+{
+  "name": "Kenji",
+  "brief": "27-year-old East Asian man, short side-parted black hair, clean-shaven, plain bright green tee, light grey sweatpants, playful; seated in the driver's seat of a parked car in daylight, waist up. Cast against the source prank driver (bearded dark-haired man in a grey printed tee).",
+  "soul_prompt": "UGC Casually taken shot of a 27 year old East Asian man, handsome, good looking with a playful grin, short black hair with a neat side part in a casual everyday style, clean-shaven. He is wearing a plain bright green crew-neck t-shirt and light grey sweatpants. Framed from the waist up, sitting relaxed in the driver's seat of a parked car in daylight, hands empty and relaxed on his lap, looking at the camera, no posing, no filters, no text",
+  "edit_prompt": "Edit this photo. Keep the same person with the exact same face, hair, expression, skin, body, outfit, pose, car interior and lighting. Sharpen and clean the image, removing blur and artefacts. Only change the paper sticker on the sun visor: replace it with a plain grey visor with no sticker. Also reframe slightly so there is clear empty space above his head, roughly a head height of room between the top of his hair and the top of the frame, still framed from the waist up. Keep the casual quick phone snapshot look, no filters, no text",
+  "jobs": {"soul": "d66cadc6-7288-4329-b09a-3beef4c277d5", "edit": "3ff2fe5c-d9c1-4683-b1db-0af751793eee"},
+  "urls": {"soul": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1792793452013-139f3a7b-5213-4606-a02f-a3861503ce6c.png",
+           "persona": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1792793566228-112e823b-83ca-4d62-8746-1d9a4b07b474.png"},
+  "credits": 12,
+  "made_by_task": "267",
+  "created": "2026-10-24"
+}

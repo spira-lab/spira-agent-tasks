@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  /* Pop-up commentary sticker: white text, heavy dark outline, slight tilt, no box.
+     Render at 1x on a 960x240 transparent canvas: node render_html.js "popup.html#<urlencoded text>" pop.png 960 240 1
+     Place it in edit.json as an overlay of kind "pop": build_edit.py gives it the three-frame pop-in (70% / 95% / 106% / 100%). */
+  html, body { margin: 0; width: 960px; height: 240px; background: transparent; overflow: hidden; }
+  .wrap { width: 960px; height: 240px; display: flex; align-items: center; justify-content: center; }
+  .pop { transform: rotate(-3deg); max-width: 760px; text-align: center;
+    font: 800 50px/1.12 -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    color: #fff; letter-spacing: -0.4px; -webkit-text-stroke: 13px #111; paint-order: stroke fill;
+    text-shadow: 0 5px 8px rgba(0,0,0,.35); }
+</style></head>
+<body><div class="wrap"><div class="pop" id="t"></div></div>
+<script>document.getElementById("t").textContent = decodeURIComponent(location.hash.slice(1));</script>
+</body></html>
