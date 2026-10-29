@@ -10,7 +10,7 @@ Layout (the shared file-management skill, exactly):
 Brand-level files that must survive backups:
   Agents/NovaOM/client-assets/<BrandName>/personas/<Name>/ and .../brand/
 """
-import fcntl, hashlib, html, json, re, shutil, subprocess, tempfile
+import fcntl, hashlib, html, json, re, shutil, subprocess, sys, tempfile
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
@@ -23,6 +23,8 @@ PROJECT = SUPER / "Project"
 SHARED = AGENTS / "DesignerShared"
 CLIENT_ASSETS = AGENTS / "NovaOM" / "client-assets"
 PLAYWRIGHT = SHARED / "tools" / "render" / "node_modules" / "playwright-core"
+sys.path.insert(0, str(SHARED / "tools"))
+import profile as scratch_profile   # redirects tempfile to the scratch root
 MAKE_TIMINGS = SHARED / "tools" / "make-timings.py"
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"   # the asset CDN refuses Python's default agent
 
@@ -81,7 +83,7 @@ def locked(path):
     """An exclusive lock for one file, kept in the system temp folder (never beside the file,
     so no lock files land in the brand folder)."""
     key = hashlib.sha1(str(Path(path).resolve()).encode()).hexdigest()[:16]
-    with open(Path(tempfile.gettempdir()) / f"reskit-{key}.lock", "a") as lk:
+    with open(Path(scratch_profile.OS_TEMP) / f"reskit-{key}.lock", "a") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
         yield
 

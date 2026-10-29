@@ -14,7 +14,7 @@
 //      and every <audio class="sfx" data-at="<seconds>"> mixed in at its time.
 //   6. Embeds the frame at --cover seconds as the MP4's cover image.
 //   7. Checks the output and prints one JSON line. Exit code 0 only if it passed.
-const { chromium } = require('playwright-core');
+const { chromium } = require('playwright-core'); const profile = require('./profile');
 const { spawn, execFileSync, execFile } = require('child_process');
 const fs = require('fs'), path = require('path'), http = require('http'), os = require('os');
 
@@ -27,7 +27,7 @@ if (!htmlArg || !outArg) { console.error('usage: render-fast.js <editable.html> 
 const coverSec = parseFloat(opt('--cover', 'NaN'));
 if (!(coverSec > 0)) { console.error('--cover <seconds> is required and must be after 0: the clearest poster frame, never the first frame'); process.exit(2); }
 const sfxGain = parseFloat(opt('--sfx-gain', '0'));
-const WORKERS = parseInt(opt('--workers', '4'), 10);
+const WORKERS = parseInt(opt('--workers', String(profile.defaultWorkers())), 10);
 const fps = parseInt(opt('--fps', '30'), 10);
 
 const htmlPath = path.resolve(htmlArg), out = path.resolve(outArg);
@@ -46,7 +46,7 @@ const sfxTags = [...html.matchAll(/<audio[^>]*class="[^"]*\bsfx\b[^"]*"[^>]*>/g)
   .map(t => ({ src: attr(t, 'src'), at: parseFloat(attr(t, 'data-at')), gain: parseFloat(attr(t, 'data-gain') || '0') }))
   .filter(s => s.src && s.at >= 0 && s.at * 1000 < durationMs);
 const frames = Math.round(durationMs / 1000 * fps);
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'render-fast-'));
+const tmp = profile.makeTempDir('render-fast-');
 const t0 = Date.now();
 const run = (cmd, args) => new Promise((res, rej) => execFile(cmd, args, { maxBuffer: 1 << 26 }, (e, so, se) => e ? rej(new Error(se || e.message)) : res(so)));
 
@@ -135,11 +135,11 @@ const INSTALL = meta => {
   return vids.filter(v => v.__m).length;
 };
 const hwEncoder = (() => { try { return execFileSync('ffmpeg', ['-hide_banner', '-encoders']).toString().includes('h264_videotoolbox'); } catch { return false; } })();
-const ENC = hwEncoder ? ['-c:v', 'h264_videotoolbox', '-b:v', '10M', '-profile:v', 'high', '-allow_sw', '0'] : ['-c:v', 'libx264', '-preset', 'medium', '-crf', '17'];
+const ENC = hwEncoder ? ['-c:v', 'h264_videotoolbox', '-b:v', '10M', '-profile:v', 'high', '-allow_sw', '0'] : ['-c:v', 'libx264', '-preset', profile.preset('final'), '-crf', '17', ...(profile.x264Threads() ? ['-threads', String(profile.x264Threads())] : [])];
 
 async function worker(id, from, to, port, meta) {
   const seg = path.join(tmp, `seg${String(id).padStart(2, '0')}.mp4`);
-  const launch = { args: ['--force-device-scale-factor=1', '--use-angle=metal', '--enable-gpu-rasterization', '--ignore-gpu-blocklist', '--enable-zero-copy'] };
+  const launch = { args: ['--force-device-scale-factor=1', ...profile.gpuArgs()] };
   if (process.env.CHROME_PATH) launch.executablePath = process.env.CHROME_PATH; else launch.channel = 'chrome';
   const browser = await chromium.launch(launch);
   const page = await browser.newPage({ deviceScaleFactor: 1 });

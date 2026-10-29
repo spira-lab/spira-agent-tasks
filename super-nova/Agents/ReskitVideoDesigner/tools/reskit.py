@@ -52,7 +52,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from reskit_common import (PROJECT, SHARED, UA, MATERIAL_DIRS, Video, brand_key, video_name, update_meta,
-                           read_meta, write_editable, ffprobe_json, duration, loudness, scene_changes, now, to_deletable)
+                           read_meta, write_editable, ffprobe_json, duration, loudness, scene_changes, now, to_deletable, scratch_profile)
 
 
 def opt(a, flag, default=None):
@@ -154,13 +154,13 @@ def cmd_fetch(a):
     if raw.suffix == ".mp4" and vs.get("codec_name") == "h264":
         shutil.copy2(raw, out) if raw.resolve() != out.resolve() else None
     else:
-        run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-c:v", "libx264", "-crf", "16", "-preset", "medium",
+        run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-c:v", "libx264", "-crf", "16", "-preset", scratch_profile.preset("intermediate"),
              "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", out])
     for g in sorted((v.materials / "source").glob("download*")):   # raw downloads: kept, out of the way
         if g.resolve() != out.resolve(): to_deletable(g, v.materials / "deletable")
     (v.materials / "source" / "info.json").write_text(json.dumps({"link": src, **info}, indent=1, ensure_ascii=False) + "\n")
     update_meta(v, lambda d: d.update({"source": {"link": src, "file": str(out), "title": info.get("title"),
-                                                  "uploader": info.get("uploader"), "fetched": now()}}))
+                                                  "uploader": info.get("uploader"), "fetched": now()}, "stage": "fetched"}))
     cmd_probe([str(out)])
 
 
@@ -182,18 +182,27 @@ def cmd_frames(a):
     every = float(opt(a, "--every", "0.5")); width = int(opt(a, "--width", "270"))
     t0 = float(opt(a, "--from", "0")); t1 = opt(a, "--to")
     src, out = Path(a[0]), Path(a[1]); out.mkdir(parents=True, exist_ok=True)
+    keep = "--keep-frames" in a
     end = float(t1) if t1 else duration(src)
-    run(["ffmpeg", "-v", "error", "-y", "-ss", t0, "-t", max(0.1, end - t0), "-i", src, "-vf",
-         f"fps=1/{every},scale={width}:-2", "-q:v", "4", out / "f%04d.jpg"])
-    frames = sorted(out.glob("f*.jpg"))
-    times = [round(t0 + i * every, 2) for i in range(len(frames))]
-    for f, t in zip(frames, times):
-        f.rename(out / f"t{t:07.2f}.jpg")
-    cols = 6; rows = max(1, math.ceil(len(frames) / cols))
-    run(["ffmpeg", "-v", "error", "-y", "-ss", t0, "-t", max(0.1, end - t0), "-i", src, "-vf",
-         f"fps=1/{every},scale={width}:-2,tile={cols}x{rows}:padding=4:color=white", "-frames:v", "1", "-q:v", "3",
-         out / "contact.jpg"])
-    print(f"{len(frames)} frames -> {out}; contact sheet {out / 'contact.jpg'} ({cols} across, left to right, top to bottom)")
+    work = Path(tempfile.mkdtemp(prefix="reskit-frames-"))
+    try:
+        run(["ffmpeg", "-v", "error", "-y", "-ss", t0, "-t", max(0.1, end - t0), "-i", src, "-vf",
+             f"fps=1/{every},scale={width}:-2", "-q:v", "4", work / "f%04d.jpg"])
+        frames = sorted(work.glob("f*.jpg"))
+        times = [round(t0 + i * every, 2) for i in range(len(frames))]
+        for f, t in zip(frames, times):
+            f.rename(work / f"t{t:07.2f}.jpg")
+        cols = 6; rows = max(1, math.ceil(len(frames) / cols))
+        run(["ffmpeg", "-v", "error", "-y", "-ss", t0, "-t", max(0.1, end - t0), "-i", src, "-vf",
+             f"fps=1/{every},scale={width}:-2,tile={cols}x{rows}:padding=4:color=white", "-frames:v", "1", "-q:v", "3",
+             work / "contact.jpg"])
+        shutil.copy2(work / "contact.jpg", out / "contact.jpg")
+        if keep:
+            for f in work.glob("t*.jpg"): shutil.copy2(f, out / f.name)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    print(f"{len(frames)} frames; contact sheet {out / 'contact.jpg'} ({cols} across, left to right, top to bottom)"
+          + (f"; frames in {out}" if keep else "; single frames: use `still` or add --keep-frames"))
     print("times:", " ".join(f"{t:.2f}" for t in times))
 
 
@@ -250,7 +259,7 @@ def cmd_cutref(a):
     if pad > 0.001: vf += f",tpad=stop_mode=clone:stop_duration={pad:.3f}"
     out.parent.mkdir(parents=True, exist_ok=True)
     run(["ffmpeg", "-v", "error", "-y", "-ss", f"{s:.3f}", "-t", f"{length:.3f}", "-i", src, "-an", "-map_metadata", "-1",
-         "-vf", vf, "-t", dur, "-c:v", "libx264", "-crf", "16", "-preset", "medium", "-pix_fmt", "yuv420p", out])
+         "-vf", vf, "-t", dur, "-c:v", "libx264", "-crf", "16", "-preset", scratch_profile.preset("intermediate"), "-pix_fmt", "yuv420p", out])
     cuts = scene_changes(out, 0.3)
     print(f"{out} {duration(out):.2f}s  scene changes inside: {' '.join(map(str, cuts)) or 'none'}")
     if cuts: sys.exit("a scene change is inside the reference clip: end it a few frames before the cut")
@@ -331,7 +340,15 @@ def cmd_lesson(a):
     print(f"{len(d['lessons'])} lessons proposed in {v.metadata}")
 
 
-COMMANDS = {"new": cmd_new, "fetch": cmd_fetch, "probe": cmd_probe, "frames": cmd_frames, "still": cmd_still,
+def cmd_stage(a):
+    v = Video(a[0])
+    if len(a) < 2:
+        print(read_meta(v).get("stage", "none")); return
+    update_meta(v, lambda d: d.update({"stage": a[1]}))
+    print(f"stage = {a[1]}")
+
+
+COMMANDS = {"stage": cmd_stage, "new": cmd_new, "fetch": cmd_fetch, "probe": cmd_probe, "frames": cmd_frames, "still": cmd_still,
             "dna": cmd_dna, "mask": cmd_mask, "cutref": cmd_cutref, "strip": cmd_strip, "safe": cmd_safe,
             "audio-probe": cmd_audio_probe, "loudness": cmd_loudness, "lesson": cmd_lesson}
 

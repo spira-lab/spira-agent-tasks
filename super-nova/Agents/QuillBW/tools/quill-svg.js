@@ -4,7 +4,7 @@
 const path = require('path');
 const fs = require('fs');
 const SUPER = path.resolve(__dirname, '..', '..', '..');
-const { chromium } = require(path.join(SUPER, 'Agents', 'DesignerShared', 'tools', 'render', 'node_modules', 'playwright-core'));
+const { chromium } = (() => { try { return require(path.join(SUPER, 'Agents', 'DesignerShared', 'tools', 'render', 'node_modules', 'playwright-core')); } catch { return require('playwright-core'); } })();
 const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const [inp, out] = process.argv.slice(2);
 (async () => {

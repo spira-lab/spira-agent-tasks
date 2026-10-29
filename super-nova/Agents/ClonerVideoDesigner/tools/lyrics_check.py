@@ -19,6 +19,8 @@ import argparse, json, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent.parent / "DesignerShared" / "tools"))
+import profile as scratch_profile  # noqa: E402,F401  (redirects tempfile to the scratch root)
 SUPER = HERE.parents[2]
 PROJECT = SUPER / "Project"
 

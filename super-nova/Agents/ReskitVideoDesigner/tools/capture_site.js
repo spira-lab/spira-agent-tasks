@@ -21,7 +21,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const { chromium } = require(path.join(__dirname, '..', '..', 'DesignerShared', 'tools', 'render', 'node_modules', 'playwright-core'));
+const { chromium } = (() => { try { return require(path.join(__dirname, '..', '..', 'DesignerShared', 'tools', 'render', 'node_modules', 'playwright-core')); } catch { return require('playwright-core'); } })();
 
 const HIDE = ['[id*="cookie" i]', '[class*="cookie" i]', '[id*="consent" i]', '[class*="consent" i]', '[id*="onetrust" i]',
   '[class*="onetrust" i]', '[id*="gdpr" i]', '[class*="gdpr" i]', '#CybotCookiebotDialog', '[aria-label*="cookie" i]',

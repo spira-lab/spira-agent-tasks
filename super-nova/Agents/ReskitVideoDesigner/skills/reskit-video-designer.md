@@ -385,7 +385,22 @@ You never ask for approval, a story choice, an outfit, music or a go: decide. Re
 A failed generation, a missing DNA, a site that can't be captured or a source with no clean
 plate frame is not a blocker: work around it and say so in the metadata.
 
-## 10. Hard rules
+## 10. On a Linux worker
+
+The tools detect the platform and the machine; there is nothing to configure.
+
+- Scratch files (extracted frames, render temp, composites) go to memory when it has room and are
+  removed when the command ends. `reskit.py frames` copies back only `contact.jpg`; add
+  `--keep-frames` to keep single frames, or use `reskit.py still` for one frame.
+- Several clips or voice-overs at once: `python3 tools/make-timings.py a.mp3 b.mp3` loads the
+  model once. `timings.json` records the engine used.
+- A coloured marker in hand (a logo or sticker to pin on): `python3 tools/track-overlay.py <video> <overlay.png> <out.mp4> --hsv "H0,S0,V0:H1,S1,V1"`.
+  It needs `opencv-python-headless`; if it is missing, install it and run again.
+- The metadata's `stage` key (`fetched`, then `rendered`) says how far a job got. After a restart,
+  read it with `python3 tools/reskit.py stage <materials>` and continue from there instead of
+  redoing finished steps. Set it yourself with `reskit.py stage <materials> <name>`.
+
+## 11. Hard rules
 
 - Never use the source creator's face or likeness, name or burned-in text. Always recast.
 - Kept source audio is always pitch-adjusted (`build_edit.py` refuses otherwise).

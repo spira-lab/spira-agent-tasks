@@ -45,7 +45,7 @@ from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from reskit_common import SHARED, Video, update_meta, write_editable, ffprobe_json, duration, loudness, to_deletable, now
+from reskit_common import SHARED, Video, update_meta, write_editable, ffprobe_json, duration, loudness, to_deletable, now, scratch_profile
 
 FPS = 30; AF = 0.03; SR = 48000
 FIT = "scale=1080:1920:force_original_aspect_ratio=increase:flags=lanczos,crop=1080:1920,setsar=1"
@@ -204,7 +204,7 @@ def main():
         # ------------------------------------------------------------ picture render + attach
         pic = tmp / "picture.mp4"
         flat = [x for inp in inputs for x in inp]
-        crf, preset = ("23", "veryfast") if mode == "draft" else ("18", "medium")
+        crf, preset = ("23", "veryfast") if mode == "draft" else ("18", scratch_profile.preset("final"))
         r = subprocess.run(["ffmpeg", "-v", "error", "-y", *map(str, flat), "-filter_complex", g.text(), "-map", "[v]",
                             "-t", f3(total), "-an", "-c:v", "libx264", "-preset", preset, "-crf", crf, "-r", str(FPS),
                             "-pix_fmt", "yuv420p", str(pic)], capture_output=True, text=True)
@@ -238,7 +238,7 @@ def main():
             if share.exists(): share.unlink()            # the share copy is rebuilt from the current render
             for c, scale in (("23", None), ("26", None), ("26", "scale=720:-2")):
                 run(["ffmpeg", "-v", "error", "-y", "-i", joined, *(["-vf", scale] if scale else []), "-c:v", "libx264",
-                     "-crf", c, "-preset", "medium", "-c:a", "copy", "-movflags", "+faststart", share])
+                     "-crf", c, "-preset", scratch_profile.preset("intermediate"), "-c:a", "copy", "-movflags", "+faststart", share])
                 if share.stat().st_size < SHARE_MB * 1e6: break
             problems += check_final(out, total, share)
             fi, ftp = loudness(out)
@@ -248,7 +248,7 @@ def main():
                       "overlays": times, "problems": problems, "notes": notes}
             update_meta(v, lambda d: d.setdefault("renders", []).append({
                 "file": str(out), "rendered": now(), "status": "current", "fps": FPS, "duration_ms": int(round(duration(out) * 1000)),
-                "lufs": fi, "true_peak": ftp, "share": str(share), "ok": not problems, "problems": problems}))
+                "lufs": fi, "true_peak": ftp, "share": str(share), "ok": not problems, "problems": problems}) or d.update({"stage": "rendered"}))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     write_editable(v, E, note=f"Last build: {mode}, {now()}, {'ok' if result['ok'] else 'problems: ' + '; '.join(problems)}")

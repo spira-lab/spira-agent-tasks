@@ -2,7 +2,7 @@
 # Usage: scrape.sh <url> <outdir>   -> page.txt meta.json links.txt style.json
 set -euo pipefail
 URL="$1"; OUT="${2:-research}"; mkdir -p "$OUT"
-CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+CHROME="${CHROME_PATH:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
 TMP="$OUT/dom.html"
 UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
 "$CHROME" --headless=new --disable-gpu --user-agent="$UA" --virtual-time-budget=10000 --dump-dom "$URL" > "$TMP" 2>/dev/null || true

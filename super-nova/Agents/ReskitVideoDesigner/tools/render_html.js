@@ -16,7 +16,7 @@
 const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
-const { chromium } = require(path.join(__dirname, '..', '..', 'DesignerShared', 'tools', 'render', 'node_modules', 'playwright-core'));
+const { chromium } = (() => { try { return require(path.join(__dirname, '..', '..', 'DesignerShared', 'tools', 'render', 'node_modules', 'playwright-core')); } catch { return require('playwright-core'); } })();
 
 function pageUrl(spec) {
   const m = spec.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
