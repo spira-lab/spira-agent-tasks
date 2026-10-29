@@ -32,7 +32,7 @@ function flag(a, f) { const i = a.indexOf(f); if (i < 0) return false; a.splice(
 function slug(u) { const x = new URL(u); return ((x.hostname + x.pathname).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'page').slice(0, 60).toLowerCase(); }
 
 async function settle(page) {
-  try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch (e) { /* busy pages: carry on */ }
+  try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* busy pages: carry on */ }
   await page.evaluate(async () => {
     // scroll through once so lazy images load, then back to the top
     for (let y = 0; y < document.body.scrollHeight; y += 700) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 120)); }
@@ -96,7 +96,7 @@ async function main() {
           }
           if (name === 'desktop') {
             const cands = await page.evaluate(() => {
-              const abs = x => { try { return new URL(x, location.href).href; } catch (e) { return null; } };
+              const abs = x => { try { return new URL(x, location.href).href; } catch { return null; } };
               const res = [];
               for (const img of document.querySelectorAll('img')) {
                 const hay = `${img.src} ${img.alt} ${img.className} ${img.parentElement && img.parentElement.className}`.toLowerCase();
@@ -131,7 +131,7 @@ async function main() {
                   const f = path.join(out, `logo-${c.kind}-${k}.${ext}`); fs.writeFileSync(f, await r.body());
                   record.logos.push({ file: f, url: c.url, from: u }); console.log(f);
                 }
-              } catch (e) { /* a candidate that will not load is skipped */ }
+              } catch { /* a candidate that will not load is skipped */ }
             }
           }
         } catch (e) {

@@ -12,7 +12,7 @@
 // <out.png> may be absolute, relative to the current folder, or relative to the Super Nova folder;
 // it must be inside Super Nova/Project/ (only folders inside Project/ are created).
 // Chrome: CHROME_PATH if set, else /usr/bin/chromium. Prints one JSON line.
-const path = require('path'), fs = require('fs'), os = require('os');
+const path = require('path'), fs = require('fs');
 
 const SUPER = path.resolve(__dirname, '..', '..', '..');
 const PROJECT = path.join(SUPER, 'Project');

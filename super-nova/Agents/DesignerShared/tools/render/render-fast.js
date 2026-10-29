@@ -81,7 +81,7 @@ async function predecode() {
         const lib = JSON.parse(await run('ffprobe', ['-v', 'error', '-c:v', probe.codec_name === 'vp9' ? 'libvpx-vp9' : 'libvpx',
           '-select_streams', 'v:0', '-show_entries', 'stream=pix_fmt', '-of', 'json', file])).streams[0] || {};
         alpha = fmtHasAlpha(lib.pix_fmt);
-      } catch (e) {}
+      } catch {}
     }
     const key = `c${i}`; const outDir = path.join(framesRoot, key); fs.mkdirSync(outDir, { recursive: true });
     if (alpha) {
@@ -134,7 +134,7 @@ const INSTALL = meta => {
   }));
   return vids.filter(v => v.__m).length;
 };
-const hwEncoder = (() => { try { return execFileSync('ffmpeg', ['-hide_banner', '-encoders']).toString().includes('h264_videotoolbox'); } catch (e) { return false; } })();
+const hwEncoder = (() => { try { return execFileSync('ffmpeg', ['-hide_banner', '-encoders']).toString().includes('h264_videotoolbox'); } catch { return false; } })();
 const ENC = hwEncoder ? ['-c:v', 'h264_videotoolbox', '-b:v', '10M', '-profile:v', 'high', '-allow_sw', '0'] : ['-c:v', 'libx264', '-preset', 'medium', '-crf', '17'];
 
 async function worker(id, from, to, port, meta) {
