@@ -26,7 +26,7 @@ PLAYWRIGHT = SHARED / "tools" / "render" / "node_modules" / "playwright-core"
 sys.path.insert(0, str(SHARED / "tools"))
 import profile as scratch_profile   # redirects tempfile to the scratch root
 MAKE_TIMINGS = SHARED / "tools" / "make-timings.py"
-UA = "Mozilla/5.0 (X11; Linux x86_64)"   # the asset CDN refuses Python's default agent
+UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"   # the asset CDN refuses Python's default agent
 
 MATERIAL_DIRS = ["source", "assets", "gen/ref", "gen/out", "music", "deletable"]
 
@@ -181,7 +181,7 @@ def write_editable(v, edit=None, note=""):
 <meta name="generator" content="reskit-video-designer">
 <title>{html.escape(v.name)}</title>
 <style>
- body {{ font: 14px/1.45 system-ui, Arial, sans-serif; margin: 24px; color: #111; background: #fff; max-width: 960px; }}
+ body {{ font: 14px/1.45 Arial, sans-serif; margin: 24px; color: #111; background: #fff; max-width: 960px; }}
  code {{ background: #f2f2f2; padding: 2px 5px; border-radius: 4px; }}
  table {{ border-collapse: collapse; margin: 8px 0 20px; }} td, th {{ border: 1px solid #ddd; padding: 4px 8px; text-align: left; }}
  .note {{ color: #555; }}
