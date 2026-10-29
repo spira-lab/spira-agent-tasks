@@ -1,7 +1,7 @@
 // Renders 1-4.html to sop-1..4.jpg at the page's own height (no empty space). Run with node.
 const { chromium } = require('playwright-core');
 (async () => {
-  const b = await chromium.launch({ channel: 'chrome' });
+  const b = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/usr/bin/chromium' });
   const p = await b.newPage({ viewport: { width: 1600, height: 200 }, deviceScaleFactor: 1 });
   for (const n of ['1', '2', '3', '4']) {
     await p.goto('file://' + __dirname + '/' + n + '.html', { waitUntil: 'networkidle' });

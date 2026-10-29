@@ -32,7 +32,7 @@ What the tool reads (Nova's, read only): her monthly output logs
 (`Agents/NovaOM/docs/client-monthly/`), her targets (`Agents/NovaOM/docs/nova-targets.md`), and her
 Client Ledger (for every brand and its name). **A new brand gets its own section by itself** as
 soon as it is in the ledger, has output logged, or has a target. It also measures **storage**: the
-Mac's disk (size, used, free), how much the Super Nova folder takes (and its Project folder),
+This machine's disk (size, used, free), how much the Super Nova folder takes (and its Project folder),
 the backup drive named in Jani's config (size, used, free, or not connected), and how many videos
 Jani has backed up (from `Agents/NovaOM/docs/nova-backups.md` and Jani's runs).
 

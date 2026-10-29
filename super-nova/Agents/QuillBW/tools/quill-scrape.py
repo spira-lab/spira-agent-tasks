@@ -22,7 +22,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 QUILL = Path(__file__).resolve().parents[1]
 SUPER = QUILL.parents[1]
-UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36"
+UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36"
 SIZE_KEYS = {"width", "w", "height", "h", "size", "crop", "resize", "fit", "quality", "q", "auto", "dpr", "format", "fm", "v"}
 MAX_CANDIDATES = 40
 

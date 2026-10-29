@@ -147,15 +147,27 @@ def folder_size(path):
     return total
 
 
+def drive_mount(volume):
+    """Where the backup drive is mounted on this Linux host. A directory that is not a mount point
+    does not count, so nothing is ever written to the root disk by mistake; when the drive is not
+    mounted the returned path does not exist."""
+    user = Path.home().name
+    for base in (Path("/mnt"), Path("/media"), Path("/media") / user, Path("/run/media") / user):
+        p = base / volume
+        if os.path.ismount(p):
+            return p
+    return Path("/mnt/.not-mounted") / volume
+
+
 def storage():
-    """The Mac's disk, what Super Nova takes, the backup drive, and what Jani has backed up."""
+    """This machine's disk, what Super Nova takes, the backup drive, and what Jani has backed up."""
     gb = lambda b: round(b / 1e9, 1)
-    mac = shutil.disk_usage("/")
-    out = {"mac": {"total": gb(mac.total), "used": gb(mac.total - mac.free), "free": gb(mac.free)},
+    host = shutil.disk_usage("/")
+    out = {"host": {"total": gb(host.total), "used": gb(host.total - host.free), "free": gb(host.free)},
            "super_nova": {"size": gb(folder_size(SUPER)), "project": gb(folder_size(SUPER / "Project"))}}
     try: vol = json.loads((JANI / "docs" / "jani-config.json").read_text())["volume"]
     except (OSError, ValueError, KeyError): vol = None
-    d = Path("/Volumes") / vol if vol else None
+    d = drive_mount(vol) if vol else None
     if d and d.is_dir():
         u = shutil.disk_usage(d)
         out["backup_drive"] = {"name": vol, "connected": True, "total": gb(u.total), "used": gb(u.total - u.free), "free": gb(u.free)}

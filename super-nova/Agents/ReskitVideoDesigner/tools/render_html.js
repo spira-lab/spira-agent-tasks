@@ -42,7 +42,7 @@ async function main() {
     process.exit(2);
   }
   const launch = { headless: true, args: ['--allow-file-access-from-files', '--hide-scrollbars'] };
-  if (process.env.CHROME_PATH) launch.executablePath = process.env.CHROME_PATH; else launch.channel = 'chrome';
+  launch.executablePath = process.env.CHROME_PATH || '/usr/bin/chromium';
   const browser = await chromium.launch(launch);
   let failed = 0;
   try {

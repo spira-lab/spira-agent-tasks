@@ -54,7 +54,7 @@ On the drive, `<drive>/Super Nova Backup/`:
   replaced renders in `deletable/`, its metadata, its archived failed attempts, and its
   **designer sessions** (the full conversation logs of every designer that worked on it, kept in
   Claude's own data folder). The sessions go to `Designer sessions/<Brand>/<video>/` in the
-  backup, and are cleared from this Mac with the rest of the set. A session a designer worked in
+  backup, and are cleared from this machine with the rest of the set. A session a designer worked in
   today waits for a later backup.
 - **A carousel goes as one set too** (any carousel designer, e.g. the Corporate Carousel Designer, 2026-10-27): its folder
   `<Brand>/carousels/<name>/` (slides, contact sheet, notes, `slides.html`, research, generated

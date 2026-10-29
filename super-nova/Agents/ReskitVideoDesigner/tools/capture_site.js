@@ -49,7 +49,7 @@ async function main() {
   const out = path.resolve(a[1]); fs.mkdirSync(out, { recursive: true });
   const css = [...HIDE, ...(hide ? [hide] : [])].join(',') + '{display:none!important;visibility:hidden!important}';
   const launch = { headless: true };
-  if (process.env.CHROME_PATH) launch.executablePath = process.env.CHROME_PATH; else launch.channel = 'chrome';
+  launch.executablePath = process.env.CHROME_PATH || '/usr/bin/chromium';
   const browser = await chromium.launch(launch);
   const record = { captured: new Date().toISOString(), pages: [], logos: [], colors: null };
   const ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';

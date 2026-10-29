@@ -75,7 +75,7 @@ arguments):
 | `python3 <shared>/tools/chunker.py` | the pace of any new line Omni speaks |
 
 You may use only Atlas's approved commands (`<super>/Agents/AtlasPM/docs/atlas-allowed-tools.txt`):
-never shell loops, `$(...)` variables, `sleep`, `kill`, `mktemp` or `sips`. The tools do the
+never shell loops, `$(...)` variables, `sleep`, `kill` or `mktemp`. The tools do the
 looping; the waiting is `wait_ai_job` (parallel tool calls, one per job). Never run a job through the
 `spira` CLI (only `spira ai models get <id>` for model docs); every generation is `submit_ai_job`
 and every download is the `ai` tool's download action. Every path you pass is absolute (or

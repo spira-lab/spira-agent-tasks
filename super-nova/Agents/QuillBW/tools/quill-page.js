@@ -9,7 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const SUPER = path.resolve(__dirname, '..', '..', '..');
 const { chromium } = (() => { try { return require(path.join(SUPER, 'Agents', 'DesignerShared', 'tools', 'render', 'node_modules', 'playwright-core')); } catch { return require('playwright-core'); } })();
-const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const CHROME = process.env.CHROME_PATH || '/usr/bin/chromium';
 
 const [url, out] = process.argv.slice(2);
 if (!url || !out) { console.error('usage: node quill-page.js <url> <out.json>'); process.exit(2); }
@@ -17,7 +17,7 @@ if (!url || !out) { console.error('usage: node quill-page.js <url> <out.json>');
 (async () => {
   const browser = await chromium.launch({ executablePath: CHROME, headless: true });
   const page = await browser.newPage({ viewport: { width: 1440, height: 1800 },
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36' });
+    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36' });
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
     await page.waitForTimeout(2500);

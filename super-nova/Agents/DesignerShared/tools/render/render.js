@@ -70,7 +70,7 @@ const PREP = `
 
 function launchOpts() {
   const o = { args: ['--force-device-scale-factor=1', ...profile.gpuArgs()] };
-  if (process.env.CHROME_PATH) o.executablePath = process.env.CHROME_PATH; else o.channel = 'chrome';
+  o.executablePath = process.env.CHROME_PATH || '/usr/bin/chromium';
   return o;
 }
 

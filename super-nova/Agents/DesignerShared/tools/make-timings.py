@@ -37,8 +37,8 @@ _fw_failed = []
 
 
 def faster_whisper(src):
-    """Same output as whisper() from the faster-whisper engine, or None when it is not usable (Linux only)."""
-    if scratch_profile.IS_MAC or _fw_failed:
+    """Same output as whisper() from the faster-whisper engine, or None when it is not usable."""
+    if _fw_failed:
         return None
     try:
         if not _fw_model:

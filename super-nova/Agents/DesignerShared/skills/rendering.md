@@ -57,9 +57,9 @@ What it does, in order:
 1. Moves an existing render of this video to `renders/deletable/`, with
    its time as a suffix.
 2. Decodes every video clip in the editable once, into still frames.
-3. Draws each frame in headless Chrome on the GPU, showing each clip's
+3. Draws each frame in headless Chrome (software rendering), showing each clip's
    pre-decoded frame for that moment.
-4. Encodes on the Mac's hardware video encoder.
+4. Encodes with libx264.
 5. Mixes the audio: voice at -16 LUFS, music 20 LU under it (or as
    many LU as the bgm tag's `data-under` says) with a one-second fade in
    and 1.5 out, and every sound effect tag at its moment.
@@ -83,10 +83,9 @@ The command prints one line of JSON.
 
 ## What the machine needs
 
-Node, ffmpeg, and Google Chrome (or `CHROME_PATH` set to another
-Chromium), with `npm install` run once in the shared folder's `tools/render`.
-On a Mac with a hardware encoder the render uses it; elsewhere it falls
-back to software encoding on its own.
+Node, ffmpeg, and Chromium at `/usr/bin/chromium` (or `CHROME_PATH` set to
+another Chromium), with `npm install` run once in the shared folder's `tools/render`.
+The render always encodes in software.
 
 `tools/render/render.js`, the older renderer, stays in the shared folder
 because other tools still call it. Productions use `render-fast.js`.

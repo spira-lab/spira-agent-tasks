@@ -10,7 +10,7 @@
     margin: 0; height: 100%;
     background: #000;            /* black sides outside the canvas */
     overflow: hidden;
-    font-family: -apple-system, system-ui, sans-serif;
+    font-family: system-ui, sans-serif;
   }
 
   /* The canvas: fixed logical resolution, scaled to fit the window */
@@ -49,7 +49,7 @@
 
   /* ---------- Guide layers (preview only, never rendered) ---------- */
   .guide { position:absolute; inset:0; z-index:1000; pointer-events:none;
-           font-family:-apple-system, "SF Pro Text", system-ui, sans-serif; color:#fff; }
+           font-family:system-ui, sans-serif; color:#fff; }
   .guide[hidden] { display:none; }
   .guide * { text-shadow:0 1px 3px rgba(0,0,0,.6); }
   .guide svg { filter:drop-shadow(0 1px 3px rgba(0,0,0,.6)); }

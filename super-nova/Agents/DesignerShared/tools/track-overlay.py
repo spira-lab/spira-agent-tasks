@@ -119,7 +119,7 @@ if __name__ == "__main__":
         Path(out).parent.mkdir(parents=True, exist_ok=True)
         ff = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{W}x{H}",
                                "-r", f"{FPS}", "-i", "-", "-an", "-c:v", "libx264", "-preset", scratch_profile.preset("final"),
-                               "-crf", "17", "-pix_fmt", "yuv420p", *(["-threads", "2"] if not scratch_profile.IS_MAC else []),
+                               "-crf", "17", "-pix_fmt", "yuv420p", "-threads", "2",
                                "-movflags", "+faststart", out], stdin=subprocess.PIPE)
         for data in pool.imap(composite, [((a, b), track[a:b]) for a, b in chunks]):
             ff.stdin.write(data)

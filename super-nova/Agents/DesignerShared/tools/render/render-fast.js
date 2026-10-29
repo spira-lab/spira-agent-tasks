@@ -7,9 +7,9 @@
 //   2. Pre-decodes every <video> clip in the editable once, in order, into still
 //      frames (JPEG, or PNG with alpha for transparent clips). Seeking compressed
 //      video for every frame was 90% of the old renderer's CPU.
-//   3. Headless Chrome draws each frame on the GPU (Metal); the clips show the
+//   3. Headless Chrome draws each frame in software (SwiftShader); the clips show the
 //      pre-decoded frame for that moment instead of seeking.
-//   4. Frames are encoded on the Mac's media engine (h264_videotoolbox).
+//   4. Frames are encoded with libx264.
 //   5. Audio: voice normalised to -16 LUFS, music bed 20 LU under it with fades,
 //      and every <audio class="sfx" data-at="<seconds>"> mixed in at its time.
 //   6. Embeds the frame at --cover seconds as the MP4's cover image.
@@ -134,13 +134,12 @@ const INSTALL = meta => {
   }));
   return vids.filter(v => v.__m).length;
 };
-const hwEncoder = (() => { try { return execFileSync('ffmpeg', ['-hide_banner', '-encoders']).toString().includes('h264_videotoolbox'); } catch { return false; } })();
-const ENC = hwEncoder ? ['-c:v', 'h264_videotoolbox', '-b:v', '10M', '-profile:v', 'high', '-allow_sw', '0'] : ['-c:v', 'libx264', '-preset', profile.preset('final'), '-crf', '17', ...(profile.x264Threads() ? ['-threads', String(profile.x264Threads())] : [])];
+const ENC = ['-c:v', 'libx264', '-preset', profile.preset('final'), '-crf', '17', '-threads', String(profile.x264Threads())];
 
 async function worker(id, from, to, port, meta) {
   const seg = path.join(tmp, `seg${String(id).padStart(2, '0')}.mp4`);
   const launch = { args: ['--force-device-scale-factor=1', ...profile.gpuArgs()] };
-  if (process.env.CHROME_PATH) launch.executablePath = process.env.CHROME_PATH; else launch.channel = 'chrome';
+  launch.executablePath = process.env.CHROME_PATH || '/usr/bin/chromium';
   const browser = await chromium.launch(launch);
   const page = await browser.newPage({ deviceScaleFactor: 1 });
   page.on('pageerror', e => console.error(`w${id} page error:`, e.message));
@@ -234,7 +233,7 @@ async function worker(id, from, to, port, meta) {
   fs.rmSync(tmp, { recursive: true, force: true });
   const usedClips = meta.filter(m => m.count).length;
   console.log(JSON.stringify({ ok: problems.length === 0, out, seconds: gotSecs, frames: gotFrames, cover_at: coverSec,
-    clips_predecoded: `${usedClips}/${meta.length}`, alpha_clips: meta.filter(m => m.count && m.ext === '.png').length, sfx_mixed: sfxMixed, encoder: hwEncoder ? 'hardware' : 'software',
+    clips_predecoded: `${usedClips}/${meta.length}`, alpha_clips: meta.filter(m => m.count && m.ext === '.png').length, sfx_mixed: sfxMixed, encoder: 'software',
     previous_moved_to: movedPrevious, render_seconds: Math.round((Date.now() - t0) / 1000), problems }));
   process.exit(problems.length ? 1 : 0);   // keep-alive sockets otherwise hold the event loop open
 })().catch(e => { console.error(e); fs.rmSync(tmp, { recursive: true, force: true }); process.exit(1); });

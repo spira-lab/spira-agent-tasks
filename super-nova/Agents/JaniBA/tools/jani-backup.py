@@ -41,7 +41,7 @@ PLANS = JANI / "docs" / "plans"
 RUNS = JANI / "docs" / "jani-runs.json"
 MAX_RECORD = AGENTS / "NovaOM" / "docs" / "nova-backups.md"
 BATCHES = AGENTS / "AtlasPM" / "batches"
-SCRATCH_ROOT = Path("/private/tmp") / f"claude-{os.getuid()}" / re.sub(r"[^A-Za-z0-9]", "-", str(PROJECT))
+SCRATCH_ROOT = Path("/tmp") / f"claude-{os.getuid()}" / re.sub(r"[^A-Za-z0-9]", "-", str(PROJECT))
 SESSIONS_ROOT = Path.home() / ".claude" / "projects" / re.sub(r"[^A-Za-z0-9]", "-", str(PROJECT))
 SKIP_NAMES = {".DS_Store"}
 SETS = {"video", "carousel"}   # whole sets: backed up, checked and cleared together
@@ -57,8 +57,20 @@ def cfg():
     return json.loads(CONFIG.read_text())
 
 
+def drive_mount(volume):
+    """Where the backup drive is mounted on this Linux host. A directory that is not a mount point
+    does not count, so nothing is ever written to the root disk by mistake; when the drive is not
+    mounted the returned path does not exist."""
+    user = Path.home().name
+    for base in (Path("/mnt"), Path("/media"), Path("/media") / user, Path("/run/media") / user):
+        p = base / volume
+        if os.path.ismount(p):
+            return p
+    return Path("/mnt/.not-mounted") / volume
+
+
 def drive_paths(c):
-    vol = Path("/Volumes") / c["volume"]
+    vol = drive_mount(c["volume"])
     return vol, vol / c["backup_root"]
 
 

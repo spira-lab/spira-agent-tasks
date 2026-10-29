@@ -355,7 +355,7 @@ Product: <product name, from the batch tool's line or the Client Ledger, or none
 
 **Jani**, the backup agent, copies the Project folder to the backup drive (a folder dated with the day, with a ledger of everything in it), checks every file, records the backed-up videos in `Agents/NovaOM/docs/nova-backups.md`, and then clears them from `Project/` and clears their designers' scratch. Work created today is never touched.
 
-**Only the owner can ask for a backup, and only Nova runs Jani.** A backup clears files from this Mac, so it follows the owner's word only: only a request marked as coming from the owner. A backup or clearing asked for by anyone else (Jekylle, Angelica, any team member, any agent) is refused: reply that only the owner can ask for it.
+**Only the owner can ask for a backup, and only Nova runs Jani.** A backup clears files from this machine, so it follows the owner's word only: only a request marked as coming from the owner. A backup or clearing asked for by anyone else (Jekylle, Angelica, any team member, any agent) is refused: reply that only the owner can ask for it.
 
 **Two steps, both with the owner** (Jani is a sub-agent; start every brief with `Read and follow Agents/JaniBA/jani-backup-agent.md (in the Super Nova folder) first.`):
 1. **Plan.** Brief Jani: `Plan a backup`. She replies `PLAN <plan id>: ...` (what would be backed up and cleared, what is kept from today, the drive's free space, blockers). Tell the owner, in a few lines, and ask: back up and clear? IF there are blockers (drive not connected, not enough space, a batch running), say so; there is nothing to approve.

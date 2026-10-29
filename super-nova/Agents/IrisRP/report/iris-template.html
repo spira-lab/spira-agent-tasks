@@ -19,7 +19,7 @@
   --rim: rgba(244, 242, 247, .16); --rim-hot: rgba(255, 111, 0, .45); --orange-glow: rgba(255, 111, 0, .35);
   --scrim: rgba(4, 4, 6, .72);
   --f-display: "Urbanist", "Avenir Next", "Segoe UI", system-ui, sans-serif;
-  --f-body: "Manrope", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --f-body: "Manrope", Arial, system-ui, sans-serif;
   --r: 46px;
 }
 * { box-sizing: border-box; }
@@ -575,11 +575,11 @@ function renderStorage() {
     c.innerHTML = `${ring(Math.round(used), Math.round(total), null, 3, "GB", center)}<div class="facts"><h3>${title}</h3><div class="rows">${rows}</div></div>`;
     return c;
   };
-  host.append(gauge("grey", "This Mac", S.mac.used, S.mac.total,
-    `<span><b>${gb(S.mac.used)}</b> used of ${gb(S.mac.total)}</span><span><b>${gb(S.mac.free)}</b> free</span>`));
+  host.append(gauge("grey", "This machine", S.host.used, S.host.total,
+    `<span><b>${gb(S.host.used)}</b> used of ${gb(S.host.total)}</span><span><b>${gb(S.host.free)}</b> free</span>`));
   const sm = el("div", "card orange gauge flat");
   sm.innerHTML = `<div class="label">Super Nova uses</div><div class="figure">${dm(String(S.super_nova.size), 5)}<span class="unit">GB</span></div>
-    <div class="rows"><span><b>${gb(S.super_nova.project)}</b> of it is the Project folder</span><span><b>${(S.super_nova.size / S.mac.total * 100).toFixed(1)}%</b> of this Mac</span></div>`;
+    <div class="rows"><span><b>${gb(S.super_nova.project)}</b> of it is the Project folder</span><span><b>${(S.super_nova.size / S.host.total * 100).toFixed(1)}%</b> of this machine</span></div>`;
   host.append(sm);
   const d = S.backup_drive;
   host.append(d.connected
