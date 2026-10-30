@@ -179,7 +179,11 @@ generation.
   A non-null `style` asks for another bed of that kind: replace `#bgm`'s src
   with a library track from `<cm>/music/Music metadata.json` whose `family`
   is in the style's set, never the track already used, and copy its
-  `gain_db` as `data-gain-db` (creative-video-production section 1). Pick
+  `gain_db` as `data-gain-db` (creative-video-production section 1), and
+  set `data-match-lufs` to `bgm.lufs` from the current render's receipt,
+  `<cm>/<r>renders/<video>.mp4.audio/manifest.json`, so the new bed sounds
+  as loud as the old one before the selection's level (a receipt without
+  `bgm.lufs` gets none). Pick
   within the set by the video's topic and pace. Sets by family:
   `lofi` Lo-Fi Jazzhop, Chopped & Swung, Swing It On, G# Minor, Tense Quiet
   (A minor), Tense Quiet (F# minor); `upbeat` Bouncy Guitar Riff, Glossy

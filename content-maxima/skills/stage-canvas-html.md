@@ -231,13 +231,15 @@ sound.
 | `data-gain-db="-6"` | an `audio.sfx` | that effect, −40 to +6 |
 | `data-gain-offset-db="-4"` | `#bgm` | on top of its `data-gain-db` (kept as copied), −20 to +6 |
 | `data-duck="1200-3400:-8,9000-12000:-6"` | `#bgm` | music lowered by dB in each ms range, 300 ms ramps, 0 to −30, no overlaps |
+| `data-match-lufs="-27.7"` | `#bgm` | the bed as heard in this video (its stretch, ducking and fades) brought to this loudness before `data-gain-offset-db`, −60 to −5; set only when an edit swaps the bed for another kind, and kept on later renders |
 
 `#bgm data-muted` silences the bed without removing its source. `#stage`
 `data-sfx-offset-db` (-20 to +6) scales the whole sound-effects group after
 individual cue levels; `data-sfx-muted` silences that group without removing cues.
 These attributes are changed only on an explicit sound-level request. Group
 levels are absolute, never cumulative. Rendering writes a `.mp4.audio` directory
-beside the video with neutral-group FLAC stems and a version-bound manifest;
+beside the video with neutral-group FLAC stems and a version-bound manifest
+(its `bgm.lufs` is the bed's loudness as heard, before the group level);
 keep it with the render so Edit can audition the same mix.
 
 The renderer stops on a value out of range.
