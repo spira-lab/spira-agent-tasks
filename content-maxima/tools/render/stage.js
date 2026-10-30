@@ -165,6 +165,9 @@ function readEditable(htmlPath) {
     voLevelled: /\bdata-levelled\b/.test(voTag),
     bgmOffsetDb: num(attr(bgmTag, 'data-gain-offset-db')),
     bgmDuck: attr(bgmTag, 'data-duck') ?? null,
+    bgmMuted: /\bdata-muted(?:\s|=|>)/.test(bgmTag),
+    sfxOffsetDb: num(attr((html.match(/<[^>]+\bid="stage"[^>]*>/) || [''])[0], 'data-sfx-offset-db')),
+    sfxMuted: /\bdata-sfx-muted(?:\s|=|>)/.test((html.match(/<[^>]+\bid="stage"[^>]*>/) || [''])[0]),
   };
 }
 

@@ -232,7 +232,15 @@ sound.
 | `data-gain-offset-db="-4"` | `#bgm` | on top of its `data-gain-db` (kept as copied), −20 to +6 |
 | `data-duck="1200-3400:-8,9000-12000:-6"` | `#bgm` | music lowered by dB in each ms range, 300 ms ramps, 0 to −30, no overlaps |
 
-The renderer stops before the capture on a value out of range.
+`#bgm data-muted` silences the bed without removing its source. `#stage`
+`data-sfx-offset-db` (-20 to +6) scales the whole sound-effects group after
+individual cue levels; `data-sfx-muted` silences that group without removing cues.
+These attributes are changed only on an explicit sound-level request. Group
+levels are absolute, never cumulative. Rendering writes a `.mp4.audio` directory
+beside the video with neutral-group FLAC stems and a version-bound manifest;
+keep it with the render so Edit can audition the same mix.
+
+The renderer stops on a value out of range.
 
 ## 6. Captions
 
