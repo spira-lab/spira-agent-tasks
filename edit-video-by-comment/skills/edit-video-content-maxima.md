@@ -167,6 +167,55 @@ generation.
   Copy the font from `<cm>/fonts/` into the materials and declare it.
   Never edit inside the markers and never rewrite caption words; this
   comment changes the look only.
+- **`mix`** — a whole-video sound-level selection. Each non-null `bgm` / `sfx`
+  contains absolute `offsetDb` (-20 to +6) and `muted`; do not add it to the old
+  offset. For `bgm`, set `#bgm data-gain-offset-db` and add/remove `data-muted`.
+  For `sfx`, set `#stage data-sfx-offset-db` and add/remove `data-sfx-muted`.
+  Preserve the bed src, every cue and its individual gain, VO and all visuals.
+  Null means leave that group unchanged. If a requested group does not exist,
+  report not fixed, do not invent sound. Apply group levels after an explicitly
+  requested replacement in the same run; resolve contradictory requests in the report.
+  Never remove the music tag to mute it. No generation is needed.
+  A non-null `style` asks for another bed of that kind: replace `#bgm`'s src
+  with a library track from `<cm>/music/Music metadata.json` whose `family`
+  is in the style's set, never the track already used, and copy its
+  `gain_db` as `data-gain-db` (creative-video-production section 1). Pick
+  within the set by the video's topic and pace. Sets by family:
+  `lofi` Lo-Fi Jazzhop, Chopped & Swung, Swing It On, G# Minor, Tense Quiet
+  (A minor), Tense Quiet (F# minor); `upbeat` Bouncy Guitar Riff, Glossy
+  Groove, Stuttering Sparkles, Bedroom Bounce, Kalimba Drive; `energetic`
+  Samba Drop, Hypnotic Understated Loop, Dark Drive; `minimal` Clockwork
+  Discovery, Low-Mid Loop; `heartfelt` A Major swell, C Minor Reflection,
+  D# Minor Loop, Submerged Arpeggio; `playful` Woodwind Caper; `sleek` Night
+  Drive, Midnight Confessions; `shuffle` the current track's family (else
+  one of like mood and energy). The group levels in the same selection
+  apply to the new bed. A video without a bed gets none: not fixed. No
+  generation is needed.
+- **`speech`** — a spoken line rewritten by the reviewer. The comment's span
+  (`time` to `endTime`) is that line, `from` its words as the captions show
+  them, `to` what they become. Do these before every other comment of the
+  run, the timeline edit (5b) still last.
+  - `voice: false` corrects the captions only: the speech is right, its
+    writing is not. In `materials/<video>/script.txt` replace the words of
+    `from`, the occurrence spoken in the span, with `to`; then rerun
+    `tools/captions.py` with the flags the current caption block was made
+    with (`--style`, `--top`, `--size`, `--color`, `--hl`, read from the
+    CSS between its markers) and keep the restyle after the markers.
+    Nothing is generated and no time moves.
+  - `voice: true` has the line said again as `to`; every other word of
+    the script stays. Change `script.txt` the same way, then remake the
+    speech by its source (section 5, Sound). For talking-head clips (3e),
+    remake only the clip or clips whose chunk in `jobs/plan.json` holds
+    the line, with that chunk's new text and a length the chunker's pace
+    rule gives it, and their cut-outs (3f); keep every other clip as it
+    is. Then rebuild `vo.mp3` from all the clips (`make-timings.py
+    --from`), the captions as above, and retime what follows the line by
+    the amount it grew or shrank: scenes, cues, and the moments of this
+    run's other comments after `endTime`. Report the new length.
+    A voice from a voice ID (3j), a recording (3j) or a supplied talking
+    head (3k) is never said again for one line: `not fixed`, saying so.
+  - IF `from` is not what is said in the span (the script changed since),
+    skip it: `not fixed, the line changed`.
 - **`audio`** — `role: 'sfx'` is a cue at the comment's moment:
   `<audio class="sfx" src="materials/<video>/sfx/<file>" data-at="<ms>"
   data-gain-db="<gainDb>">`, alongside the existing slots. `role: 'bed'`
@@ -453,7 +502,9 @@ attachments) applies as usual.
 
 ## 8. Deliver
 
-1. `cp "<cm>/<r>renders/<video>.mp4" results/<video>.mp4`.
+1. `cp "<cm>/<r>renders/<video>.mp4" results/<video>.mp4`. Also copy its
+   audio receipt and stems: `cp -R "<cm>/<r>renders/<video>.mp4.audio" results/`.
+   This directory belongs to that exact render; never reuse another render's stems.
 2. `submit_result`: `video` = `results/<video>.mp4`, `publicUrl` = hosted
    URL, `report` = one line per comment in packet order, saying what
    changed and, WHEN something was generated, what and its credits; a
