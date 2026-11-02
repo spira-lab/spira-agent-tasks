@@ -1,6 +1,6 @@
 ---
 name: prompting
-description: How to write prompts for the generation models in the toolkit, and the fixed prompt format for each model. Use every time a prompt is written for Higgsfield Soul, GPT Image 2, or Seedance 1.5 Pro.
+description: How to write prompts for the generation models in the toolkit, and the fixed prompt format for each model. Use every time a prompt is written for Higgsfield Soul, GPT Image 2, or Gemini Omni Flash 1.1.
 ---
 
 # Prompting
@@ -55,9 +55,9 @@ Edit this photo. Keep the same person with the exact same face, hair, expression
   changes, the first sentence no longer says "outfit"; if the hair
   changes, it no longer says "hair". Keeping and changing the same thing
   in one prompt is a contradiction the model resolves by drifting.
-- When the persona holds or wears a product, the product image is the
-  second reference and the holding or wearing lines from the toolkit go
-  in the "Only change" sentence.
+- A product never goes into this edit (toolkit 3b): the prompt is the
+  same with or without one. The product comes in with the talking-head
+  clips (section 5).
 
 ## 4. GPT Image 2, transparent background
 
@@ -68,13 +68,30 @@ transparent background. Nothing else.
 [the visual], on a transparent background, PNG with alpha, no backdrop, no shadow on the ground, no frame
 ```
 
-## 5. Seedance 1.5 Pro, talking head
+## 5. Talking-head clips: Gemini Omni Flash 1.1
 
 The cleaned persona image is the reference. The line is the script
-chunk for this clip, sized per the toolkit.
+chunk for this clip, exactly as `tools/chunker.py` planned it (toolkit
+3e).
 
 ```
 The person says: “[line]”
+The camera remain static and steady on position.
+No camera movements, No sound effects, No special effects, No text on screen.
+```
+
+**With a product** (the persona image and the product image are the two
+references, toolkit 3e), the product lines go around the spoken line.
+Keep the interaction simple: hold it, bring it a little toward the
+camera, glance at it, turn the label to the camera. One or two of these
+per clip, never a demonstration that needs both hands or opening and
+pouring.
+
+```
+The person from the first reference image holds the [product] from the second reference image in one hand, in the same room and framing as the first reference image.
+The person says: “[line]”
+While talking, the person [one or two simple interactions: brings it a little closer to the camera / glances at it / turns the label toward the camera].
+The [product] stays exactly the same as the second reference image, with the same shape, colour and label.
 The camera remain static and steady on position.
 No camera movements, No sound effects, No special effects, No text on screen.
 ```
@@ -86,7 +103,7 @@ Captions and on-screen text keep them.
 
 ## 6. Speech
 
-WHEN a prompt carries words to be spoken, the Seedance line or a VO
+WHEN a prompt carries words to be spoken, the talking-head line or a VO
 script, the model will get some of them wrong: brand names, product
 names, acronyms, unusual spellings, words borrowed from another
 language. Before writing the prompt, open `skills/working-memory.md`

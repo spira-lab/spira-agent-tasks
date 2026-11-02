@@ -387,7 +387,7 @@ moves an existing render to `renders/deletable/` first, captures every
 frame on AWS Lambda in parallel chunks, mixes the audio (voice at -16
 LUFS, effects under it, bed 10 dB under it, faded in 1 s and out 1.5 s), checks
 the file (duration, frame count, stereo). Output is 1080 x 1920 H.264
-with stereo AAC at 24 fps, the rate of Seedance clips, so each output
+with stereo AAC at 24 fps, the rate of the Omni clips, so each output
 frame is one clip frame. A clip at any other rate repeats or drops
 frames on the stage, which shows as the presenter juddering; the
 renderer names such a clip in a warning (toolkit section 3, Frame rate).

@@ -19,7 +19,8 @@ a named style means that style.
 
 **The script.** WHEN the user gives a script, it is spoken word for word:
 never shorten, reword, or speed it up to fit a target length. Before any
-generation, count its words: at 3.3 words a second that is its length.
+generation, plan it with `tools/chunker.py` (toolkit 3e): the clip
+lengths it adds up to, at 4.7 to 5.0 syllables a second, are its length.
 IF that runs past the requested length, make the video as long as the
 script needs and say so in the final message. Only a brief or an idea is
 written to length. WHEN the user gives a voice-over recording, the
@@ -185,10 +186,11 @@ cut-out on screen is wrong; the audit flags it. Wherever the figure is cropped b
 its own frame (the body at the bottom, often a shoulder or an arm at the
 sides), that side of the cut-out runs past the canvas edge; placed or
 scaled so a cropped side ends inside the canvas, the person ends in a
-straight line in mid-air, which the audit flags. The clip keeps the
-framing of `persona.png`, so that image (looked at through
-`tools/view-image.sh`) already shows which sides are
-cropped: the scene table places the cut-out from it, with its frame
+straight line in mid-air, which the audit flags. Without a product the
+clip keeps the framing of `persona.png`, so that image (looked at through
+`tools/view-image.sh`) already shows which sides are cropped (with a
+product the framing can shift, so the contact sheet of `th-01.mp4` shows
+it instead, toolkit 3e): the scene table places the cut-out from it, with its frame
 flush with or past the canvas on those sides, and the audit's `edge`
 line confirms it on the stage.
 

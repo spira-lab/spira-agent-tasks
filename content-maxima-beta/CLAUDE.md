@@ -81,6 +81,7 @@ cost), **Where**.
 
 ```bash
 tools/new-video.sh "<topic>" <<< "<script>"                   # start a video: name, folders, template, script
+python3 tools/chunker.py <materials>/<name>/script.txt <materials>/<name>/jobs/plan.json  # talking-head chunks by syllables
 python3 tools/make-timings.py <materials>/<name>/vo.mp3 [--from clips... | --recording <url>]  # word timings (and the VO from clips or a recording)
 python3 tools/cut-sheet.py grid|elements <sheet.png> ... --names a,b  # cut one generated sheet into its images
 python3 tools/captions.py <root>/editable/<name>.html            # word-per-word captions from the timings
