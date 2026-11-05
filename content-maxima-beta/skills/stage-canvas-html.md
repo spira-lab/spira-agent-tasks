@@ -121,7 +121,9 @@ one video:
 - In the video CSS: the `@font-face` declarations; the type system as
   classes (a headline class, an accent, a pill, a card, a caption face)
   with the reference's treatment; the palette as CSS variables on
-  `#stage`; the shared `@keyframes` the video will use (an entry, a pop,
+  `#stage`, each background read against the persona's outfit so the
+  cut-out stays a figure (creative-video-production section 5); the
+  shared `@keyframes` the video will use (an entry, a pop,
   a slide, a wipe); each scene's **exit** on its container, `#sN { … }`
   (rule 10); and one marker pair per scene for its own rules:
 

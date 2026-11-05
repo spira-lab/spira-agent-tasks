@@ -87,7 +87,10 @@ it has no exit.
   about one per sentence; more scenes are more to write and check, not
   a better video. Decide them all before the first edit, as one scene
   table (time window, what it shows, which assets), and build from it
-  without re-deciding each scene as you reach it. Then write the
+  without re-deciding each scene as you reach it. Each scene's
+  background colour is read against the persona's outfit while that table
+  is drawn up, so the cut-out stays a figure on it
+  (creative-video-production section 5). Then write the
   skeleton (scene containers, the audio and sfx tags, `data-duration`),
   then the scenes two or three per edit. Never the whole file in one
   write: a very large write takes minutes with nothing on disk.

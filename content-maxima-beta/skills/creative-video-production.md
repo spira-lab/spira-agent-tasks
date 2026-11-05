@@ -219,6 +219,16 @@ and the audit flags it.
   style reference is followed, the rolled one included. Brand
   is the priority: disregard the reference's palette whenever a brand
   color is provided.
+- The clothing colour contrasts with the background. The outfit is fixed
+  when the persona is generated; the scenes behind the cut-out are
+  decided later, in the build. So plan them together: read the scene
+  palette before the persona generation and pick an outfit that reads
+  against it, and check the cut-out against every background it plays
+  over, not only the first one. WHEN a scene background comes out too
+  close to the clothing in colour or in brightness, the person melts
+  into the frame and the cut-out stops reading as a figure. Change that
+  background; never regenerate the persona for it. The same holds for a
+  supplied talking-head video, whose outfit cannot be changed at all.
 
 ## 6. Several videos in one request
 
