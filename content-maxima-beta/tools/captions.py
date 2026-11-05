@@ -3,6 +3,7 @@
 
   python3 tools/captions.py <root>/editable/<name>.html [--style highlight|appear]
       [--top 1390] [--size 66] [--color #fff] [--hl #ffcf33] [--max-chars N per line]
+  python3 tools/captions.py <root>/editable/<name>.html --lines <out.json>
 
 Reads materials/<name>/timings.json (Whisper) and materials/<name>/script.txt.
 Each caption word carries the script's spelling and Whisper's timing: the two
@@ -156,19 +157,24 @@ def phrase_cost(ws, line, last_in_sentence):
     return cost + 0.6  # each phrase costs a little, so they do not get too short
 
 
-def phrases(words, line):
-    """Split each sentence into the cheapest run of one-line phrases."""
-    sentences, cur = [], []
+def sentences(words):
+    """The script's sentences: a full stop, a pause of over 0.6 s, or a clause break in a tight script ends one."""
+    out, cur = [], []
     for i, w in enumerate(words):
         cur.append(w)
         nxt = words[i + 1] if i + 1 < len(words) else None
         # A space in a tight script separates clauses, as a full stop does.
         clause = nxt is not None and nxt["sp"] and w["tight"] and nxt["tight"]
         if nxt is None or END.search(w["w"]) or nxt["s"] - w["e"] > 0.6 or clause:
-            sentences.append(cur)
+            out.append(cur)
             cur = []
+    return out
+
+
+def phrases(words, line):
+    """Split each sentence into the cheapest run of one-line phrases."""
     groups = []
-    for sent in sentences:
+    for sent in sentences(words):
         n = len(sent)
         best = [0.0] + [float("inf")] * n
         back = [0] * (n + 1)
@@ -254,6 +260,8 @@ def main():
     ap.add_argument("--hl", default="#ffcf33")
     ap.add_argument("--max-chars", type=int, default=0,
                     help="characters per caption line; default fits the 700 px block at --size")
+    ap.add_argument("--lines", metavar="OUT.json",
+                    help="write the spoken lines (each sentence, its words as the script has them and its time) and change nothing")
     a = ap.parse_args()
     ed = pathlib.Path(a.editable).resolve()
     name = ed.stem
@@ -261,6 +269,10 @@ def main():
     timed = json.loads((mat / "timings.json").read_text())["words"]
     script = (mat / "script.txt").read_text()
     words = align(script_words(script), timed)
+    if a.lines:
+        lines = [{"startMs": round(s[0]["s"] * 1000), "endMs": round(s[-1]["e"] * 1000), "text": join(s)} for s in sentences(words)]
+        pathlib.Path(a.lines).write_text(json.dumps(lines, ensure_ascii=False))
+        return
     # A heavy caption face runs about 0.55 em per half-width character across the 700 px block.
     line = a.max_chars or int(700 / (a.size * 0.55))
     groups = phrases(words, line)

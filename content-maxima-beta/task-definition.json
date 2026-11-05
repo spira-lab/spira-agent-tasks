@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "packageVersion": "1.19.19",
+  "packageVersion": "1.19.20",
   "description": "Staging copy of content-maxima. Every change to this package is authored here first and synced to content-maxima by hand once it has tested well (specs/agent-job/content-maxima.md, Beta First), so a run against this task type exercises the staged version. Turns a script, brief, or idea into a finished short video, 9:16 for Reels and TikTok unless another aspect ratio is asked for, following the skills in skills/ (start with skills/creative-video-production.md).",
   "requirements": [
     {"name": "ffmpeg", "kind": "system", "purpose": "Encoding, mixing, frame extraction and probing (render, gen, add-ons)", "check": "ffmpeg -version && ffprobe -version"},

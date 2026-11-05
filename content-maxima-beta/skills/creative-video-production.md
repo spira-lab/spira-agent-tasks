@@ -71,7 +71,8 @@ Elements to consider:
   open the audio files to learn them. The audio is hosted, not in the
   package: fetch each sound you use with `python3
   tools/fetch-resource.py sfx/<file> editable/materials/<name>/sfx/<file>`.
-  Placement and levels are in the stage skill (section 5).
+  Each sound plays at the volume stored in its file; adjust it only when
+  asked. Placement and levels are in the stage skill (section 5).
 - Background music. Three cases, decided by what the user said:
   - WHEN the user says no music or no bgm, use none: nothing generated,
     nothing picked.
@@ -321,9 +322,13 @@ empties them, never the session.
   on the safe zone. A block up to 700 wide centred there clears the
   icon column at x 890; keep the wrap width within that and never shift
   the block sideways.
-- The voice is always the loudest thing in the mix, effects under it,
-  the bed under them. The levels are fixed and a session never adjusts
-  any of them (stage skill section 5).
+- The voice is always the loudest thing in the mix. Sound effects sit
+  under it and above the music bed. The levels are fixed by default: each
+  effect plays at the volume stored in its file and the renderer sets the
+  voice and the bed (a library bed at the `data-gain-db` copied from the
+  music pick's reply). A session changes a level only when the request or
+  a review comment asks, and only with the attributes of stage-canvas-html
+  section 5.
 - Never invent a brand logo. A logo is used only when the user provides
   it. IF none is provided, the brand is shown by its name in text, and
   nothing is drawn, generated, or approximated to stand in for a logo.

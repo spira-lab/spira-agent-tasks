@@ -148,8 +148,9 @@ function readEditable(htmlPath) {
   const durationMs = parseInt((html.match(/data-duration="(\d+)"/) || [0, 0])[1], 10);
   const voTag = (html.match(/<audio\b[^>]*\bid="vo"[^>]*>/) || [])[0] || '';
   const bgmTag = (html.match(/<audio\b[^>]*\bid="bgm"[^>]*>/) || [])[0] || '';
+  const num = v => (v === undefined ? null : Number(v));
   const sfx = [...html.matchAll(/<audio\b[^>]*\bclass="[^"]*\bsfx\b[^"]*"[^>]*>/g)].map(m => ({
-    src: attr(m[0], 'src'), at: parseFloat(attr(m[0], 'data-at')) || 0,
+    src: attr(m[0], 'src'), at: parseFloat(attr(m[0], 'data-at')) || 0, gainDb: num(attr(m[0], 'data-gain-db')),
   })).filter(s => s.src);
   const videos = [...new Set([...html.matchAll(/<video\b[^>]*\bsrc="([^"]+)"/g)].map(m => m[1]))];
   const name = path.basename(htmlPath).replace(/\.html?$/i, '');
@@ -159,6 +160,15 @@ function readEditable(htmlPath) {
     html, name, durationMs, videos, sfx,
     voSrc: attr(voTag, 'src'), bgmSrc: attr(bgmTag, 'src'),
     bgmGainDb: gainAttr === undefined ? null : parseFloat(gainAttr),
+    // Optional level adjustments, only when asked for (stage-canvas-html section 5); validated by render.js.
+    voGainDb: num(attr(voTag, 'data-gain-db')),
+    voLevelled: /\bdata-levelled\b/.test(voTag),
+    bgmOffsetDb: num(attr(bgmTag, 'data-gain-offset-db')),
+    bgmDuck: attr(bgmTag, 'data-duck') ?? null,
+    bgmMatchLufs: num(attr(bgmTag, 'data-match-lufs')),
+    bgmMuted: /\bdata-muted(?:\s|=|>)/.test(bgmTag),
+    sfxOffsetDb: num(attr((html.match(/<[^>]+\bid="stage"[^>]*>/) || [''])[0], 'data-sfx-offset-db')),
+    sfxMuted: /\bdata-sfx-muted(?:\s|=|>)/.test((html.match(/<[^>]+\bid="stage"[^>]*>/) || [''])[0]),
   };
 }
 

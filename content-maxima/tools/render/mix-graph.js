@@ -24,8 +24,8 @@ function mixGraph(ed, dir, tmp, secs) {
     const want = LIBRARY_GAIN.get(track);
     const fail = msg => { console.error(`error: ${msg}`); process.exit(1); };
     if (typeof want !== 'number') fail(`${track} has no gain_db in music/Music metadata.json`);
-    if (ed.bgmGainDb === null) fail(`#bgm (${track}) has no data-gain-db: copy the entry's gain_db, data-gain-db="${want.toFixed(1)}"`);
-    if (!(Math.abs(ed.bgmGainDb - want) <= 0.05)) fail(`#bgm (${track}) has data-gain-db="${ed.bgmGainDb}", but the track's gain_db is ${want.toFixed(1)}: copy it as it is`);
+    if (ed.bgmGainDb === null) fail(`#bgm (${track}) has no data-gain-db: copy the gain from the music pick's reply, data-gain-db="${want.toFixed(1)}"`);
+    if (!(Math.abs(ed.bgmGainDb - want) <= 0.05)) fail(`#bgm (${track}) has data-gain-db="${ed.bgmGainDb}", but the track's gain is ${want.toFixed(1)}: copy it as it is`);
     return want;
   })();
 

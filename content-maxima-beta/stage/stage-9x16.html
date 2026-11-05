@@ -206,7 +206,7 @@
   const RENDER = new URLSearchParams(location.search).has('render');
   if (RENDER) [vo, bgm, ...sfx].forEach(a => { if (a) { a.removeAttribute('src'); a.preload = 'none'; } });
   if (bgm && bgm.getAttribute('src')) {
-    bgm.volume = Math.min(1, (parseFloat(bgm.dataset.volume) || 0.15) * 10 ** ((parseFloat(bgm.dataset.gainDb) || 0) / 20));
+    bgm.volume = Math.min(1, (parseFloat(bgm.dataset.volume) || 0.14) * 10 ** ((parseFloat(bgm.dataset.gainDb) || 0) / 20));
     fetch(bgm.getAttribute('src')).then(r => r.blob())
       .then(b => { bgm.src = URL.createObjectURL(b); bgm.load(); }).catch(() => {});
   }

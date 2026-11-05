@@ -18,6 +18,9 @@
 //     track's gain_db in music/Music metadata.json (measured with ebur128); a library bed
 //     without it, or with another value, stops the render before the capture. Any other
 //     bed (generated music) is levelled to -26 LUFS by loudnorm.
+//   * optional, only when asked for: #vo data-gain-db, sfx data-gain-db, #bgm
+//     data-gain-offset-db and data-duck="startMs-endMs:dB,..." adjust those levels
+//     (stage-canvas-html section 5); absent, the mix is the default one
 //   * stage size is read from the page (window.STAGE), so any ratio works
 //   * a render already at <out.mp4> is moved to renders/deletable first; the new one
 //     is checked (duration, frames, stereo)
@@ -27,20 +30,10 @@ const fs = require('fs'), path = require('path'), os = require('os');
 const { readEditable } = require('./stage');
 const { renderChunks } = require('./lambda');
 const { intraCopies, probe, clipFpsWarnings } = require('./intra');
-const crypto = require('crypto');
+const { writeStems, saveStems } = require('./stems');
 
-// The rate of Omni (gemini-omni-flash-1.1) clips. Switching or adding a video model
-// means checking its output rate against this.
+// The rate of Omni (gemini-omni-flash-1.1) clips. Switching or adding a video model means checking its output rate against this.
 const FPS = 24;
-
-const OTHER_BED_LUFS = -26;
-const PKG = path.join(__dirname, '..', '..');
-// sha256 -> package path of every library track, and package path -> its measured gain.
-const LIBRARY_MUSIC = new Map(Object.entries(JSON.parse(fs.readFileSync(path.join(PKG, 'resources.json'), 'utf8')).files || {})
-  .filter(([k]) => k.startsWith('music/')).map(([k, f]) => [f.sha256, k]));
-const LIBRARY_GAIN = new Map(JSON.parse(fs.readFileSync(path.join(PKG, 'music', 'Music metadata.json'), 'utf8'))
-  .map(t => [t.path, t.gain_db]));
-const libraryPath = file => LIBRARY_MUSIC.get(crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'));
 
 const [htmlArg, outArg, ...extra] = process.argv.slice(2);
 if (!htmlArg || !outArg || extra.length) {
@@ -58,56 +51,26 @@ const fps = FPS;
 console.log(`  frame rate: ${fps} fps`);
 clipFpsWarnings(dir, ed, fps).forEach(w => console.error(`warning: ${w}`));
 
-// Settled before the capture, so a bed without its gain costs a message, not a render.
-// null: generated music, levelled by loudnorm in the mix.
-const bedGainDb = (() => {
-  if (!ed.bgmSrc) return null;
-  const track = libraryPath(path.join(dir, ed.bgmSrc));
-  if (!track) {
-    if (ed.bgmGainDb !== null) console.error(`warning: ${ed.bgmSrc} is not a library track; its data-gain-db is ignored`);
-    return null;
-  }
-  const want = LIBRARY_GAIN.get(track);
-  const fail = msg => { console.error(`error: ${msg}`); process.exit(1); };
-  if (typeof want !== 'number') fail(`${track} has no gain_db in music/Music metadata.json`);
-  if (ed.bgmGainDb === null) fail(`#bgm (${track}) has no data-gain-db: copy the gain from the music pick's reply, data-gain-db="${want.toFixed(1)}"`);
-  if (!(Math.abs(ed.bgmGainDb - want) <= 0.05)) fail(`#bgm (${track}) has data-gain-db="${ed.bgmGainDb}", but the track's gain is ${want.toFixed(1)}: copy it as it is`);
-  return want;
-})();
 const frames = Math.round(ed.durationMs / 1000 * fps);
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'stage-render-'));
 fs.mkdirSync(path.dirname(out), { recursive: true });
 
-function mixAudio(silent, secs) {
-  const inputs = ['-i', silent], parts = [], labels = [];
-  let idx = 1;
-  if (ed.voSrc) {
-    inputs.push('-i', path.join(dir, ed.voSrc));
-    parts.push(`[${idx}:a]loudnorm=I=-16:TP=-1.5:LRA=7,aformat=channel_layouts=stereo,apad[vo]`); labels.push('[vo]'); idx++;
-  }
-  ed.sfx.forEach((s, k) => {
-    const file = path.join(dir, s.src);
-    if (!fs.existsSync(file)) { console.error(`warning: sound effect ${s.src} not found, skipped`); return; }
-    const ms = Math.max(0, Math.round(s.at));
-    inputs.push('-i', file);
-    parts.push(`[${idx}:a]aformat=sample_rates=48000:channel_layouts=stereo,adelay=${ms}|${ms}[fx${k}]`); labels.push(`[fx${k}]`); idx++;
-  });
-  if (ed.bgmSrc) {
-    const bed = path.join(tmp, 'bed.wav');
-    execFileSync('python3', [path.join(__dirname, '..', 'bgm-extend.py'), path.join(dir, ed.bgmSrc), bed, secs], { stdio: 'inherit' });
-    inputs.push('-i', bed);
-    let level = `aformat=sample_rates=48000:channel_layouts=stereo,volume=${bedGainDb}dB`;
-    if (bedGainDb === null) {
-      level = `loudnorm=I=${OTHER_BED_LUFS}:TP=-2:LRA=9,aresample=48000`;
-      console.log(`  ${ed.bgmSrc} is not a library track: levelled to ${OTHER_BED_LUFS} LUFS`);
-    } else {
-      console.log(`  ${ed.bgmSrc}: library bed at ${bedGainDb} dB`);
-    }
-    parts.push(`[${idx}:a]${level},afade=t=in:d=1,afade=t=out:st=${(ed.durationMs/1000-1.5).toFixed(2)}:d=1.5[bed]`); labels.push('[bed]'); idx++;
+function mixAudio(silent, secs, prepared) {
+  const inputs = ['-i', silent], labels = [];
+  const parts = [];
+  for (const stem of ['vo', 'sfx', 'bgm']) {
+    if (!prepared[stem]) continue;
+    const index = labels.length + 1;
+    inputs.push('-i', prepared[stem]);
+    const muted = stem === 'bgm' ? ed.bgmMuted : stem === 'sfx' ? ed.sfxMuted : false;
+    const offset = stem === 'bgm' ? ed.bgmOffsetDb ?? 0 : stem === 'sfx' ? ed.sfxOffsetDb ?? 0 : 0;
+    parts.push(`[${index}:a]volume=${muted ? '0' : `${offset}dB`}[${stem}]`);
+    labels.push(`[${stem}]`);
   }
   const fc = labels.length ? `${parts.join(';')};${labels.join('')}amix=inputs=${labels.length}:normalize=0,atrim=0:${secs}[a]` : '';
   execFileSync('ffmpeg', ['-y','-v','error', ...inputs, ...(fc ? ['-filter_complex', fc, '-map', '0:v', '-map', '[a]', '-c:a', 'aac', '-b:a', '192k'] : []),
     '-c:v','copy','-t',secs,'-movflags','+faststart', out], { stdio: 'inherit' });
+  saveStems(prepared, ed, htmlPath, out);
 }
 
 function checkRender() {
@@ -137,6 +100,8 @@ function archivePrevious() {
 }
 
 (async () => {
+  // Validate and prepare audio before spending on frame capture or moving the old render.
+  const prepared = writeStems(ed, dir, tmp, (ed.durationMs / 1000).toFixed(3));
   archivePrevious();
   const t0 = Date.now();
   const swap = await intraCopies(dir, ed);
@@ -149,7 +114,7 @@ function archivePrevious() {
   fs.writeFileSync(listFile, segs.map(s => `file '${s}'`).join('\n'));
   const silent = path.join(tmp, 'joined.mp4');
   execFileSync('ffmpeg', ['-y','-v','error','-f','concat','-safe','0','-i',listFile,'-c','copy', silent]);
-  mixAudio(silent, (ed.durationMs / 1000).toFixed(3));
+  mixAudio(silent, (ed.durationMs / 1000).toFixed(3), prepared);
   fs.rmSync(tmp, { recursive: true, force: true });
   console.log(`  concat+audio in ${((Date.now()-tTail)/1000).toFixed(0)}s | total ${((Date.now()-t0)/1000).toFixed(0)}s`);
 

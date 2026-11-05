@@ -30,11 +30,8 @@ itself, and never build a video from a blank file. The copy gives you:
   exactly as it previews (rule 6).
 - Preview controls, guide overlays, and a word readout for the operator;
   `?render` hides them and places the canvas at 1:1. Do not edit them.
-  The guides are the stage grid every layout is placed on
-  (creative-video-production section 9): `TikTok UI` and `Reels UI` draw
-  the app UI and the one safe zone, `Centre` the X and Y axes through
-  x 540, y 960 with a tick every 5% (54 px across, 96 px down), and
-  `Thirds` the 3 x 3 lines at x 360 and 720, y 640 and 1280.
+  The guides (`TikTok UI`, `Reels UI`, `Centre`, `Thirds`) draw the safe
+  zone and the stage grid of creative-video-production section 9.
 
 ## 2. Voice-over timings (as soon as the VO file exists)
 
@@ -81,26 +78,23 @@ it has no exit.
   elements with the class `w` (a key word also `k`), each phrase in its
   own parent; the audit checks phrases by it. Captions are not written by
   hand: section 6.
-- **Plan the scenes once, then build in a few edits.** A scene is one
-  look that holds for a few seconds; the changes inside it (cards, words,
-  zooms) carry the pace. A 30-second video has at most 6 or 7 scenes,
-  about one per sentence; more scenes are more to write and check, not
-  a better video. Decide them all before the first edit, as one scene
-  table (time window, what it shows, which assets), and build from it
-  without re-deciding each scene as you reach it. Each scene's
-  background colour is read against the persona's outfit while that table
-  is drawn up, so the cut-out stays a figure on it
-  (creative-video-production section 5). Then write the
-  skeleton (scene containers, the audio and sfx tags, `data-duration`),
-  then the scenes two or three per edit. Never the whole file in one
-  write: a very large write takes minutes with nothing on disk.
-- **Write the editable by hand. Never build a helper that writes it.** No
-  build script, generator, or template filler that takes timings and
-  emits the html. You are the generator: read `timings.json`, write the
-  CSS and markup with the numbers in them. A helper costs the time to
-  write it, run it, and debug it, and can stall at each step. The one
-  exception is the captions, which the package's own tool writes
-  (section 6).
+- **Plan the scenes once, then build skeleton first, scenes in parallel.**
+  A scene is one look that holds for a few seconds; the changes inside
+  it (cards, words, zooms) carry the pace. A 30-second video has at most
+  6 or 7 scenes, about one per sentence; more scenes are more to write
+  and check, not a better video. Decide them all before the first edit,
+  as one scene table (time window, what it shows, which assets), and
+  build from it without re-deciding each scene as you reach it. Then
+  write the skeleton in one edit and have the scenes written in parallel
+  by subagents (section 3b). Never the whole file in one write: a very
+  large write takes minutes with nothing on disk.
+- **No session-built helper writes the editable.** No build script,
+  generator, or template filler that takes timings and emits the html;
+  a helper costs the time to write it, run it, and debug it, and can
+  stall at each step. The package's own tools are the only other
+  writers: `tools/captions.py` (section 6) and `tools/assemble-scenes.py`
+  (section 3b). Everything else is written by hand from `timings.json`,
+  with the numbers in the CSS and markup.
 - **Do not read the stage template.** Section 1 is its interface; the
   copy is your editable, and reading 23 KB of harness only fills the
   context.
@@ -113,6 +107,85 @@ it has no exit.
   only, never the video's type; `Noto Color Emoji` is the emoji font. Do
   not list or inspect the system fonts. The audit flags a font that
   failed to load and a video whose text is all in system fonts.
+
+## 3b. Scenes in parallel
+
+Writing six scenes one after another is the longest stretch of a
+session. The skeleton is yours; the scenes are written at the same time
+by subagents, each from the same scene table, and one tool puts them in.
+
+**1. The skeleton, in one edit**, once the scene table is final and the
+timings exist. It is everything the scenes share, so they come out as
+one video:
+
+- In the video CSS: the `@font-face` declarations; the type system as
+  classes (a headline class, an accent, a pill, a card, a caption face)
+  with the reference's treatment; the palette as CSS variables on
+  `#stage`, each background read against the persona's outfit so the
+  cut-out stays a figure (creative-video-production section 5); the
+  shared `@keyframes` the video will use (an entry, a pop,
+  a slide, a wipe); each scene's **exit** on its container, `#sN { … }`
+  (rule 10); and one marker pair per scene for its own rules:
+
+  ```css
+  /* scene:s1 */
+  /* /scene:s1 */
+  ```
+
+- Inside `#stage`: the audio slots, the `.sfx` tags, `data-duration`,
+  and one container per scene with its marker pair:
+
+  ```html
+  <section class="scene" id="s1"><!-- scene:s1 --><!-- /scene:s1 --></section>
+  ```
+
+Then run `tools/captions.py` (section 6) so the caption block exists and
+its position is known.
+
+**2. The scenes, in one turn.** Launch the subagents with the Agent
+tool, all in the same turn, two or three adjacent scenes each, and wait
+for them. Each brief carries what that subagent cannot see:
+
+- Its rows of the scene table: time window, what the scene shows, the
+  assets it uses as `materials/<name>/<file>` with their pixel size (for
+  the persona cut-out, which sides are cropped), and the words spoken in
+  its window with their `s` and `e` from `timings.json`, pasted in.
+- The skeleton's vocabulary: the class names, the CSS variables, the
+  shared `@keyframes`, and where the captions sit (`--top`), so nothing
+  lands on them. It uses these and adds nothing that duplicates them.
+- The rules: it reads `skills/stage-canvas-html.md` sections 3 and 4
+  itself, and no other skill.
+- What it writes: `materials/<name>/scenes/sN.html`, the markup that
+  goes inside `#sN` (no `<script>`, no `<style>`, no exit animation: the
+  container has it), and `materials/<name>/scenes/sN.css`, with every
+  selector scoped to `#sN` and every scene-local `@keyframes` named
+  `sN-…`. It never touches the editable, never references `deletable/`
+  or `jobs/`, and never generates or fetches an asset: a missing one is
+  reported, not made.
+- Its reply: one line per scene, what it placed and any asset it could
+  not use and why.
+
+**3. Assemble**, once every subagent has replied:
+
+```bash
+python3 tools/assemble-scenes.py <root>/editable/<name>.html
+```
+
+It checks every fragment (markers present, no `<script>`, selectors
+scoped, no `transition` / `vw` / `vh` / `animation: none`, files exist
+and are not in `deletable/` or `jobs/`, no id used twice) and prints one
+line per problem, writing nothing until all pass; then it puts each
+fragment between its markers and moves `scenes/` to `deletable/scenes/`.
+From here the editable is the only source: the audit's fixes (section 7)
+are made in it directly, never by rewriting a fragment. A problem the
+tool reports in a fragment is fixed in that fragment and the tool run
+again; a scene the subagent could not finish is written by hand into
+its markers.
+
+Look at the first audit sheet for the join between scenes as much as
+for each scene: the same type, the same palette, entries of one family.
+A scene that looks like a different video is restyled with the
+skeleton's classes, not left as its own.
 
 ## 4. Rules for animating inside the stage
 
@@ -202,10 +275,9 @@ Each cue is one tag inside `#stage`, next to the audio slots:
 ```
 
 `data-at` is the stage millisecond the sound starts; put a whoosh's peak
-on the cut it serves, not after it. Fetch each sound you use into
-`materials/<name>/sfx/` first: `python3 tools/fetch-resource.py
-sfx/<file> editable/materials/<name>/sfx/<file>` (the audio is hosted,
-not in the package).
+on the cut it serves, not after it. The file is the one fetched into
+`materials/<name>/sfx/` when the sound was chosen
+(creative-video-production section 1).
 
 Every effect plays at the volume stored in its file. The library is
 already levelled, one sound at a time, against a voice at −16 LUFS, the
@@ -213,7 +285,7 @@ level the renderer sets every voice-over to; the renderer adds no gain
 to an effect. WHEN a sound feels too loud or too soft for a moment,
 choose a different sound. A library
 music bed is set 10 dB under the voice by the gain on its tag,
-`data-gain-db`, which is the chosen entry's `gain_db`
+`data-gain-db`, which is copied from the music pick's reply
 (creative-video-production section 1): the renderer applies it as a
 fixed gain and stops before the capture when it is missing or is not
 that track's value. Never estimate, round, or change it, and never
@@ -270,6 +342,38 @@ the `ccHl` keyframes (the highlight). The captions come out in no font of
 their own: set `.cc-phrase` to the caption face of the video's type
 system (creative-video-production section 5). Never edit inside the markers, never
 write caption words by hand, and do not reuse the `cc-` names.
+
+A caption **style chosen by the user** arrives with its own numbers
+(behaviour, font, size, colour, highlight colour, top). The generator's
+flags take behaviour/top/size/colours; everything else — the face, the
+case, the outline, a box behind the phrase, a larger spoken word — is the
+`.cc-phrase` / `.cc-phrase .w` CSS after the markers. Restyling never
+changes which words appear when: that comes from the timings.
+
+## 6b. Layers a change adds
+
+An edit may bring its own files (a sound, a still, an animated sticker).
+They must be copied into `materials/<name>/` first — the stage loads
+nothing from the network (section 4, rule 8) and nothing from outside the
+editable's own folder.
+
+- **Image**: `<img>` in an absolutely positioned wrapper inside `#stage`,
+  sized in stage pixels, entering and leaving on CSS animations
+  (section 4, rule 10). Give it a wrapper if it needs both an entry and an
+  exit, exactly like a scene element.
+- **Animated sticker**: `<video muted playsinline preload="auto"
+  data-start="<ms>" src="materials/<name>/elements/<file>">`. The harness
+  and the renderer seek it; write no sync script and extract no frames
+  (section 4, rule 11). WebM only: its transparency has to survive.
+- **Extra sound**: a short cue is one more `<audio class="sfx" data-at>`
+  (section 5). A different music bed replaces `#bgm`, with the library
+  entry's own `data-gain-db` copied exactly, or a generated bed levelled
+  by loudnorm. There is no fourth audio slot.
+- **Text or emoji**: ordinary absolutely positioned text inside `#stage`
+  — the same rules as any other type in the video (section 3).
+
+These layers are content, not chrome: they live inside `#stage`, they do
+not touch the harness CSS, and the audit must pass with them in place.
 
 ## 7. Audit
 
@@ -328,7 +432,8 @@ Each line says how to fix it; fix them all in as few edits as you can,
 then run it the second time. It also writes
 `materials/<name>/deletable/audit-sheet.jpg`: the first frame, each scene
 0.6 s in, and the last frame, or the `--at` moments. Look at it on the
-first run; it is the check a render would otherwise be spent on. The
+first run (this sheet is read as it is, never scaled: it is the check a
+render would otherwise be spent on). The
 tool's output is the whole interface: do not read its source.
 
 ## 8. Render

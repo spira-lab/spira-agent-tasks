@@ -228,6 +228,43 @@ rendering all behave. Break them and playback or the MP4 will be wrong.
     after its end its last, so put its entry and exit on a wrapper with
     CSS animations, as for any element. An alpha WebM keeps its
     transparency on the stage and in the render.
+12. **One person on screen, never a ghost.** Two copies of the presenter
+    visible at once, at different sizes or places, read as a phantom.
+    - When the scene before and the scene after both show the person, the
+      change between them is a cut for the person: the outgoing scene's
+      exit is a one-frame step on the incoming scene's first frame, never
+      a fade, and the incoming scene shows its person at full opacity from
+      that frame. The new look arrives with the new scene's background and
+      elements, never with a fading person.
+    - Every element that holds a clip hides, as a cut, at its clip's end
+      (its `data-start` plus its length) or at its scene's end, whichever
+      comes first. A clip holds its last frame after it ends, so nothing
+      that is not hidden stays frozen behind the next shot.
+    - Cover before you uncover: when the room goes away behind a cut-out,
+      the new background is fully in before the full shot starts to fade;
+      when the room comes back, the full shot is fully in before the
+      background leaves. Time both from the same millisecond values.
+13. **The cut-out sits exactly on the person.** A clip and its cut-out,
+    when both are in a scene, go in one wrapper and both videos fill it the
+    same way (`position: absolute; left: 0; top: 0; width: 100%; height:
+    100%; object-fit: cover; object-position: 50% 50%`). Every size or
+    position change, a zoom, a resize, a move, is an animation of that
+    wrapper, never of one video inside it; the room shows or hides with the
+    full shot's opacity alone. Then a resize into or out of the room never
+    pulls the cut-out off the person.
+14. **Gradient text gets room on all four sides.** `background-clip: text`
+    paints the letters only inside the element's box, and tight headline
+    leading makes that box smaller than the letters: the tails of g, j, p,
+    q and y, tall capitals, accents and italic overhangs are cut flat.
+    Every gradient-text element is an inline-block with padding on all
+    four sides and the same negative margin, so the box grows and the
+    layout does not move, and its parents never have `overflow: hidden`:
+
+    ```css
+    .grad { display: inline-block; padding: 0.25em 0.15em; margin: -0.25em -0.15em;
+      background: <the gradient>; -webkit-background-clip: text; background-clip: text;
+      color: transparent; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+    ```
 
 ## 5. Sound effects
 
@@ -245,9 +282,8 @@ on the cut it serves, not after it. The file is the one fetched into
 Every effect plays at the volume stored in its file. The library is
 already levelled, one sound at a time, against a voice at −16 LUFS, the
 level the renderer sets every voice-over to; the renderer adds no gain
-to an effect. Never set, scale, or calibrate an effect's volume: no
-volume attribute, no gain filter, no re-encoded copy. WHEN a sound feels
-too loud or too soft for a moment, choose a different sound. A library
+to an effect. WHEN a sound feels too loud or too soft for a moment,
+choose a different sound. A library
 music bed is set 10 dB under the voice by the gain on its tag,
 `data-gain-db`, which is copied from the music pick's reply
 (creative-video-production section 1): the renderer applies it as a
@@ -257,6 +293,31 @@ scale or re-encode the bed. Generated music, which has no stored gain,
 carries no `data-gain-db` and is levelled to -26 LUFS. Do not
 pre-mix effects into
 `vo.mp3`; the VO file stays the dry voice that the timings came from.
+
+**Level adjustments, only when the request or a review comment asks for
+one.** These optional attributes are the only way to change a level;
+never a gain filter or a re-encoded file. The voice stays the loudest
+sound.
+
+| Attribute | On | Effect |
+|---|---|---|
+| `data-gain-db="-3"` | `#vo` | voice after its −16 LUFS levelling, −12 to +6 |
+| `data-levelled` | `#vo` | the file is already levelled to −16 LUFS (an edit levels it before cutting it), so the renderer does not level it again; a voice made anew drops it |
+| `data-gain-db="-6"` | an `audio.sfx` | that effect, −40 to +6 |
+| `data-gain-offset-db="-4"` | `#bgm` | on top of its `data-gain-db` (kept as copied), −20 to +6 |
+| `data-duck="1200-3400:-8,9000-12000:-6"` | `#bgm` | music lowered by dB in each ms range, 300 ms ramps, 0 to −30, no overlaps |
+| `data-match-lufs="-27.7"` | `#bgm` | the bed as heard in this video (its stretch, ducking and fades) brought to this loudness before `data-gain-offset-db`, −60 to −5; set only when an edit swaps the bed for another kind, and kept on later renders |
+
+`#bgm data-muted` silences the bed without removing its source. `#stage`
+`data-sfx-offset-db` (-20 to +6) scales the whole sound-effects group after
+individual cue levels; `data-sfx-muted` silences that group without removing cues.
+These attributes are changed only on an explicit sound-level request. Group
+levels are absolute, never cumulative. Rendering writes a `.mp4.audio` directory
+beside the video with neutral-group FLAC stems and a version-bound manifest
+(its `bgm.lufs` is the bed's loudness as heard, before the group level);
+keep it with the render so Edit can audition the same mix.
+
+The renderer stops on a value out of range.
 
 ## 6. Captions
 

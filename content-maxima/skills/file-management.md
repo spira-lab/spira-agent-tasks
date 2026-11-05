@@ -32,6 +32,8 @@ from and never written to, and nothing is built inside them.
         sfx/                    the sound effects the editable uses
         <images, clips, cut-outs, fonts>
         jobs/                   generation payloads; never referenced
+        scenes/                 scene fragments written by the subagents, until
+                                assemble-scenes.py puts them in and moves them to deletable/
         deletable/              rejected, replaced, unused and working files
   renders/
     NN-name-MM-DD.mp4           the current render of each editable
@@ -74,7 +76,7 @@ carry on from there, and generate nothing that is already in.
 
 - Everything the editable references lives in its materials folder and
   is referenced as `materials/NN-name-MM-DD/<file>`. Nothing in
-  `deletable/` or `jobs/` may be referenced.
+  `deletable/`, `jobs/`, or `scenes/` may be referenced.
 - Only material in use stays in the folder proper. The moment a file is
   rejected, replaced, or turns out to be unused (the second take of a
   music job, a Soul base image once the edit is in, a contact sheet),
@@ -87,7 +89,8 @@ carry on from there, and generate nothing that is already in.
   otherwise retry once, then `report_error`. The only `rm` is a saved
   `.pending` record (toolkit section 1). The `deletable/` folders are
   the operator's to empty.
-- Tool working files (audit sheets, a reference video and its frames,) are written straight to `deletable/`
+- Tool working files (audit sheets, a reference video and its frames,, the copies
+  `view-image.sh` writes to `deletable/view/` for looking at an image) are written straight to `deletable/`
   by the tools.
 
 ## 6. Renders
