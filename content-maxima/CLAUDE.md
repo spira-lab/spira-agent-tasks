@@ -12,12 +12,7 @@ Spira CLI) and assembling them in an HTML stage that renders to MP4.
 Read `skills/creative-video-production.md` first. It is the entry point and
 names the other skills, which are essential and never skipped:
 `toolkit.md`, `prompting.md`, `stage-canvas-html.md`, `file-management.md`,
-`known-methods.md`, plus `skills/working-memory.md` for its Preferences,
-`fonts/fonts.md`, and the sound-effect index `sfx/SFX index.md`. Read
-them all in one turn, and run every requirement check of the task
-contract in that same turn, one Bash call each, not one per turn. The
-music index is read by a subagent, never by this session
-(creative-video-production section 1). This file
+`known-methods.md`, plus `skills/working-memory.md` for its Preferences. This file
 is a map; where it and a skill disagree, the skill wins.
 
 ## Package and root
@@ -26,47 +21,6 @@ The package (`skills/`, `stage/`, `tools/`, `sfx/`, `music/`, `styles/`, `fonts/
 read from, never written to. Session output goes to the root, the folder
 the session was opened in, under `editable/` and `renders/`, which are
 gitignored. `file-management.md` governs every path.
-
-## Looking at images
-
-Every image the session looks at (a style sheet, a contact sheet, the
-audit sheet, a generated sheet or persona, a photo the user supplied) is
-opened through the tool, never by reading the image file itself:
-
-```bash
-tools/view-image.sh <image> <materials>/<name>/deletable [--max <px>] [--crop x,y,w,h]
-```
-
-Read the path it prints. The image is scaled so its long edge is at most
-`--max` px (default 1024); an image already that small is read as it is.
-A Read puts an image in context at its pixel size and resends it every
-turn, so pass the smallest `--max` that still shows what you need:
-
-| Looking at | `--max` |
-|---|---|
-| An element sheet or b-roll collage, to see where the cuts fall | 1024 |
-| A cut-out element or sticker (silhouette, colour) | 320 |
-| A b-roll still (composition, light, room for text) | 640 |
-| A style sheet or a contact sheet (palette, face, crop) | 1100 |
-| **The audit sheet** | **read as it is, no tool** |
-
-For small type or an edge, look at a region at full resolution with
-`--crop` (source pixels) instead of the whole image larger.
-
-**Never measure on a copy.** The copy is for knowing what the image
-shows; its pixels are not the video's. A position or size goes on the
-stage by writing the scene and running `audit.js --at` (stage skill
-section 7), which measures on the canvas itself. The `scale` the tool
-prints (multiply a copy measurement by it for the source value) is only
-for placing a cropped element roughly, never for the layout.
-
-The copy is for looking only. Everything the video uses takes the
-original: what the editable references, the sheet given to
-`cut-sheet.py`, a file passed to `host_file`, and every job
-input such as `referenceImage` (the original or its hosted URL), never a
-file from `deletable/view/`. The audit flags an editable that references
-the copy; nothing checks an upload or a job input, so this rule is the
-only guard there.
 
 ## Record a corrected approach in known-methods
 
@@ -85,12 +39,10 @@ python3 tools/chunker.py <materials>/<name>/script.txt <materials>/<name>/jobs/p
 python3 tools/make-timings.py <materials>/<name>/vo.mp3 [--from clips... | --recording <url>]  # word timings (and the VO from clips or a recording)
 python3 tools/cut-sheet.py grid|elements <sheet.png> ... --names a,b  # cut one generated sheet into its images
 python3 tools/captions.py <root>/editable/<name>.html            # word-per-word captions from the timings
-python3 tools/assemble-scenes.py <root>/editable/<name>.html     # put the subagents' scene fragments into the editable
 node tools/render/audit.js <root>/editable/<name>.html [--at ms,...]  # leaks, text, files, frame sheet
 node tools/render/render.js <root>/editable/<name>.html <root>/renders/<name>.mp4
 host_file renders/<name>.mp4 (worker_tools)                   # host the finished render; returns its URL
 tools/style-sheet.sh <url or path> <materials>/<name>/deletable # style reference contact sheet
-tools/view-image.sh <image> <materials>/<name>/deletable [--max <px>] [--crop x,y,w,h]  # the copy of an image to look at
 node docs/render-steps.js                                       # refresh the README cards
 ```
 

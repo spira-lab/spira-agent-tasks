@@ -47,9 +47,13 @@ Pass `resultUrls[0]` into the next job that needs the result.
 `status: "FAILED"` carries the provider's error. Read it and fix the
 payload before resubmitting once (a new `submit_ai_job`, a new
 `.pending`); never resubmit an unchanged payload in a loop.
-`stillRunning` and `saveError` are retried as your instructions say,
-with the same `jobId` and `saveTo`. IF a session was cut off (a
-restart), read every `jobs/*.pending` and call `wait_ai_job` on the id
+
+`stillRunning: true` means the wait timed out, not that the job failed:
+call `wait_ai_job` again with the same `jobId` and `saveTo`. `saveError`
+means the job finished but its download failed: call `wait_ai_job` again
+with the same `jobId` and `saveTo` — it returns at once and is not charged
+again. IF a session was cut off
+(a restart), read every `jobs/*.pending` and call `wait_ai_job` on the id
 it holds. **Never call `submit_ai_job` for an output that has a `.pending`
 record** — that pays twice for one output. Delete a `.pending` file only
 to deliberately replace that job.
@@ -59,14 +63,19 @@ back in `saved` with `hasAlpha`. `hasAlpha: false` on a file whose payload
 asked for a transparent background means it has no alpha channel and must
 be regenerated.
 
-**Independent jobs run in parallel**, all submitted in one turn and all
-waited on in one turn, so a batch costs its longest job, not the sum. A
-job that depends on another's output starts the moment that output is
-in, not after the whole batch. Plan the order so the longest chain
-starts first: for a talking head that is Soul, then the persona edit,
-then the clips, then the cut-outs (with the user's own photo the chain
-starts at the persona edit, or at the voice-over in 3j); music, b-roll,
-and elements run beside it.
+**Independent jobs run in parallel.** Whenever jobs do not depend on each
+other's results, submit them all in one turn — one `submit_ai_job` call
+each — then wait on them all in one turn — one `wait_ai_job` call each.
+Calls in the same turn run at once; one after another costs the sum of
+the job times.
+
+Serial waiting costs the sum of the job times; parallel costs the
+longest one. A job that depends on another's output starts the moment
+that output is in, not after the whole batch. Plan the order so the
+longest chain starts first: for a talking head that is Soul, then the
+persona edit, then the clips, then the cut-outs (with the user's own
+photo the chain starts at the persona edit, or at the voice-over in 3j); music, b-roll, and elements
+run beside it.
 
 To inspect a model's inputs and prices: `spira ai models get <modelId>`.
 
@@ -155,8 +164,8 @@ video:` is not this: it is the finished talking head and skips 3a
 entirely (3k). Then:
 
 - **With a voice ID or a recording** (section 3): skip the clean-up
-  edit (3b) and the talking-head clips (3e) too. The talking head is
-  HeyGen from the photo as given, section 3j.
+  edit (3b) and the talking-head clips (3e) too. The talking head is HeyGen from the photo
+  as given, section 3j.
 - **On Auto voice:** the photo takes Soul's
   place as the reference for the clean-up edit (3b), which still gives
   the headspace above the head. The edited image goes into the
@@ -215,19 +224,6 @@ another object is cleared from its crop. Move the sheet to `deletable/`
 once the cut-outs are in. A single element on its own is the same prompt
 with one object at `1:1` `1K`.
 
-**Cutting and checking a sheet is a subagent's job**, for elements and
-for b-roll (3d) alike, so the sheet and its cut-outs never enter this
-session's context. When the sheet is saved, launch the Agent tool (in
-the background, while the clips render) with: the sheet's path, the
-`cut-sheet.py` command to run with the names in reading order, and the
-instruction to look at each cut-out through `tools/view-image.sh <file>
-<materials>/<name>/deletable --max 320` (elements) or `--max 640`
-(stills), then move the sheet to `deletable/` and reply one line per
-cut-out: name, pixel size, whether it is usable (whole, the right
-object, clean alpha edge or a clean frame), and anything wrong. Plan the
-scenes from that reply; look at a cut-out yourself only when the reply
-says it is doubtful.
-
 The prompt must say transparent background in those words; it does not
 happen by default, and a white or grey backdrop cannot be keyed cleanly
 afterwards. `wait_ai_job` reports `hasAlpha: false` when the PNG came back without alpha.
@@ -240,8 +236,7 @@ frames of exactly 1080 x 1920, full-bleed on the stage, for 6.15 credits
 in all. Payload:
 `{"prompt":"A 2x2 collage of four separate photographs in four equally divided frames, edge to edge, no border, no outline, no gaps, no dividing lines. Top left: <scene>. Top right: <scene>. Bottom left: <scene>. Bottom right: <scene>. Photographic, natural light, no text, no logos","size":"9:16","resolution":"4K"}`.
 
-Then cut the frames out, named in reading order, by the same subagent
-as an element sheet (3c), which also reports the frame size:
+Then cut the frames out, named in reading order:
 
 ```bash
 python3 tools/cut-sheet.py grid <materials>/<name>/broll-sheet.png 2x2 --names broll-track,broll-engine,broll-cockpit,broll-daily
@@ -274,8 +269,9 @@ stage at that ratio.
 never changed: the tool splits it at sentence ends (and at a comma,
 colon or dash only when that is what lands a chunk in the band) and
 gives each chunk a clip length so it is spoken at 4.7 to 5.0 syllables a
-second (never over 5.2: above that Omni cuts the end off or rewrites the
-line). Run it on the saved script before any clip is written:
+second (never over
+5.2: above that Omni cuts the end off or rewrites the line). Run it on
+the saved script before any clip is written:
 
 ```bash
 python3 tools/chunker.py <materials>/<name>/script.txt <materials>/<name>/jobs/plan.json
@@ -340,9 +336,8 @@ python3 tools/make-timings.py <materials>/<name>/vo.mp3 --from th-01.mp4 th-02.m
 
 Without a product, the clips keep the persona image's framing: the face
 sits where it sits in `persona.png`, so plan the layout around it from
-that image (looked at through `tools/view-image.sh` per CLAUDE.md,
-Looking at images), and check it on the stage with `audit.js --at`. Do not
-cut frames out of the clips to look at them; the one contact sheet of a
+that image, and check it on the stage with `audit.js --at`. Do not cut
+frames out of the clips to look at them; the one contact sheet of a
 product clip (above) is the exception.
 
 Cost per clip (the same at 720p and 1080p): 4 s 41, 6 s 54, 8 s 68,
@@ -350,8 +345,8 @@ Cost per clip (the same at 720p and 1080p): 4 s 41, 6 s 54, 8 s 68,
 
 ## 3f. Talking-head cut-out: `pixelcut-video-background-removal` (fallback `bria-video-background-removal`)
 
-Removes the background from an Omni, HeyGen, or supplied (3k) clip so
-the talking head sits on the stage with real transparency. Payload:
+Removes the background from an Omni, HeyGen, or supplied (3k) clip so the talking head sits on
+the stage with real transparency. Payload:
 `{"referenceVideo":["<clip url>"],"mode":"Transparent"}`,
 written to `<name>.webm`.
 
@@ -446,8 +441,10 @@ credits per second.
 ## 3i. Voice-over without a presenter: `elevenlabs-text-to-speech`
 
 Only for a video the request explicitly makes presenter-less
-(creative-video-production section 1), on Auto voice; with a voice ID
-or a recording the voice-over is 3j step 1 instead. Payload:
+(creative-video-production section 1); a VO explainer otherwise still
+has a talking head and never comes here. WHEN the voice comes from a
+voice ID or a recording (section 3), the voice-over is 3j step 1
+instead, and nothing here applies. Payload:
 `{"text":"<the script>","voiceId":"21m00Tcm4TlvDq8ikWAM","providerModelId":"eleven_v3"}`,
 written to `vo.mp3`, then `python3 tools/make-timings.py <materials>/<name>/vo.mp3`.
 Voices proven on this account: `21m00Tcm4TlvDq8ikWAM` (female) and
@@ -498,9 +495,8 @@ goes on the stage at `data-start="0"`. Cost is 10 credits a second.
 WHEN the request has `Talking head supplied video: <url>`. That exact
 video is the talking head of the finished video, and its own audio is
 the voice-over. Skip the persona (3a), the avatar edit (3b), the
-talking-head clips (3e), and HeyGen (3j); generate no speech (3i). It
-comes first in the session, before the concept: its words are what the
-video is about.
+talking-head clips (3e), and HeyGen (3j); generate no speech (3i). It comes first in the
+session, before the concept: its words are what the video is about.
 
 1. **Start the video with no script**:
    `tools/new-video.sh "<brand, or talking head>" < /dev/null`.
@@ -524,9 +520,7 @@ video is about.
 5. **Look at where the person is**, from a contact sheet of frames
    across the clip:
    `tools/style-sheet.sh <materials>/<name>/th-01.mp4 <materials>/<name>/deletable`.
-   Open only `deletable/contact-sheet.jpg`, through `tools/view-image.sh
-   <contact-sheet.jpg> <materials>/<name>/deletable --max 1100` (CLAUDE.md,
-   Looking at images). Note where the face and the
+   Open only `deletable/contact-sheet.jpg`. Note where the face and the
    body sit in the frame, how much of it they fill, whether they move,
    and where the free space is, and plan where every animated element
    lands from that: beside, above, or below the person, never over the

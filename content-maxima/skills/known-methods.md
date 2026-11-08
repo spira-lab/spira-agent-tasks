@@ -27,15 +27,14 @@ tool the entry points to; this file holds the why.
 
 ## Writing the editable
 
-- **Works:** 6 or 7 scenes planned up front, a skeleton in one edit,
-  then the scenes written in parallel by subagents from the same scene
-  table and put in by `tools/assemble-scenes.py`.
+- **Works:** 6 or 7 scenes planned up front, a skeleton, then two or
+  three scenes per edit, written by hand from `timings.json`.
 - **Fails:** the whole editable in one write (an 80 KB file takes minutes
   with nothing visible), a generator script that emits the html (paid for
   three times: writing, running, fixing), and ten scenes written one per
   edit with an audit after each: twenty minutes of round trips on staging
   for a 30-second video.
-- **Where:** stage-canvas-html, sections 3 and 3b.
+- **Where:** stage-canvas-html, section 3.
 
 ## Captions
 
@@ -92,7 +91,7 @@ tool the entry points to; this file holds the why.
 
 ## Persona cut-outs
 
-- **Works:** every talking-head clip cut out in one cut-out batch, and the
+- **Works:** every talking-head clip cut out in one batch, and the
   cut-out layered over most talking-head scenes: over an animated
   background or b-roll, in front of a headline, the room faded away.
 - **Fails:** cutting out only the clips the scene plan showed as a

@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "packageVersion": "1.19.16",
+  "packageVersion": "1.19.17",
   "description": "Turn a script, brief, or idea into a finished short video, 9:16 for Reels and TikTok unless another aspect ratio is asked for, following the skills in skills/ (start with skills/creative-video-production.md).",
   "requirements": [
     {"name": "ffmpeg", "kind": "system", "purpose": "Encoding, mixing, frame extraction and probing (render, gen, add-ons)", "check": "ffmpeg -version && ffprobe -version"},
-    {"name": "python3", "kind": "system", "purpose": "tools/make-timings.py, tools/chunker.py and tools/bgm-extend.py", "check": "python3 --version"},
+    {"name": "python3", "kind": "system", "purpose": "tools/make-timings.py and tools/bgm-extend.py", "check": "python3 --version"},
     {"name": "@aws-sdk/client-s3 + client-lambda", "kind": "npm", "purpose": "tools/render/render.js and audit.js run their browser on AWS Lambda (CM_RENDER_LAMBDA / CM_RENDER_BUCKET)", "check": "node -e \"require('@aws-sdk/client-s3'); require('@aws-sdk/client-lambda')\"", "install": "npm install -g @aws-sdk/client-s3@3.1142.0 @aws-sdk/client-lambda@3.1142.0"},
     {"name": "@spira-lab/cli", "kind": "npm", "purpose": "Model docs only (`spira ai models get`, skills/toolkit.md). Never used to host a file, or to submit, wait on or check a job", "check": "spira --version", "install": "npm install -g @spira-lab/cli"},
     {"name": "spira sign-in", "kind": "credential", "purpose": "The Spira CLI must be signed in as the operator: jobs and host_file run as that account", "check": "spira auth whoami"},
