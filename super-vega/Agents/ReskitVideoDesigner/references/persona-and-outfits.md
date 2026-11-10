@@ -13,6 +13,9 @@ All persona files live in `Agents/VegaOM/client-assets/<BrandName>/personas/<Nam
 
 ## 1. Which persona
 
+First read the Design approach in `Agents/DesignerShared/skills/working-memory.md`: an entry
+there about personas (e.g. a new persona for every video) wins over the steps below.
+
 1. **The request gives one** (`Use this avatar image: <path or URL>`): that is the persona.
    Never make another beside it, and never run Soul to "match" it.
    - Look in `client-assets/<BrandName>/personas/` for a folder whose `source/` holds that image
@@ -35,7 +38,10 @@ Read `prompting.md` sections 1–3 and `toolkit.md` 3a–3b. Then:
    skill's Soul format, framed for the widest shot you will ever need: **full body, standing
    relaxed, hands empty at the sides**, a plain lived-in room in daylight, looking at the camera.
    Everyday words, no lens or lighting words. One image; a second image is a different person,
-   so fix the prompt rather than generating a batch to pick from.
+   so fix the prompt rather than generating a batch to pick from. **Outfit: the kind only**
+   (the owner's rule, 2026-10-30; section 4): in the Soul format's outfit slot write only the
+   general kind of attire (e.g. "in a casual home outfit"), never a garment or a colour, and
+   leave out its "is wearing a [outfit detail]" sentence.
 3. **Clean-up edit:** one GPT Image 2 job (`9:16`, `2K`) in the persona-edit format, the Soul
    result as `referenceImage`.
 4. **Check** it as the Avatar Designer does: the person decided, sharp face, no artefacts or
@@ -68,18 +74,24 @@ Resolution matters: a sheet assembled from small panels gives the video model li
 detail, and close-ups suffer first. Save it as `personas/<Name>/sheet_4k.png` and start an empty
 `outfits.md` (section 5).
 
+Sheets made before this layout was settled may have another arrangement (more panels, no borders,
+no name label). Use them as they are, and word the outfit prompt for the layout the sheet actually
+has; never remake a persona's sheet just to match.
+
 ## 4. Outfits: decided first, never repeated
 
 Every video starts its visual work by choosing and generating the outfit. Nothing else that
 shows the persona (plates with her, clips, b-roll featuring her) is generated before the outfit
 exists and has been checked, because every later reference carries it.
 
-**Choosing.** The outfit fits the scene (lounging at home, a night out, a café, a commute) and
-the brand's voice; contrasts clearly with what the source performer wears, so the result never
-reads as a copy; and contrasts with the background so the persona separates from the room.
-Read the persona's whole `outfits.md` first: an outfit, or a near-variant of one (same garment
-type in the same colour), that appeared in any previous video is not used again. Colours and
-garment types already used are off the table for the main pieces.
+**Choosing: the kind of attire only, never the garment or the colour** (the owner's rule,
+2026-10-30). Decide only the general kind the scene and the brand's voice call for: a home
+outfit, lounge wear, office wear, gym wear, going-out clothes, a café look. Never decide or
+write an exact garment (sweatshirt, cardigan, blazer, crop top, ...), a colour, a fabric or a
+fit, in this prompt or any other: the image model interprets the kind and picks its own pieces
+and colours. Choosing them ourselves kept landing on the same few colours (mint green, olive
+green, orange-brown) video after video. Read the persona's whole `outfits.md` first: when the
+latest entries share a kind, pick another kind where the scene allows it.
 
 **Generating.** One GPT Image 2 edit of the persona's **original** `sheet_4k.png`, `16:9`, `4K`.
 Never edit an earlier outfit sheet: each edit softens identity a little, and chained edits drift
@@ -89,17 +101,32 @@ into a different person. The prompt has three parts:
    same face, hair, expression, skin, body shape and size, pose, camera angle and framing, and
    keep the same seven-panel layout, the black borders, the plain light-grey studio backdrop and
    the name label." Name the accessories that stay.
-2. What changes, and only that: "Only change the outfit, identically in every panel: …",
-   described concretely (garments, colours, fabric, fit), plus footwear for the full-body panels.
+2. What changes, and only that: "Only change the outfit, identically in every panel, to a
+   <kind of attire, e.g. casual home outfit>, with matching footwear in the full-body panels."
+   Nothing more: no garments, colours, fabric or fit. The model chooses them.
 3. "Keep the clean photographic look of the sheet, no other text."
 
 The outfit job is `"hold": true` in the chain: when it lands, look at it (face, hair and body
-match the original sheet in every panel; the outfit is identical across panels), then
-set `"approved": true` on it in `chain.json`. Only then do you submit the clips. A failed
-check is a redo with a tighter prompt (at most 2 extra).
+match the original sheet in every panel; the outfit is identical across panels and reads as the
+kind asked for; it is not a near-copy of an outfit in the ledger or of what the source performer
+wears; it stands out from the setting; and nothing on it carries another company's logo or mark,
+shoes included, since the clips copy it faithfully), then set `"approved": true` on it in
+`chain.json`. Only then do you submit the clips. A failed check is a redo (at most 2 extra) with
+the same kind-only prompt, or another kind; tightening the prompt never means adding a garment
+or a colour.
 
 Save the approved sheet in `personas/<Name>/outfits/<YYYY-MM-DD>_<short-outfit-name>.png`
 (copy it from the video's `assets/`, where `wait_ai_job` saved it) and append it to the ledger.
+
+## 4a. The voice
+
+When a video re-voices or adds speech, the persona speaks in a voice Wan 3.0 generates from words.
+So she sounds the same across videos, her voice is written once and kept:
+`personas/<Name>/voice.md`, one sentence in plain words: an explicit adult age, nationality and
+accent, pitch, and the voice's texture. Write it the first time she speaks, choosing what suits her look and the
+brand's audience, and never change it. Each clip adds only the delivery the scene needs (deadpan,
+excited, sighing) after it. Never base it on the source performer's voice, and never send that
+voice to the model.
 
 ## 5. The ledger
 
@@ -111,4 +138,6 @@ Save the approved sheet in `personas/<Name>/outfits/<YYYY-MM-DD>_<short-outfit-n
 | 2026-10-19 | CookiyLabs 14-cookiylabs-10-19 | oversized dusty-lilac crewneck sweatshirt, light-grey jersey lounge shorts | outfits/2026-10-19_lilac-sweatshirt.png |
 ```
 
-The Video column is `<BrandName> <video name>`, so the row points back to its metadata.
+The Video column is `<BrandName> <video name>`, so the row points back to its metadata. The
+Outfit column records the kind asked for and what the model made, so the next check can spot a
+repeat. It is a record only: never copy it into a prompt.

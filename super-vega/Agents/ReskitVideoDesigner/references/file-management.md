@@ -52,6 +52,7 @@ Agents/VegaOM/client-assets/<BrandName>/
   personas/<Name>/
     source/                  the given avatar image, or the Soul base image if one was made
     sheet_4k.png             the master character sheet (never edited in place)
+    voice.md                 her voice in one sentence, written the first time she speaks, never changed
     sheet.html               how the sheet was assembled, when built from photos
     outfits/                 one sheet per outfit: <YYYY-MM-DD>_<short-outfit-name>.png
     outfits.md               the outfit ledger (persona-and-outfits.md)
@@ -72,6 +73,9 @@ materials when a build needs them.
 
 - what drives the source, with its timings
 - the new story in one sentence, and the keep/cut/rewrite table
+- the **dialogue script** when anything is re-voiced or added: every line spoken in the finished
+  video, in order, with its speaker, source start time, the source's words and the new words
+  (kept lines word for word), and the voice sentence used for each speaker
 - the persona and the outfit chosen, and the ledger entry it created
 - the generation plan: every job with model, settings and expected credits (read from `spira ai models get`), and the total
 - the **job log** (last section of the file): you append one row per job the
@@ -88,6 +92,8 @@ brand, created, editable, assets, renders) and adds:
 - `story`: the new story in one sentence
 - `persona`: `{name, sheet, outfit, outfit_sheet, ledger}`
 - `music`: where the soundtrack came from (kept source audio, generated, library) and why
+- `dialogue`: when re-voiced, `{script, voices}`: the full dialogue script and each speaker's
+  voice sentence, verbatim
 - `assets[]`: every job, written by you the moment the job exists: label, job ID,
   model, the exact inputs and prompt, result URLs, file, credits and where the credit figure
   came from. Add an entry yourself for anything else that costs credits (a Scribe transcript

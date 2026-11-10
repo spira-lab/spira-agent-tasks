@@ -1,6 +1,6 @@
 # How to Send a Request to Vega
 
-Vega is Super Vega's operations manager. She takes the request as the task brief and runs the AI team: Echo (scripts), Atlas and the designers (talking head, explainer, podcast, avatar, clone, re-skit and corporate carousel), Hermes (uploads), Iris (reports) and Quill (brand briefs). This SOP shows how to ask so a request runs the first time.
+Vega is Super Vega's operations manager. She takes the request as the task brief and runs the AI team: Echo (scripts), Atlas and the designers (talking head, explainer, podcast, avatar, clone, re-skit, corporate carousel and lifestyle story carousel), Hermes (uploads), Iris (reports) and Quill (brand briefs). This SOP shows how to ask so a request runs the first time.
 
 ## 1. Where to ask
 
@@ -14,7 +14,7 @@ Vega is Super Vega's operations manager. She takes the request as the task brief
 |---|---|---|
 | **Brand or product** | Cookiy Earn Text Agent, IASO, PartGenie | Vega asks |
 | **How many** | 5 videos | Vega asks |
-| **Video style** | talking head, explainer, podcast, avatar image, clone, re-skit (see 2b), corporate carousel (see 2c) | Vega uses the brand's usual style, or asks |
+| **Video style** | talking head, explainer, podcast, avatar image, clone, re-skit (see 2b), corporate carousel or lifestyle story carousel (see 2c) | Vega uses the brand's usual style, or asks |
 | **Organic or ad** | organic | The brand's usual; otherwise Vega asks |
 | **Duration** (optional) | 30 seconds | The writing style's default length |
 | **Language** (optional) | Thai only | IASO rotates its 5 languages automatically |
@@ -59,12 +59,19 @@ Two agents work from a video you send. Say which one you want, or describe it an
 
 ## 2c. Carousels
 
-The 🖼️ **Corporate Carousel Designer** makes 4–7 slide corporate carousels (1080×1350, 4:5, for Instagram and LinkedIn) in the brand's own look, plus ready-to-use captions. "Carousels" means corporate carousels for now; more carousel kinds (e.g. lifestyle) will follow.
+The 🖼️ **Corporate Carousel Designer** makes 4–7 slide corporate carousels (1080×1350, 4:5, for Instagram and LinkedIn) in the brand's own look, plus ready-to-use captions. "Carousels" means corporate carousels unless you ask for the lifestyle kind (below).
 
 - **Say:** `Make 3 carousels for PartGenie`
 - **Required:** the brand (or product), which must be on Vega's client list with its website, and how many.
 - **Optional:** a topic or angle you want. Otherwise Echo writes a fresh angle for each carousel, and a brand's carousel angles don't repeat within its last 75 carousels.
 - **You get:** the contact sheet, every slide, and the captions (short-form and LinkedIn).
+
+**Lifestyle story carousels** (new, 2026-11-03). The 📸 **Lifestyle Story Carousel Designer** makes photoreal story carousels like Ryan's: one person and one place across 5–10 slides, real-looking phone photos, the product's real screens at the end, and the captions.
+- **Say:** `Make 3 lifestyle story carousels for PartGenie` (or "photo carousels", "people carousels", "story carousels like Ryan's"). Without one of these words, Vega makes corporate carousels.
+- **Required:** the brand (or product), on Vega's client list with its website, and how many.
+- **Optional:** a topic or pain you want, `story` (9:16) or `feed` (4:5, the default), a slide count. Otherwise the designer picks a fresh idea for each carousel from the brand's idea bank and a 100-idea list, and never repeats one for that brand.
+- **Good to know:** no approval step and no Echo step. About 80–100 credits per carousel; a carousel that would cost more than 150 credits stops and Vega asks you first.
+- **You get:** the same as above (contact sheet, every slide, captions), plus any facts a person should check before posting.
 
 ## 3. What happens next
 

@@ -6,14 +6,14 @@ Status: INSTALLED (2026-10-24), tests on Test still to do. No system backup was 
 
 | | **Cloner** | **Re-skit** |
 |---|---|---|
-| What it does | Rebuilds a reference video's format for a brand: new lines, a new persona, new shots (Soul → GPT Image 2 plates → Wan/Omni/Kling clips, voice, music) in the house stage editable | Keeps the source's real motion, timing and voices, recasts the person (Wan person-replacement), and changes the meaning with cuts, overlays and rebuilt product screens |
+| What it does | Rebuilds a reference video's format for a brand: new lines, a new persona, new shots (Soul → GPT Image 2 plates → Wan/Omni/Kling clips, voice, music) in the house stage editable | Keeps the source's real motion and timing, recasts the person (Wan person-replacement), and changes the meaning with cuts, overlays and rebuilt product screens, or re-voices it: the persona says new brand lines over the source's own motion (Wan 3.0 with sound, from one full script), or speaks on a source that had no talking (updated 2026-11-05) |
 | Typical source | ads, explainers, talking heads, product demos | trending skits, reactions, memes |
 | Script | writes its own lines (scriptless for Echo) | rewrites through keep/cut/rewrite of the source's dialogue (scriptless) |
 | Cost | ~95–130 credits for 15 s (first runs up to ~420) | ~140 credits per video, ~280 at 1080p |
 
 **Routing rule for Vega:**
-- **Re-skit** when the request keeps the source's own performance or audio ("re-skit", "same skit with our product", trends, reactions).
-- **Cloner** when the format is rebuilt with new lines or a new voice ("clone this ad / video for Cookiy").
+- **Re-skit** when the request keeps the source's own performance: its motion and timing, with its own voices or with new lines said over the same motion ("re-skit", "same skit with our product", "make her say…", trends, reactions).
+- **Cloner** when the format is rebuilt with new shots ("clone this ad / video for Cookiy").
 - If the wording doesn't make it clear, Vega asks the requester one question.
 
 ## 1. How Atlas assigns them
@@ -25,11 +25,7 @@ Status: INSTALLED (2026-10-24), tests on Test still to do. No system backup was 
   - **Design → READY:** source analysis, plan, persona and plates, all generations, the edit built.
   - **Render → DONE:** final render, checks, the share copy, then the `DONE <mp4> <credits> <minutes>` line (an `.mp4` in `renders/`, so Lark, Hermes and Iris work unchanged).
 - **Concurrency:** no cap of their own; they run in the usual 6 designing / 2 rendering (the owner's rule, 2026-10-24, replacing a proposed cap of 2).
-- **Approval gate (Re-skit's "nothing paid before go"):**
-  - The designer stops at the plan with `QUESTION plan ready: <story in one line>, <n> jobs, ~<credits> credits`.
-  - Vega posts it in the requester's thread, and the requester says go.
-  - Plans over **400 credits** also need the owner's OK.
-  - Atlas's existing QUESTION → ANSWER loop handles this.
+- **No approval gate** (the owner's decision 5, §10a; removed from this plan on 2026-11-05). Neither designer stops at the plan or waits for a "go": both run straight through from the request to READY. Spend stays visible through the credits in the DONE line, the metadata and the report. `QUESTION` is only for true blockers (no source, no Task ID or Brand number, a failed Spira sign-in, self-contradicting instructions).
 
 ## 2. How a request reaches Atlas
 
@@ -97,9 +93,9 @@ Also needed: the ElevenLabs model IDs, and the missing voice-match tool (`match.
 ## 6. Vega's roster, Lark and the docs
 
 - **Vega's skill:** add both agents to the roster table and reply style (🧬 **Cloner**, 🎭 **Re-skit**), plus the routing rule and the request format.
-- **Lark notes:** how the team asks, and how the plan approval appears in the thread.
+- **Lark notes:** how the team asks. (No plan approval appears in the thread: there is no approval gate.)
 - **One roster file**, `Agents/VegaOM/docs/vega-roster.json`, listing every agent (name, emoji, role, styles, status). The report, the workflow schematic and the SOP all read it, so a new agent is added in one place.
-- **Updated:** the workflow schematic (both agents, the Source video column, the approval gate) and the SOP Lark doc (two new request types).
+- **Updated:** the workflow schematic (both agents, the Source video column; no approval gate) and the SOP Lark doc (two new request types).
 
 ## 7. The report (Iris)
 
@@ -110,7 +106,7 @@ Also needed: the ElevenLabs model IDs, and the missing voice-match tool (`match.
 ## 8. Schema updates
 
 - **Batch sheet:** the new `Source video` column. Old sheets stay valid.
-- **Designer metadata JSON:** `source`, `method`, `jobs[]` with credits, and `approval` (who said go, when).
+- **Designer metadata JSON:** `source`, `method`, `jobs[]` with credits (no `approval` field: there is no approval gate), and for a re-voiced re-skit `dialogue` (the full script and the voice sentences).
 - **New:** `vega-roster.json`.
 - **Updated:** the workflow schematic and the dev notes.
 
@@ -143,7 +139,7 @@ Also needed: the ElevenLabs model IDs, and the missing voice-match tool (`match.
 2. **Pace rule:** the shared 4.9–5.2 with the 1 s pad (recommended), or the Cloner's 4.0?
 3. **Vocals in music:** allowed in clones and re-skits only when the requester asks?
 4. **Rights:** downloading third-party social videos, and keeping the source creator's audio or footage, internal tests only, or also client uploads? Naming competitors: never by default?
-5. **Plan approval:** the requester approves, with the owner's OK needed above 400 credits?
+5. **Plan approval:** the requester approves, with the owner's OK needed above 400 credits? (Answered: no approval gates, §10a.5.)
 6. **Personas:** the Avatar Designer is the one source of personas. Should it also make Re-skit's 7-panel character sheets?
 7. **Brand material for Re-skit** (UI screenshots, screen recordings): who supplies it?
 8. **Lessons files:** may the designers propose additions, with Vega writing them after your OK?

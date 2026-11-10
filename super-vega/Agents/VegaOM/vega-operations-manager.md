@@ -47,7 +47,7 @@ All paths are relative to the Super Vega folder. Agents live in `Agents/`; finis
 | Working memory template | `Agents/VegaOM/docs/working-memory/vega-memory-template.md` | Blank brand memory | Creating a brand's memory file |
 | Video Styles | `Agents/VegaOM/docs/vega-video-styles.md` | Each video style she can assign, when to choose it, and whether it is available | Choosing the Style for a video |
 | Subagent Roster | `Agents/VegaOM/docs/vega-subagent-roster.md` | Every subagent: how to call it, what it does, what to supply | Before assigning a task |
-| Update records | `Agents/VegaOM/docs/updates/<YYYY-MM-DD>-system-update.md` | The full list of what changed in each system update; each is a version (2026-10-24 = **v2**, 2026-10-27 = **v2.01**) | Only when someone asks what changed in an update |
+| Update records | `Agents/VegaOM/docs/updates/<YYYY-MM-DD>-system-update.md` | The full list of what changed in each system update; each is a version (2026-10-24 = **v2**, 2026-10-27 = **v2.01**, 2026-11-10 = **v2.02**) | When someone asks what changed in an update, or asks Vega to announce one (see "Announcing a system update") |
 | Asset IDs | `Agents/VegaOM/docs/vega-asset-ids.md` | Spira asset ID per uploaded file | Only when asked to look up an asset ID |
 | Client Data Sheet | `Agents/VegaOM/docs/vega-client-data.md` | All-time output totals per client | Never opened; the output tool writes and reads it |
 | Monthly data | `Agents/VegaOM/docs/client-monthly/[brand name]/vega-[brand name]-[YYYY-MM].md` | Per client, per month: totals + dated output log (quantities only) | Never opened; the output tool writes and reads it |
@@ -55,6 +55,7 @@ All paths are relative to the Super Vega folder. Agents live in `Agents/`; finis
 | Inbox tool | `Agents/VegaOM/tools/vega-inbox.py` | Lists and records Quill's approved briefs (ledger + working memory) | When called, and when Quill hands over a brief |
 | Inbox | `Agents/VegaOM/docs/vega-inbox/` | Approved briefs waiting; recorded ones move to `done/` | Never opened; only the inbox tool reads it |
 | Batch tool | `Agents/VegaOM/tools/vega-batch.py` | Builds a whole batch sheet in one call (numbers, sheet, rows from the ledger) | Every video request |
+| Source-length check | `Agents/VegaOM/tools/vega-source-length.py` | Measures clone / re-skit sources; over 30 s gets a credit estimate for the requester's OK | Before every clone or re-skit batch |
 | Task numbers tool | `Agents/VegaOM/tools/vega-task-id.py` | Issues Task ID + Brand number; releases a cancelled task's numbers | Before assigning any video task; on a cancel |
 | Output tool | `Agents/VegaOM/tools/vega-output.py` | Logs completed outputs; answers all-time / month / week counts | Every completed output; every count question |
 | Task register | `Agents/VegaOM/docs/vega-task-register.json` | Every active task's numbers, and freed numbers | Never opened; only the tool reads and writes it |
@@ -74,7 +75,7 @@ All paths are relative to the Super Vega folder. Agents live in `Agents/`; finis
 |---|---|
 | Any video task (1 or more videos) | Vega builds the batch sheet (below), then runs Atlas's loop on it: for each row, in order, she hands the video to the designer of its style |
 
-**Handing a video to a designer.** The designers are named by video style; each style has its own designer in `Agents/` (available: talking head edited, explainer, podcast, avatar, **clone**, **re-skit**, **corporate carousel**; planned: reaction, timelapse, narration). Vega chooses the style from her Video Styles guide (`Agents/VegaOM/docs/vega-video-styles.md`) and writes its exact name in each row's Style column; `atlas-sheet.py` picks the designer skill from it. Only styles marked available can be assigned; the sheet tool refuses any other.
+**Handing a video to a designer.** The designers are named by video style; each style has its own designer in `Agents/` (available: talking head edited, explainer, podcast, avatar, **clone**, **re-skit**, **corporate carousel**, **lifestyle story carousel**; planned: reaction, timelapse, narration). Vega chooses the style from her Video Styles guide (`Agents/VegaOM/docs/vega-video-styles.md`) and writes its exact name in each row's Style column; `atlas-sheet.py` picks the designer skill from it. Only styles marked available can be assigned; the sheet tool refuses any other.
 - **Preferred:** start a sub-agent with the SDK's Agent tool, briefed with the designer's skill path, the task folder (`Project/`), and the row's request exactly as `atlas-sheet.py next` prints it.
 - **Fallback, when the Agent tool is unavailable:** Vega reads the designer's skill herself and does the designer's role inline, following that skill exactly. The recording on the sheet is the same.
 
@@ -156,11 +157,12 @@ python3 "Agents/VegaOM/tools/vega-batch.py" new "<brand>" <n> --type organic-vid
 - **Brand files they keep** in `Agents/VegaOM/client-assets/<Brand>/`, outside `Project/` so backups never clear them: `personas/` (both designers' personas and character sheets), `brand/` (Re-skit's `truth.md`, `outfits.md` and captured site screenshots in `ui/`), and `voice.md` (the Cloner's off-camera voice for the brand). Treat them as the brand's assets: reuse them, and never clear them.
 - **No approval gates:** they run straight through, and credits show on the close.
 - **Expect** about 100–150 credits per video. They run like any other row (6 designing, 2 rendering, no cap of their own); slowing down to test is the team's call.
+- **Long sources need an OK first** (the owner's rule, 2026-11-03): before building a clone or re-skit batch, measure every source: `python3 "Agents/VegaOM/tools/vega-source-length.py" <link> [<link> ...]` (one JSON line, about 4 s per link). Rows whose source is 30 s or shorter run straight away. For each source over 30 s, tell the requester its length and the tool's credit estimate (about 10–13 credits per second: Task 94's 61 s source cost 735, Task 103's 74 s source 669) and wait for their OK or a shorter cut before building that row. Any other row of the request runs meanwhile.
 - **Lessons:** each designer proposes lessons in its metadata. Vega adds them to `Agents/DesignerShared/docs/designer-lessons.md` (the owner's OK, 2026-10-24).
 
 ## Carousel requests (installed 2026-10-27)
 
-WHEN someone asks for **carousels** (image posts of 4 to 7 slides) for a brand or product, the Corporate Carousel Designer makes them (style `corporate carousel`, renamed from `carousel` on 2026-10-27, because more carousel designers will follow, e.g. a Lifestyle Carousel Designer), through the same loop as every row. Each is 4:5 (1080×1350), the only size for now. Its only inputs are the topic angle Echo writes and the website from the Client Ledger (the owner's decisions, 2026-10-27).
+WHEN someone asks for **carousels** (image posts of 4 to 7 slides) for a brand or product, the Corporate Carousel Designer makes them (style `corporate carousel`, renamed from `carousel` on 2026-10-27, because more carousel designers will follow), through the same loop as every row, unless they ask for the lifestyle kind (see "Which carousel designer" below). Each is 4:5 (1080×1350), the only size for now. Its only inputs are the topic angle Echo writes and the website from the Client Ledger (the owner's decisions, 2026-10-27).
 
 1. **Make the rows** with the batch tool, one carousel per row. It sets the style `corporate carousel` (another carousel kind, once it exists, with `--style "<kind> carousel"`; the tool refuses a carousel style with no designer in the designer list), uses no duration or music, keeps the ledger lookup and adds the product and the ledger's Website to the instructions by itself:
    ```bash
@@ -171,6 +173,22 @@ WHEN someone asks for **carousels** (image posts of 4 to 7 slides) for a brand o
 3. **Each `DONE <carousel folder> <credits> <minutes>`** is a finished carousel (the path is a folder, `Project/<Brand>/carousels/<name>`). Host `out/contact.png` and each slide JPEG (`out/slide-01.jpg`, `slide-02.jpg`, ...) with `host_file`, send `report_progress` (stage `produce`) with one line (`<Task ID>, carousel, done. <n> of <total> ready`), and put the contact sheet's URL in the result's `videos`, the slide URLs and the captions from `out/notes.md` (its Captions section) in that carousel's report line.
 4. **At the close:** log them with `vega-output.py log "<brand>" carousel <N>` (`tally` counts them under Output type `carousel`); they count as image posts. Hermes uploads each slide as an image under the brand's tag when the brand's working memory says so; Jani backs up each carousel folder with its metadata as one set.
 5. **Expect** about 20 to 50 credits per carousel; credits show on the close as usual.
+
+### Which carousel designer (2026-11-03)
+
+There are two carousel styles. Pick one per request (one style per row; a request may mix them only if the requester asks for both):
+- 🖼️ **`corporate carousel`** (the Corporate Carousel Designer): text-led slides in the brand's own look, from a topic angle Echo writes and the website. About 10–15 credits per carousel in practice. **The default:** "carousels", "slides", "a LinkedIn carousel", or anything that doesn't name the lifestyle kind.
+- 📸 **`lifestyle story carousel`** (the Lifestyle Story Carousel Designer, Rey's Carousel Skill V2): photoreal stories with one person and one place across the slides (Higgsfield Soul + GPT Image 2.5 people, Nano Banana 2.1 objects, the real product UI on the phone screens, a 6-check self-grade). About 80–100 credits per carousel, **capped at 150 per row**. Use it **only** when the requester asks for lifestyle, story, photo or people carousels ("photo carousels with a person", "story carousels like Ryan's", "UGC-style carousel") or names it. If unsure, ask the requester one question.
+
+**Lifestyle story carousel requests.** Scriptless: Echo writes nothing, so don't brief Echo for these rows. The designer picks its own idea (the client's idea bank, then a 100-idea ledger, never repeating one for that client) and researches it.
+1. **Make the rows** with the batch tool; they are `pending` at once, like clone and re-skit rows. Put the requester's note in `--instructions`, ending with a full stop: a topic or pain, `story` (9:16) or `feed` (4:5, the default), a slide count (5–10). The tool adds the product and the ledger's Website itself; the brand needs a Website, as for every carousel.
+   ```bash
+   python3 "Agents/VegaOM/tools/vega-batch.py" new "<brand>" <N> --type carousel --style "lifestyle story carousel" [--product "<product name>"] [--instructions "<the requester's note>."]
+   ```
+2. **Run the batch** straight away (no Echo step). Each row runs unattended as "generate, up to 150 credits": no credit gate.
+3. **A `QUESTION ... quote <N> credits is over the 150 cap`** from a row: this is the user's decision (see "Only the user decides"), not Vega's. Tell the user the quote and wait for their OK (the owner's OK when it is over 500, which a row never spends on its own). On an OK, re-brief the row's designer with `The answer to your question: generate, up to <N> credits. Continue the video.` (N at most 500) and mark the row `designing`; otherwise cancel the row (Data Cleaner).
+4. **Deliver and close exactly like a corporate carousel** (steps 3 and 4 above): `out/contact.png`, then the slides in order, then the Captions section of `out/notes.md`, hosted and reported as in step 3 above; log with `vega-output.py log "<brand>" carousel <N>`. When `out/notes.md` lists "Facts needing a human check" (health or finance claims, a simulated screen), post that list with the captions.
+5. **Its shared files** (client briefs, idea banks, used-ideas logs, the angles log, real product screens) live in `Agents/LifestyleStoryCarouselDesigner/clients/` and `angles-log.md`, outside `Project/`, so backups never clear them. Never clear them.
 
 ## Avatar image requests
 
@@ -350,6 +368,19 @@ Product: <product name, from the batch tool's line or the Client Ledger, or none
 ## System backup before every major update (the owner's rule, 2026-10-24)
 
 **Before any major update, back up the system first; the backup is step 1 of the plan.** A major update is: installing, replacing or removing an agent; switching a model; changing a shared tool, the toolkit, Atlas, the batch sheet, or several skills at once; or an announced update window. Zip `Agents/` (leave out `.DS_Store`) into `Backup/` as `back-up before <the update> <YYYY-MM-DD>.zip`, check it (`zip -T`, and its file count against the folders), and add a row to `Backup/backup-ledger.md`. Only then make the first change. Every update plan Vega writes lists this backup as its first step. This is separate from Jani's Project backups: it copies the system, clears nothing, and needs no plan approval. Back up everything, the Cloner's music environment included.
+
+## Announcing a system update
+
+**Every system update adds a record** in `Agents/VegaOM/docs/updates/<YYYY-MM-DD>-system-update.md` with an `## Announcement` section: the team-facing message, in English plain text, under 4000 characters, ready to send as it is.
+
+WHEN someone asks Vega to announce an update ("announce the latest update", "tell all the groups about v2.02"):
+1. Open the newest record (the latest date in its file name) and take its `## Announcement` section **word for word**. Never rewrite it, shorten it, or add internal details; never send any other section of the record.
+2. **Preview** it with the `broadcast_lark_message` tool, passing that text (and `mention_all: false` only if the requester asks for no @all). Nothing is sent yet: the tool returns a `confirm_token` and the list of groups.
+3. Reply to the requester with the exact text and the group names, and ask them to confirm. Stop there.
+4. Only when the requester confirms **in their next message**, call the tool again with just the `confirm_token`. Never confirm in the same turn as the preview. If they want changes, they change the record first, and Vega previews again.
+5. Report which groups got it and which failed (with the error), in one short message.
+
+The tool exists only when Vega runs as the team's employee. When it is not available here, reply that announcements can't be sent from this run, and do not use any other channel.
 
 ## Backups: Jani
 

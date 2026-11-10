@@ -9,7 +9,8 @@ The sheet is a Markdown table (.md); an .xlsx sheet also works.
       An avatar row's request carries only the avatar description; a carousel row's (any style
       ending in "carousel", e.g. corporate carousel; Output type carousel) only the brand, its
       numbers, the instructions (with the product and the brand website) and Echo's topic angle
-      from the Script column. An old style name (e.g. "carousel") reads as its current one
+      from the Script column; a scriptless carousel style's (lifestyle story carousel, 2026-11-03)
+      the same without an angle (its designer picks its own idea). An old style name (e.g. "carousel") reads as its current one
       (the _aliases in atlas-designers.json).
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> list <status>
       Prints the Task IDs whose Status is <status>, one per line, in sheet order.
@@ -204,6 +205,14 @@ def build_request(r):
         skill = inside_skill(designer_for(r), "Designer skill", r['Task ID'])
         lines = [f"Task ID: {r['Task ID']}", f"Read this skill first: {skill}"]
         if r.get("Brand"): lines.append(f"Brand: {r['Brand']}")
+        if not needs_script(r):
+            # A scriptless carousel style (lifestyle story carousel, 2026-11-03): no topic angle from Echo;
+            # the designer picks and researches its own idea. A story (9:16) only when the instructions ask.
+            lines += [f"Brand number: {r['Brand number']}",
+                      "This is a carousel task: slides as JPEGs, 4:5 (1080x1350) unless the instructions ask for a 9:16 story, no video and no music."]
+            if r.get("Instructions"): lines.append(f"These are the instructions: {r['Instructions']}")
+            lines.append("This is a scriptless carousel: there is no topic angle. Pick and research your own idea as your skill says, and work from the instructions above.")
+            return "\n".join(lines)
         lines += [f"Brand number: {r['Brand number']}",
                   "This is a carousel task: 4:5 slides (1080x1350 JPEGs), no video and no music."]
         if r.get("Instructions"): lines.append(f"These are the instructions: {r['Instructions']}")

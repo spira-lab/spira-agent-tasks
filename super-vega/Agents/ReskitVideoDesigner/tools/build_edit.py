@@ -24,19 +24,33 @@ edit.json (paths relative to the materials folder):
               file defaults to gen/out/<id>.mp4
   "segments": [{"clip": "A", "from": 0.0, "to": 1.75, "zoom": false},
                {"insert": "assets/broll.mp4", "dur": 2.5}]     an insert is a video or a still
+              Times are on the source's clock. A segment of a clip generated longer than its
+              reference (a longer delivery) may run past the source's end: "to" up to the clip's
+              start + the clip's length. Until that clip lands, the draft holds the source's
+              last frame there.
   "end_hold": 0          seconds to hold the last frame (only when the last shot is too short to read)
   "overlays": [{"png": "assets/pop_1.png", "in": "2@4.58", "out": "3@end", "kind": "pop"}]
               times: "<seg>@<source time>", "<seg>@end", "<seg>@+<s from the segment's start>",
               or "t:<timeline seconds>". kind: full (full-frame PNG at 0,0) | pop (sticker centred
               at pop_cy with a three-frame pop-in, 70/95/106/100 %)
   "pop_cy":   1290       keep text above y 1536 and left of x 940 (the safe area)
-  "audio":    "source" (cut with the segments, pitch-adjusted) | "music" | "none"
+  "audio":    "source" (the source's own voices, cut with the segments, pitch-adjusted)
+              | "clips" (a re-voiced video: each segment's sound is its own generated clip's audio,
+                cut at the same points as the picture; a clip still rendering uses the
+                pitch-adjusted source audio as a stand-in in the draft)
+              | "music" | "none"
   "pitch_semitones": 0.6 source audio is ALWAYS pitch-adjusted (owner's rule): 0.4 to 1.0 up,
               or the same range down; length and lip sync hold (resample + tempo correction)
-  "music":    {"file": "music/take_a.mp3", "start": 0} or null. With audio "music" it is the
-              whole soundtrack; with audio "source" it is a bed music_under_lu under the source.
+  "music":    {"file": "music/take_a.mp3", "start": 0, "pitch": false} or null. With audio "music"
+              it is the whole soundtrack; with audio "source" or "clips" it is a bed music_under_lu
+              under the voices. "pitch": true shifts the bed by pitch_semitones: required when the
+              bed is the source's own sound (kept source audio is always pitch-adjusted), e.g.
+              {"file": "source/source.mp4", "start": 0, "pitch": true} for a source with no voices.
   "music_under_lu": 20
-  "roomtone": [9.30, 2.10]   a quiet stretch of the source (start, length) for inserts and holds
+  "roomtone": [9.30, 2.10]   a truly quiet stretch of the source (start, length) for inserts and holds:
+              at least 10 dB below the source and 0.5 s longer than the longest insert or hold, so it
+              never loops (checked; the build stops otherwise). When the source has music or voices
+              everywhere, set null and carry inserts and the end card on one continuous music bed.
   "zoom":     "crop=982:1745:49:118,scale=1080:1920"   the punch-in used by "zoom": true
   "cover":    3.2        the clearest poster moment on the timeline (final only; never 0)
 """
@@ -88,19 +102,24 @@ def main():
     src = P(E.get("source") or "source/source.mp4")
     if not src.exists(): sys.exit(f"no source at {src}")
     has_src_audio = any(s.get("codec_type") == "audio" for s in ffprobe_json(src).get("streams", []))
+    src_dur = duration(src)
     mask = P(E.get("mask")); caption = P(E.get("caption"))
     for f in (mask, caption):
         if f and not f.exists(): sys.exit(f"missing {f}")
     segs = E.get("segments") or []
     if not segs: sys.exit("the build has no segments yet")
     audio = E.get("audio", "source")
+    if audio not in ("source", "clips", "music", "none"): sys.exit(f'audio must be "source", "clips", "music" or "none", not {audio!r}')
     semis = float(E.get("pitch_semitones") or 0)
-    if audio == "source":
-        if not has_src_audio: sys.exit('audio is "source" but the source has no audio')
+    music = E.get("music") or None
+    bed_from_source = bool(music) and P(music["file"]).resolve() == src.resolve()
+    if audio == "source" and not has_src_audio: sys.exit('audio is "source" but the source has no audio')
+    if bed_from_source and not music.get("pitch"):
+        sys.exit("the music bed is the source's own sound: set \"pitch\": true on it (kept source audio is always pitch-adjusted)")
+    if audio in ("source", "clips") or (music and music.get("pitch")):
         if not 0.4 <= abs(semis) <= 1.0:
             sys.exit("kept source audio is always pitch-adjusted (the owner's rule): pitch_semitones must be 0.4 to 1.0 "
                      "(or -0.4 to -1.0); +0.6 is the approved value")
-    music = E.get("music") or None
     if audio == "music" and not music: sys.exit('audio is "music" but no music is set')
     if music and not P(music["file"]).exists(): sys.exit(f"missing music {P(music['file'])}")
     rt = E.get("roomtone")
@@ -152,6 +171,8 @@ def main():
             else:
                 standin.append(cid)
                 chain = f"{g.use('0:v')}trim={f3(st)}:{f3(en)},setpts=PTS-STARTPTS" + (f",removelogo=filename='{mask}'" if mask else "") + f",fps={FPS},{FIT}"
+                if en > src_dur:   # a segment that runs past the source's end on a longer clip: hold the last frame until it lands
+                    chain += f",tpad=stop_mode=clone:stop_duration={f3(en - max(st, src_dur) + 0.1)},trim=duration={f3(d)}"
             if s.get("zoom"): chain += "," + (E.get("zoom") or "crop=982:1745:49:118,scale=1080:1920")
             if hold > 0: chain += f",tpad=stop_mode=clone:stop_duration={f3(hold)}"
             if cap_i is not None:
@@ -162,6 +183,10 @@ def main():
         seg_end.append(t); vlabels.append(f"[v{n}]")
     total = t
     g.add("".join(vlabels) + f"concat=n={nseg}:v=1:a=0[vc]")
+    end_hold = float(E.get("end_hold") or 0)
+    fill_windows = [(seg_t[k], seg_end[k], "insert") for k, s in enumerate(segs) if "insert" in s]
+    if end_hold > 0 and "insert" not in segs[-1]: fill_windows.append((seg_end[-1] - end_hold, seg_end[-1], "end hold"))
+    if audio == "source": check_roomtone(src, rt, [w[1] - w[0] for w in fill_windows])
 
     def at(spec):
         spec = str(spec)
@@ -195,11 +220,12 @@ def main():
     # ---------------------------------------------------------------- sound (mixed on its own)
     tmp = Path(tempfile.mkdtemp(prefix="reskit-build-"))
     try:
-        mix = tmp / "mix.wav"; build_audio(E, P, src, segs, seg_end, total, audio, semis, music, rt, tmp, mix, notes)
+        mix = tmp / "mix.wav"; voiced = build_audio(E, P, src, segs, seg_end, total, audio, semis, music, rt, tmp, mix, notes, problems)
         i_lufs, tp = loudness(mix)
         if i_lufs is None or i_lufs == float("-inf"): problems.append("the mixed audio is silent")
         elif abs(i_lufs - TARGET_LUFS) > 1.0: problems.append(f"mix loudness {i_lufs} LUFS, not about {TARGET_LUFS}")
         if tp is not None and tp > TP_MAX + 0.3: problems.append(f"mix true peak {tp} dBTP")
+        problems += check_fills(mix, fill_windows, (float(rt[1]) - 0.3) if rt and audio == "source" else None)
 
         # ------------------------------------------------------------ picture render + attach
         pic = tmp / "picture.mp4"
@@ -218,7 +244,7 @@ def main():
             shutil.move(str(joined), str(out))
             result = {"ok": not problems, "mode": "draft", "out": str(out), "seconds": round(duration(out), 2),
                       "lufs": i_lufs, "true_peak": tp, "generated_clips": used, "stand_ins": sorted(set(standin)),
-                      "overlays": times, "problems": problems, "notes": notes}
+                      "voice_from_clips": voiced, "overlays": times, "problems": problems, "notes": notes}
         else:
             if standin: problems.append(f"source stand-ins still in the cut for clip(s) {', '.join(sorted(set(standin)))}")
             cover = E.get("cover")
@@ -245,7 +271,7 @@ def main():
             result = {"ok": not problems, "mode": "final", "out": str(out), "share": str(share),
                       "share_mb": round(share.stat().st_size / 1e6, 1), "seconds": round(duration(out), 2),
                       "lufs": fi, "true_peak": ftp, "cover_at": float(cover), "generated_clips": used,
-                      "overlays": times, "problems": problems, "notes": notes}
+                      "voice_from_clips": voiced, "overlays": times, "problems": problems, "notes": notes}
             update_meta(v, lambda d: d.setdefault("renders", []).append({
                 "file": str(out), "rendered": now(), "status": "current", "fps": FPS, "duration_ms": int(round(duration(out) * 1000)),
                 "lufs": fi, "true_peak": ftp, "share": str(share), "ok": not problems, "problems": problems}) or d.update({"stage": "rendered"}))
@@ -259,6 +285,74 @@ def run(cmd):
     r = subprocess.run([str(c) for c in cmd], capture_output=True, text=True)
     if r.returncode != 0: sys.exit(f"ffmpeg failed: {r.stderr.strip()[-1200:]}")
     return r
+
+
+def mean_db(src, start=None, length=None):
+    """mean_volume (dB) of the source audio, or of one stretch of it."""
+    cut = ["-ss", f3(start), "-t", f3(length)] if start is not None else []
+    r = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", *cut, "-i", str(src), "-vn", "-af", "volumedetect", "-f", "null", "-"],
+                       capture_output=True, text=True)
+    m = re.search(r"mean_volume:\s*(-?[0-9.]+|-inf) dB", r.stderr)
+    return float(m.group(1)) if m and m.group(1) != "-inf" else float("-inf")
+
+
+def check_roomtone(src, rt, fills):
+    """A room-tone slice may only be truly quiet and long enough never to repeat (the owner's rule, 2026-10-29:
+    a looped slice with the source's music or voices in it sounds like a skipping CD on the end card)."""
+    if not rt or not fills: return
+    rs, rl = float(rt[0]), float(rt[1])
+    need = max(fills) + 0.5
+    if rl < need:
+        sys.exit(f"roomtone {rl:.2f} s would loop under a {max(fills):.2f} s insert or hold (needs at least {need:.2f} s): "
+                 "pick a longer truly quiet stretch, or set roomtone to null and carry inserts and the end card on one "
+                 "continuous music bed (music + music_under_lu)")
+    slice_db, src_db = mean_db(src, rs, rl), mean_db(src)
+    if slice_db != float("-inf") and slice_db > src_db - 10:
+        sys.exit(f"roomtone {rs:.2f}+{rl:.2f} s is not quiet ({slice_db:.1f} dB vs the source's {src_db:.1f} dB; it must be "
+                 "at least 10 dB below): it holds music or voices. Set roomtone to null and carry inserts and the end card "
+                 "on one continuous music bed (music + music_under_lu)")
+
+
+def check_fills(mix, windows, period=None):
+    """Problems in the audio under inserts and holds: a dropout at a cut, and, when room tone fills them, a loop
+    (the slice repeating every `period` s). A music bed is never loop-checked: its own beat would read as a loop."""
+    sr = 8000
+    r = subprocess.run(["ffmpeg", "-v", "error", "-i", str(mix), "-ac", "1", "-ar", str(sr), "-f", "f32le", "-"], capture_output=True)
+    if r.returncode != 0 or not r.stdout: return []
+    import numpy as np
+    x = np.frombuffer(r.stdout, dtype=np.float32); problems = []
+    fr = int(0.02 * sr)
+    def rms_db(a):
+        n = len(a) // fr
+        if n == 0: return np.array([])
+        e = np.sqrt(np.mean(a[:n * fr].reshape(n, fr) ** 2, axis=1)) + 1e-9
+        return 20 * np.log10(e)
+    for t0, t1, what in windows:
+        a = x[int(t0 * sr):int(t1 * sr)]
+        if period and len(a) > int(2.2 * period * sr) and np.sqrt(np.mean(a ** 2)) > 1e-4:   # loop check at the slice period
+            hop = int(0.01 * sr); n = len(a) // hop
+            env = 20 * np.log10(np.sqrt(np.mean(a[:n * hop].reshape(n, hop) ** 2, axis=1)) + 1e-9)
+            env = env - env.mean(); best, lag_best = 0.0, 0
+            p0 = int(round(period * 100))
+            for lag in range(max(5, p0 - 3), min(p0 + 4, n // 2)):
+                u, w = env[:-lag], env[lag:]
+                den = np.sqrt(np.sum(u * u) * np.sum(w * w))
+                c = float(np.sum(u * w) / den) if den > 0 else 0.0
+                if c > best: best, lag_best = c, lag
+            if best > 0.3:
+                problems.append(f"audio loop under the {what} at {t0:.2f}-{t1:.2f}s (repeats every {lag_best / 100:.2f}s, "
+                                f"correlation {best:.2f}): use one continuous music bed there, not looped room tone")
+        for b in (t0, t1):                                                    # dropout check at the cut
+            if b <= 0.2 or b >= len(x) / sr - 0.6: continue           # the video's own start and final fade
+            around = rms_db(x[int((b - 0.4) * sr):int((b + 0.4) * sr)])
+            if len(around) < 10: continue
+            ref = float(np.median(around)); low = around < ref - 6
+            run_, worst = 0, 0
+            for v_ in low:
+                run_ = run_ + 1 if v_ else 0; worst = max(worst, run_)
+            if worst * 0.02 >= 0.08 and ref > -45:
+                problems.append(f"audio dropout at the {what} cut {b:.2f}s ({worst * 20} ms more than 6 dB down)")
+    return problems
 
 
 def roomtone(g, label, d, rt, notes):
@@ -292,9 +386,63 @@ def loudnorm_to(src, dst, target=TARGET_LUFS):
          f"measured_thresh={j['input_thresh']}:offset={j['target_offset']}:linear=true", "-ar", str(SR), dst])
 
 
-def build_audio(E, P, src, segs, seg_end, total, audio, semis, music, rt, tmp, out, notes):
-    main = tmp / "main.wav"
-    if audio == "source":
+def has_audio(f):
+    return any(s.get("codec_type") == "audio" for s in ffprobe_json(f).get("streams", []))
+
+
+def pitch_chain(semis):
+    """Pitch shift that keeps length and lip sync (resample + tempo correction)."""
+    if not semis: return ""
+    r = 2 ** (semis / 12.0)
+    return f",asetrate={SR * r:.2f},aresample={SR},atempo={1 / r:.6f}"
+
+
+def silence(g, label, d):
+    g.add(f"anullsrc=r={SR}:cl=stereo,atrim=0:{f3(d)},asetpts=PTS-STARTPTS[{label}]")
+
+
+def build_audio(E, P, src, segs, seg_end, total, audio, semis, music, rt, tmp, out, notes, problems):
+    """Mix the soundtrack on its own. Returns the clips whose own (generated) voice is in the mix."""
+    main = tmp / "main.wav"; voiced = []
+    if audio == "clips":
+        clips = E.get("clips") or {}
+        files = [src]; cidx = {}
+        for cid, c in clips.items():
+            f = P(c.get("file") or f"gen/out/{cid}.mp4")
+            if not f.exists(): continue
+            if has_audio(f): cidx[cid] = len(files); files.append(f)
+            else: problems.append(f"clip {cid} has no sound: a re-voiced clip is generated with \"sound\": true")
+        src_audio = has_audio(src); standin = set()
+        g = Graph(); labels = []; nseg = len(segs)
+        for n, s in enumerate(segs, 1):
+            if "insert" in s:
+                silence(g, f"a{n}", float(s["dur"])); labels.append(f"[a{n}]"); continue
+            cid = s["clip"]; st, en = float(s["from"]), float(s["to"]); d = en - st
+            hold = float(E.get("end_hold") or 0) if n == nseg else 0.0
+            fade = f"afade=t=in:d={AF},afade=t=out:st={f3(max(0, d - AF))}:d={AF}"
+            if cid in cidx:
+                vs = max(0.0, st - float(clips[cid].get("start", 0)))
+                g.add(f"{g.use(f'{cidx[cid]}:a')}atrim={f3(vs)}:{f3(vs + d)},asetpts=PTS-STARTPTS,aresample={SR},"
+                      f"aformat=channel_layouts=stereo,{fade}[sa{n}]")
+                if cid not in voiced: voiced.append(cid)
+            elif src_audio:
+                standin.add(cid)
+                g.add(f"{g.use('0:a')}atrim={f3(st)}:{f3(en)},asetpts=PTS-STARTPTS,aresample={SR},aformat=channel_layouts=stereo"
+                      f"{pitch_chain(semis)},apad=whole_dur={f3(d)},atrim=0:{f3(d)},{fade}[sa{n}]")
+            else:
+                silence(g, f"sa{n}", d)
+            if hold > 0:
+                silence(g, f"ha{n}", hold); g.add(f"[sa{n}][ha{n}]concat=n=2:v=0:a=1[a{n}]")
+            else:
+                g.add(f"[sa{n}]anull[a{n}]")
+            labels.append(f"[a{n}]")
+        g.add("".join(labels) + f"concat=n={nseg}:v=0:a=1,atrim=0:{f3(total)}[a]")
+        flat = [x for f in files for x in ("-i", f)]
+        run(["ffmpeg", "-v", "error", "-y", *flat, "-filter_complex", g.text(), "-map", "[a]", "-ar", str(SR), "-ac", "2", tmp / "raw.wav"])
+        notes.append(f"voices from the generated clips ({', '.join(voiced) or 'none yet'})")
+        if standin: notes.append(f"source audio (pitch-adjusted) stands in for clip(s) {', '.join(sorted(standin))} until they land")
+        loudnorm_to(tmp / "raw.wav", main)
+    elif audio == "source":
         g = Graph(); labels = []
         nseg = len(segs)
         for n, s in enumerate(segs, 1):
@@ -321,14 +469,14 @@ def build_audio(E, P, src, segs, seg_end, total, audio, semis, music, rt, tmp, o
     else:
         run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", f"anullsrc=r={SR}:cl=stereo", "-t", f3(total), main])
         notes.append("no audio (audio: none)")
-    if audio == "source" and music:
-        bed = tmp / "bed.wav"; bed_of(P, music, total, tmp, bed, fade_out=1.5)
+    if audio in ("source", "clips") and music:
+        bed = tmp / "bed.wav"; bed_of(P, music, total, tmp, bed, fade_out=1.5, semis=semis if music.get("pitch") else 0)
         bi, _ = loudness(bed); under = float(E.get("music_under_lu") or 20)
         gain = 0 if bi is None or bi == float("-inf") else (TARGET_LUFS - under) - bi
         run(["ffmpeg", "-v", "error", "-y", "-i", main, "-i", bed, "-filter_complex",
              f"[1:a]volume={gain:.2f}dB[b];[0:a][b]amix=inputs=2:normalize=0:duration=first,alimiter=limit=0.84:level=0[a]",
              "-map", "[a]", "-ar", str(SR), "-ac", "2", out])
-        notes.append(f"music bed {under} LU under the source")
+        notes.append(f"music bed {under} LU under the {'voices' if audio == 'clips' else 'source'}")
     else:
         shutil.move(str(main), str(out))
     i_lufs, _ = loudness(out)                       # a last small nudge if the mix drifted
@@ -336,15 +484,17 @@ def build_audio(E, P, src, segs, seg_end, total, audio, semis, music, rt, tmp, o
         fixed = tmp / "nudged.wav"
         run(["ffmpeg", "-v", "error", "-y", "-i", out, "-af", f"volume={TARGET_LUFS - i_lufs:.2f}dB,alimiter=limit=0.84:level=0", fixed])
         shutil.move(str(fixed), str(out))
+    return voiced
 
 
-def bed_of(P, music, total, tmp, out, fade_out):
+def bed_of(P, music, total, tmp, out, fade_out, semis=0):
     f = P(music["file"]); ms = float(music.get("start") or 0)
     if duration(f) - ms < total:
         ext = tmp / "extended.wav"
         run(["python3", SHARED / "tools" / "bgm-extend.py", f, ext, f3(ms + total + 1)]); f = ext
-    run(["ffmpeg", "-v", "error", "-y", "-i", f, "-af",
-         f"atrim={f3(ms)}:{f3(ms + total)},asetpts=PTS-STARTPTS,aresample={SR},aformat=channel_layouts=stereo,"
+    run(["ffmpeg", "-v", "error", "-y", "-i", f, "-vn", "-af",
+         f"atrim={f3(ms)}:{f3(ms + total)},asetpts=PTS-STARTPTS,aresample={SR},aformat=channel_layouts=stereo"
+         f"{pitch_chain(semis)},atrim=0:{f3(total)},"
          f"afade=t=in:d=0.3,afade=t=out:st={f3(max(0, total - fade_out))}:d={f3(fade_out)}", out])
 
 

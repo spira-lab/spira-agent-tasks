@@ -1,0 +1,58 @@
+<!doctype html>
+<!--
+SIMULATED UI: PartGenie chat answer for a chip marking, rebuilt at phone width. The answer only runs signed in (login wall tested 2026-11-05), so nobody signed in.
+Sources, element by element (public, signed out, 2026-11-05):
+- All chat words, the 98% and 63%, the two chip cards, tags and descriptions: https://www.partgenie.ai/images/tools/chip-marking-lookup-hero.webp and /images/tools/steps/chip-marking-lookup-step-1.webp, step-2.webp. Copied word for word; truncated descriptions stay truncated.
+- Tabs Overview, Components, Sources: same hero image.
+- Input placeholder and footer line: same hero image, and the placeholder also on https://app.partgenie.ai/app/chat.
+- Logo and hamburger: https://app.partgenie.ai/app/chat mobile, signed out. Login button left out because the chat is signed in.
+- Card chip image: crop of step-2.webp. Uploaded photo thumbnail: the story's own chip photo (slide 02), standing in for the user's upload.
+- Colors: teal from the site's Share button and tag pills; font Geist, read from the app shell's computed style.
+Not from the site: only the narrow single-column layout, because no signed-in mobile screenshot is public.
+-->
+<html><head><meta charset="utf-8"><style>
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=block');
+*{box-sizing:border-box}html,body{margin:0;width:393px;height:852px;background:#fcfcf9;font-family:Geist,sans-serif;color:#475467;overflow:hidden}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 6px}
+.hd img{height:30px}.bg{width:20px;height:14px;border-top:2px solid #344054;border-bottom:2px solid #344054;position:relative}
+.bg:after{content:"";position:absolute;left:0;right:0;top:4px;border-top:2px solid #344054}
+.tabs{display:flex;gap:22px;padding:6px 16px 0;font-size:13.5px;font-weight:500;border-bottom:1px solid #eaecf0;color:#667085}
+.tabs span{padding-bottom:8px}.tabs .on{color:#207883;border-bottom:2px solid #207883;font-weight:600}
+.main{padding:12px 16px 0}
+.thumb{display:block;width:84px;height:84px;object-fit:cover;border-radius:10px;margin:0 0 8px auto}
+.ask{margin-left:auto;width:fit-content;max-width:300px;background:#f2f2ef;border-radius:10px;padding:9px 12px;font-size:14px;line-height:1.35;color:#344054;font-weight:500}
+.done{color:#98a2b3;font-size:13.5px;margin:12px 0 7px}
+.cards{display:flex;gap:9px}
+.card{flex:1;border:1px solid #e4e7ec;border-radius:10px;background:#fff;overflow:hidden}
+.tag{display:inline-block;margin:7px 0 0 7px;background:#d5f0f2;border:1px solid #7cc5cd;color:#135f69;font-size:11.5px;font-weight:500;border-radius:5px;padding:2px 6px}
+.card img{display:block;width:100%;height:92px;object-fit:contain;margin-top:2px}
+.card p{margin:0;border-top:1px solid #eaecf0;padding:7px 9px 8px;font-size:12px;line-height:1.35;color:#475467}
+.t{font-size:14.5px;line-height:1.42;margin:11px 0 0}
+b{color:#344054;font-weight:600}
+.mpn{display:inline-block;border:1px solid #e4e7ec;background:#f9fafb;border-radius:999px;padding:0 8px;font-size:12px;font-weight:600;color:#344054;line-height:20px}
+ul{margin:6px 0 0;padding-left:20px;font-size:14.5px;line-height:1.5}
+.foot{position:absolute;left:0;right:0;top:672px;height:130px;background:linear-gradient(to bottom,rgba(252,252,249,0),#fcfcf9 22%);padding:22px 12px 0}
+.bar{display:flex;align-items:center;gap:8px;border:1px solid #d0d5dd;border-radius:22px;background:#fff;padding:9px 9px;box-shadow:0 1px 4px rgba(16,24,40,.08)}
+.circ{flex:none;width:30px;height:30px;border:1px solid #e4e7ec;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:#667085;line-height:1}
+.go{background:#e4e7ec;border:0;color:#475467;font-size:15px}
+.ph{flex:1;font-size:12.5px;line-height:1.25;color:#667085}
+.dis{font-size:9.5px;line-height:1.25;color:#98a2b3;text-align:center;margin-top:7px}
+</style></head><body>
+<div class="hd"><img src="chip-marking-219/logo.png" alt=""><div class="bg"></div></div>
+<div class="tabs"><span class="on">Overview</span><span>Components</span><span>Sources</span></div>
+<div class="main">
+<img class="thumb" src="chip-marking-219/thumb.png" alt="">
+<div class="ask">Identify this chip marking and find the datasheet</div>
+<div class="done">Complete &rsaquo;</div>
+<div class="cards">
+<div class="card"><span class="tag">STMicroelectronics</span><img src="chip-marking-219/chip-card.png" alt=""><p>The L9616 is a bidirectional transceiver for signal...</p></div>
+<div class="card"><span class="tag">Tudi Semiconductor</span><img src="chip-marking-219/chip-card.png" alt=""><p>L9616-TR-TUDI is a 5 V CAN bus transceiver with 1 Mbau...</p></div>
+</div>
+<p class="t">I read the chip marking <b>L9616</b> from your photo. Context from the image: package <b>SO-8</b>, likely manufacturer <b>ST</b>.</p>
+<p class="t"><b>Best match:</b> <span class="mpn">L9616</span> (<b>98%</b> confidence) STMicroelectronics · SO-8.</p>
+<p class="t">Other possible matches:</p>
+<ul><li><span class="mpn">L9616-TR-TUDI</span> (63%) — Tudi Semiconductor · SOP-8</li></ul>
+</div>
+<div class="foot"><div class="bar"><div class="circ">+</div><div class="ph">Search MPNs, specs &amp; alternatives — or ask any component question...</div><div class="circ go">&uarr;</div></div>
+<div class="dis">PartGenie answers are based on verified data, but please review detailed information for design accuracy</div></div>
+</body></html>

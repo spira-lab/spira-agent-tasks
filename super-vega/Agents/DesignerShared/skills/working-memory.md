@@ -31,6 +31,14 @@ then that add-on applies wherever the entry does.
   product), no riser sound effects are used, and sound effects are kept
   simple and sparse: only a few, on the moments that matter, never on
   every cut or element.
+- WHEN the request is a re-skit (style `re-skit`) and gives no avatar
+  image, every video gets a new persona of its own, made by the Avatar
+  Designer's method: never reuse a persona already in the brand's
+  `personas/` folder (the user, 2026-10-29).
+- WHEN a video has an insert, an end card or a held frame with no sound of its own: never fill it
+  with a looped slice of the source's sound that has music or voices in it (it glitches like a
+  skipping CD). Use a truly quiet stretch long enough never to repeat, or carry it on one
+  continuous music bed with a clean final fade (the owner, 2026-10-29).
 - WHEN asked to translate a video into another language, translate the
   script, generate a new voice-over from the translated script with the
   same voice the original used, apply it to the video, and adjust the
@@ -66,3 +74,6 @@ Captions, subtitles, and any text on screen always use the original.
 | Freelancing | free lancing ("Freelancing" came out as "Freakalancing") |
 | Whitespace | white space ("whitespace" came out as "Clevestide") |
 | Kilohms (10 kΩ) | ten kilo-ohms ("10 kilohms" was transcribed as "ten kelms" with Brian, eleven_multilingual_v2) |
+| FUCASO | Foo-kah-so (with eleven_v3 it came back transcribed as "Fucaso", three syllables; the plain spelling was not tried) |
+| ICANS | eye-cans (with eleven_v3 it came back transcribed as "ICANS") |
+| pemerhati (Malay) | pe-merhati (with eleven_v3 and voice cgSgspJ2msm6clMCkdW9 the plain spelling came out as "pemberhati"; "pe-merhati" came back transcribed as "pemerhati") |

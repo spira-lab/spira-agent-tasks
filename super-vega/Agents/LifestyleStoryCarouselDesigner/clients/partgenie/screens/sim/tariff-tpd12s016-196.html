@@ -1,0 +1,72 @@
+<!doctype html>
+<!--
+  FACTUAL SIMULATION of a signed-in PartGenie chat at phone size. Task 196, 2026-11-04.
+  Why simulated: the Tariff Lookup answer only runs signed in; we never sign in.
+
+  Sources, per element:
+  - Every word and number of the answer (query, "Worked for 4s", TARIFF LOOKUP card, HTS 8542, TPD12S016PWR, Origin CN,
+    Base rate 0%, both SECTION_301 lines, Est. total 62.5%, the estimate disclaimer, "Estimated total import tariff",
+    "Classification Basis", "Tariff Composition", Chapter 99 code, legal source): copied word for word from the client's own
+    public image https://www.partgenie.ai/images/tools/tariff-lookup-hero.webp (the hero of https://www.partgenie.ai/tariff-lookup).
+  - Composer placeholder, "Overview" tab, bookmark and Share: same image.
+  - The phone layout (back arrow, query bubble right, "Worked for" line, composer at the bottom): the phone chat on Ryan's
+    slide references/style/feed-list-things-only-s07.jpg.
+  - Colors and font: BRIEF.md Brand look and the same image.
+  The hero image's account name and email are left out on purpose. Nothing is added that the sources do not show.
+-->
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=393">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=block" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:393px;height:852px;overflow:hidden;background:#fbfbf9;color:#101828;font-family:Inter,Arial,sans-serif}
+header{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid #eaecf0}
+.back{font-size:22px;color:#475467;width:30px}
+.tab{color:#207883;font-weight:600;font-size:14px;border-bottom:2px solid #22808D;height:46px;line-height:46px;padding:0 4px}
+.acts{display:flex;gap:8px;align-items:center}
+.bm{width:26px;height:26px;border:1px solid #d0d5dd;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.share{background:#22808D;color:#fff;font-size:12.5px;font-weight:500;border-radius:6px;padding:5px 10px}
+main{padding:14px 16px 0}
+.q{margin-left:auto;background:#f2f2ee;border-radius:12px;padding:10px 13px;font-size:14.5px;line-height:1.35;width:fit-content;max-width:300px}
+.w{color:#98a2b3;font-size:13.5px;margin:13px 0 11px}
+.card{background:#fff;border:1px solid #e4e7ec;border-radius:12px;padding:13px 14px 12px;position:relative}
+.lbl{font-size:11px;letter-spacing:.06em;color:#667085}
+.hts{position:absolute;right:11px;top:10px;border:1px solid #e4e7ec;border-radius:6px;font-size:11.5px;color:#475467;padding:3px 7px}
+.pn{font-weight:600;font-size:17px;margin:9px 0 8px}
+.r{font-size:13.5px;line-height:1.5;color:#344054;overflow-wrap:anywhere}
+.r b{color:#101828;font-weight:600}
+.big{font-size:17px;margin-top:5px}
+.fine{font-size:10.5px;color:#98a2b3;margin-top:8px;line-height:1.35}
+p{font-size:14.5px;line-height:1.5;margin:13px 0 0;color:#344054}
+p b{color:#101828;font-weight:600}
+h4{font-size:15px;margin:14px 0 0;font-weight:600}
+li{font-size:14.5px;line-height:1.5;color:#344054;margin-top:5px}
+ul{padding-left:18px;margin:6px 0 0}
+li b{color:#101828;font-weight:600}
+code{background:#f2f4f7;border-radius:4px;padding:1px 4px;font-size:12.5px}
+.fade{position:absolute;left:0;right:0;bottom:50px;height:150px;background:linear-gradient(to bottom,rgba(251,251,249,0),#fbfbf9 62%)}
+.comp{position:absolute;left:12px;right:12px;bottom:66px;height:66px;background:#fff;border:1px solid #d0d5dd;border-radius:14px;padding:11px 13px;color:#667085;font-size:13.5px}
+.send{position:absolute;right:9px;bottom:8px;width:24px;height:24px;border-radius:50%;background:#98a2b3;color:#fff;font-size:14px;text-align:center;line-height:24px}
+</style></head><body>
+<header><div class="back">&#8592;</div><div class="tab">Overview</div>
+<div class="acts"><div class="bm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#475467" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg></div><div class="share">Share</div></div></header>
+<main>
+<div class="q">Check tariff for TPD12S016PWR made in China entering the US</div>
+<div class="w">Worked for 4s &#8250;</div>
+<div class="card">
+  <div class="lbl">TARIFF LOOKUP</div><div class="hts">HTS 8542</div>
+  <div class="pn">TPD12S016PWR</div>
+  <div class="r">Origin: <b>CN</b></div>
+  <div class="r">Base rate: <b>0%</b></div>
+  <div class="r">SECTION_301_CHINA_SEMICONDUCTOR_2024: <b>50%</b></div>
+  <div class="r">SECTION_301_FORCED_LABOR_2026: <b>12.5%</b></div>
+  <div class="r big">Est. total: <b>62.5%</b></div>
+  <div class="fine">Estimate only, not a binding customs determination - verify with a licensed customs broker before filing.</div>
+</div>
+<p><b>Estimated total import tariff: 62.5%</b>, applicable to the monolithic/hybrid integrated circuit TPD12S016PWR originating from China.</p>
+<h4>Tariff Composition</h4>
+<ul><li><b>Base Rate</b>: 0% (Free).</li>
+<li><b>Section 301 China Semiconductor (2024)</b>: 50% (Chapter 99 Code: <code>9903.91.02</code>). Legal source: USTR 2024 Four-Year Review, 89 FR 76581 (2024-09-18); rate increase to 50% effective 2025-01-01 for most HTS 8541/8542 subheadings.</li></ul>
+</main>
+<div class="fade"></div>
+<div class="comp">Search MPNs, specs &amp; alternatives — or ask any component question...<div class="send">&#8593;</div></div>
+</body></html>

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "packageVersion": "1.3.0",
+  "packageVersion": "1.4.0",
   "description": "Make one or more videos for a brand as Vega, the operations manager. The opening message is the request (for example 'make 3 videos for Emochi'). Start by reading Agents/VegaOM/vega-operations-manager.md in full: it routes the batch to the designers, produces each video one after another and delivers hosted URLs. A client's assets are found through Agents/VegaOM/docs/vega-client-ledger.md under Agents/VegaOM/client-assets/<Brand>/.",
   "requirements": [
     {"name": "ffmpeg", "kind": "system", "purpose": "Probing, cutting and the audio mix", "check": "ffmpeg -version && ffprobe -version"},
@@ -11,7 +11,9 @@
     {"name": "openai-whisper", "kind": "pip", "purpose": "Word timings when no hosted transcription is used (DesignerShared/tools/make-timings.py)", "check": "python3 -c \"import importlib.util, sys; sys.exit(importlib.util.find_spec('whisper') is None)\"", "install": "pip install openai-whisper", "optional": true},
     {"name": "yt-dlp", "kind": "pip", "purpose": "Cloner video designer fetching a source video from a link", "check": "yt-dlp --version", "install": "pip install yt-dlp", "optional": true},
     {"name": "faster-whisper", "kind": "pip", "purpose": "Faster word timings on Linux, same model (DesignerShared/tools/make-timings.py); falls back to openai-whisper", "check": "python3 -c \"import importlib.util, sys; sys.exit(importlib.util.find_spec('faster_whisper') is None)\"", "install": "pip install faster-whisper", "optional": true},
-    {"name": "opencv-python-headless", "kind": "pip", "purpose": "Overlay tracking (DesignerShared/tools/track-overlay.py)", "check": "python3 -c \"import importlib.util, sys; sys.exit(importlib.util.find_spec('cv2') is None)\"", "install": "pip install opencv-python-headless", "optional": true}
+    {"name": "opencv-python-headless", "kind": "pip", "purpose": "Overlay tracking (DesignerShared/tools/track-overlay.py) and the lifestyle carousel's phone-screen fit and composite (LifestyleStoryCarouselDesigner/scripts/screen_fit.py, screen_composite.py)", "check": "python3 -c \"import importlib.util, sys; sys.exit(importlib.util.find_spec('cv2') is None)\"", "install": "pip install opencv-python-headless", "optional": true},
+    {"name": "numpy + pillow", "kind": "pip", "purpose": "Lifestyle carousel grading, status bar and image checks (LifestyleStoryCarouselDesigner/scripts, tools/lsc.py)", "check": "python3 -c \"import numpy, PIL\"", "install": "pip install numpy pillow", "optional": true},
+    {"name": "playwright (Python)", "kind": "pip", "purpose": "Lifestyle carousel text render and product screen capture, driving the system chromium (CHROME_PATH); no browser download", "check": "python3 -c \"import playwright.sync_api\"", "install": "pip install playwright", "optional": true}
   ],
   "workspaceDirs": ["Project", "Backup"],
   "stages": [

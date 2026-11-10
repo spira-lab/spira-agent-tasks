@@ -28,3 +28,4 @@ Follow-up assignments Vega makes as soon as Atlas reports the video done.
 - Data: the 16 Cookiy videos made on 2026-10-13 were tests, not official content. They are logged under `Test`, not Cookiy Labs, so they never count in Cookiy reports.
 
 - Use the existing Cookiy Earn logo (CookiyLabs_logo.png) as the Cookiy Labs brand logo for every Cookiy Labs product, including Cookiy Earn Text Agent. User's words: "We can use the same logo from cookiy earn only". Already hosted and local; no re-upload. (from Quill's approved brief)
+- 2026-11-03: Cookiy Insights logo: the ledger logo (client-assets/CookiyLabs/CookiyLabs_logo.png) is the Cookiy Earn logo. For Cookiy Insights rows, add to the instructions: "Ignore the brand logo file (it is Cookiy Earn); use cookiy.ai's own Cookiy logo." Also: the owner cut the $7M+ funding claim from the DNA, so add "Do not mention funding or investors" to Cookiy Insights rows (Task 110 showed it, captured from cookiy.ai).

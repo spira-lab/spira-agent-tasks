@@ -97,7 +97,9 @@ def cmd_new(a):
     (root / "metadata").mkdir(parents=True, exist_ok=True)
     v = Video(mat / "x")
     if not v.plan.exists():
-        v.plan.write_text(f"# {name}\n\n## Source\n\n## Story\n\n## Keep / cut / rewrite\n\n| # | Source time | Source line or beat | Decision | New meaning / overlay | Truth row |\n|---|---|---|---|---|---|\n\n"
+        v.plan.write_text(f"# {name}\n\n## Source\n\n## Story\n\n## Keep / cut / rewrite\n\n| # | Source time | Source line or beat | Decision (keep / rewrite / re-voice / cut) | New meaning, new line or overlay | Truth row |\n|---|---|---|---|---|---|\n\n"
+                          "## Dialogue script\n\nOnly when anything is re-voiced or added. Every line spoken in the finished video, in order; kept lines word for word.\n\n"
+                          "Voices (the same words in every clip):\n\n| # | Speaker | Source start (s) | Source words | New words | Clip | Truth row |\n|---|---|---|---|---|---|---|\n\n"
                           "## Persona and outfit\n\n## Generation plan\n\n| Label | Model | Settings | Expected credits |\n|---|---|---|---|\n\n"
                           "## Job log\n\n| Label | Job ID | Model | Settings | Credits | Render time |\n|---|---|---|---|---|---|\n")
     if not v.edit_json.exists():
@@ -111,6 +113,7 @@ def cmd_new(a):
         "root": str(v.root), "task_id": str(task), "brand_number": str(bno or d.get("brand_number", "")), "name": name,
         "brand": v.brand, "style": "re-skit", "created": created, "editable": str(v.editable),
         "build": str(v.edit_json), "plan": str(v.plan), "source": d.get("source", {}), "story": d.get("story", ""),
+        "dialogue": d.get("dialogue", {}),
         "persona": d.get("persona", {}), "music": d.get("music", {}), "jobs": d.get("jobs", []), "assets": d.get("assets", []),
         "renders": d.get("renders", []), "credits_total": d.get("credits_total", 0), "lessons": d.get("lessons", []),
         "risks": d.get("risks", []), "unverified": d.get("unverified", [])}))
@@ -130,8 +133,11 @@ def cmd_fetch(a):
         raw = local
     else:
         tmpl = str(v.materials / "source" / "download.%(ext)s")
-        r = subprocess.run(["yt-dlp", "--no-playlist", "--no-progress", "-f", "bv*+ba/b", "--merge-output-format", "mp4",
-                            "--write-info-json", "-o", tmpl, src], capture_output=True, text=True)
+        try:
+            r = subprocess.run(["yt-dlp", "--no-playlist", "--no-progress", "-f", "bv*+ba/b", "--merge-output-format", "mp4",
+                                "--write-info-json", "-o", tmpl, src], capture_output=True, text=True)
+        except FileNotFoundError:
+            r = subprocess.CompletedProcess([], 127, "", "yt-dlp is not installed")
         got = sorted((v.materials / "source").glob("download.*"))
         vids = [g for g in got if g.suffix in (".mp4", ".mkv", ".webm", ".mov")]
         if r.returncode != 0 or not vids:

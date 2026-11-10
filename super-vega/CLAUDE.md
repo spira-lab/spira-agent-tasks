@@ -32,8 +32,8 @@ the bold name (for example 🗺️ **Atlas**) and group by team.
 - `Agents/AtlasPM/`: batch planning
 - `Agents/QuillBW/`, `EchoSD/`, `HermesMU/`, `JaniBA/`, `IrisRP/`: helpers,
   called by skill path
-- `Agents/*VideoDesigner/`, `CorporateCarouselDesigner/`, `AvatarDesigner/`:
-  the designers; `Agents/DesignerShared/` holds their toolkit
+- `Agents/*VideoDesigner/`, `CorporateCarouselDesigner/`,
+  `LifestyleStoryCarouselDesigner/`, `AvatarDesigner/`: the designers; `Agents/DesignerShared/` holds their toolkit
 - `Project/`: finished work. `Backup/`: backups
 
 Generate with `submit_ai_job` and `wait_ai_job` and host files with

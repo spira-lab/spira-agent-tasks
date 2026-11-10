@@ -40,11 +40,19 @@ the metadata's `unverified`.
 **Start from the source's form, not from a blank page.** The source's caption has a format
 ("pov: that friend who…"), a length, a register and a position on screen. The new caption keeps
 that form and changes the content. The same goes for the spoken lines: keep the line's job in
-the scene (a complaint, a reveal, a deflection) and give it a true brand meaning through cuts
-and overlays.
+the scene (a complaint, a reveal, a deflection) and give it a true brand meaning, through cuts
+and overlays, or by re-voicing it: new words with the same job, the same length and the same
+rhythm, aimed at the brand's message.
+
+**Re-voiced and added lines are claims too.** A spoken line is held to the same rule as an
+overlay: every factual phrase in it points to a row in `truth.md`, recorded in the dialogue
+script. Write it the way the source person talks (their register, their slang, their deadpan or
+their excitement), not the way an ad talks: the persona is a person describing her life, not a
+narrator reading features. One brand point per line; the joke or the turn carries it.
 
 **Write in the market's language.** The instructions name the language and market; captions,
-pop-ups and simulated content are written in it. Kept source speech stays as it is.
+pop-ups and simulated content are written in it. Kept source speech stays as it is; re-voiced and
+added lines are written in the market's language.
 
 **Every claim traces to the truth file.** Before an overlay is rendered, each factual phrase in
 it must point to a row in `truth.md` (put the row in the keep/cut/rewrite table). Opinions and
@@ -74,8 +82,9 @@ when the instructions explicitly ask for it, and then record the claim and its s
 metadata's `risks` so Vega can flag it.
 
 **No brand names inside generated speech or song lyrics.** Generators mispronounce them. The
-brand name goes on screen. (For a line Omni must say, the shared Reword table in
-`DesignerShared/skills/working-memory.md` gives spellings that are said right.)
+brand name goes on screen. (For any other hard word in a line Wan will say, the shared Reword
+table in `DesignerShared/skills/working-memory.md` gives spellings that are said right; the
+on-screen text keeps the real spelling.)
 
 ## Overlay style
 

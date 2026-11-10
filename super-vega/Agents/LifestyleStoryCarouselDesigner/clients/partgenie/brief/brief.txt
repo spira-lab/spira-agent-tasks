@@ -1,0 +1,97 @@
+PartGenie—SocialContentBrief
+1. Thebrand
+PartGenieisanAIassistantforhardwareengineers.Ithelpsthemfindelectroniccomponents,
+understanddatasheets,designcircuits,andbuildandsourceabillofmaterials(BOM).
+Tagline:"BuildhardwarewithAIyoucanverify."Thesocialbioreads"Theintelligencelayer
+forhardwaredesign.Components.Datasheets.Betterdecisions."
+PartGenieisownedbyAuraLoomLLCinAnnArbor,Michigan.ItlaunchedinNovember2025.
+Thefounder'sparentsrananelectronicsfactory,andthat'stheoriginoftheidea.
+1.1 PartGeniesocialchannels
+Channel Link Size
+Website partgenie.ai —
+LinkedIn PartGenie About46followers
+X @PartGenie —
+Instagram @partgenieai About470followers,17posts
+TikTok @partgenieai About190followers
+YouTube @partgenie About10subscribers
+2. Theproduct
+•
+Hugepartsdatabase:56M+componentsfrom12,700+manufacturers.
+•
+Search:lookupparts,specsanddatasheetsinplainEnglish,findpin-compatible
+alternatives,andcomparepartssidebyside.
+•
+Chatwithadatasheet:askanyspecquestioninsteadofreadinghundredsofpages.
+•
+Uploadandidentify:circuitdiagrams,PCBphotos,chipmarkings,datasheetsorBOMs.The
+AIrecognisestheparts.
+•
+AIHardwareDesigner:describeaproductanditproposesthearchitecture,pickspartsand
+buildstheBOM.
+•
+SmartBOM:flagsobsoleteorriskyparts,showspricingandstock,findscheaper
+alternatives,andletsyouchatwithyourBOM.
+•
+Design-readyECAD:symbols,footprintsand3DmodelsforAltium,KiCad,Eagle,OrCAD,
+Allegroandmore.
+•
+Sourcing:comparespricing,stock,MOQandavailabilityacrossdistributors,plusatariff
+lookup.
+•
+Everywhereyouwork:web,iOS,AndroidandaChromeextension.
+•
+Keypromise:answerstracebacktomanufacturerdatasheetsandtrustedsources.It'sAIyou
+canverify,unlikeChatGPT.
+3. Thebusiness
+•
+FreemiumSaaS:
+◦
+Free:$0,forstudentsandmakers,50AIcreditsamonth.
+◦
+Pro:$29/mo,or20%offannually,forengineersandFAEs.420creditsamonth,full
+alternatives,BOMHealthandexport.7-dayfreetrial.
+◦
+BusinessandEnterprise:custompricing.Teamlibraries,sourcingrules,SSO,ERP/PLM
+integrationsandAPI,privatemodeltraining.
+•
+Otherrevenue:credittop-ups,ECADmodeldownloads,aneducationprogramanda
+partnershipprogram.
+•
+Stage:early-stagestartup.Nopublicfundingorusernumbers.
+4. Theaudience
+•
+Hardwareandelectricalengineers:theydesignPCBsandpickparts.
+•
+FieldApplicationEngineers(FAEs):theybuildsolutionsandBOMsforcustomers.
+•
+Sourcingandprocurementteams:theymanagesupplyrisk,alternativesandcost.
+•
+Students,makersandhobbyists:theyusethefreetierandworkonArduino,ESP32and
+KiCadprojects.
+Theirpainpoints:hoursspentdiggingthroughdatasheets,partsthatgoobsoleteoroutof
+stock,findingdrop-inreplacements,andbuildingBOMsbyhand.
+5. Competitors
+5.1 AIhardwareandcomponenttools
+Brand Social
+Flux Instagram·X·YouTube·Facebook
+SnapMagic LinkedIn·X·Facebook
+CELUS LinkedIn·TikTok·Instagram·X·YouTube·Facebook
+CircuitMind LinkedIn
+Zenode —
+Z2Data LinkedIn·X·YouTube
+5.2 Partsearch,datasheetsandCADlibraries
+Brand Social
+Octopart LinkedIn·Instagram·X·YouTube·Facebook
+Findchips(Supplyframe) LinkedIn·Instagram·X·YouTube·Facebook
+UltraLibrarian LinkedIn·YouTube·Facebook
+AllDatasheet —
+5.3 Distributors
+Brand Social
+DigiKey LinkedIn·Instagram·X·YouTube·Facebook
+Mouser LinkedIn
+Arrow LinkedIn·Instagram·YouTube·Facebook
+LCSC LinkedIn·Instagram·X·YouTube·Facebook
+5.4 GeneralAIassistants
+Brand Social
+ChatGPT TikTok·Instagram·X
+Gemini X

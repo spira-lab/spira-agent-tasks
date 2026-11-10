@@ -15,8 +15,10 @@ plan: for each Task ID (or every done row with "done"):
   - a carousel row (Result DONE <carousel folder> ..., any carousel style): each slide JPEG in the folder's
     out/ (slide-01.jpg, slide-02.jpg, ...) is listed in order, as an image; the contact sheet and notes
     are never listed
-  - the tag comes from docs/hermes-working-memory.md (the product's row first, then the brand's);
-    --tag <tag id> is a one-off tag for this run only, used instead of the working memory
+  - the tag comes from docs/hermes-working-memory.md, per kind (2026-10-29): video rows use the
+    tag For "videos", carousel rows the tag For "carousels", either falling back to a row For both
+    (For empty); a row for the kind wins, then the product's row over the brand's
+  - --tag <tag id> is a one-off tag for this run only, used for every row instead of the working memory
   - a file already hosted (same path, same size, same tag) is listed as skipped, with its URL
   Prints one JSON line per file ({"path", "task_id", "action": "host"|"skipped", ...}), then one summary
   line. For every "host" line, call host_file with that path, then record it.
@@ -38,20 +40,27 @@ def norm(s): return " ".join((s or "").lower().split())
 def opt(a, name, default=None):
     return a[a.index(name) + 1] if name in a and a.index(name) + 1 < len(a) else default
 
-def tag_for(brand, product):
-    """(label, tag id) from the working memory: the product's row, else the brand's own row."""
-    rows, table = [], False
+def tag_for(brand, product, kind):
+    """(label, tag id) from the working memory for kind "videos" or "carousels": a row For that
+    kind wins over a row For both (For empty); then the product's row wins over the brand's."""
+    rows, head = [], None
     for line in MEMORY.read_text(encoding="utf-8").splitlines():
-        if line.startswith("| Brand"): table = True; continue
-        if not table or line.startswith("|---"): continue
-        if not line.startswith("|"): table = False; continue
+        if line.startswith("| Brand"):
+            head = [norm(x) for x in line.strip().strip("|").split("|")]; continue
+        if not head or line.startswith("|---"): continue
+        if not line.startswith("|"): head = None; continue
         c = [x.strip() for x in line.strip().strip("|").split("|")]
-        if len(c) >= 4 and c[0]: rows.append(c)
+        if len(c) != len(head) or not c[0]: continue
+        r = dict(zip(head, c))
+        tag = next((v for k, v in r.items() if k.startswith("tag (")), "")
+        rows.append((norm(r.get("brand")), norm(r.get("product")), norm(r.get("for")), tag, r.get("tag id", "")))
     b, p = norm(brand), norm(product)
-    for c in rows:
-        if norm(c[0]) == b and p and norm(c[1]) == p: return c[2], c[3]
-    for c in rows:
-        if norm(c[0]) == b and not c[1]: return c[2], c[3]
+    for want_for in (kind, ""):
+        if p:
+            for rb, rp, rf, tag, tid in rows:
+                if rb == b and rp == p and rf == want_for and tid: return tag, tid
+        for rb, rp, rf, tag, tid in rows:
+            if rb == b and not rp and rf == want_for and tid: return tag, tid
     return None, None
 
 def load_sheet(path):
@@ -82,12 +91,6 @@ def plan(a):
     if not sheet.is_file(): sys.exit(f"FAILED no sheet at {sheet}")
 
     one_off = opt(a, "--tag")
-    if one_off:
-        label, tag_id = one_off, one_off
-    else:
-        label, tag_id = tag_for(brand, product)
-    if not tag_id:
-        sys.exit(f"QUESTION no upload tag in Hermes's working memory for {brand}" + (f" / {product}" if product else ""))
 
     rows = load_sheet(sheet)
     if norm(tasks) == "done":
@@ -99,11 +102,21 @@ def plan(a):
         if missing: sys.exit(f"FAILED no such Task ID on the sheet: {', '.join(missing)}")
         picked = [by_id[t.lstrip("0")] for t in want]
 
+    kinds = {"carousels" if (not render_of(r) and carousel_of(r)) else "videos"
+             for r in picked if norm(r.get("Status")) == "done"} or {"videos"}
+    tag = {}
+    for kind in sorted(kinds, reverse=True):
+        lt = (one_off, one_off) if one_off else tag_for(brand, product, kind)
+        if not lt[1]:
+            sys.exit(f"QUESTION no upload tag for {kind} in Hermes's working memory for {brand}" + (f" / {product}" if product else ""))
+        tag[kind] = lt
+
     log = json.loads(LOG.read_text(encoding="utf-8") or "{}") if LOG.is_file() else {}
     to_host = skipped = 0; problems = []; carousels = 0
 
-    def emit(tid, f, extra=None):
+    def emit(tid, f, kind, extra=None):
         nonlocal to_host, skipped
+        label, tag_id = tag[kind]
         prev = log.get(str(f))
         d = {"task_id": tid, "path": str(f), "tag": label, "tag_id": tag_id, **(extra or {})}
         if prev and prev.get("size") == f.stat().st_size and prev.get("tag_id") == tag_id:
@@ -127,15 +140,16 @@ def plan(a):
                 problems.append(f"{tid} carousel has no slides in out/"); continue
             carousels += 1
             for i, slide in enumerate(slides, 1):
-                emit(tid, slide, {"carousel": str(folder), "slide": i, "of": len(slides)})
+                emit(tid, slide, "carousels", {"carousel": str(folder), "slide": i, "of": len(slides)})
             continue
         render = render_of(r)
         if not render or not render.is_file():
             problems.append(f"{tid} render not found"); continue
         if not render.resolve().is_relative_to(PROJECT):
             problems.append(f"{tid} render outside Project/"); continue
-        emit(tid, render)
-    line = f"PLAN {to_host} files to host under tag {label}"
+        emit(tid, render, "videos")
+    labels = sorted({label for label, _ in tag.values()})
+    line = f"PLAN {to_host} files to host under tag {' and '.join(labels)}"
     if carousels: line += f" ({carousels} carousel{'s' if carousels != 1 else ''}, slides in order)"
     if skipped: line += f"; {skipped} already hosted"
     if problems: line += f"; problems: {'; '.join(problems)}"

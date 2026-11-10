@@ -1,6 +1,6 @@
 {
  "_about": "Super Vega's agent roster: one place that lists every agent. The report (Iris), the workflow schematic and the SOP read it. Edit it when an agent is added, changed or retired. status: built | new | not ready | planned | decommissioned (not ready: built but not ready for production, the owner's word; decommissioned: removed from the system, kept on the roster for the record). styles: the Atlas designer styles an agent covers.",
- "updated": "2026-10-27",
+ "updated": "2026-11-03",
  "agents": [
   {
    "name": "Vega",
@@ -157,6 +157,18 @@
    ],
    "does": "4–7 slide corporate brand carousels (1080×1350, 4:5) from a topic angle and the brand's website: research, design brief, copy, GPT Image 2 assets, HTML layout, rendered JPEGs and captions.",
    "folder": "Agents/CorporateCarouselDesigner"
+  },
+  {
+   "name": "Lifestyle Story Carousel Designer",
+   "emoji": "📸",
+   "role": "Image designer",
+   "team": "designers",
+   "status": "new",
+   "styles": [
+    "lifestyle story carousel"
+   ],
+   "does": "5–10 slide photoreal lifestyle story carousels (4:5 feed or 9:16 story) with no script: picks its own idea per client, researches pains, locks one person and place (Soul + GPT Image 2.5, Nano Banana 2.1), real product UI on screens, local grade and text, 6-check self-grade, captions. Rey's Carousel Skill V2.",
+   "folder": "Agents/LifestyleStoryCarouselDesigner"
   },
   {
    "name": "Repurpose",

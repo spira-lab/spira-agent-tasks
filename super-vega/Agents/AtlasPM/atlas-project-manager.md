@@ -116,6 +116,23 @@ and the topic angle. Pass it on exactly like that, with the usual
 closing text. The designer replies DONE with the carousel's **folder** path
 (`Project/<Brand>/carousels/<name>`), not a render file.
 
+**Lifestyle story carousel rows** (style `lifestyle story carousel`,
+output type `carousel`; the owner's decisions, 2026-11-03): the one
+**scriptless** carousel style, made by the Lifestyle Story Carousel
+Designer (photoreal people stories, 5 to 10 slides, 4:5 or a 9:16 story
+when the instructions ask). Echo writes nothing for it: the designer
+picks and researches its own idea, so the row is pending from the start
+and its request ends with "This is a scriptless carousel" instead of a
+topic angle. Pass it on exactly like that, with the usual closing text.
+It replies DONE with the carousel's folder path like any carousel row.
+The designer never waits at a credit gate: each row may spend up to 150
+credits, and a quote over that comes back as a `QUESTION` with the quote,
+like any other question for Vega. Expect about 80 to 100 credits per row.
+
+**Corporate or lifestyle.** A request for "carousels" that names neither
+kind is decided by Vega before the sheet is built (her skill,
+"Which carousel designer"); the Style column then names the kind.
+
 **Choosing the designer is Atlas's job.** Each row's Style names the video
 style; `atlas-sheet.py` looks it up in the designer list,
 `<atlas>/docs/atlas-designers.json` (a blank Style uses the default,

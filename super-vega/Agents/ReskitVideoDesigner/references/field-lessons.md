@@ -17,11 +17,125 @@ something new proposes it in its metadata (`python3 <reskit>/tools/reskit.py les
 | Background plates, `gpt-image-2` | 6 of 7 | One full restyle moved the camera angle; a minimal material swap of the same plate kept it. |
 | Original music, `suno-music` | usable on the first job when the brief was right | One job was wasted by briefing an instrumental for a source that had rap vocals. |
 | Simulated product screens (HTML + headless Chrome) | worked once rebuilt from real screenshots | The first version, guessed from the web, was rejected as not looking like the real product. |
+| Re-voicing, `wan-3.0` reference-to-video with sound on, 720p | **held every time no source speech reached the model**; failed every time it did | Every planned word came back in order and on its time when the reference was silent and the lines were written with times. With the source's speech in the reference video or audio, the old words came back. |
+| A single take longer than one reference, `wan-3.0` | **copying the opening and extending it worked** | Copying the second half from its own reference opened on the plate's view; a sped-up reference lost the camera after half its length. |
+| Brand screens on a phone in the scene, `wan-3.0` | **two passes worked; one pass and overlays didn't** | Laid-on screens read as overlays and slipped under fingers. One pass copied the source screen's reactions, invented buttons and skipped states. Green screen first, then only the green stretch filled from a screen video, showed every state in order with no copied content. |
 
 Render times for 4–13 s Wan clips ranged from 4 to 23 minutes; a few sit QUEUED for 20 minutes
 before running. They do finish; don't resubmit (a duplicate costs the full price again).
 
 ## Lessons
+
+**Source speech in the reference brings the old words back.**
+When the source's audio was in the reference video or sent as reference audio, Wan replaced the
+person well but its soundtrack was essentially the source's own audio: old words, old voice, the
+new script ignored, or a mix of old and new words. A silent reference with no reference audio, the
+voice described in words and every line written with its start time, gave every new word on time.
+
+**Burned-in captions in the reference come back as invented captions.**
+Captions left in a reference reappear in the result as the model's own, often misspelled. Masked
+first, they don't.
+
+**Re-voice the whole speaking part from one script.**
+The voice is generated from a description, so a kept source line beside a generated one changes
+voice at the cut. Writing the kept lines into the script word for word keeps one voice through
+the video, and the same voice sentence in every clip keeps clips close.
+
+**A clip can run longer than its reference.**
+With the clip's duration set past the reference's length and a line written there, the model
+followed the reference's motion for its length, then continued the performance itself: same
+person, room and way of moving, every line heard. Wan 3.0 can continue a performance like this (the owner, 2026-11-05),
+so a longer delivery is a matter of a longer duration, not a longer reference. The ceiling is the
+reference and the output together: Wan rejects a job whose reference video plus output passes
+30 s (a 15 s reference allows at most 15 s out; a 10 s reference, 20 s). A line placed in the continued stretch can start slightly earlier than
+asked.
+
+**A long single take: copy the opening, then extend it.**
+A 24 s handheld shot was too long to copy in one job. The first 12 s copied as an ordinary clip.
+That clip went back in as Video 1 with "Extend Video 1 forward by 12 seconds", the same images, a
+timed shot list of the source's remaining beats and the remaining lines. Wan returned only the new
+12 s, continuing straight on with the same faces, room and voices. Every beat landed close to its
+time, and the reveal faced the camera as described. Its gestures and camera were its own, not the
+source's. The owner preferred this to copying the second half from its own reference (2026-11-06).
+
+**A later part copied from its own reference opened on the plate's view.**
+The second half of the same shot, copied from its own reference, began on a reference frame
+blurred by a whip pan. Wan opened that clip on a wide view taken from the background plate, which
+was not in the source. The second half also brought back what the plate held, where the first half
+had kept it out of sight.
+
+**Every part extending the first clip kept a long talking head consistent** (the owner,
+2026-11-09). A 57 s talking head was made as one copied clip A and three parts that each extended
+A (not each other). Every line came back in order, and the face, outfit, prop and voice matched
+across all parts. The only seam is a jump cut between parts, on the same framing.
+Separately generated talking-head clips drift in voice tone from one to the next; extensions keep
+the first clip's voice. Copy a new clip from the source only for a new action with a new camera
+angle or shot; same-setup movement goes in the extension's prompt.
+
+**Squeezing the source to fit one reference didn't hold.**
+The whole 24 s source sped up four times (a 6 s reference) with a 24 s output kept every line on
+time. But the clip followed the source's camera only loosely for about half its length, then sat
+on one static wide shot to the end.
+
+**A logo in the plate came back despite the prompt.**
+Takeaway cups with a coffee chain's mark were in a background plate. "Plain cups, no logos" in the
+clip prompt didn't stop Wan from painting the mark back. Editing the plate to plain mugs did.
+
+**Describing the look drifts across scenes** (the owner, 2026-11-05).
+Naming the outfit, hair, items or objects in clip prompts makes clips of a multi-scene video come
+back different from each other. Pointing to the references ("the outfit from image 1") in the
+same words in every clip holds, even where a single described clip happens to look right.
+
+**A screen drawn in the same pass as the recast leaks the source's screen.**
+Asked to recast the people and put a new screen on the device in one generation, Wan copied the
+source app's own reactions onto the new screen (a like animation, a header from the source
+creator's profile), invented a button, and never showed the last screen state. With the screen
+plain green in the first pass and only that stretch filled in a second pass, none of it came
+back and every state appeared in order.
+
+**The screen follows the hands, not the screen video's clock.**
+Moving every event in the screen video a second earlier changed nothing: the screen still changed
+with the hand's own actions in the source, scrolling when the hand scrolled and opening when it
+tapped. The screen video sets the order of the states; the hand in the source sets their timing.
+
+**Overlays read as overlays** (the owner, 2026-11-06).
+Screens tracked onto a green or white screen in the edit looked flatter, sharper and more evenly
+lit than the scene, and slipped when a finger covered a corner. A screen the model draws takes the
+scene's light, glare and perspective. This holds for phones; on a laptop the overlay won (next).
+
+**Laptop and monitor screens: the overlay looked better** (the owner, 2026-11-07).
+Task 277 remade Task 95's laptop shots with the screen drawn by Wan in two passes; the owner
+judged Task 95's overlay the better result. Laptops and monitors are overlaid again, with the
+screen tracked and kept in perspective on every frame so it doesn't slip when the camera moves
+or when a hand or object briefly covers it.
+
+**A second pass drifts a little by its end.**
+Re-running a 5 s stretch kept the first frame almost identical to the first pass, but by the end
+the framing had shifted a few pixels, which showed as a small jump at the second join. A 4-frame
+crossfade hid it.
+
+**Empty space on a screen video gets filled with invented UI.**
+A state that left blank space at the bottom of the screen came back with a made-up app tab bar
+with garbled labels, and a mid-size heading garbled too. Rebuilt to fill the screen edge to edge
+with real content, the redo came back clean.
+
+**The green stretch landed longer than asked.**
+Pass 1 was asked for green between two moments and came back green from a little earlier to a
+little later. Pass 2 was priced for the planned stretch and had to be a second longer. Measure the
+landed green before cutting or pricing pass 2.
+
+**The screen changed on the most visible tap, not the first one.**
+The source had a light tap followed by a firm double tap; the new screen changed on the double
+tap, about a second after the planned moment. Text timed to the planned moment had to move.
+
+**The off-camera filmer's hands kept the source's jewellery.**
+Asked for "plain hands with no jewellery", the clip kept the bracelets and long nails of the
+source creator's hands. Hands that come into frame from the camera follow the reference closely;
+changing them is a gesture-level change, not a prompt detail.
+
+**A generated outfit carried another company's logo.**
+An outfit sheet's sneakers came out with a recognisable brand mark, and the clips copied it. Check
+the outfit sheet for logos and marks before approving it.
 
 **A prompt can't replace a gesture that's in the reference clip.**
 Asked to have the person text on her phone instead of holding it to her ear, the model kept the
@@ -97,10 +211,13 @@ on its own, check it, then attach it to the video (`build_edit.py` does). Verify
 file itself: transcribe it, and if speech recognition hears only "music", treat that as a failure
 to investigate, not a quirk to explain away.
 
-**Practical tooling.**
-Tools take absolute paths (background runs don't start in the project folder). The asset CDN
-refuses Python's default user agent; the tools download with `curl` and a browser agent. An
-ffmpeg limiter (`alimiter`) raises the level by itself unless its auto-level is off, which pushed
-a -16 LUFS mix to -14.5; the build turns it off. Headless Chrome through playwright sets any
-viewport size exactly (the old ~500 px minimum window of the Chrome command line no longer
-applies), but large images still need shrinking so they load before the screenshot.
+**Practical tooling.** Tools take absolute paths (background runs don't start in the project
+folder). The asset CDN refuses Python's default user agent; the tools download with `curl` and a
+browser agent. An ffmpeg limiter (`alimiter`) raises the level by itself unless its auto-level
+is off, which pushed a -16 LUFS mix to -14.5; the build turns it off. Headless Chrome through
+playwright sets any viewport size exactly (the old ~500 px minimum window of the Chrome command
+line no longer applies), but large images still need shrinking so they load before the
+screenshot. `build_edit.py` and `reskit.py audio-probe` need numpy; a python3 without it fails,
+so run them with a python that has it. `reskit.py strip --times` takes times on the clip's own
+clock, not the source's. After a redo, the chain's running "credits so far" line can undercount;
+the total comes from each job's own charge.

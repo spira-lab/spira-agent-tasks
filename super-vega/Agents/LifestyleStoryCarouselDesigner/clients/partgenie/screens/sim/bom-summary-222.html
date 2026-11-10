@@ -1,0 +1,68 @@
+<!doctype html>
+<!--
+SIMULATED UI, Task 222. The BOM Analyzer's result screen only runs signed in, so this rebuilds its left
+summary pane at phone width. Nothing here is invented. Sources, element by element:
+- File name, "47 part lines · 219 pcs · 39 categories", "Health 94%", "Analyze this BOM", "Worked for 27s",
+  "BOM analysis summary" and its first paragraph, "Overall status", the Metric / Result table and its seven
+  rows and values, "Type / for skills, or ask about this BOM...", "Agent":
+  https://www.partgenie.ai/images/tools/ai-bom-analyzer-hero.webp (public image on /ai-bom-analyzer)
+- Colors: the same image, and the brief's teal #22808D.
+- Left out for room: "Refreshing DigiKey 0/45", the Files & Rules / Export / Share buttons, the paragraph about
+  the analysis window, the "Detailed in current analysis window 28" row and the parts table.
+The file name is the site's own demo BOM, kept word for word. Nothing is shown that the hero image does not
+show; the phone layout itself is our rebuild and needs a human check.
+-->
+<html><head><meta charset="utf-8">
+<meta name="viewport" content="width=393, initial-scale=1">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=block');
+*{box-sizing:border-box}
+html,body{margin:0;width:393px;height:852px;background:#fbfbf9;font-family:Inter,Arial,sans-serif;color:#101828;overflow:hidden}
+.top{padding:58px 14px 11px;border-bottom:1px solid #eceded}
+.row1{display:flex;align-items:center;gap:9px}
+.logo{width:24px;height:24px;border-radius:50%;background:#22808D;display:flex;align-items:center;justify-content:center;flex:none}
+.logo i{display:block;width:12px;height:8px;border-radius:3px;background:#fff}
+.ttl{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row2{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.meta{font-size:12.5px;color:#667085}
+.health{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#344054;border:1px solid #dfe1e1;border-radius:8px;padding:4px 9px;background:#fff}
+.ring{width:15px;height:15px;border-radius:50%;border:2.5px solid #067647}
+.pane{padding:12px 14px 0}
+.go{display:block;margin-left:auto;width:max-content;background:#22808D;color:#fff;font-size:13.5px;font-weight:500;border-radius:7px;padding:8px 13px}
+.work{margin:12px 0 7px;font-size:12px;color:#98a2b3}
+h2{margin:0 0 6px;font-size:16px;font-weight:600}
+p{margin:0 0 12px;font-size:14px;line-height:1.5;color:#344054}
+p b{font-weight:600;color:#101828}
+h3{margin:0 0 7px;font-size:14px;font-weight:600}
+table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e6e7e7;border-radius:10px;overflow:hidden;background:#fff;font-size:14px}
+th{background:#f5f5f0;font-weight:500;font-size:12.5px;color:#475467;text-align:left;padding:8px 13px}
+td{padding:9.5px 13px;border-top:1px solid #eceded;color:#28303f}
+th:last-child,td:last-child{text-align:right}
+.hot td{font-weight:600;color:#101828}
+.foot{position:absolute;left:14px;right:14px;bottom:52px;height:74px;border:1px solid #dfe1e1;border-radius:13px;background:#fff;padding:10px 12px;font-size:13.5px;color:#98a2b3}
+.agent{position:absolute;left:9px;bottom:8px;font-size:12px;color:#344054;border:1px solid #dfe1e1;border-radius:7px;padding:3px 9px;background:#fafafa}
+.send{position:absolute;right:9px;bottom:7px;width:26px;height:26px;border-radius:50%;background:#eceded;color:#475467;text-align:center;line-height:26px;font-size:13px}
+</style></head><body>
+<div class="top">
+  <div class="row1"><div class="logo"><i></i></div><div class="ttl">partgenie_ev_control_module_test_bom</div></div>
+  <div class="row2"><div class="meta">47 part lines · 219 pcs · 39 categories</div><div class="health"><span class="ring"></span>Health 94%</div></div>
+</div>
+<div class="pane">
+  <div class="go">Analyze this BOM</div>
+  <div class="work">Worked for 27s ›</div>
+  <h2>BOM analysis summary</h2>
+  <p>The current BOM contains <b>47 lines / 47 materials</b>, with <b>219 total quantity</b> across <b>39 categories</b>. All <b>47 lines were fully matched</b>; there are <b>0 unmatched</b> and <b>0 partial matches</b>.</p>
+  <h3>Overall status</h3>
+  <table>
+    <tr><th>Metric</th><th>Result</th></tr>
+    <tr><td>Total BOM lines</td><td>47</td></tr>
+    <tr><td>Fully matched lines</td><td>47</td></tr>
+    <tr><td>Unmatched lines</td><td>0</td></tr>
+    <tr><td>Partial matches</td><td>0</td></tr>
+    <tr class="hot"><td>High-risk items</td><td>0</td></tr>
+    <tr><td>Alternative opportunities</td><td>2</td></tr>
+    <tr class="hot"><td>Missing information items</td><td>11</td></tr>
+  </table>
+</div>
+<div class="foot">Type / for skills, or ask about this BOM...<span class="agent">Agent</span><span class="send">↑</span></div>
+</body></html>

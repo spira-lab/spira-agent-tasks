@@ -1,5 +1,5 @@
 {
-  "_about": "Atlas's designer list: video style -> its designer. Each entry is the designer skill path (relative to the Super Vega folder), or {\"skill\": <path>, \"script\": \"none\"} for a scriptless style. A plain path means the style needs a script. A row with a blank Style uses the default. A style whose name ends in \"carousel\" is a carousel style (output type carousel, the topic angle as its script; 2026-10-27). _aliases maps an old style name to its current one (\"carousel\" was renamed \"corporate carousel\" on 2026-10-27), so old sheets still read.",
+  "_about": "Atlas's designer list: video style -> its designer. Each entry is the designer skill path (relative to the Super Vega folder), or {\"skill\": <path>, \"script\": \"none\"} for a scriptless style. A plain path means the style needs a script. A row with a blank Style uses the default. A style whose name ends in \"carousel\" is a carousel style (output type carousel; 2026-10-27). A carousel style marked script none is a scriptless carousel: no topic angle from Echo, its designer picks its own idea (lifestyle story carousel, 2026-11-03); otherwise the topic angle is its script. _aliases maps an old style name to its current one (\"carousel\" was renamed \"corporate carousel\" on 2026-10-27), so old sheets still read.",
   "default": "talking head edited",
   "talking head edited": "Agents/TalkingHeadEditedVideoDesigner/skills/talking-head-edited-video-designer.md",
   "explainer": "Agents/ExplainerVideoDesigner/skills/explainer-video-designer.md",
@@ -17,6 +17,10 @@
     "script": "none"
   },
   "corporate carousel": "Agents/CorporateCarouselDesigner/skills/corporate-carousel-designer.md",
+  "lifestyle story carousel": {
+    "skill": "Agents/LifestyleStoryCarouselDesigner/skills/lifestyle-story-carousel-designer.md",
+    "script": "none"
+  },
   "_aliases": {
     "carousel": "corporate carousel"
   }

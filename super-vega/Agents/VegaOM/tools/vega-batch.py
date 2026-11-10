@@ -4,7 +4,8 @@ sheet, fills every row from the request and the Client Ledger, and prints ONE li
 100-video request costs Vega one call and one line of context.
 
     python3 "<max>/tools/vega-batch.py" new "<brand | Brandless>" <count> --type <organic-video|ad-video|avatar-image|carousel>
-        [--duration <s>] [--style "<video style>"]   (--type carousel: corporate carousel unless --style "<kind> carousel") [--product "<product name>"]
+        [--duration <s>] [--style "<video style>"]   (--type carousel: corporate carousel unless --style "<kind> carousel",
+                                                      e.g. --style "lifestyle story carousel") [--product "<product name>"]
         [--music <library|none>] [--instructions "<text>"]
         [--style-ref <path or URL>] [--avatar-image <path or URL>] [--avatar-voice "<voice>"]
         [--source "<source video link or path>"]   (styles clone and re-skit: the video to clone or re-skit)
@@ -28,12 +29,15 @@ take a client's video numbers; say who it is for in --instructions. No ledger, n
 
 `--type carousel` (2026-10-27): 4:5 carousels (1080x1350 slides), one per row, made by a carousel
 designer: style `corporate carousel` (the Corporate Carousel Designer) unless --style names another
-carousel style ("<kind> carousel", e.g. a future "lifestyle carousel"). The style must end in
+carousel style ("<kind> carousel", e.g. "lifestyle story carousel", 2026-11-03). The style must end in
 "carousel" and have a designer in Atlas's list; the old name `carousel` means `corporate carousel`.
 Every carousel style shares output type `carousel`. The ledger lookup stays (brand, and the product with
 --product); the row's only inputs are Echo's topic angle (its Script, so the rows are drafts until
 Echo writes them) and the website: the batch tool writes "Product: <name>." and "Brand website: <url>"
-into the instructions. No duration, music, style ref, source, avatar, logo, color or product image.
+into the instructions. A scriptless carousel style (marked script none in Atlas's list: lifestyle story
+carousel, whose designer picks its own idea) gets the same instructions but no angle, so its rows are
+pending at once, like clone and re-skit rows; the requester's note (a topic, story or feed, a slide
+count) goes in --instructions. No duration, music, style ref, source, avatar, logo, color or product image.
 A carousel needs the Website column in the Client Ledger (the product's row, else the brand's) and
 a brand: not Brandless.
 

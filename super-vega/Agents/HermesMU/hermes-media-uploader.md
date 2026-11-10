@@ -47,9 +47,10 @@ Product: <product name, or none>
 
 ## Uploading
 
-1. **Plan.** Run the tool's `plan`. It finds the tag in your working memory (the product's
-   row first, then the brand's) and prints one JSON line per file (each video, and each carousel
-   slide in order), marked `host` or `skipped` (already hosted):
+1. **Plan.** Run the tool's `plan`. It finds the tag in your working memory per kind of row
+   (videos and carousels can have different tags; a row For the kind first, then a row For both;
+   the product's row before the brand's) and prints one JSON line per file (each video, and each
+   carousel slide in order), marked `host` or `skipped` (already hosted):
 
    ```bash
    python3 "<hermes>/tools/hermes-upload.py" plan --sheet "<sheet>" --tasks <ids|done> --brand "<brand>" --product "<product>"
@@ -72,8 +73,9 @@ Product: <product name, or none>
    For a carousel slide add `--carousel "<folder>" --slide <i> --of <n>` (the plan line carries them).
    Host a file once: a `skipped` file is already in the log, and running `plan` again never hosts twice.
    **Carousels** (rows whose Result is `DONE <carousel folder> ...`, from any carousel designer,
-   e.g. the Corporate Carousel Designer): the plan lists each slide JPEG of the folder's `out/` in order (`slide-01.jpg`,
-   `slide-02.jpg`, ...). The contact sheet and the notes are never hosted. Host the slides in order;
+   e.g. the Corporate Carousel Designer, 2026-10-27, and the Lifestyle Story Carousel Designer, 2026-11-03, whose 9:16 story slides go up the same way): the plan lists each slide JPEG of the folder's `out/` in order (`slide-01.jpg`,
+   `slide-02.jpg`, ...), with the carousel tag (the working-memory row For `carousels`, else the
+   brand's or product's row For both; 2026-10-29). The contact sheet and the notes are never hosted. Host the slides in order;
    if one fails, stop that carousel there so its slides stay in order, and a rerun carries on.
    `host_file` cannot apply a Social Post Assets tag: the tag is recorded in the log only.
 3. **Reply** with the plan's last line, adjusted to the files you hosted.
@@ -84,13 +86,16 @@ One line, nothing else:
 
 - `UPLOADED <n> videos tag <category / tag>` (the tool's summary line,
   with any videos skipped as already uploaded, or problems). With carousels in the request it reads
-  `UPLOADED <n> videos and <c> carousels (<s> slides) tag ...` (or only the carousels).
+  `UPLOADED <n> videos and <c> carousels (<s> slides) tag ...` (or only the carousels); when the
+  videos and carousels have different tags it reads `UPLOADED <n> videos tag <video tag> and <c> carousels (<s> slides) tag <carousel tag>`.
 - `QUESTION <what is missing>`
 - `FAILED <short reason>`
 
 ## Working memory
 
-The upload tags live in `<hermes>/docs/hermes-working-memory.md`, one row per brand or product.
+The upload tags live in `<hermes>/docs/hermes-working-memory.md`, one row per brand or product,
+with **For** = `videos`, `carousels`, or empty (both). Keep one row per brand, product and For:
+when a new tag replaces one, change that row instead of adding a second.
 Write to it only when the owner, Jekylle or Angelica (through Vega) asks you to remember, change, or forget a tag. Record
 the exact category / tag name and its ID as Vega gives them; never invent or create one.
 
