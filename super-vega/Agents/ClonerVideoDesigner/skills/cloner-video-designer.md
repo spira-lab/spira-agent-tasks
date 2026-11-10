@@ -111,8 +111,22 @@ These are the Cloner's craft; they hold for every clone.
   `<super>/Agents/VegaOM/client-assets/<BrandName>/personas/<Name>/`, to
   save a persona you made (section 6). Nothing else in `Agents/`, ever:
   not this skill, not its references, not the shared skills, not the
-  working memory. Throwaway intermediates go in the session scratchpad
-  or the system temp folder.
+  working memory. Throwaway intermediates go in your own scratch folder,
+  `<scratchpad>/t<Task ID>/`: up to 6 designers work at the same time
+  (2026-11-10), so never read, change or run another task's files
+  there.
+- **Other designers at the same time.** One may be making a video of the
+  same brand. Make or change anything in `client-assets/<BrandName>/`
+  (a persona folder, `voice.md`) only inside
+  `python3 <shared>/tools/brand-lock.py <BrandName> -- <command>`, looking
+  again first for what you were about to make: reuse it when another
+  designer has just made it. Heavy steps (the render, a frame-sequence
+  ffmpeg encode, an HTML batch render) go through
+  `python3 <shared>/tools/heavy-slot.py <Task ID> -- <command>` (Bash
+  timeout 600000; exit 75 = run it again). The moment `submit_ai_job`
+  returns, write its job ID into the metadata's `jobs[]`, before
+  waiting: after a restart that is how a paid job is waited for instead
+  of submitted again.
 - **NN is the Task ID**, padded to two digits. Never count folders or
   files to number a video. IF the Task ID is missing, reply QUESTION.
 - **Rights.** Cloning a format is fine. Never use the source creator's
@@ -253,9 +267,11 @@ Talking-to-camera formats on Omni cost more per second at current prices
   `<super>/Agents/VegaOM/client-assets/<BrandName>/personas/<Name>/`
   (`<Name>` the persona's first name, e.g. `Maya`): `<Name>.png` (the
   finished edit) and `<Name>.json` (brief, Soul prompt, edit prompt, job
-  ids, result URLs, credits, the Task ID that made it). That folder is
-  the **only** place in `Agents/` this designer writes. Never overwrite
-  an existing persona: pick another name. Copy the persona into the
+  ids, result URLs, credits, the Task ID that made it). A folder made
+  from 2026-11-10 on is named `personas/<Name>-t<Task ID>/` (e.g.
+  `Maya-t291/`), so two designers saving one at once never share a
+  folder. That folder is the **only** place in `Agents/` this designer
+  writes. Never overwrite an existing persona: pick another name. Copy the persona into the
   clone's `persona/` folder too.
 - Before making a new persona, look in that brand's `personas/` folder.
   IF a saved persona fits this clone's casting (it contrasts with the
@@ -393,8 +409,9 @@ Write `plan.md` before spending:
   `<super>/Agents/DesignerShared/docs/voice-list.md` that fits the Brand
   DNA and the source's narrator, and save it as the brand's voice: write
   `voice.md` there (`elevenlabs <voice ID> <model>`, the voice's name, and
-  one line on why it fits), so every later clone of that brand uses the
-  same voice. Never ask the requester (the owner's decision, 2026-10-24).
+  one line on why it fits) inside `brand-lock.py <BrandName> -- …`,
+  checking first that it is still missing, so every later clone of that
+  brand uses the same voice. Never ask the requester (the owner's decision, 2026-10-24).
 - **Timings and checks** use the shared `make-timings.py` (Scribe first):
   `timings.json` for any voice-over, `--txt` for every clip's cut-off
   check.
@@ -493,7 +510,7 @@ Then reply READY.
 When Atlas resumes you to render:
 
 1. Follow `<shared>/skills/rendering.md`: one command, the shared
-   `render-fast.js`, with `--cover` at the clearest, most telling moment
+   `render-fast.js` inside `heavy-slot.py <Task ID> --`, with `--cover` at the clearest, most telling moment
    (never the first frame). Read its one JSON line; on `"ok": false` fix
    the cause and run it once more, no more.
 2. Measure the render's audio as the stage skill's check 7 says. WHEN the

@@ -19,10 +19,10 @@ what a clone needs on top of it.
   **MM-DD** is the day the editable was created. The source's own short
   title goes in the metadata as `source_title`.
 - Nothing is written in `Agents/`, except a persona you made, saved in
-  `Agents/VegaOM/client-assets/<BrandName>/personas/<Name>/` (the skill,
-  section 6). Nothing is written in Downloads or outside Super Vega;
-  throwaway scratch goes in the session scratchpad or the system temp
-  folder.
+  `Agents/VegaOM/client-assets/<BrandName>/personas/<Name>-t<Task ID>/`
+  (the skill, section 6). Nothing is written in Downloads or outside
+  Super Vega; throwaway scratch goes in your own `<scratchpad>/t<Task ID>/`
+  (other designers share the scratchpad at the same time).
 
 ## Inside the materials folder
 

@@ -90,7 +90,7 @@ The Avatar Designer is the one source of personas (the owner's rule, 2026-10-24)
 3. Check every panel is the same person and outfit. Rerun the edit at most once.
 4. Save it as `NN-sheet-MM-DD.png` beside the avatar, and record it in the metadata.
 
-**For a brand persona** (the instructions say which brand), also save a copy to `Agents/VegaOM/client-assets/<BrandName>/personas/<Name>/`, keeping both `avatar.png` and `sheet.png` there. That folder is the one place in Agents/ this designer may write.
+**For a brand persona** (the instructions say which brand), also save a copy to `Agents/VegaOM/client-assets/<BrandName>/personas/<Name>-t<Task ID>/`, keeping both `avatar.png` and `sheet.png` there (other designers may save a persona of the same brand at the same time: make the folder inside `python3 Agents/DesignerShared/tools/brand-lock.py <BrandName> -- <command>`). That folder is the one place in Agents/ this designer may write.
 
 ## 5. Files
 

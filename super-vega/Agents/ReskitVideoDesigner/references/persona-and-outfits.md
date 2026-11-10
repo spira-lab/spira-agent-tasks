@@ -11,6 +11,19 @@ toolkit skills; Re-skit only adds the character sheet and the outfits on top.
 All persona files live in `Agents/VegaOM/client-assets/<BrandName>/personas/<Name>/`
 (file-management.md), never in `Project/`.
 
+**Other designers work at the same time** (up to 6, 2026-11-10), and may be making a video of
+the same brand. So:
+- A persona folder you make **new** is named `personas/<Name>-t<Task ID>/` (e.g. `Mia-t291/`),
+  so two designers registering one at once never write into the same folder. An existing
+  folder keeps its name, whatever it is.
+- Before making a new persona or a new `voice.md`, look in `personas/` again: one may have
+  appeared since you last looked (another designer's `-t` folder made for the same image or
+  brand). Reuse it when it fits.
+- Append to `outfits.md` only with
+  `python3 <shared>/tools/brand-lock.py append <persona>/outfits.md @<textfile>`, and write a new
+  `voice.md` inside `python3 <shared>/tools/brand-lock.py <BrandName> -- bash -c "<command>"`,
+  checking first that it is still missing.
+
 ## 1. Which persona
 
 First read the Design approach in `Agents/DesignerShared/skills/working-memory.md`: an entry
@@ -20,7 +33,7 @@ there about personas (e.g. a new persona for every video) wins over the steps be
    Never make another beside it, and never run Soul to "match" it.
    - Look in `client-assets/<BrandName>/personas/` for a folder whose `source/` holds that image
      (or a sheet made from it). If there is one, use its `sheet_4k.png` and its `outfits.md`.
-   - Otherwise register it: make `personas/<Name>/` (the name from the request or the file name;
+   - Otherwise register it: make `personas/<Name>-t<Task ID>/` (the name from the request or the file name;
      a first name that fits the brand when there is none), copy the image into `source/`, and
      build the sheet from it (section 3).
 2. **None is given, but the brand already has a persona** in `client-assets/<BrandName>/personas/`:
@@ -67,7 +80,7 @@ plain light-grey backdrop.
 - **From several real photos of the person** (when the brand provides them): no generation.
   Copy `tools/sheet_template.html` into the persona folder as `sheet.html`, set the seven
   `src` attributes and the name, and render it at 3840x2160
-  (`node <reskit>/tools/render_html.js sheet.html sheet_4k.png 3840 2160 1`). Keep every panel
+  (`python3 <shared>/tools/heavy-slot.py <Task ID> -- node <reskit>/tools/render_html.js sheet.html sheet_4k.png 3840 2160 1`). Keep every panel
   at or below its photo's native resolution where possible.
 
 Resolution matters: a sheet assembled from small panels gives the video model little facial

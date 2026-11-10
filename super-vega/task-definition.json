@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "packageVersion": "1.4.0",
-  "description": "Make one or more videos for a brand as Vega, the operations manager. The opening message is the request (for example 'make 3 videos for Emochi'). Start by reading Agents/VegaOM/vega-operations-manager.md in full: it routes the batch to the designers, produces each video one after another and delivers hosted URLs. A client's assets are found through Agents/VegaOM/docs/vega-client-ledger.md under Agents/VegaOM/client-assets/<Brand>/.",
+  "packageVersion": "1.5.0",
+  "description": "Make one or more videos for a brand as Vega, the operations manager. The opening message is the request (for example 'make 3 videos for Emochi'). Start by reading Agents/VegaOM/vega-operations-manager.md in full: it routes the batch to the designers, produces the videos in parallel, up to 6 at a time, and delivers hosted URLs. A client's assets are found through Agents/VegaOM/docs/vega-client-ledger.md under Agents/VegaOM/client-assets/<Brand>/.",
   "requirements": [
     {"name": "ffmpeg", "kind": "system", "purpose": "Probing, cutting and the audio mix", "check": "ffmpeg -version && ffprobe -version"},
     {"name": "python3", "kind": "system", "purpose": "The Agents/*/tools scripts", "check": "python3 --version"},
@@ -19,7 +19,7 @@
   "stages": [
     {"id": "intake", "title": "Read the skill, ledger and brand memory; understand the request"},
     {"id": "assign", "title": "Plan the batch and brief the designers"},
-    {"id": "produce", "title": "Produce and render each video, one after another"},
+    {"id": "produce", "title": "Produce and render the videos in parallel, up to 6 at a time"},
     {"id": "deliver", "title": "Host the videos, update the output log, write the report"}
   ],
   "outputs": [

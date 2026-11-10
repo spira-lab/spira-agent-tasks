@@ -43,5 +43,6 @@ Agents/CorporateCarouselDesigner/state/*
 !Agents/CorporateCarouselDesigner/state/.gitkeep
 Agents/IrisRP/report/iris-track-sheet.html
 
-# Lock files
+# Lock files (render slots and brand locks live in .locks/)
 *.lock
+.locks/

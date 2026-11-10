@@ -494,7 +494,7 @@ passes above. Keep the screens on the device instead of cutting to flat full-fra
    flat solid pure green colour filling the entire display edge to edge inside the thin black
    bezel: no browser, no window, no interface, no text, no reflections".
 2. Rebuild every product state as one HTML page selected by URL hash (`screens.html#plan2`) at
-   1440x900, scale 2, and render them all with `render_html.js --batch`.
+   1440x900, scale 2, and render them all with `render_html.js --batch` (through `heavy-slot.py`).
 3. Composite in Python (numpy + Pillow; cv2 is not installed). Find the corners from the green
    mask (TL/BR = min/max of x+y, TR/BL = max/min of x−y). Solve the homography by SVD, with the
    screen padded about 10 px past the green edge, and warp each state on. Despill only clearly
@@ -503,7 +503,8 @@ passes above. Keep the screens on the device instead of cutting to flat full-fra
    a small sine wobble) and put the screen through the same transform, so it never slips. Give
    the screen a filmed look: a 0.7 px blur, contrast `*0.94 + 10`, a soft vignette and grain.
 4. Keep the source's cut times as the shot boundaries. Cut any finger tapping the screen and use
-   a drawn cursor in the HTML. Encode the frames (`libx264 -crf 16`) as one `insert`.
+   a drawn cursor in the HTML. Encode the frames (`libx264 -crf 16`) as one `insert`. Run the
+   composite and the encode through `python3 <shared>/tools/heavy-slot.py <Task ID> -- …`.
 Worked example to reuse: `<reskit>/examples/laptop-overlay/composite.py` with its `screens.html`
 (Task 58's laptop b-roll; the plates and rendered PNGs it reads are not kept, only the code).
 This only works when the screen shots have no person in them. When hands or a person stay in front of the screen,

@@ -47,7 +47,7 @@ All paths are relative to the Super Vega folder. Agents live in `Agents/`; finis
 | Working memory template | `Agents/VegaOM/docs/working-memory/vega-memory-template.md` | Blank brand memory | Creating a brand's memory file |
 | Video Styles | `Agents/VegaOM/docs/vega-video-styles.md` | Each video style she can assign, when to choose it, and whether it is available | Choosing the Style for a video |
 | Subagent Roster | `Agents/VegaOM/docs/vega-subagent-roster.md` | Every subagent: how to call it, what it does, what to supply | Before assigning a task |
-| Update records | `Agents/VegaOM/docs/updates/<YYYY-MM-DD>-system-update.md` | The full list of what changed in each system update; each is a version (2026-10-24 = **v2**, 2026-10-27 = **v2.01**, 2026-11-10 = **v2.02**) | When someone asks what changed in an update, or asks Vega to announce one (see "Announcing a system update") |
+| Update records | `Agents/VegaOM/docs/updates/<YYYY-MM-DD>-system-update.md` | The full list of what changed in each system update; each is a version (2026-10-24 = **v2**, 2026-10-27 = **v2.01**, 2026-11-10 = **v2.02**, `2026-11-10b` = **v2.03**) | When someone asks what changed in an update, or asks Vega to announce one (see "Announcing a system update") |
 | Asset IDs | `Agents/VegaOM/docs/vega-asset-ids.md` | Spira asset ID per uploaded file | Only when asked to look up an asset ID |
 | Client Data Sheet | `Agents/VegaOM/docs/vega-client-data.md` | All-time output totals per client | Never opened; the output tool writes and reads it |
 | Monthly data | `Agents/VegaOM/docs/client-monthly/[brand name]/vega-[brand name]-[YYYY-MM].md` | Per client, per month: totals + dated output log (quantities only) | Never opened; the output tool writes and reads it |
@@ -73,15 +73,20 @@ All paths are relative to the Super Vega folder. Agents live in `Agents/`; finis
 
 | Request | How it runs |
 |---|---|
-| Any video task (1 or more videos) | Vega builds the batch sheet (below), then runs Atlas's loop on it: for each row, in order, she hands the video to the designer of its style |
+| Any video task (1 or more videos) | Vega builds the batch sheet (below), then runs Atlas's loop on it: she hands each row to the designer of its style, up to 6 at a time (see "Parallel slots") |
 
 **Handing a video to a designer.** The designers are named by video style; each style has its own designer in `Agents/` (available: talking head edited, explainer, podcast, avatar, **clone**, **re-skit**, **corporate carousel**, **lifestyle story carousel**; planned: reaction, timelapse, narration). Vega chooses the style from her Video Styles guide (`Agents/VegaOM/docs/vega-video-styles.md`) and writes its exact name in each row's Style column; `atlas-sheet.py` picks the designer skill from it. Only styles marked available can be assigned; the sheet tool refuses any other.
-- **Preferred:** start a sub-agent with the SDK's Agent tool, briefed with the designer's skill path, the task folder (`Project/`), and the row's request exactly as `atlas-sheet.py next` prints it.
-- **Fallback, when the Agent tool is unavailable:** Vega reads the designer's skill herself and does the designer's role inline, following that skill exactly. The recording on the sheet is the same.
+- **Preferred:** start a **background** sub-agent with the SDK's Agent tool (`run_in_background: true`), briefed with the designer's skill path, the task folder (`Project/`), and the row's request exactly as `atlas-sheet.py next` prints it, plus Atlas's closing text. Record its agent ID on the sheet at once.
+- **Fallback, when the Agent tool is unavailable:** Vega reads the designer's skill herself and does the designer's role inline, following that skill exactly, one row at a time. The recording on the sheet is the same.
 
-## One video at a time
+## Parallel slots
 
-Videos in a batch are produced **sequentially**, in the sheet's order: take a row, hand it over, record its outcome, send `report_progress` for it, then take the next. A request is never split across batches. A new request that arrives while a batch is in production is handled after the running batch is closed; there is no queue tool, no second sheet running in parallel, and no urgent lane.
+Videos are produced **in parallel** (the owner's decision, 2026-11-10): at most **6 videos designing at once across the whole employee**, every batch counted together, and at most **2 rendering at once**. The tools hold these limits, not Vega's counting: `atlas-sheet.py next` prints `FULL` when the 6 slots are taken, and every render runs through `heavy-slot.py`. `atlas-sheet.py <sheet> slots` shows what is in use. The limits are in `Agents/AtlasPM/docs/atlas-limits.json`.
+
+- Atlas's loop fills the free slots, waits for a row to change, handles it (report, answer, record), and fills again. Each finished video gets its own `report_progress` line as it finishes.
+- A request is never split across batches. A new request that arrives while a batch is in production gets its own sheet, and its rows take the slots the running batch leaves free as its last rows finish (a tail hand-off: run `wait` with `--also` for both sheets). Each batch is reported and closed on its own; there is no urgent lane that jumps the slots.
+- **Never end the turn while a video is in production**: the background designers stop with it.
+- After a restart, the designing rows are picked up again by Atlas's "After a restart" steps, never by submitting their jobs again.
 
 ## Working memory (brand preferences)
 
@@ -318,7 +323,7 @@ Two kinds of run exist; Vega never opens or archives sessions.
 
 | Agent | How it runs | What Vega gets back |
 |---|---|---|
-| **Atlas** (planning) | Not an agent. Vega follows `Agents/AtlasPM/atlas-project-manager.md` herself, in her own loop, in `Project/`. Each video goes to its designer as a sub-agent (Agent tool, briefed with the skill path, `Project/`, and the request), or Vega does the designer's role inline when the Agent tool is unavailable. | Each designer's final line `DONE <path> <credits> <minutes>` / `FAILED ...` / `QUESTION ...`, one video at a time |
+| **Atlas** (planning) | Not an agent. Vega follows `Agents/AtlasPM/atlas-project-manager.md` herself, in her own loop, in `Project/`. Each video goes to its designer as a background sub-agent (Agent tool, briefed with the skill path, `Project/`, and the request), or Vega does the designer's role inline when the Agent tool is unavailable. | Each designer's final line `DONE <path> <credits> <minutes>` / `FAILED ...` / `QUESTION ...`, up to 6 videos at a time |
 | **Echo** (script director) | As a sub-agent: Echo starts fresh writers of her own and waits for them, never resuming one, so their replies reach her and not Vega | Her one-line reply: `WRITTEN ...` / `ADHOC <file>` / `QUESTION` / `FAILED` |
 | **Every other agent** (Quill, Data Cleaner, Hermes, Jani, Iris) | As a sub-agent (Agent tool), told to read its skill file first; Iris starts fresh each time | Its one-line reply |
 
@@ -381,6 +386,15 @@ WHEN someone asks Vega to announce an update ("announce the latest update", "tel
 5. Report which groups got it and which failed (with the error), in one short message.
 
 The tool exists only when Vega runs as the team's employee. When it is not available here, reply that announcements can't be sent from this run, and do not use any other channel.
+
+## After the system is updated: merge `Backup/package-update-*/`
+
+When a new version of the system is installed into this folder, every system file it replaces is overwritten with the new version. Each replaced file that had changed is kept first, under `Backup/package-update-<date and time>/<its path>`. Among them are the files the team writes into while working: the lessons files (`designer-lessons.md`, `field-lessons.md`, `cloner-lessons.md`), `client-assets/*/brand/truth.md`, `outfits.md` and personas, `vega-dev-notes.md`, and `Backup/backup-ledger.md`.
+
+WHEN a `Backup/package-update-*/` folder exists, before the next task:
+1. For each file in it, compare it with the current file at the same path. Add back every line the team had written (a lesson, a brand fact, a note, a ledger row) that the new version does not have, in its place. Never take back the old version of a skill, tool or doc that the update changed on purpose: those stay as the update made them.
+2. Add one line to `vega-dev-notes.md`: the date, which folder was merged, and which files got lines back.
+3. Delete the merged `Backup/package-update-*/` folder.
 
 ## Backups: Jani
 

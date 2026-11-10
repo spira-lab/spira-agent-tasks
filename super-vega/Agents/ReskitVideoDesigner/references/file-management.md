@@ -40,7 +40,10 @@ Project/<BrandName>/
   file per video.
 - At the render, move the working files (frame folders, contact sheets) to `deletable/`. Keep
   `chain.json`, `edit.json` and `plan.md`.
-- Never delete anything. Throwaway intermediates go to the session scratchpad.
+- Never delete anything. Throwaway intermediates go to your own scratch folder,
+  `<scratchpad>/t<Task ID>/`: other designers share the scratchpad at the same time
+  (2026-11-10), so never read, change or run another task's files there (a `--batch` jobs
+  file included).
 
 ## Brand-level files (the one place in Agents/ you write)
 
@@ -49,7 +52,7 @@ and must survive Jani's backups (Jani clears `Project/`). They live in Vega's cl
 
 ```
 Agents/VegaOM/client-assets/<BrandName>/
-  personas/<Name>/
+  personas/<Name>/           a persona made from 2026-11-10 on: <Name>-t<Task ID>/
     source/                  the given avatar image, or the Soul base image if one was made
     sheet_4k.png             the master character sheet (never edited in place)
     voice.md                 her voice in one sentence, written the first time she speaks, never changed
@@ -66,6 +69,13 @@ Agents/VegaOM/client-assets/<BrandName>/
 `Agents/` this designer writes. Never touch the brand's other files there (the logo and product
 images Vega keeps at the top of the brand's folder): read them, copy them into the video's
 materials when a build needs them.
+
+Another designer may be writing the same brand's files at the same time. Add lines to
+`truth.md` and `outfits.md` only with `python3 <shared>/tools/brand-lock.py append <file> @<textfile>`.
+Anything else written here (a new `voice.md`, `brand/ui/` screenshots, a new `logo/`, an
+in-place edit of `truth.md`) goes inside `python3 <shared>/tools/brand-lock.py <BrandName> -- <command>`,
+after looking again for what you were about to make: when another designer has just made it,
+reuse theirs.
 
 ## The plan file
 

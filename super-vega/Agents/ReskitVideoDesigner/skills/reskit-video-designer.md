@@ -86,6 +86,12 @@ arguments):
 | `node <reskit>/tools/capture_site.js` | screenshots, logo, colors and text from the brand's own website |
 | `<reskit>/tools/caption.html`, `beat.html`, `popup.html`, `sheet_template.html` | overlay and sheet templates |
 | `python3 <shared>/tools/make-timings.py` | transcripts and speech checks (Scribe first, Whisper fallback): the source's word timings, and every re-voiced clip checked against its script |
+| `python3 <shared>/tools/heavy-slot.py <Task ID> -- <command>` | runs a heavy command in one of the 2 render slots (Bash timeout 600000; exit 75 = slots busy, run the same line again). Every `build_edit.py` run, every `render_html.js --batch`, every `composite.py` and every frame-sequence ffmpeg encode goes through it |
+| `python3 <shared>/tools/brand-lock.py` | `append <file> @<textfile>` for a line in `truth.md`, `outfits.md` or a lessons file; `<BrandName> -- <command>` for anything else written in the brand's client-assets |
+
+Other designers work at the same time as you (up to 6, 2026-11-10). Keep throwaway files in
+`<scratchpad>/t<Task ID>/` only, and write each job ID into `chain.json` the moment
+`submit_ai_job` returns it (7.7).
 
 You may use only Atlas's approved commands (`<super>/Agents/AtlasPM/docs/atlas-allowed-tools.txt`):
 never shell loops, `$(...)` variables, `sleep`, `kill` or `mktemp`. The tools do the
@@ -396,7 +402,7 @@ Everything that doesn't need a generated result, now:
 
 - **Overlays:** render the caption, the text beats and the pop-ups from the templates
   (`node <reskit>/tools/render_html.js <template>#<urlencoded text> <out.png> [w h scale]`, or
-  `--batch` for all of them), keeping each one's HTML beside its PNG in `assets/`. Time each
+  `--batch` for all of them, through `heavy-slot.py`), keeping each one's HTML beside its PNG in `assets/`. Time each
   pop-up to the exact word it reacts to.
 - **B-roll and simulated screens:** rebuilt in HTML from the captured or provided UI, rendered,
   animated in ffmpeg (the playbook's "B-roll and simulated screens").
@@ -446,8 +452,10 @@ Everything that doesn't need a generated result, now:
   cover moment. Then:
 
   ```
-  python3 <reskit>/tools/build_edit.py <materials>/edit.json draft
+  python3 <shared>/tools/heavy-slot.py <Task ID> -- python3 <reskit>/tools/build_edit.py <materials>/edit.json draft
   ```
+
+  (Bash timeout 600000; exit 75 means every render slot stayed busy: run the same line again.)
 
   It builds the whole cut with the source footage (caption masked) standing in for every clip
   still rendering, writes `renders/deletable/<name>_draft.mp4`, rewrites the editable page, and
@@ -490,7 +498,8 @@ Then record it on the sheet and reply exactly as Atlas's closing text says:
 When Atlas resumes you with "Render the video now by following the rendering skill", the
 rendering skill for a re-skit is **this section**. Never run `render-fast.js` on a re-skit.
 
-1. `python3 <reskit>/tools/build_edit.py <materials>/edit.json final`. It mixes and checks the
+1. `python3 <shared>/tools/heavy-slot.py <Task ID> -- python3 <reskit>/tools/build_edit.py <materials>/edit.json final`
+   (Bash timeout 600000; exit 75: run it again). It mixes and checks the
    audio on its own, renders the picture, attaches the sound, embeds the cover, writes
    `renders/<name>.mp4` (an older render moves to `renders/deletable/` first), makes the share
    copy (under 30 MB) at `renders/deletable/<name>_share.mp4`, checks the file (1080x1920,

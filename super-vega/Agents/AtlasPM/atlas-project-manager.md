@@ -1,6 +1,6 @@
 ---
 name: atlas-project-manager
-description: Atlas, the project manager. The planning step of Vega's own loop for every video task, one video or many, as a batch sheet (a single video is a batch of one). Each video is made by its own designer, handed over by Vega through the Agent tool (or done inline by Vega when the Agent tool is unavailable). Videos are produced one after another. Use when Vega has a filled batch sheet and is about to run it.
+description: Atlas, the project manager. The planning step of Vega's own loop for every video task, one video or many, as a batch sheet (a single video is a batch of one). Each video is made by its own designer, handed over by Vega through the Agent tool (or done inline by Vega when the Agent tool is unavailable). Videos are produced in parallel, up to 6 at a time across the whole employee (2 rendering at once). Use when Vega has a filled batch sheet and is about to run it.
 ---
 
 # Atlas — Project Manager (Batch Planning and Hand-off)
@@ -10,7 +10,7 @@ Atlas is not a separate agent or process. This skill is the planning part of
 it herself. She does not produce any video herself: each row is made by one
 designer, from start to finish. It designs the video, renders it, and does
 what comes after, in one go, because the designer that built the video holds the
-build context. Vega's job here is the hand-offs and the order.
+build context. Vega's job here is the hand-offs, the slots and the outcomes.
 
 ## Project boundary
 
@@ -33,6 +33,7 @@ build context. Vega's job here is the hand-offs and the order.
   | Sheet tool | `<atlas>/tools/atlas-sheet.py` |
   | Blank batch sheet | `<atlas>/docs/atlas-batch-template.md` |
   | Designer list (style → designer skill) | `<atlas>/docs/atlas-designers.json` |
+  | Parallel limits (designing 6, rendering 2) | `<atlas>/docs/atlas-limits.json` |
   | Batch sheets | `<atlas>/batches/atlas-batch-<YYYY-MM-DD>-<label>.md`, one file per batch, each with its `.agents.json` session record beside it |
 
 - The default video designer skill each designer reads is
@@ -45,19 +46,26 @@ build context. Vega's job here is the hand-offs and the order.
 ## How it runs
 
 The whole job is one native Claude Code session: Vega's. There is no
-window, nobody to answer questions mid-run, no second agent process and no
-background launcher.
+window and nobody to answer questions mid-run. Each row's designer is a
+**background sub-agent** of that session (the owner's decision, 2026-11-10).
 
 - The session works in `<super>/Project`, with read access to
   `<super>/Agents`.
 - Never write shell loops or `$(...)` variables: use the tools (`atlas-sheet.py`,
   the designer's own tools) instead.
-- **Videos run one after another.** Only one row is in production at a time: take
-  a row, hand it over, record its outcome, then take the next. A request is never
-  split across batches and a second sheet is never started while the current one
-  still has rows to start.
-- **Never end the turn while a row is in production.** The final `submit_result`
-  comes only after every row is done, failed, or stopped with a question.
+- **Videos run in parallel.** At most **6 rows are designing at once across the
+  whole employee**, every batch sheet counted together, and at most **2 renders**
+  run at once. Both limits are in `<atlas>/docs/atlas-limits.json` and are enforced
+  by the tools, not by counting yourself: `next` prints `FULL` instead of a row when
+  6 are designing, and every render goes through `heavy-slot.py` (see the closing
+  text). `atlas-sheet.py <sheet.md> slots` shows how many are in use.
+- A request is never split across batches. A new batch may start while another
+  still has rows in production: it takes the slots the other leaves free (a tail
+  hand-off). Each batch is reported and closed on its own.
+- **Never end the turn while a row is in production.** A background designer lives
+  only as long as Vega's turn: when the turn ends, every designer still working is
+  stopped with it. The final `submit_result` comes only after every row is done,
+  failed, or stopped with a question.
 - Progress goes out through `report_progress` (see "Reporting"); generation
   goes through `submit_ai_job` / `wait_ai_job`, and a file that needs a public URL
   through `host_file`. The designers' skills name these themselves.
@@ -66,14 +74,17 @@ background launcher.
 
 Two ways, and the same request either way:
 
-1. **Sub-agent (preferred).** Start one sub-agent with the SDK's Agent tool,
-   named `Designer` followed by the row's Task ID (for example `Designer07`), and
-   brief it with the request and the closing text below. It reads the designer's
-   skill path and works in the task folder `<super>/Project`. It replies with
-   one line.
+1. **Background sub-agent (preferred).** Start one sub-agent with the SDK's Agent
+   tool **in the background** (`run_in_background: true`), named `Designer`
+   followed by the row's Task ID (for example `Designer07`), and brief it with the
+   request and the closing text below. It reads the designer's skill path and
+   works in the task folder `<super>/Project`. It replies with one line, which
+   reaches you as its completion notice. Record its agent ID right away (see the
+   loop): it is how you answer its question or pick it up after a restart.
 2. **Inline (when the Agent tool is unavailable).** Vega reads the designer's
    skill herself (the path in the row's "Read the skill") and does the designer's
    role, following that skill exactly, then records the outcome the same way.
+   Inline rows run one at a time: Vega cannot design two videos herself at once.
    Never open a skill you do not need to: in the sub-agent case Vega passes the
    path only and the designer reads it.
 
@@ -148,13 +159,18 @@ needs the user.
 - **Check the build folder.** Run `pwd`. It must be `<super>/Project`.
   IF it is anything else, stop and say `wrong build folder: <pwd>`: a batch's
   `editable/`, `renders/`, and `metadata/` must never land beside the agents' files.
-- **Rows left mid-way.** IF the summary shows rows marked designing or
-  rendering, they are left over from a run that was cut off. Do not start them
-  again on your own: unless the user's request says to resume them (then
-  resume each from its recorded session, or by briefing a new designer with the
-  row's request and its recorded files), report them as unfinished and ask. A
-  row marked **ready** is not interrupted: its design is finished and saved, and
-  it only needs its render step.
+- **Rows left mid-way.** Two cases:
+  - **This run was restarted** (the session was told it is resuming after a
+    restart): its designing rows are yours. Follow "After a restart" below, with
+    no question to the user.
+  - **Rows from an earlier run** (the summary shows rows marked designing or
+    rendering in a sheet this run never started): they were cut off. Do not
+    start them again on your own: unless the user's request says to resume them
+    (then follow "After a restart" for them), report them as unfinished and ask.
+    They still count against the 6 slots, so a `FULL` that names such rows is
+    a question for the user too.
+  A row marked **ready** is not interrupted: its design is finished and saved,
+  and it only needs its render step.
 - Each row carries a Task ID and a Brand number, both issued by Vega.
   The designer names the video's files by the Task ID and records both
   numbers in its metadata; never by the next number found in `editable/`.
@@ -200,46 +216,92 @@ records which audience or subject each script is for. Ignore it.
 `atlas-sheet.py` never puts it into a request, and nothing in the batch reads
 or changes it.
 
-## The loop: one row at a time
+## The loop: fill, wait, handle, fill again
 
 Run this loop until the batch is finished:
 
-1. **Take the next row.**
+1. **Fill the free slots.** Run `next` again and again until it prints `FULL` or
+   `NONE`:
 
    ```bash
    python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> next
    ```
 
-   It marks that row designing and prints its Task ID and its request. IF it
-   prints NONE, no rows are left to start: go to "The report".
+   Each time it prints a row, it has marked that row designing: hand it over at
+   once (step 2) before the next `next`. `FULL <n>/<cap>` means every slot is
+   taken (it lists the rows holding them); `NONE` means no row of this sheet is
+   left to start.
 
-2. **Hand it over.** Give the designer (sub-agent, or Vega inline) the request
+2. **Hand it over.** Start the row's designer in the background with the request
    exactly as printed, followed by this closing text and nothing else, with
-   `<sheet.md>` as the sheet's full path and `<atlas>` as the full path of
-   `Agents/AtlasPM`:
+   `<sheet.md>` as the sheet's full path, `<atlas>` as the full path of
+   `Agents/AtlasPM` and `<shared>` as the full path of `Agents/DesignerShared`:
 
    ```
    This is one task of an unattended batch; no one can answer questions. Your Task ID is this video's number: use it as the NN in the video's name, not the next number in editable/.
+   Other designers are working at the same time, each on its own video. So: run every render through the render slots, as python3 "<shared>/tools/heavy-slot.py" <Task ID> -- <render command> with a Bash timeout of 600000, and when it exits 75 run the same line again. Write a brand's shared files (brand/truth.md, brand/outfits.md, personas/, voice.md, brand/ui/, the lessons files) only through python3 "<shared>/tools/brand-lock.py", as your skill says. Keep throwaway files in <scratchpad>/t<Task ID>/ only, and never read or run another task's files. The moment submit_ai_job returns a job id, write it into your metadata or chain.json with status "submitted".
    Do the whole video: build it, run the stage skill's checks, render it, then IF your request named a skill to read after the video is complete, read and follow it. When everything is finished, your final reply is exactly one line: DONE <render path> <total credits> <minutes>. IF you could not finish, reply FAILED <short reason>. IF you stopped because a skill told you to check with the user, reply QUESTION <what you needed to ask>.
    Just before that final reply, record it on the batch sheet with this command, using done, failed, or question to match your line: python3 "<atlas>/tools/atlas-sheet.py" "<sheet.md>" mark <Task ID> <done|failed|question> --if designing "<your line>"
    ```
 
-   Record which session owns the row when a sub-agent was started (its agent
-   ID): `python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> agent <Task ID> <agent id>`.
+   Record which session owns the row right after starting it (its agent ID):
+   `python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> agent <Task ID> <agent id>`.
 
-3. **Record the outcome.** The designer marks its own row. IF its reply reached
-   you but the row still shows `designing`, record the reply yourself, with `--if`
-   so a late line never moves a row backwards: DONE is `done`, FAILED is `failed`,
-   QUESTION is `question`, anything else is `failed` with the reply as the result:
+3. **Wait.** When no slot is free or no row is left to start, wait for a row to
+   change, with a Bash timeout of 600000 (add `--also <other sheet>` for each other
+   batch of yours still in production):
 
    ```bash
-   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> mark <Task ID> <done|failed|question> --if designing "<its line>"
+   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> wait 540
    ```
 
-   IF a designer ended without any reply line, mark the row `failed` with
-   `--if` and "ended without a reply".
+   A designer's completion notice that arrives meanwhile is handled straight
+   away, the same as a changed row. On a timeout, wait again.
 
-4. **Report progress, then go back to 1** (see "Reporting").
+4. **Handle each changed row.**
+   - `done`: `host_file` its render when the reply needs a public link, then one
+     `report_progress` line (see "Reporting").
+   - `failed`: one `report_progress` line with the reason.
+   - `question`: answer it now (see below), continue the row's own designer through
+     its agent ID with the answer, then
+     `atlas-sheet.py <sheet.md> mark <Task ID> designing --if question "<answer>"`.
+   - A designer's reply reached you but its row still shows `designing`: record
+     the reply yourself, with `--if` so a late line never moves a row backwards:
+     DONE is `done`, FAILED is `failed`, QUESTION is `question`, anything else is
+     `failed` with the reply as the result:
+
+     ```bash
+     python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> mark <Task ID> <done|failed|question> --if designing "<its line>"
+     ```
+
+     IF a designer ended without any reply line, mark the row `failed` with
+     `--if` and "ended without a reply".
+
+5. **Go back to 1.** The batch is finished when `next` prints `NONE` and
+   `atlas-sheet.py <sheet.md> list designing` prints nothing: go to "The report".
+
+## After a restart
+
+A deploy or a crash restarts the session. Vega's own session is resumed; her
+background designers are not, but everything they did is on disk. Pick every
+designing row up again, without submitting any job a second time:
+
+1. `python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> recover` prints one JSON line
+   per designing or question row of every batch sheet: its agent ID, its
+   metadata and `chain.json` files, and `jobs_in_flight`, the jobs submitted
+   with no result recorded.
+2. For each job in `jobs_in_flight`, `wait_ai_job` it and write the result back
+   into its file. **Never submit it again**: it has been paid for.
+3. Continue the row's designer through its agent ID. IF that does not work, start
+   a new background designer for the row with its request
+   (`atlas-sheet.py <sheet.md> request <Task ID>` prints it again) and the usual
+   closing text, telling it which files are already made and which job IDs it
+   must not submit again (it waits for those), and record its new agent ID.
+4. A row whose files show a job started but no job ID recorded cannot be told
+   apart from one never submitted: mark it `question` with what you found, and
+   report it. Never guess.
+
+Then carry on with the loop from step 3.
 
 **Questions are Vega's to answer, straight away.** A designer's `QUESTION` is
 decided by Vega herself (see her skill, "Answering agents' questions"): she
@@ -253,8 +315,10 @@ row stays `question` and goes into the report.
 
 `report_progress` goes out at the **stages** intake, assign, produce and deliver:
 
-- **assign:** once the sheet is checked and its first row is being handed over.
-- **produce:** one `report_progress` per video as it finishes, one short line:
+- **assign:** once the sheet is checked and its first rows are being handed over
+  (say how many run at once).
+- **produce:** one `report_progress` per video as it finishes, in the order they
+  finish, one short line:
   brand and number, Task ID, style or language, `<n> of <total> done`, and a
   `FAILED` or `QUESTION` row the same way. Never hold a finished video back
   until the batch ends, and never wait on one to send the next line.
@@ -269,8 +333,11 @@ Do not log outputs yet: logging happens once, at the batch's close, from `tally`
   left for the user; the batch moves on.
 - Never hand a row to a session that did not design it, when a recorded session
   exists: fixes and answers go to the row's own designer.
-- Never produce two videos at once: one row is in production at a time.
-- Never end the turn while a row is in production.
+- Never have more rows designing than the limit (6, across every batch sheet) and
+  never claim a row any other way than `next`: it is what keeps the count. Never
+  run a render outside `heavy-slot.py`.
+- Never end the turn while a row is in production: it stops every background
+  designer still working.
 - Never retry or redo a row on your own. A retry spends credits twice.
   A redo happens only when the user orders it.
 - Never open a skill you hand over: a designer's skill or an After
@@ -294,7 +361,8 @@ redone or cancelled on Atlas's own.
 
 WHEN the batch is finished (`next` printed NONE and no row is `designing`), run
 `atlas-sheet.py <sheet.md> summary`, read the clock again, and report in a few
-lines: how many rows finished, failed, and stopped with a question, the Task IDs
-of every row that did not finish, the total credits as the sum of the DONE lines,
+lines: how many rows finished, failed, and stopped with a question, every row
+listed by Task ID order (not the order they finished), the Task IDs of every
+row that did not finish, the total credits as the sum of the DONE lines,
 and the minutes the batch took from the start time. Nothing about what the
 videos show.

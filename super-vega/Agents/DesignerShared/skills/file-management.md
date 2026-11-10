@@ -35,6 +35,20 @@ document is relative to the root, and every file the session creates goes
 inside it. Nothing is written anywhere else, except throwaway
 intermediates, which go in the session scratchpad.
 
+- **Your own scratch folder.** Up to 6 designers work at the same time
+  (2026-11-10), and the scratchpad is shared by them. Keep every throwaway
+  file in `<scratchpad>/t<Task ID>/` (for example `t291/`), create it
+  first, and never read, change or run anything outside it: another
+  task's jobs file or frames are not yours, even when the name fits.
+- **Shared brand files.** A brand's files outside `Project/`
+  (`Agents/VegaOM/client-assets/<Brand>/`) and the lessons files are
+  shared with the other designers. Add a line to them only with
+  `python3 <shared>/tools/brand-lock.py append <file> @<textfile>`;
+  make or change anything else there only inside
+  `python3 <shared>/tools/brand-lock.py <Brand> -- <command>`, reading
+  the file again inside it first (another designer may have just made
+  it: reuse it then). Never run one brand-lock inside another.
+
 - **BrandName** is the brand as given in the request, with spaces and
   special characters removed and capitalization kept: "Glow Lab Co."
   becomes `GlowLabCo`. It is the same name the operations manager uses for
@@ -176,6 +190,7 @@ regenerated after its file has been deleted.
       "prompt": "the exact prompt or instruction used, verbatim",
       "source": "/abs/path of the sheet it was cut from, or null",
       "url": "output URL returned by the generative AI service, or null",
+      "job_id": "the id submit_ai_job returned, or null",
       "credits": 5,
       "generated": "2026-09-20T14:02",
       "replaced_by": null
@@ -193,6 +208,12 @@ regenerated after its file has been deleted.
 }
 ```
 
+- **The moment `submit_ai_job` returns**, before waiting for it, add the
+  asset's entry with `"status": "submitted"` and `"job_id": "<the id>"`
+  (and the prompt and credits). When the job finishes, set the status to
+  `in-use` (or `deletable`) and fill in `file` and `url`. After a restart
+  this is how a job already paid for is waited for instead of submitted
+  again.
 - Every generated asset gets an entry the moment it is generated,
   including candidates that are later rejected. `credits` is the
   job's cost from the toolkit's price table, recorded at submission;

@@ -15,8 +15,17 @@ better. Run it, read its one result line, move on.
 
 WHEN the editable is built and has passed the stage skill's first-frame
 audit (3a) and its checks before hand-over (4), it is ready to render.
-Only one render runs on the machine at a time; never start a second one
-alongside.
+Other designers render on the same machine at the same time, so every
+render runs inside a **render slot**: at most 2 renders at once (the owner's
+decision, 2026-11-10). Put `python3 <shared>/tools/heavy-slot.py <Task ID> --`
+in front of the render command, with a Bash timeout of 600000. It waits
+for a free slot, runs the command, and exits with the command's own exit
+code. IF it exits **75**, every slot stayed busy for 5 minutes and nothing
+ran: run the same line again. The same goes for every other heavy step a
+style skill names (an HTML batch render, a build or composite script, a
+final ffmpeg encode); light steps (AI jobs, probes, single frames) run
+without a slot. A command that needs a shell (a pipe, `&&`) goes in as
+`bash -c "<command>"`.
 
 ## Before you run it
 
@@ -46,7 +55,7 @@ mix effects into the voice file yourself.
 ## The command
 
 ```bash
-node <shared>/tools/render/render-fast.js <root>/editable/<name>.html <root>/renders/<name>.mp4 --cover <seconds>
+python3 <shared>/tools/heavy-slot.py <Task ID> -- node <shared>/tools/render/render-fast.js <root>/editable/<name>.html <root>/renders/<name>.mp4 --cover <seconds>
 ```
 
 `<shared>` is the designers' shared folder, `Super Vega/Agents/DesignerShared`; `<root>` and `<name>` are
@@ -67,7 +76,8 @@ What it does, in order:
 7. Checks the file: frame count, length, stereo audio, cover.
 
 Expect about one second of wall time per second of video; a 40-second
-video takes about 45 seconds.
+video takes about 45 seconds (longer while another render shares the
+machine), plus any wait for a slot.
 
 ## The result
 

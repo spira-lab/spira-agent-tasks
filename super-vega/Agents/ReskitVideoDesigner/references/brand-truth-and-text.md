@@ -18,6 +18,11 @@ with its source and the date it was checked:
 | The brand has no live chat support | absent from site, help centre, app UI text | site + app strings | 2026-01-15 |
 ```
 
+Other designers may be working on the same brand at the same time. Add rows only with
+`python3 <shared>/tools/brand-lock.py append <truth.md> @<textfile>`; an in-place edit of a row
+(a re-check), and a new capture into `brand/ui/`, go inside
+`python3 <shared>/tools/brand-lock.py <BrandName> -- <command>`, reading the file again first.
+
 **Sources, in order of trust:**
 1. Material the request provides (product image, logo, screenshots, files named in the
    instructions). It always wins.
@@ -98,7 +103,8 @@ on-screen text keeps the real spelling.)
   (take the time from `source/timings.json`) and holds until the moment passes or the shot cuts.
 - **Text beats** (`tools/beat.html`) that replace the source's own caption moments (for example a
   two-part setup over a reaction) use the source's caption style at the same height.
-- Render every overlay from its HTML (`render_html.js`, several at once with `--batch`), and
+- Render every overlay from its HTML (`render_html.js`, several at once with `--batch` through
+  `heavy-slot.py`), and
   keep the HTML beside the PNG in `assets/`, so a text change is a re-render, not a redesign.
 - The brand's logo appears only as the real file (from the request, or captured from the
   brand's site), never an emoji or a lookalike. Brand colors from the request win over captured

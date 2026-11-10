@@ -6,12 +6,17 @@ The sheet is a Markdown table (.md); an .xlsx sheet also works.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> next
       Takes the first row whose Status is blank or pending, marks it designing,
       and prints {"task_id": ..., "request": ...}. Prints NONE when no row is left.
+      Prints "FULL <n>/<cap>" and the rows counted (and claims nothing) when <cap> rows are
+      already designing across every sheet in <atlas>/batches/ (docs/atlas-limits.json, 6).
       An avatar row's request carries only the avatar description; a carousel row's (any style
       ending in "carousel", e.g. corporate carousel; Output type carousel) only the brand, its
       numbers, the instructions (with the product and the brand website) and Echo's topic angle
       from the Script column; a scriptless carousel style's (lifestyle story carousel, 2026-11-03)
       the same without an angle (its designer picks its own idea). An old style name (e.g. "carousel") reads as its current one
       (the _aliases in atlas-designers.json).
+  python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> request <task id>
+      Prints a row's request again, as `next` did, whatever its status (to brief a new
+      designer for a row after a restart). Changes nothing.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> list <status>
       Prints the Task IDs whose Status is <status>, one per line, in sheet order.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> agent <task id> [<agent id>]
@@ -24,6 +29,13 @@ The sheet is a Markdown table (.md); an .xlsx sheet also works.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> wait [seconds] [--also <sheet2.md> ...]
       Blocks until any row's status changes (a designer marking its row) or the seconds run
       out (default 110, at most 540), then prints {"changed": [...], "timeout": bool}.
+  python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> slots
+      Prints {"designing", "cap", "rendering", "render_cap", "renders", "free"} across every
+      batch sheet; "renders" names who holds each busy render slot (heavy-slot.py).
+  python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> recover
+      After a restart: one JSON line per designing or question row in every batch sheet, with
+      its agent id, its metadata and chain.json files, and the jobs submitted there that have
+      no result yet ("jobs_in_flight": wait for those, never submit them again).
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> summary
       Counts rows by status and lists every row that is not done.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> create
@@ -61,6 +73,12 @@ INPUTS = COLS[:COLS.index("Status")]
 OUTPUT_TYPES = {"organic-video", "ad-video", "avatar-image", "carousel"}
 DESIGNERS = Path(__file__).resolve().parents[1] / "docs" / "atlas-designers.json"
 RUNNABLE = {"", "pending"}
+# Parallel production (the owner's decision, 2026-11-10): at most 6 rows designing across every
+# batch sheet of this employee, at most 2 renders at once (the render slots of heavy-slot.py).
+LIMITS = Path(__file__).resolve().parents[1] / "docs" / "atlas-limits.json"
+BATCHES = Path(__file__).resolve().parents[1] / "batches"
+LOCKS = PROJECT / ".locks"
+IN_FLIGHT = {"submitted", "queued", "running", "processing", "pending"}
 
 # ---------- markdown table ----------
 def md_cells(line):
@@ -280,6 +298,72 @@ def statuses(path):
         rows, _ = load(path)
     return {r.get("Task ID", ""): (r.get("Status") or "pending").lower() for r in rows if filled(r)}
 
+def limits():
+    try: d = json.loads(LIMITS.read_text())
+    except (OSError, ValueError): d = {}
+    return int(d.get("designing") or 6), int(d.get("rendering") or 2)
+
+def batch_sheets(extra=None):
+    sheets = {p.resolve() for p in BATCHES.glob("*.md") if ".saving" not in p.name} if BATCHES.is_dir() else set()
+    if extra is not None: sheets.add(extra)
+    return sorted(sheets)
+
+def designing_elsewhere(own):
+    """(sheet, Task ID) of every designing row in the other batch sheets. Never reads `own`:
+    the caller holds its lock, and a second lock on it from this process would wait forever."""
+    out = []
+    for p in batch_sheets():
+        if p == own: continue
+        try: st = statuses(p)
+        except (SystemExit, OSError, ValueError): continue
+        out += [(p, t) for t, s in st.items() if s == "designing"]
+    return out
+
+def rendering():
+    """Who holds each busy render slot, from the .who file heavy-slot.py writes beside it."""
+    busy = []
+    for f in sorted(LOCKS.glob("render-slot-*.lock")) if LOCKS.is_dir() else []:
+        with open(f, "a") as lk:
+            try: fcntl.flock(lk, fcntl.LOCK_SH | fcntl.LOCK_NB)
+            except BlockingIOError:
+                who = f.with_suffix(".who")
+                busy.append(who.read_text(encoding="utf-8").strip() if who.exists() else f.stem)
+    return busy
+
+def jobs_in_flight(node, out):
+    """Every job entry with a job_id still waiting for its result (chain.json, metadata jobs/assets)."""
+    if isinstance(node, dict):
+        if node.get("job_id") and str(node.get("status") or "").lower() in IN_FLIGHT:
+            out.append({k: node.get(k) for k in ("job_id", "status", "file", "kind", "model", "id") if node.get(k) is not None})
+        for v in node.values(): jobs_in_flight(v, out)
+    elif isinstance(node, list):
+        for v in node: jobs_in_flight(v, out)
+    return out
+
+def recover(extra=None):
+    """One JSON line per designing or question row, with what a restart needs to pick it up."""
+    for p in batch_sheets(extra):
+        try:
+            with open(p.with_name(p.name + ".lock"), "a") as lk:
+                fcntl.flock(lk, fcntl.LOCK_SH)
+                rows, _ = load(p)
+        except (SystemExit, OSError, ValueError): continue
+        side = p.with_name(p.name + ".agents.json")
+        try: agents = json.loads(side.read_text()) if side.exists() else {}
+        except ValueError: agents = {}
+        for r in rows:
+            task, status = r.get("Task ID", ""), (r.get("Status") or "pending").lower()
+            if status not in {"designing", "question"} or not task or not filled(r): continue
+            nn = task.zfill(2)
+            files = sorted(str(f) for f in (PROJECT / "Project").glob(f"*/metadata/{nn}-*.json"))
+            files += sorted(str(f) for f in (PROJECT / "Project").glob(f"*/editable/materials/{nn}-*/chain.json"))
+            jobs = []
+            for f in files:
+                try: jobs_in_flight(json.loads(Path(f).read_text(encoding="utf-8")), jobs)
+                except (OSError, ValueError): pass
+            print(json.dumps({"sheet": str(p), "task_id": task, "status": status, "started": r.get("Started", ""),
+                              "agent": agents.get(task), "files": files, "jobs_in_flight": jobs}))
+
 def wait(path, secs, also=()):
     """Block until a row's status changes, so Atlas never has to end his turn to be woken.
     --also <sheet> watches more sheets at the same time (a tail handoff runs two)."""
@@ -300,22 +384,45 @@ def main():
     if len(sys.argv) < 3: sys.exit(__doc__)
     path = Path(sys.argv[1]).expanduser().resolve(); cmd = sys.argv[2]
     if cmd == "create": return create(path)
+    if cmd == "slots":
+        cap, render_cap = limits()
+        designing = 0
+        for p in batch_sheets(path if path.is_file() else None):
+            try: designing += sum(1 for s in statuses(p).values() if s == "designing")
+            except (SystemExit, OSError, ValueError): pass
+        busy = rendering()
+        print(json.dumps({"designing": designing, "cap": cap, "rendering": len(busy), "render_cap": render_cap,
+                          "renders": busy, "free": max(0, cap - designing)})); return
+    if cmd == "recover":
+        return recover(path if path.is_file() else None)
     if not path.is_file(): sys.exit(f"No sheet at {path}")
     if cmd == "wait":
         a = sys.argv[3:]; also = []
         while "--also" in a:
             i = a.index("--also"); also.append(a[i + 1]); del a[i:i + 2]
         return wait(path, a[0] if a else 110, also)
+    if cmd == "next":
+        # Taken before the sheet's own lock, by every `next` alike, so two batches never both
+        # claim the last free slot and never wait on each other's sheets.
+        BATCHES.mkdir(parents=True, exist_ok=True)
+        slots_lock = open(BATCHES / ".slots.lock", "a")
+        fcntl.flock(slots_lock, fcntl.LOCK_EX)
     lock = open(path.with_name(path.name + ".lock"), "a")
     fcntl.flock(lock, fcntl.LOCK_EX)          # released when the process exits
     rows, handle = load(path)
     for r in rows:
         for c in COLS: r.setdefault(c, "")
     if cmd == "next":
+        cap, _ = limits()
         for r in rows:
             if filled(r) and r["Status"].lower() in RUNNABLE:
                 if not r["Task ID"] or not r["Brand number"] or (needs_script(r) and not r["Script"]):
                     sys.exit("a pending row is missing its Task ID, Brand number, or Script")
+                mine = [x["Task ID"] for x in rows if filled(x) and x["Status"].lower() == "designing"]
+                others = designing_elsewhere(path)
+                if len(mine) + len(others) >= cap:
+                    print(f"FULL {len(mine) + len(others)}/{cap}")
+                    print("designing: " + ", ".join(mine + [f"{p.name} {t}" for p, t in others])); return
                 request = build_request(r)   # validate before marking, so a rejected row stays pending
                 r["Status"] = "designing"; r["Started"] = datetime.now().strftime("%Y-%m-%d %H:%M")
                 save(path, rows, handle)
@@ -338,6 +445,11 @@ def main():
                 r["Status"] = status; r["Result"] = " ".join(result.split())[:1500]
                 save(path, rows, handle); print(f"{task}: {status}"); return
         sys.exit(f"no row with Task ID {task}")
+    if cmd == "request":
+        for r in rows:
+            if r["Task ID"] == sys.argv[3]:
+                print(json.dumps({"task_id": r["Task ID"], "request": build_request(r)})); return
+        sys.exit(f"no row with Task ID {sys.argv[3]}")
     if cmd == "list":
         want = sys.argv[3].lower()
         for r in rows:
