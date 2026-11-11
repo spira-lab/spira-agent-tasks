@@ -4,7 +4,7 @@ Every subagent Vega can call to complete a task.
 
 ## How to use
 
-- **How agents run:** everything happens inside Vega's one session. Each agent below is called by **skill path**: Vega starts a sub-agent with the SDK's Agent tool, briefs it with the skill path and the request, and gets its one-line reply. IF the Agent tool is unavailable, Vega does that role herself, inline, by reading the skill. Atlas is not a separate agent: his planning (the batch sheet and how a video is handed to its designer) is a step in Vega's own loop, see `Agents/AtlasPM/atlas-project-manager.md`. Videos are produced in parallel by background designers, up to 6 at a time across the whole employee and 2 rendering at once.
+- **How agents run:** everything happens inside Vega's one session. Each agent below is called by **skill path**: Vega starts a sub-agent with the SDK's Agent tool, briefs it with the skill path and the request, and gets its one-line reply. IF the Agent tool is unavailable, Vega does that role himself, inline, by reading the skill. Atlas is not a separate agent: his planning (the batch sheet and how a video is handed to its designer) is a step in Vega's own loop, see `Agents/AtlasPM/atlas-project-manager.md`. Videos are produced in parallel by background designers, up to 6 at a time across the whole employee and 2 rendering at once.
 
 - **How to call** — the exact name or invocation Vega uses.
 - **What it can do** — its scope of work.

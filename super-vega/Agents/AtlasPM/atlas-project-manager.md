@@ -6,8 +6,8 @@ description: Atlas, the project manager. The planning step of Vega's own loop fo
 # Atlas — Project Manager (Batch Planning and Hand-off)
 
 Atlas is not a separate agent or process. This skill is the planning part of
-**Vega's own loop**: Vega reads it when she has a batch sheet to run and follows
-it herself. She does not produce any video herself: each row is made by one
+**Vega's own loop**: Vega reads it when he has a batch sheet to run and follows
+it himself. He does not produce any video himself: each row is made by one
 designer, from start to finish. It designs the video, renders it, and does
 what comes after, in one go, because the designer that built the video holds the
 build context. Vega's job here is the hand-offs, the slots and the outcomes.
@@ -82,9 +82,9 @@ Two ways, and the same request either way:
    reaches you as its completion notice. Record its agent ID right away (see the
    loop): it is how you answer its question or pick it up after a restart.
 2. **Inline (when the Agent tool is unavailable).** Vega reads the designer's
-   skill herself (the path in the row's "Read the skill") and does the designer's
+   skill himself (the path in the row's "Read the skill") and does the designer's
    role, following that skill exactly, then records the outcome the same way.
-   Inline rows run one at a time: Vega cannot design two videos herself at once.
+   Inline rows run one at a time: Vega cannot design two videos himself at once.
    Never open a skill you do not need to: in the sub-agent case Vega passes the
    path only and the designer reads it.
 
@@ -141,7 +141,7 @@ credits, and a quote over that comes back as a `QUESTION` with the quote,
 like any other question for Vega. Expect about 80 to 100 credits per row.
 
 **Corporate or lifestyle.** A request for "carousels" that names neither
-kind is decided by Vega before the sheet is built (her skill,
+kind is decided by Vega before the sheet is built (his skill,
 "Which carousel designer"); the Style column then names the kind.
 
 **Choosing the designer is Atlas's job.** Each row's Style names the video
@@ -282,7 +282,7 @@ Run this loop until the batch is finished:
 
 ## After a restart
 
-A deploy or a crash restarts the session. Vega's own session is resumed; her
+A deploy or a crash restarts the session. Vega's own session is resumed; his
 background designers are not, but everything they did is on disk. Pick every
 designing row up again, without submitting any job a second time:
 
@@ -304,11 +304,11 @@ designing row up again, without submitting any job a second time:
 Then carry on with the loop from step 3.
 
 **Questions are Vega's to answer, straight away.** A designer's `QUESTION` is
-decided by Vega herself (see her skill, "Answering agents' questions"): she
+decided by Vega himself (see his skill, "Answering agents' questions"): he
 resumes the row's own designer with the decision (or briefs a new one with the
 row's request, its recorded files and the answer), marks the row `designing`
 with `--if question`, and carries on. A row never waits for the end of the
-batch on a question she can answer. IF the answer is for the user to decide, the
+batch on a question he can answer. IF the answer is for the user to decide, the
 row stays `question` and goes into the report.
 
 ## Reporting

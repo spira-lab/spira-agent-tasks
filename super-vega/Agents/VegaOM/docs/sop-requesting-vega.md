@@ -1,6 +1,6 @@
 # How to Send a Request to Vega
 
-Vega is Super Vega's operations manager. She takes the request as the task brief and runs the AI team: Echo (scripts), Atlas and the designers (talking head, explainer, podcast, avatar, clone, re-skit, corporate carousel and lifestyle story carousel), Hermes (uploads), Iris (reports) and Quill (brand briefs). This SOP shows how to ask so a request runs the first time.
+Vega is Super Vega's operations manager. He takes the request as the task brief and runs the AI team: Echo (scripts), Atlas and the designers (talking head, explainer, podcast, avatar, clone, re-skit, corporate carousel and lifestyle story carousel), Hermes (uploads), Iris (reports) and Quill (brand briefs). This SOP shows how to ask so a request runs the first time.
 
 ## 1. Where to ask
 
@@ -27,7 +27,7 @@ Brand rules already on file (voices, logos, style sheets, languages, upload tags
 **Examples**
 - `Let's create 3 videos for Cookiy Earn Text Agent and 15 videos for IASO`
 - `1 organic talking-head video for PartGenie. Don't upload yet, I'll review.`
-- `Create 5 avatar images that look like typical Instagram content creators` (with no description, Vega picks the people herself)
+- `Create 5 avatar images that look like typical Instagram content creators` (with no description, Vega picks the people himself)
 
 ## 2b. Cloning or re-skitting a video
 
@@ -75,7 +75,7 @@ The 🖼️ **Corporate Carousel Designer** makes 4–7 slide corporate carousel
 
 ## 3. What happens next
 
-1. **Vega confirms** in her first progress message what is being made.
+1. **Vega confirms** in his first progress message what is being made.
 2. **Echo writes the scripts**, checked against everything the brand already has, so angles don't repeat.
 3. **Atlas produces** the videos: up to 6 in design and 2 rendering at once. New batches start in free slots as the current one finishes.
 4. **Each video is reported** the moment it's done, one by one, with a short progress line (for example "IASO #146 (Task 248) done · Vietnamese · dengue protection").
@@ -108,5 +108,5 @@ Every video is delivered as its public URL, in full quality.
 ## 7. Good to know
 
 - **Weekly targets** run Monday to Friday: Cookiy 42, IASO 100, PartGenie 50 (10 a day).
-- If Vega is **blocked** (a service down, a missing tag, a decision only the owner can make), she says so in a progress message and in the result.
+- If Vega is **blocked** (a service down, a missing tag, a decision only the owner can make), he says so in a progress message and in the result.
 - During an announced **update window**, hold new requests. Anything sent during the window is picked up right after.

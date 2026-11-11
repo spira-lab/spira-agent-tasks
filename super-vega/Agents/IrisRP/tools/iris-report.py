@@ -54,7 +54,7 @@ def ledger_brands():
 
 
 def read_log(path):
-    """[(date, type)] from one of Vega's monthly files (same format her output tool writes)."""
+    """[(date, type)] from one of Vega's monthly files (same format his output tool writes)."""
     if not path.exists(): return []
     out, in_log = [], False
     for line in path.read_text(encoding="utf-8").splitlines():

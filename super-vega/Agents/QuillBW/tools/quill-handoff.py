@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Quill's handoff tool. After the user APPROVES the brief, leaves it in Vega's inbox as one
-small file. Vega records it into her Client Ledger and working memory with her own tool.
+small file. Vega records it into his Client Ledger and working memory with his own tool.
 Without --product the brief is about the brand (its brand row); with --product it is about
 that product (its own row). --dna is that row's DNA file path.
 Prints one JSON line with the handoff file.

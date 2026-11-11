@@ -8,7 +8,7 @@
    "role": "Operations manager",
    "team": "managers",
    "status": "built",
-   "does": "Takes the request, plans the batch herself, hands each video to its designer, reports progress, delivers the result, runs the helpers.",
+   "does": "Takes the request, plans the batch himself, hands each video to its designer, reports progress, delivers the result, runs the helpers.",
    "folder": "Agents/VegaOM"
   },
   {

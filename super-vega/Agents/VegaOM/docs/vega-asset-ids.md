@@ -1,7 +1,7 @@
 # Vega — Spira Asset IDs
 
 Spira (Viralwell) asset ID for every uploaded logo and product image.
-Vega appends to this file after each upload. She opens it only when asked to look up an asset ID.
+Vega appends to this file after each upload. He opens it only when asked to look up an asset ID.
 
 | File name | Spira asset ID |
 |---|---|

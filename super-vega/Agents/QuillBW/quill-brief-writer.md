@@ -67,7 +67,7 @@ fields and nothing else (template: `<quill>/docs/quill-dna-template.md`):
 | Not in the DNA file | Where it goes |
 |---|---|
 | Brand colors (hex), logo, product images | Handed to Vega with the brief (assets, not information) |
-| How the user wants this brand's videos made (style, music, duration, avatar, uploads) | **Preferences**, handed to Vega for her working memory |
+| How the user wants this brand's videos made (style, music, duration, avatar, uploads) | **Preferences**, handed to Vega for his working memory |
 
 ## Reading sources: how Quill interprets what he is given
 
@@ -165,7 +165,7 @@ part of the approval.
      `--website` is the brand's or product's own site, the one the DNA was researched from. Vega
      passes it to the Cloner and Re-skit designers.
 
-## When Vega calls you (as her helper)
+## When Vega calls you (as his helper)
 
 Vega passes on the user's information. Do steps 1 to 3, then reply one line and stop:
 `DRAFT <brand> product=<product or none> dna=<DNA path> missing=<what you could not fill, or none>`.
@@ -184,7 +184,7 @@ IF you need something only the user can answer, reply `QUESTION <what>`.
 - **Never hand over without the user's approval.**
 - Never invent brand or product facts.
 - Never put colors, logos, or images into the DNA file; they go to Vega.
-- Never edit Vega's ledger or working memory: the handoff goes to her inbox, and
-  she records it.
+- Never edit Vega's ledger or working memory: the handoff goes to his inbox, and
+  he records it.
 - A user's own files are copied, never moved or deleted.
 - Never delete a DNA file.

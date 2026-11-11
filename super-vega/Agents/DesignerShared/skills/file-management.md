@@ -52,7 +52,7 @@ intermediates, which go in the session scratchpad.
 - **BrandName** is the brand as given in the request, with spaces and
   special characters removed and capitalization kept: "Glow Lab Co."
   becomes `GlowLabCo`. It is the same name the operations manager uses for
-  the brand in her own files, so one brand has one folder everywhere.
+  the brand in his own files, so one brand has one folder everywhere.
 - Create `Project/<BrandName>/` the first time a brand has a video. Every
   later video of that brand goes into the same folder.
 - IF the request's brand is `Brandless`, or it names no brand, the video is a generic one for no client: use `Project/Brandless/`. A Brandless video shows no brand at all: no brand name, no logo, nothing drawn or written to stand in for one (the word "Brandless" never appears on screen).

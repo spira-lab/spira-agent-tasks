@@ -8,7 +8,7 @@ Owned by Vega. Source of truth for client brands, products, where their DNA live
   - Product name covers DTC / e-commerce products or collections, SaaS features (one row per feature), or subsidiaries (one row per subsidiary).
 - **DNA** — the **DNA reference** of that row (the path of its local DNA Markdown file; older rows may still hold a Lark URL), the source of information about the brand or the product. Written by Quill and recorded by Vega from Quill's approved brief.
   - Every DNA has the same fields: Brand name, Product name (empty when there is no product), Description, Key highlights, RTB (up to 5 each).
-  - Vega passes the URL on. She does not open the DNA docs herself.
+  - Vega passes the URL on. He does not open the DNA docs himself.
 - **Brand colors / Brand logo** — brand-wide, kept on the brand row. Hex codes (e.g. `#1A2B3C`); several separated with `<br>`.
 - **Website** — the brand's or product's own site (the page Quill researched). Passed only to the Cloner and Re-skit designers (the owner's rule, 2026-10-24), which read it for brand info and capture UI screenshots from it, and to every carousel designer (the Corporate Carousel Designer, 2026-10-27; the Lifestyle Story Carousel Designer, 2026-11-03), which makes each carousel from it: a carousel cannot be made for a brand or product without one. A product row without one falls back to the brand row's.
 - **Product images** — on the product row: hosted URL + local path. Local files live in `Agents/VegaOM/client-assets/<BrandName>/`, named `<BrandName>_logo`, `<BrandName>_<ProductName>_prdIMG<N>`. Several images: one per line, separated with `<br>`.

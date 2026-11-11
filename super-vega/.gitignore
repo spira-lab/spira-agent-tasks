@@ -26,6 +26,7 @@ Agents/VegaOM/docs/vega-inbox/*
 Agents/VegaOM/docs/vega-inbox/done/*
 !Agents/VegaOM/docs/vega-inbox/done/.gitkeep
 Agents/VegaOM/docs/client-monthly/*/
+Agents/VegaOM/assets/vega-photos/
 Agents/VegaOM/docs/vega-task-register.json
 Agents/VegaOM/docs/vega-iris.json
 Agents/VegaOM/docs/vega-backups.md

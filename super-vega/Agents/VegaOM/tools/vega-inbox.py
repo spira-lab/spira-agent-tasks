@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Vega's inbox. Quill leaves each user-approved brand brief here as one small file; Vega
-records it with one call and never opens the ledger or the file herself.
+records it with one call and never opens the ledger or the file himself.
 
   python3 "<max>/tools/vega-inbox.py" list
       One JSON line: the briefs waiting ({"waiting": [{"file", "brand", "product", "from"}]}).

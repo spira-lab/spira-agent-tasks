@@ -1,6 +1,6 @@
 # Vega — Video Styles
 
-Owned by Vega. The video styles she can assign, and when to choose each. Vega writes the
+Owned by Vega. The video styles he can assign, and when to choose each. Vega writes the
 style name in the batch sheet's **Style** column; Atlas picks the designer for it. The names
 must match Atlas's designer list exactly (`Agents/AtlasPM/docs/atlas-designers.json`), and
 the sheet tool refuses a style that is not on it.

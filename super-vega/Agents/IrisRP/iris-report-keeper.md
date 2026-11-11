@@ -28,8 +28,8 @@ inside it. IF something you need is not there, stop and say so.
 | The page | `<iris>/report/iris-track-sheet.html` | What gets published; rebuilt by the tool every time |
 | Config | `<iris>/docs/iris-config.json` | The artifact's link (`artifact_url`) |
 
-What the tool reads (Vega's, read only): her monthly output logs
-(`Agents/VegaOM/docs/client-monthly/`), her targets (`Agents/VegaOM/docs/vega-targets.md`), and her
+What the tool reads (Vega's, read only): his monthly output logs
+(`Agents/VegaOM/docs/client-monthly/`), his targets (`Agents/VegaOM/docs/vega-targets.md`), and his
 Client Ledger (for every brand and its name). **A new brand gets its own section by itself** as
 soon as it is in the ledger, has output logged, or has a target. It also measures **storage**: the
 This machine's disk (size, used, free), how much the Super Vega folder takes (and its Project folder),

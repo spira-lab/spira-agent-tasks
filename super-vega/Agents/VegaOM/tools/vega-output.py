@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Vega's output bookkeeping. Logs completed outputs and answers count questions,
-printing one short line, so Vega never opens her monthly files or data sheet.
+printing one short line, so Vega never opens his monthly files or data sheet.
 
   python3 "<max>/tools/vega-output.py" log <brand> <type> [count] [--date YYYY-MM-DD]
       Logs completed outputs (never rejected, failed, or cancelled ones). Creates the
