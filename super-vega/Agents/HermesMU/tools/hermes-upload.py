@@ -1,28 +1,30 @@
 #!/usr/bin/env python3
-"""Hermes's upload bookkeeping. Hermes hosts each finished video (and carousel slide) with the
-host_file tool; this script holds only the local part: which files a batch sheet's rows call for, which
-tag they go under, which are already hosted, and the upload log. It never calls Spira and never hosts
-anything itself.
+"""Hermes's upload bookkeeping. Hermes files each finished video, and each carousel as one album, into
+Spira's Social Post Assets with the upload_social_post_asset tool; this script holds only the local
+part: which items a batch sheet's rows call for, which tag they go under, which are already uploaded,
+and the upload log. It never calls Spira and never uploads anything itself.
 
   python3 "<hermes>/tools/hermes-upload.py" plan --sheet <batch sheet> --tasks <11,12,... | done>
           --brand "<brand>" [--product "<product name>"] [--tag <tag id>]
-  python3 "<hermes>/tools/hermes-upload.py" record --path <file> --url <hosted url>
-          --task <Task ID> --brand "<brand>" [--product "<product name>"] --tag "<label>" [--tag-id <id>]
-          [--carousel <folder> --slide <i> --of <n>]
+  python3 "<hermes>/tools/hermes-upload.py" record --item <video or carousel folder> --asset-id <id>
+          --asset-type <video|album> --url <url> --task <Task ID> --brand "<brand>"
+          [--product "<product name>"] --tag "<label>" --tag-id <id>
 
 plan: for each Task ID (or every done row with "done"):
   - the row must be done; its render path comes from the row's Result (DONE <render path> ...)
-  - a carousel row (Result DONE <carousel folder> ..., any carousel style): each slide JPEG in the folder's
-    out/ (slide-01.jpg, slide-02.jpg, ...) is listed in order, as an image; the contact sheet and notes
-    are never listed
+  - a carousel row (Result DONE <carousel folder> ..., any carousel style) is one item: its slide JPEGs
+    in out/ (slide-01.jpg, slide-02.jpg, ...) in slide order, uploaded together as one album; the
+    contact sheet and notes are never listed
   - the tag comes from docs/hermes-working-memory.md, per kind (2026-10-29): video rows use the
     tag For "videos", carousel rows the tag For "carousels", either falling back to a row For both
     (For empty); a row for the kind wins, then the product's row over the brand's
   - --tag <tag id> is a one-off tag for this run only, used for every row instead of the working memory
-  - a file already hosted (same path, same size, same tag) is listed as skipped, with its URL
-  Prints one JSON line per file ({"path", "task_id", "action": "host"|"skipped", ...}), then one summary
-  line. For every "host" line, call host_file with that path, then record it.
-record: appends the file and the URL host_file returned to docs/hermes-upload-log.json.
+  - an item already uploaded (same item, same tag, same files at the same sizes) is listed as skipped,
+    with its asset ID
+  Prints one JSON line per item ({"item", "files", "kind": "video"|"album", "task_id", "action":
+  "upload"|"skipped", ...}), then one summary line. For every "upload" line, call
+  upload_social_post_asset with its files and tag_id, then record the asset it returned.
+record: writes the item, its files and sizes, and the asset ID to docs/hermes-upload-log.json.
 """
 import fcntl, importlib.util, json, re, sys
 from datetime import datetime
@@ -82,6 +84,10 @@ def slides_of(folder):
     """The slide JPEGs in order: out/slide-01.jpg, slide-02.jpg, ..."""
     return sorted((folder / "out").glob("slide-*.jpg"), key=lambda f: int(re.sub(r"\D", "", f.stem) or 0))
 
+def files_of(item):
+    """The files an item uploads: the video itself, or a carousel folder's slides in order."""
+    return [item] if item.is_file() else slides_of(item)
+
 def plan(a):
     sheet, tasks, brand = opt(a, "--sheet"), opt(a, "--tasks"), opt(a, "--brand")
     product = opt(a, "--product")
@@ -112,17 +118,19 @@ def plan(a):
         tag[kind] = lt
 
     log = json.loads(LOG.read_text(encoding="utf-8") or "{}") if LOG.is_file() else {}
-    to_host = skipped = 0; problems = []; carousels = 0
+    to_upload = skipped = 0; problems = []; carousels = slides = 0
 
-    def emit(tid, f, kind, extra=None):
-        nonlocal to_host, skipped
-        label, tag_id = tag[kind]
-        prev = log.get(str(f))
-        d = {"task_id": tid, "path": str(f), "tag": label, "tag_id": tag_id, **(extra or {})}
-        if prev and prev.get("size") == f.stat().st_size and prev.get("tag_id") == tag_id:
-            skipped += 1; d.update(action="skipped", url=prev.get("url"))
+    def emit(tid, item, files, kind):
+        nonlocal to_upload, skipped
+        label, tag_id = tag["carousels" if kind == "album" else "videos"]
+        prev = log.get(str(item))
+        d = {"task_id": tid, "item": str(item), "files": [str(f) for f in files], "kind": kind,
+             "tag": label, "tag_id": tag_id}
+        if (prev and prev.get("asset_id") and prev.get("tag_id") == tag_id
+                and prev.get("files") == d["files"] and prev.get("sizes") == [f.stat().st_size for f in files]):
+            skipped += 1; d.update(action="skipped", asset_id=prev["asset_id"])
         else:
-            to_host += 1; d.update(action="host")
+            to_upload += 1; d.update(action="upload")
         print(json.dumps(d, ensure_ascii=False))
 
     for r in picked:
@@ -135,44 +143,47 @@ def plan(a):
                 problems.append(f"{tid} carousel folder not found"); continue
             if not folder.resolve().is_relative_to(PROJECT):
                 problems.append(f"{tid} carousel outside Project/"); continue
-            slides = slides_of(folder)
-            if not slides:
+            pages = slides_of(folder)
+            if not pages:
                 problems.append(f"{tid} carousel has no slides in out/"); continue
-            carousels += 1
-            for i, slide in enumerate(slides, 1):
-                emit(tid, slide, "carousels", {"carousel": str(folder), "slide": i, "of": len(slides)})
+            carousels += 1; slides += len(pages)
+            emit(tid, folder, pages, "album")
             continue
         render = render_of(r)
         if not render or not render.is_file():
             problems.append(f"{tid} render not found"); continue
         if not render.resolve().is_relative_to(PROJECT):
             problems.append(f"{tid} render outside Project/"); continue
-        emit(tid, render, "videos")
+        emit(tid, render, [render], "video")
     labels = sorted({label for label, _ in tag.values()})
-    line = f"PLAN {to_host} files to host under tag {' and '.join(labels)}"
-    if carousels: line += f" ({carousels} carousel{'s' if carousels != 1 else ''}, slides in order)"
-    if skipped: line += f"; {skipped} already hosted"
+    line = f"PLAN {to_upload} items to upload under tag {' and '.join(labels)}"
+    if carousels: line += f" ({carousels} carousel{'s' if carousels != 1 else ''} as albums, {slides} slides)"
+    if skipped: line += f"; {skipped} already uploaded"
     if problems: line += f"; problems: {'; '.join(problems)}"
     print(line)
-    sys.exit(1 if problems and not to_host and not skipped else 0)
+    sys.exit(1 if problems and not to_upload and not skipped else 0)
 
 def record(a):
-    path, url, tid, brand, label = opt(a, "--path"), opt(a, "--url"), opt(a, "--task"), opt(a, "--brand"), opt(a, "--tag")
-    if not (path and url and tid and brand and label): sys.exit(__doc__)
-    if not url.startswith("https://"): sys.exit("--url must be the https URL host_file returned")
-    f = Path(path)
-    if not f.is_file(): sys.exit(f"FAILED no file at {f}")
-    entry = {"task_id": tid, "brand": brand, "product": opt(a, "--product"), "tag": label, "tag_id": opt(a, "--tag-id") or label,
-             "size": f.stat().st_size, "url": url, "uploaded": datetime.now().isoformat(timespec="minutes")}
-    if opt(a, "--carousel"):
-        entry.update(carousel=opt(a, "--carousel"), slide=int(opt(a, "--slide", 0)), of=int(opt(a, "--of", 0)))
+    item, asset_id, asset_type, url = opt(a, "--item"), opt(a, "--asset-id"), opt(a, "--asset-type"), opt(a, "--url")
+    tid, brand, label, tag_id = opt(a, "--task"), opt(a, "--brand"), opt(a, "--tag"), opt(a, "--tag-id")
+    if not (item and asset_id and asset_type and url and tid and brand and label and tag_id): sys.exit(__doc__)
+    if asset_type not in {"video", "album"}: sys.exit("--asset-type must be video or album")
+    if not url.startswith("https://"): sys.exit("--url must be the https URL upload_social_post_asset returned")
+    f = Path(item)
+    if not f.exists(): sys.exit(f"FAILED no video or carousel folder at {f}")
+    files = files_of(f)
+    if not files: sys.exit(f"FAILED no slides in {f / 'out'}")
+    entry = {"task_id": tid, "brand": brand, "product": opt(a, "--product"), "tag": label, "tag_id": tag_id,
+             "asset_id": asset_id, "asset_type": asset_type, "url": url,
+             "files": [str(x) for x in files], "sizes": [x.stat().st_size for x in files],
+             "uploaded": datetime.now().isoformat(timespec="minutes")}
     LOG.parent.mkdir(parents=True, exist_ok=True); LOG.touch(exist_ok=True)
     with open(LOG, "r+", encoding="utf-8") as lf:
         fcntl.flock(lf, fcntl.LOCK_EX)
         raw = lf.read().strip(); log = json.loads(raw) if raw else {}
         log[str(f)] = entry
         lf.seek(0); lf.truncate(); lf.write(json.dumps(log, indent=1, ensure_ascii=False) + "\n")
-    print(json.dumps({"recorded": str(f), "url": url}))
+    print(json.dumps({"recorded": str(f), "asset_id": asset_id}))
 
 def main():
     a = sys.argv[1:]

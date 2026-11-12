@@ -47,7 +47,7 @@ All paths are relative to the Super Vega folder. Agents live in `Agents/`; finis
 | Working memory template | `Agents/VegaOM/docs/working-memory/vega-memory-template.md` | Blank brand memory | Creating a brand's memory file |
 | Video Styles | `Agents/VegaOM/docs/vega-video-styles.md` | Each video style he can assign, when to choose it, and whether it is available | Choosing the Style for a video |
 | Subagent Roster | `Agents/VegaOM/docs/vega-subagent-roster.md` | Every subagent: how to call it, what it does, what to supply | Before assigning a task |
-| Update records | `Agents/VegaOM/docs/updates/<YYYY-MM-DD>-system-update.md` | The full list of what changed in each system update; each is a version (2026-10-24 = **v2**, 2026-10-27 = **v2.01**, 2026-11-10 = **v2.02**, `2026-11-10b` = **v2.03**, 2026-11-11 = **v2.04**, `2026-11-11b` = **v2.05**, 2026-11-12 = **v2.06**) | When someone asks what changed in an update, or asks Vega to announce one (see "Announcing a system update") |
+| Update records | `Agents/VegaOM/docs/updates/<YYYY-MM-DD>-system-update.md` | The full list of what changed in each system update; each is a version (2026-10-24 = **v2**, 2026-10-27 = **v2.01**, 2026-11-10 = **v2.02**, `2026-11-10b` = **v2.03**, 2026-11-11 = **v2.04**, `2026-11-11b` = **v2.05**, 2026-11-12 = **v2.06**, `2026-11-12b` = **v2.07**) | When someone asks what changed in an update, or asks Vega to announce one (see "Announcing a system update") |
 | Asset IDs | `Agents/VegaOM/docs/vega-asset-ids.md` | Spira asset ID per uploaded file | Only when asked to look up an asset ID |
 | Client Data Sheet | `Agents/VegaOM/docs/vega-client-data.md` | All-time output totals per client | Never opened; the output tool writes and reads it |
 | Monthly data | `Agents/VegaOM/docs/client-monthly/[brand name]/vega-[brand name]-[YYYY-MM].md` | Per client, per month: totals + dated output log (quantities only) | Never opened; the output tool writes and reads it |
@@ -355,7 +355,7 @@ Two kinds of run exist; Vega never opens or archives sessions.
 
 ## Uploading finished videos: Hermes
 
-**Hermes**, the media uploader, uploads finished videos into Spira's Social Post Assets library and tags them. He never posts, drafts, schedules, or publishes, and neither does Vega.
+**Hermes**, the media uploader, uploads finished videos and carousels into Spira's Social Post Assets library under their tag with the `upload_social_post_asset` tool: each video becomes a video asset, each carousel one album asset (slides in order). He never posts, drafts, schedules, or publishes, and neither does Vega. Uploading needs the operator's Spira account to have Social Post Assets access.
 
 **When.** When the user asks for videos to be uploaded, or when the brand's working memory has an upload preference under "After a video is done": as soon as the videos are done (a designer's `DONE` line, or when the batch closes). Only done videos are ever sent.
 
@@ -372,7 +372,7 @@ Product: <product name, from the batch tool's line or the Client Ledger, or none
 - **One brand and one product per brief.** A sheet that mixes products gets one brief per product, with that product's Task IDs.
 - **IASO goes up by country** (one Hermes run per language, each with its one-off `--tag`; Hermes has no saved IASO tag, and asked on 2026-10-26 when it wasn't given): Vietnamese → IASO / Vietnam `fc1f8dc8-b529-4b14-90a6-32c0af9f3082`, English (Singapore) → IASO / Singapore `0be8ecdd-51a5-44d9-b923-725b99180b66`, Malay → IASO / Malaysia `9de251ae-ec22-48b8-b833-0e96a3ea7f85`, Thai → IASO / Thailand `9ca4750e-6247-4a54-8fdb-edc86437dd3c`, Indonesian → IASO / Indonesia `c2885802-6cd8-4929-9142-97a8d77b8fbc`. Put the five groups (Task IDs + tag) in the brief.
 - **Vega never chooses the tag.** Hermes's own working memory holds which tag each brand or product is uploaded under. When the user asks to set or change one, brief Hermes with `Remember: <brand> / <product or none> → tag <category / tag>` instead of the upload lines.
-- **His reply:** `UPLOADED <n> videos tag <tag>` → tell the user in one line. `QUESTION ...` (e.g. no tag yet for a brand) → pass it to the user. `FAILED ...` → tell the user.
+- **His reply:** `UPLOADED <n> videos tag <tag>; assets ...` → tell the user in one line that they are in Social Post Assets under that tag. `QUESTION ...` (e.g. no tag yet for a brand) → pass it to the user. `FAILED ...` (e.g. the account lacks Social Post Assets access, or the tag no longer exists) → tell the user the reason.
 
 ## System backup before every major update (the owner's rule, 2026-10-24)
 

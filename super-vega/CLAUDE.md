@@ -37,6 +37,7 @@ the bold name (for example 🗺️ **Atlas**) and group by team.
 - `Project/`: finished work. `Backup/`: backups
 
 Generate with `submit_ai_job` and `wait_ai_job` and host files with
-`host_file`.
+`host_file`. Finished videos and carousels go into Social Post Assets only
+through Hermes, with `upload_social_post_asset`.
 
 This file is a map; where it and a skill disagree, the skill wins.
