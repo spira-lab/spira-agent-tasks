@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "packageVersion": "1.6.3",
+  "packageVersion": "1.6.4",
   "description": "Make one or more videos for a brand as Vega, the operations manager. The opening message is the request (for example 'make 3 videos for Emochi'). Start by reading Agents/VegaOM/vega-operations-manager.md in full: it routes the batch to the designers, produces the videos in parallel, up to 6 at a time, and delivers hosted URLs. A client's assets are found through Agents/VegaOM/docs/vega-client-ledger.md under Agents/VegaOM/client-assets/<Brand>/.",
   "requirements": [
     {"name": "ffmpeg", "kind": "system", "purpose": "Probing, cutting and the audio mix", "check": "ffmpeg -version && ffprobe -version"},

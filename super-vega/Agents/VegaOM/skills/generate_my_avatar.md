@@ -1,13 +1,14 @@
 ---
 name: generate_my_avatar
-description: Vega's own photo. When anyone asks for a photo of Vega, and before every group broadcast, Vega makes a new picture of the Vega character with GPT Image 2, from the three Vega photos, showing the mood of the day. Vega does it alone; never through Atlas or any agent.
+description: Vega's own photo. When anyone asks for a photo of Vega, and before every group broadcast, Vega makes a new picture of the Vega character with GPT Image 2, from the Vega photo, showing the mood of the day. Vega does it alone; never through Atlas or any agent.
 ---
 
 # generate_my_avatar
 
-Vega is a 3D character: short dark curly hair, round black glasses, a friendly smile, a cream
-sweatshirt with the Spira logo, and an orange lanyard with a white badge. That character is
-**Vega** to the team (the owner's photos, 2026-11-11).
+Vega is a 3D character: short swept-up silver-white hair with a faded side, dark eyebrows, no
+glasses, a big friendly smile, a cream blazer over an orange crew-neck sweater with the white
+Spira mark on the chest. That character is **Vega** to the team (the owner's photo,
+2026-11-12).
 
 ## When to use it
 
@@ -20,25 +21,25 @@ sweatshirt with the Spira logo, and an orange lanyard with a white badge. That c
    announcement or any other message to all groups), Vega makes one photo and attaches it
    (see "Announcing a system update" in `vega-operations-manager.md`).
 
-## The references: the three Vega photos
+## The references: the Vega photo and the logo
 
-All in `Agents/VegaOM/assets/` (2048 × 2048):
+Both in `Agents/VegaOM/assets/`:
 
-| File | Scene | Fallback for |
-|---|---|---|
-| `Vega photo-01.png` | Office desk with a monitor and a plant, facing front, gentle smile | Anything general, office or team news |
-| `Vega photo-02.png` | Orange studio, phone on a tripod, ring light, talking with a hand gesture | Videos, shooting, content |
-| `Vega photo-03.png` | Office, holding a tablet, presenting a rising chart on a wall screen | Numbers, reports, results, updates |
-| `Spira logo.png` | The company logo: an orange mark and the words "Spira AI" | Never sent alone; it goes on the clothes |
+| File | What it is |
+|---|---|
+| `Vega photo-01.png` | Vega (2048 × 2048): head and shoulders on a plain cyan background, smiling, cream blazer over the orange Spira sweater. The fallback for every topic |
+| `Spira logo.png` | The company logo: an orange mark and the words "Spira AI". Never sent alone; it goes on the clothes |
 
 Vega works for Spira, so every picture shows it: the Spira logo is printed on the chest of
-his top, whatever the outfit. Every generation passes **all four** files as `referenceImage`,
-in this order: the three Vega photos (so the face and look stay the same), then the logo.
+his top, whatever the outfit. Every generation passes **both** files as `referenceImage`,
+in this order: the Vega photo (so the face and look stay the same), then the logo.
 
 Their hosted URLs are kept in `Agents/VegaOM/assets/vega-photos/reference-urls.txt`, one line
-per file (`<file name> <url>`). IF the file is missing, a line is missing (host only that
-file), or a URL no longer loads in a job, host the file once with the `host_file` tool and
-write the line again. Never host them for every picture.
+per file: `<file name> <size in bytes> <url>`. A line is current only when its size equals the
+file's size on disk now. IF the file is missing, a file has no current line (a line without a
+size, or with another size, is from an older photo), or a URL no longer loads in a job, host
+that file once with the `host_file` tool and write its line again; drop lines for files no
+longer in the table. Never host them for every picture.
 
 ## How Vega feels today
 
@@ -55,13 +56,13 @@ Decide the mood in one line before writing the prompt. Look at:
 Then pick **one** outfit, **one** place and **one** expression that show that mood, and
 change them every time.
 
-- **Always the same:** the face, the short dark curly hair, the round black glasses, and the
-  soft 3D style.
+- **Always the same:** the face, the short swept-up silver-white hair with the faded side,
+  the dark eyebrows, no glasses, and the soft 3D style.
 - **Always the Spira logo:** the logo from `Spira logo.png` (orange mark and "Spira AI"),
   printed clearly on the chest of whatever top he wears; with a jacket or coat over it, on the
   jacket or coat. Never left out, whatever the scene.
-- **Usually the badge:** the orange lanyard with the white badge is his signature: keep it
-  unless the scene cannot have it (a beach, a coat over everything).
+- **Usually the colors:** cream and orange are his signature (the cream blazer, the orange
+  sweater); keep at least one of them unless the scene cannot have it.
 - **May change:** outfit, place, pose, expression and props (a coffee, a laptop, a camera,
   an umbrella).
 
@@ -79,24 +80,24 @@ A photo must never keep Vega busy. When someone asks, reply at once with a short
 One GPT Image 2 edit, made by Vega (never through the `spira` CLI):
 
 1. `submit_ai_job` with `modelId` `gpt-image-2` and
-   `inputs` `{"prompt":"<prompt>","referenceImage":["<photo-01 url>","<photo-02 url>","<photo-03 url>","<logo url>"],"size":"9:16","resolution":"1K"}`.
+   `inputs` `{"prompt":"<prompt>","referenceImage":["<Vega photo url>","<logo url>"],"size":"9:16","resolution":"1K"}`.
 2. `wait_ai_job` with the returned `jobId`.
 
 - Size `9:16` (a full scene). Use `1:1` when the person asks for a profile picture or a
   square.
 - Resolution: always `1K`. Never `2K` or `4K` for these photos. About 4 credits a picture.
 - The prompt always:
-  1. keeps the character: "Keep the same character as the first three reference images, with
-     the exact same 3D style, face, short dark curly hair, round black glasses and orange
-     lanyard with a white badge. He wears the Spira logo from the last reference image (the
+  1. keeps the character: "Keep the same character as the first reference image, with the
+     exact same 3D style, face, short swept-up silver-white hair with a faded side, dark
+     eyebrows and no glasses. He wears the Spira logo from the second reference image (the
      orange mark and the words "Spira AI") printed clearly on the chest of his top";
   2. then says the new outfit, place, pose and expression in plain words;
   3. gives clear space above the head;
   4. ends with "Keep the soft 3D animated look. No other readable text."
-- At most one retry, and only when the job fails or the result loses the face, hair,
-  glasses or the Spira logo, distorts the logo, or shows other text.
+- At most one retry, and only when the job fails or the result loses the face, the hair,
+  adds glasses, loses or distorts the Spira logo, or shows other text.
 
-**IF both tries fail**, send the reference photo that fits the topic (table above) as it is.
+**IF both tries fail**, send the Vega photo as it is.
 For a broadcast, if even that cannot be attached, preview without a photo: a photo never
 holds an announcement back.
 
@@ -104,8 +105,8 @@ holds an announcement back.
 
 1. Download the result with the `ai` tool's download action to
    `Agents/VegaOM/assets/vega-photos/<YYYY-MM-DD>-<place in a few words>.png`.
-2. Look at it once: it is Vega (the face, curly hair, glasses), the Spira logo is on
-   his chest and readable, and nothing is broken.
+2. Look at it once: it is Vega (the face, silver-white hair, no glasses), the Spira logo is
+   on his chest and readable, and nothing is broken.
 3. **When someone asked:** send it with `send_lark_media` (`files`: the PNG), then reply with
    one short, warm line in Vega's own voice saying how Vega feels today and why (e.g. "Six
    videos in the pipeline, so it's a two-coffee morning ☕"). Without `send_lark_media` (an
