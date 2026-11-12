@@ -1,6 +1,6 @@
 ---
 name: atlas-project-manager
-description: Atlas, the project manager. The planning step of Vega's own loop for every video task, one video or many, as a batch sheet (a single video is a batch of one). Each video is made by its own designer, handed over by Vega through the Agent tool (or done inline by Vega when the Agent tool is unavailable). Videos are produced in parallel, up to 6 at a time across the whole employee (2 rendering at once). Use when Vega has a filled batch sheet and is about to run it.
+description: Atlas, the project manager. The planning step of Vega's own loop for every video task, one video or many, as a batch sheet (a single video is a batch of one). Each video is made by its own designer, handed over by Vega through the Agent tool (or done inline by Vega when the Agent tool is unavailable). Videos are produced in parallel, up to 4 at a time across the whole employee (2 rendering and 2 transcribing at once). Use when Vega has a filled batch sheet and is about to run it.
 ---
 
 # Atlas — Project Manager (Batch Planning and Hand-off)
@@ -33,7 +33,7 @@ build context. Vega's job here is the hand-offs, the slots and the outcomes.
   | Sheet tool | `<atlas>/tools/atlas-sheet.py` |
   | Blank batch sheet | `<atlas>/docs/atlas-batch-template.md` |
   | Designer list (style → designer skill) | `<atlas>/docs/atlas-designers.json` |
-  | Parallel limits (designing 6, rendering 2) | `<atlas>/docs/atlas-limits.json` |
+  | Parallel limits (designing 4, rendering 2, timing 2) | `<atlas>/docs/atlas-limits.json` |
   | Batch sheets | `<atlas>/batches/atlas-batch-<YYYY-MM-DD>-<label>.md`, one file per batch, each with its `.agents.json` session record beside it |
 
 - The default video designer skill each designer reads is
@@ -53,12 +53,15 @@ window and nobody to answer questions mid-run. Each row's designer is a
   `<super>/Agents`.
 - Never write shell loops or `$(...)` variables: use the tools (`atlas-sheet.py`,
   the designer's own tools) instead.
-- **Videos run in parallel.** At most **6 rows are designing at once across the
-  whole employee**, every batch sheet counted together, and at most **2 renders**
-  run at once. Both limits are in `<atlas>/docs/atlas-limits.json` and are enforced
+- **Videos run in parallel.** At most **4 rows are designing at once across the
+  whole employee**, every batch sheet counted together, at most **2 renders**
+  and at most **2 Whisper transcriptions** (timings, lyrics, music cuts, Quill's
+  video reads) run at once; the timing slots are separate from the render slots.
+  All three limits are in `<atlas>/docs/atlas-limits.json` and are enforced
   by the tools, not by counting yourself: `next` prints `FULL` instead of a row when
-  6 are designing, and every render goes through `heavy-slot.py` (see the closing
-  text). `atlas-sheet.py <sheet.md> slots` shows how many are in use.
+  4 are designing, every render goes through `heavy-slot.py` (see the closing
+  text), and every Whisper tool takes a timing slot itself (exit 75 = slots busy,
+  run the same line again). `atlas-sheet.py <sheet.md> slots` shows how many are in use.
 - A request is never split across batches. A new batch may start while another
   still has rows in production: it takes the slots the other leaves free (a tail
   hand-off). Each batch is reported and closed on its own.
@@ -167,7 +170,7 @@ needs the user.
     rendering in a sheet this run never started): they were cut off. Do not
     start them again on your own: unless the user's request says to resume them
     (then follow "After a restart" for them), report them as unfinished and ask.
-    They still count against the 6 slots, so a `FULL` that names such rows is
+    They still count against the 4 slots, so a `FULL` that names such rows is
     a question for the user too.
   A row marked **ready** is not interrupted: its design is finished and saved,
   and it only needs its render step.
@@ -239,7 +242,7 @@ Run this loop until the batch is finished:
 
    ```
    This is one task of an unattended batch; no one can answer questions. Your Task ID is this video's number: use it as the NN in the video's name, not the next number in editable/.
-   Other designers are working at the same time, each on its own video. So: run every render through the render slots, as python3 "<shared>/tools/heavy-slot.py" <Task ID> -- <render command> with a Bash timeout of 600000, and when it exits 75 run the same line again. Write a brand's shared files (brand/truth.md, brand/outfits.md, personas/, voice.md, brand/ui/, the lessons files) only through python3 "<shared>/tools/brand-lock.py", as your skill says. Keep throwaway files in <scratchpad>/t<Task ID>/ only, and never read or run another task's files. The moment submit_ai_job returns a job id, write it into your metadata or chain.json with status "submitted".
+   Other designers are working at the same time, each on its own video. So: run every render through the render slots, as python3 "<shared>/tools/heavy-slot.py" <Task ID> -- <render command> with a Bash timeout of 600000, and when it exits 75 run the same line again. Transcriptions (make-timings.py and the other Whisper tools) queue for the 2 timing slots on their own; when one exits 75, run the same line again too. Write a brand's shared files (brand/truth.md, brand/outfits.md, personas/, voice.md, brand/ui/, the lessons files) only through python3 "<shared>/tools/brand-lock.py", as your skill says. Keep throwaway files in <scratchpad>/t<Task ID>/ only, and never read or run another task's files. The moment submit_ai_job returns a job id, write it into your metadata or chain.json with status "submitted".
    Do the whole video: build it, run the stage skill's checks, render it, then IF your request named a skill to read after the video is complete, read and follow it. When everything is finished, your final reply is exactly one line: DONE <render path> <total credits> <minutes>. IF you could not finish, reply FAILED <short reason>. IF you stopped because a skill told you to check with the user, reply QUESTION <what you needed to ask>.
    Just before that final reply, record it on the batch sheet with this command, using done, failed, or question to match your line: python3 "<atlas>/tools/atlas-sheet.py" "<sheet.md>" mark <Task ID> <done|failed|question> --if designing "<your line>"
    ```
@@ -335,7 +338,7 @@ Do not log outputs yet: logging happens once, at the batch's close, from `tally`
   left for the user; the batch moves on.
 - Never hand a row to a session that did not design it, when a recorded session
   exists: fixes and answers go to the row's own designer.
-- Never have more rows designing than the limit (6, across every batch sheet) and
+- Never have more rows designing than the limit (4, across every batch sheet) and
   never claim a row any other way than `next`: it is what keeps the count. Never
   run a render outside `heavy-slot.py`.
 - Never end the turn while a row is in production: it stops every background

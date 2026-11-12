@@ -7,6 +7,9 @@ Engine: local Whisper (needs no hosting and no Spira call). On Linux, faster-whi
 installed (same model, int8 on CPU, loaded once for all files), else the whisper CLI. The line
 printed at the end says which engine ran; timings.json records it as "engine".
 
+Runs inside a timing slot (timing_slot.py): at most 2 transcriptions at once across the employee,
+8 threads each. Exit 75 means every timing slot stayed busy for 5 minutes: run the same line again.
+
 --language  ISO 639 code of the speech (default en), e.g. vi, ms, th, id, zh.
 --prompt    names to spell right (brand, product, people), e.g. "Cookiy Earn, Davin".
             Whisper uses it; check names against the script.
@@ -15,7 +18,8 @@ printed at the end says which engine ran; timings.json records it as "engine".
 Needs openai-whisper (pip install openai-whisper) and ffmpeg."""
 import json, re, shutil, subprocess, sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-import profile as scratch_profile  # noqa: E402
+import profile as scratch_profile  # noqa: E402,F401  (redirects tempfile to the scratch root)
+from timing_slot import WHISPER_THREADS, timing_slot  # noqa: E402
 
 WHISPER_MODEL_EN = "medium.en"   # was small.en until 2026-10-13: it kept mishearing brand names
 WHISPER_MODEL = "medium"         # other languages
@@ -44,7 +48,7 @@ def faster_whisper(src):
         if not _fw_model:
             from faster_whisper import WhisperModel
             _fw_model.append(WhisperModel(model_name, device="cpu", compute_type="int8",
-                                          cpu_threads=scratch_profile.cpu_count()))
+                                          cpu_threads=WHISPER_THREADS))
         it, _ = _fw_model[0].transcribe(str(src), language=lang, initial_prompt=prompt or None, word_timestamps=True)
         words, segs = [], []
         for s in it:
@@ -65,7 +69,8 @@ def whisper(src, out_dir):
     try:
         subprocess.run(cmd + [str(src), "--model", model_name, "--language", lang,
                               *(["--initial_prompt", prompt] if prompt else []),
-                              "--word_timestamps", "True", "--output_format", "json",
+                              "--word_timestamps", "True", "--threads", str(WHISPER_THREADS),
+                              "--output_format", "json",
                               "--output_dir", str(out_dir), "--verbose", "False"], check=True)
     except (FileNotFoundError, subprocess.CalledProcessError) as e:
         sys.exit(f"whisper is not available ({e}). Install with: pip install openai-whisper")
@@ -100,5 +105,6 @@ def process(src):
     for s in segs: print(f"  {s['start']:6.2f}-{s['end']:6.2f}  {s['text']}")
 
 
-for _src in srcs:
-    process(_src)
+with timing_slot(", ".join(str(s) for s in srcs)):
+    for _src in srcs:
+        process(_src)

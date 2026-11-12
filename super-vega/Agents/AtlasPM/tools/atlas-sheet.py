@@ -7,7 +7,7 @@ The sheet is a Markdown table (.md); an .xlsx sheet also works.
       Takes the first row whose Status is blank or pending, marks it designing,
       and prints {"task_id": ..., "request": ...}. Prints NONE when no row is left.
       Prints "FULL <n>/<cap>" and the rows counted (and claims nothing) when <cap> rows are
-      already designing across every sheet in <atlas>/batches/ (docs/atlas-limits.json, 6).
+      already designing across every sheet in <atlas>/batches/ (docs/atlas-limits.json, 4).
       An avatar row's request carries only the avatar description; a carousel row's (any style
       ending in "carousel", e.g. corporate carousel; Output type carousel) only the brand, its
       numbers, the instructions (with the product and the brand website) and Echo's topic angle
@@ -30,8 +30,9 @@ The sheet is a Markdown table (.md); an .xlsx sheet also works.
       Blocks until any row's status changes (a designer marking its row) or the seconds run
       out (default 110, at most 540), then prints {"changed": [...], "timeout": bool}.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> slots
-      Prints {"designing", "cap", "rendering", "render_cap", "renders", "free"} across every
-      batch sheet; "renders" names who holds each busy render slot (heavy-slot.py).
+      Prints {"designing", "cap", "rendering", "render_cap", "renders", "timing", "timing_cap",
+      "timings", "free"} across every batch sheet; "renders" names who holds each busy render
+      slot (heavy-slot.py), "timings" each busy Whisper timing slot (timing_slot.py).
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> recover
       After a restart: one JSON line per designing or question row in every batch sheet, with
       its agent id, its metadata and chain.json files, and the jobs submitted there that have
@@ -73,8 +74,9 @@ INPUTS = COLS[:COLS.index("Status")]
 OUTPUT_TYPES = {"organic-video", "ad-video", "avatar-image", "carousel"}
 DESIGNERS = Path(__file__).resolve().parents[1] / "docs" / "atlas-designers.json"
 RUNNABLE = {"", "pending"}
-# Parallel production (the owner's decision, 2026-11-10): at most 6 rows designing across every
-# batch sheet of this employee, at most 2 renders at once (the render slots of heavy-slot.py).
+# Parallel production (the owner's decision, 2026-11-12): at most 4 rows designing across every
+# batch sheet of this employee, at most 2 renders at once (the render slots of heavy-slot.py) and
+# at most 2 Whisper transcriptions at once (the timing slots of timing_slot.py).
 LIMITS = Path(__file__).resolve().parents[1] / "docs" / "atlas-limits.json"
 BATCHES = Path(__file__).resolve().parents[1] / "batches"
 LOCKS = PROJECT / ".locks"
@@ -301,7 +303,7 @@ def statuses(path):
 def limits():
     try: d = json.loads(LIMITS.read_text())
     except (OSError, ValueError): d = {}
-    return int(d.get("designing") or 6), int(d.get("rendering") or 2)
+    return int(d.get("designing") or 4), int(d.get("rendering") or 2), int(d.get("timing") or 2)
 
 def batch_sheets(extra=None):
     sheets = {p.resolve() for p in BATCHES.glob("*.md") if ".saving" not in p.name} if BATCHES.is_dir() else set()
@@ -319,10 +321,11 @@ def designing_elsewhere(own):
         out += [(p, t) for t, s in st.items() if s == "designing"]
     return out
 
-def rendering():
-    """Who holds each busy render slot, from the .who file heavy-slot.py writes beside it."""
+def held_slots(kind="render"):
+    """Who holds each busy render (heavy-slot.py) or timing (timing_slot.py) slot, from the .who
+    file written beside it."""
     busy = []
-    for f in sorted(LOCKS.glob("render-slot-*.lock")) if LOCKS.is_dir() else []:
+    for f in sorted(LOCKS.glob(f"{kind}-slot-*.lock")) if LOCKS.is_dir() else []:
         with open(f, "a") as lk:
             try: fcntl.flock(lk, fcntl.LOCK_SH | fcntl.LOCK_NB)
             except BlockingIOError:
@@ -385,14 +388,15 @@ def main():
     path = Path(sys.argv[1]).expanduser().resolve(); cmd = sys.argv[2]
     if cmd == "create": return create(path)
     if cmd == "slots":
-        cap, render_cap = limits()
+        cap, render_cap, timing_cap = limits()
         designing = 0
         for p in batch_sheets(path if path.is_file() else None):
             try: designing += sum(1 for s in statuses(p).values() if s == "designing")
             except (SystemExit, OSError, ValueError): pass
-        busy = rendering()
+        busy, timings = held_slots("render"), held_slots("timing")
         print(json.dumps({"designing": designing, "cap": cap, "rendering": len(busy), "render_cap": render_cap,
-                          "renders": busy, "free": max(0, cap - designing)})); return
+                          "renders": busy, "timing": len(timings), "timing_cap": timing_cap,
+                          "timings": timings, "free": max(0, cap - designing)})); return
     if cmd == "recover":
         return recover(path if path.is_file() else None)
     if not path.is_file(): sys.exit(f"No sheet at {path}")
@@ -413,7 +417,7 @@ def main():
     for r in rows:
         for c in COLS: r.setdefault(c, "")
     if cmd == "next":
-        cap, _ = limits()
+        cap = limits()[0]
         for r in rows:
             if filled(r) and r["Status"].lower() in RUNNABLE:
                 if not r["Task ID"] or not r["Brand number"] or (needs_script(r) and not r["Script"]):

@@ -10,7 +10,8 @@ In the work folder, per video N:
   video-N.txt           the transcript
   video-N-frames.jpg    contact sheet: one frame every few seconds, numbered
 English uses the local Whisper model (medium.en); --language <code> (e.g. es, tl) uses the
-multilingual one.
+multilingual one. Whisper runs in a timing slot (DesignerShared/tools/timing_slot.py): exit 75
+means every slot stayed busy for 5 minutes, run the same line again.
 
 Read the transcript and look at the frames to UNDERSTAND the brand and product: what it is,
 who it is for, what it does, what is claimed. The brief is written from that understanding,
@@ -22,6 +23,8 @@ from pathlib import Path
 
 QUILL = Path(__file__).resolve().parents[1]
 SUPER = QUILL.parents[1]
+sys.path.insert(0, str(QUILL.parent / "DesignerShared" / "tools"))
+from timing_slot import WHISPER_THREADS, timing_slot  # noqa: E402
 
 def key(name): return re.sub(r"[^A-Za-z0-9]", "", name or "")
 
@@ -69,7 +72,9 @@ def main():
             # transcript
             audio = work / f"video-{n}.wav"
             run(["ffmpeg", "-y", "-v", "error", "-i", str(vid), "-vn", "-ac", "1", "-ar", "16000", str(audio)])
-            run([whisper, str(audio), *model, "--output_format", "txt", "--output_dir", str(work), "--fp16", "False"])
+            with timing_slot(f"Quill {vid}"):
+                run([whisper, str(audio), *model, "--threads", str(WHISPER_THREADS),
+                     "--output_format", "txt", "--output_dir", str(work), "--fp16", "False"])
             txt = work / f"video-{n}.txt"; audio.unlink(missing_ok=True)
             words = len(txt.read_text().split()) if txt.exists() else 0
             # frames: ~16 evenly spaced, numbered

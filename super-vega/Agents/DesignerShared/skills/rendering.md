@@ -26,6 +26,9 @@ style skill names (an HTML batch render, a build or composite script, a
 final ffmpeg encode); light steps (AI jobs, probes, single frames) run
 without a slot. A command that needs a shell (a pipe, `&&`) goes in as
 `bash -c "<command>"`.
+Transcriptions are not renders: `make-timings.py` and the other Whisper
+tools take one of the 2 **timing slots** themselves (2026-11-12), so never
+wrap them in `heavy-slot.py`. IF one exits **75**, run the same line again.
 
 ## Before you run it
 

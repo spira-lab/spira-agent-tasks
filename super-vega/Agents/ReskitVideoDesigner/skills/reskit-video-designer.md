@@ -89,7 +89,7 @@ arguments):
 | `python3 <shared>/tools/heavy-slot.py <Task ID> -- <command>` | runs a heavy command in one of the 2 render slots (Bash timeout 600000; exit 75 = slots busy, run the same line again). Every `build_edit.py` run, every `render_html.js --batch`, every `composite.py` and every frame-sequence ffmpeg encode goes through it |
 | `python3 <shared>/tools/brand-lock.py` | `append <file> @<textfile>` for a line in `truth.md`, `outfits.md` or a lessons file; `<BrandName> -- <command>` for anything else written in the brand's client-assets |
 
-Other designers work at the same time as you (up to 6, 2026-11-10). Keep throwaway files in
+Other designers work at the same time as you (up to 4, 2026-11-12). Keep throwaway files in
 `<scratchpad>/t<Task ID>/` only, and write each job ID into `chain.json` the moment
 `submit_ai_job` returns it (7.7).
 

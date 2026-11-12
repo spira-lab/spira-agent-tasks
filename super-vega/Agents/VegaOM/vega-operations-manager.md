@@ -47,7 +47,7 @@ All paths are relative to the Super Vega folder. Agents live in `Agents/`; finis
 | Working memory template | `Agents/VegaOM/docs/working-memory/vega-memory-template.md` | Blank brand memory | Creating a brand's memory file |
 | Video Styles | `Agents/VegaOM/docs/vega-video-styles.md` | Each video style he can assign, when to choose it, and whether it is available | Choosing the Style for a video |
 | Subagent Roster | `Agents/VegaOM/docs/vega-subagent-roster.md` | Every subagent: how to call it, what it does, what to supply | Before assigning a task |
-| Update records | `Agents/VegaOM/docs/updates/<YYYY-MM-DD>-system-update.md` | The full list of what changed in each system update; each is a version (2026-10-24 = **v2**, 2026-10-27 = **v2.01**, 2026-11-10 = **v2.02**, `2026-11-10b` = **v2.03**, 2026-11-11 = **v2.04**, `2026-11-11b` = **v2.05**, 2026-11-12 = **v2.06**, `2026-11-12b` = **v2.07**, `2026-11-12c` = **v2.08**, `2026-11-12d` = **v2.09**) | When someone asks what changed in an update, or asks Vega to announce one (see "Announcing a system update") |
+| Update records | `Agents/VegaOM/docs/updates/<YYYY-MM-DD>-system-update.md` | The full list of what changed in each system update; each is a version (2026-10-24 = **v2**, 2026-10-27 = **v2.01**, 2026-11-10 = **v2.02**, `2026-11-10b` = **v2.03**, 2026-11-11 = **v2.04**, `2026-11-11b` = **v2.05**, 2026-11-12 = **v2.06**, `2026-11-12b` = **v2.07**, `2026-11-12c` = **v2.08**, `2026-11-12d` = **v2.09**, `2026-11-12e` = **v2.10**) | When someone asks what changed in an update, or asks Vega to announce one (see "Announcing a system update") |
 | Asset IDs | `Agents/VegaOM/docs/vega-asset-ids.md` | Spira asset ID per uploaded file | Only when asked to look up an asset ID |
 | Client Data Sheet | `Agents/VegaOM/docs/vega-client-data.md` | All-time output totals per client | Never opened; the output tool writes and reads it |
 | Monthly data | `Agents/VegaOM/docs/client-monthly/[brand name]/vega-[brand name]-[YYYY-MM].md` | Per client, per month: totals + dated output log (quantities only) | Never opened; the output tool writes and reads it |
@@ -74,7 +74,7 @@ All paths are relative to the Super Vega folder. Agents live in `Agents/`; finis
 
 | Request | How it runs |
 |---|---|
-| Any video task (1 or more videos) | Vega builds the batch sheet (below), then runs Atlas's loop on it: he hands each row to the designer of its style, up to 6 at a time (see "Parallel slots") |
+| Any video task (1 or more videos) | Vega builds the batch sheet (below), then runs Atlas's loop on it: he hands each row to the designer of its style, up to 4 at a time (see "Parallel slots") |
 
 **Handing a video to a designer.** The designers are named by video style; each style has its own designer in `Agents/` (available: talking head edited, explainer, podcast, avatar, **clone**, **re-skit**, **corporate carousel**, **lifestyle story carousel**; planned: reaction, timelapse, narration). Vega chooses the style from his Video Styles guide (`Agents/VegaOM/docs/vega-video-styles.md`) and writes its exact name in each row's Style column; `atlas-sheet.py` picks the designer skill from it. Only styles marked available can be assigned; the sheet tool refuses any other.
 - **Preferred:** start a **background** sub-agent with the SDK's Agent tool (`run_in_background: true`), briefed with the designer's skill path, the task folder (`Project/`), and the row's request exactly as `atlas-sheet.py next` prints it, plus Atlas's closing text. Record its agent ID on the sheet at once.
@@ -82,7 +82,7 @@ All paths are relative to the Super Vega folder. Agents live in `Agents/`; finis
 
 ## Parallel slots
 
-Videos are produced **in parallel** (the owner's decision, 2026-11-10): at most **6 videos designing at once across the whole employee**, every batch counted together, and at most **2 rendering at once**. The tools hold these limits, not Vega's counting: `atlas-sheet.py next` prints `FULL` when the 6 slots are taken, and every render runs through `heavy-slot.py`. `atlas-sheet.py <sheet> slots` shows what is in use. The limits are in `Agents/AtlasPM/docs/atlas-limits.json`.
+Videos are produced **in parallel** (the owner's decision, 2026-11-12): at most **4 videos designing at once across the whole employee**, every batch counted together, at most **2 rendering at once**, and at most **2 Whisper transcriptions at once** (timing slots, separate from the render slots). The tools hold these limits, not Vega's counting: `atlas-sheet.py next` prints `FULL` when the 4 slots are taken, every render runs through `heavy-slot.py`, and every Whisper tool (make-timings, lyrics_check, music_cut, quill-video) takes a timing slot itself; exit 75 from either means the slots stayed busy: run the same line again. `atlas-sheet.py <sheet> slots` shows what is in use. The limits are in `Agents/AtlasPM/docs/atlas-limits.json`.
 
 - Atlas's loop fills the free slots, waits for a row to change, handles it (report, answer, record), and fills again. Each finished video gets its own `report_progress` line as it finishes.
 - A request is never split across batches. A new request that arrives while a batch is in production gets its own sheet, and its rows take the slots the running batch leaves free as its last rows finish (a tail hand-off: run `wait` with `--also` for both sheets). Each batch is reported and closed on its own; there is no urgent lane that jumps the slots.
@@ -165,7 +165,7 @@ python3 "Agents/VegaOM/tools/vega-batch.py" new "<brand>" <n> --type organic-vid
 - **Persona:** the brand's avatar when there is one. Otherwise the designer makes one by the Avatar Designer's method and saves it to `client-assets/<Brand>/personas/`.
 - **Brand files they keep** in `Agents/VegaOM/client-assets/<Brand>/`, outside `Project/` so backups never clear them: `personas/` (both designers' personas and character sheets), `brand/` (Re-skit's `truth.md`, `outfits.md` and captured site screenshots in `ui/`), and `voice.md` (the Cloner's off-camera voice for the brand). Treat them as the brand's assets: reuse them, and never clear them.
 - **No approval gates:** they run straight through, and credits show on the close.
-- **Expect** about 100–150 credits per video. They run like any other row (6 designing, 2 rendering, no cap of their own); slowing down to test is the team's call.
+- **Expect** about 100–150 credits per video. They run like any other row (4 designing, 2 rendering, no cap of their own); slowing down to test is the team's call.
 - **Long sources need an OK first** (the owner's rule, 2026-11-03): before building a clone or re-skit batch, measure every source: `python3 "Agents/VegaOM/tools/vega-source-length.py" <link> [<link> ...]` (one JSON line, about 4 s per link). Rows whose source is 30 s or shorter run straight away. For each source over 30 s, tell the requester its length and the tool's credit estimate (about 10–13 credits per second: Task 94's 61 s source cost 735, Task 103's 74 s source 669) and wait for their OK or a shorter cut before building that row. Any other row of the request runs meanwhile.
 - **Lessons:** each designer proposes lessons in its metadata. Vega adds them to `Agents/DesignerShared/docs/designer-lessons.md` (the owner's OK, 2026-10-24).
 
@@ -327,7 +327,7 @@ Two kinds of run exist; Vega never opens or archives sessions.
 
 | Agent | How it runs | What Vega gets back |
 |---|---|---|
-| **Atlas** (planning) | Not an agent. Vega follows `Agents/AtlasPM/atlas-project-manager.md` himself, in his own loop, in `Project/`. Each video goes to its designer as a background sub-agent (Agent tool, briefed with the skill path, `Project/`, and the request), or Vega does the designer's role inline when the Agent tool is unavailable. | Each designer's final line `DONE <path> <credits> <minutes>` / `FAILED ...` / `QUESTION ...`, up to 6 videos at a time |
+| **Atlas** (planning) | Not an agent. Vega follows `Agents/AtlasPM/atlas-project-manager.md` himself, in his own loop, in `Project/`. Each video goes to its designer as a background sub-agent (Agent tool, briefed with the skill path, `Project/`, and the request), or Vega does the designer's role inline when the Agent tool is unavailable. | Each designer's final line `DONE <path> <credits> <minutes>` / `FAILED ...` / `QUESTION ...`, up to 4 videos at a time |
 | **Echo** (script director) | As a sub-agent: Echo starts fresh writers of her own and waits for them, never resuming one, so their replies reach her and not Vega | Her one-line reply: `WRITTEN ...` / `ADHOC <file>` / `QUESTION` / `FAILED` |
 | **Every other agent** (Quill, Data Cleaner, Hermes, Jani, Iris) | As a sub-agent (Agent tool), told to read its skill file first; Iris starts fresh each time | Its one-line reply |
 

@@ -112,7 +112,7 @@ These are the Cloner's craft; they hold for every clone.
   save a persona you made (section 6). Nothing else in `Agents/`, ever:
   not this skill, not its references, not the shared skills, not the
   working memory. Throwaway intermediates go in your own scratch folder,
-  `<scratchpad>/t<Task ID>/`: up to 6 designers work at the same time
+  `<scratchpad>/t<Task ID>/`: up to 4 designers work at the same time
   (2026-11-10), so never read, change or run another task's files
   there.
 - **Other designers at the same time.** One may be making a video of the

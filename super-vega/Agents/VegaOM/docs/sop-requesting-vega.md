@@ -55,7 +55,7 @@ Two agents work from a video you send. Say which one you want, or describe it an
 **Good to know**
 - No approval step: the agent runs straight through, and the credits used are shown when the video is done. Expect about 100–150 credits per video.
 - The source creator's face is never used: the person is always recast.
-- Clone and re-skit videos run like any other video: up to 6 in design and 2 rendering at once.
+- Clone and re-skit videos run like any other video: up to 4 in design and 2 rendering at once.
 
 ## 2c. Carousels
 
@@ -77,7 +77,7 @@ The 🖼️ **Corporate Carousel Designer** makes 4–7 slide corporate carousel
 
 1. **Vega confirms** in his first progress message what is being made.
 2. **Echo writes the scripts**, checked against everything the brand already has, so angles don't repeat.
-3. **Atlas produces** the videos: up to 6 in design and 2 rendering at once. New batches start in free slots as the current one finishes.
+3. **Atlas produces** the videos: up to 4 in design, 2 rendering and 2 transcribing at once. New batches start in free slots as the current one finishes.
 4. **Each video is reported** the moment it's done, one by one, with a short progress line (for example "IASO #146 (Task 248) done · Vietnamese · dengue protection").
 5. **At the end**, Vega submits the result: one line per video with its status and the credits spent, and the list of videos with their public URLs.
 

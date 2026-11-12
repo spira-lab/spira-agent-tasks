@@ -14,7 +14,8 @@ Prints what it did.
 Run it with the Python that prereq_check.py prints as MUSIC_PYTHON (one with librosa, scipy and
 soundfile); plain python3 works once those are installed into it. Also needs ffmpeg, and the
 `whisper` command only for the vocal-start check (skipped with --no-vocal-start, or when whisper
-is missing). Paths may be absolute, relative to the current folder, or relative to the Super Vega
+is missing); that check runs in a timing slot (DesignerShared/tools/timing_slot.py), exit 75 =
+slots busy, run the same line again. Paths may be absolute, relative to the current folder, or relative to the Super Vega
 folder. The output goes only inside Super Vega/Project/ (or the system temp folder); only folders
 inside Project/ are ever created.
 """
@@ -24,6 +25,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent.parent / "DesignerShared" / "tools"))
 import profile as scratch_profile  # noqa: E402,F401  (redirects tempfile to the scratch root)
+from timing_slot import WHISPER_THREADS, timing_slot  # noqa: E402
 SUPER = HERE.parents[2]
 PROJECT = SUPER / "Project"
 
@@ -109,9 +111,11 @@ starts = []
 if not a.no_vocal_start and shutil.which("whisper"):
     with tempfile.TemporaryDirectory(prefix="music-cut-") as td:
         w = os.path.join(td, "v.wav"); sf.write(w, mono, SR)
-        subprocess.run(["whisper", w, "--model", "small", "--language", "en", "--initial_prompt", "Song lyrics:",
-                        "--no_speech_threshold", "0.9", "--condition_on_previous_text", "False",
-                        "--output_format", "json", "--output_dir", td], capture_output=True)
+        with timing_slot(f"music_cut {src}"):
+            subprocess.run(["whisper", w, "--model", "small", "--language", "en", "--initial_prompt", "Song lyrics:",
+                            "--no_speech_threshold", "0.9", "--condition_on_previous_text", "False",
+                            "--threads", str(WHISPER_THREADS),
+                            "--output_format", "json", "--output_dir", td], capture_output=True)
         try:
             segs = json.load(open(os.path.join(td, "v.json")))["segments"]
             starts = [s["start"] - 0.15 for s in segs if s["text"].strip()]

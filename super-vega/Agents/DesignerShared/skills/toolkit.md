@@ -252,7 +252,8 @@ talking-head clip as soon as it arrives, before it goes on the stage:
 python3 <shared>/tools/make-timings.py <clip.mp4> --txt <materials folder>/deletable/clip-check --language <code> --prompt "<brand, product, and other names in the line>"
 ```
 
-It writes `<clip>.txt` there, transcribed with local Whisper.
+It writes `<clip>.txt` there, transcribed with local Whisper (in one of the 2
+shared timing slots; exit 75 = slots busy, run the same line again).
 
 Compare that text with the chunk's `text` in `chunks.json`. A word heard
 differently (a brand name, a similar-sounding word) is **not** a
