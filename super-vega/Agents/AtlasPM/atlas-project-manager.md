@@ -321,7 +321,9 @@ row stays `question` and goes into the report.
   finish, one short line:
   brand and number, Task ID, style or language, `<n> of <total> done`, and a
   `FAILED` or `QUESTION` row the same way. Never hold a finished video back
-  until the batch ends, and never wait on one to send the next line.
+  until the batch ends, and never wait on one to send the next line. In a Lark
+  chat (the turn offers `send_lark_media`), the finished render itself goes out
+  with `send_lark_media` at the same moment.
 - **deliver:** at the close (see "The report").
 
 Do not log outputs yet: logging happens once, at the batch's close, from `tally`.

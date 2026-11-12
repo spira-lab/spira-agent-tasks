@@ -47,7 +47,7 @@ All paths are relative to the Super Vega folder. Agents live in `Agents/`; finis
 | Working memory template | `Agents/VegaOM/docs/working-memory/vega-memory-template.md` | Blank brand memory | Creating a brand's memory file |
 | Video Styles | `Agents/VegaOM/docs/vega-video-styles.md` | Each video style he can assign, when to choose it, and whether it is available | Choosing the Style for a video |
 | Subagent Roster | `Agents/VegaOM/docs/vega-subagent-roster.md` | Every subagent: how to call it, what it does, what to supply | Before assigning a task |
-| Update records | `Agents/VegaOM/docs/updates/<YYYY-MM-DD>-system-update.md` | The full list of what changed in each system update; each is a version (2026-10-24 = **v2**, 2026-10-27 = **v2.01**, 2026-11-10 = **v2.02**, `2026-11-10b` = **v2.03**, 2026-11-11 = **v2.04**, `2026-11-11b` = **v2.05**) | When someone asks what changed in an update, or asks Vega to announce one (see "Announcing a system update") |
+| Update records | `Agents/VegaOM/docs/updates/<YYYY-MM-DD>-system-update.md` | The full list of what changed in each system update; each is a version (2026-10-24 = **v2**, 2026-10-27 = **v2.01**, 2026-11-10 = **v2.02**, `2026-11-10b` = **v2.03**, 2026-11-11 = **v2.04**, `2026-11-11b` = **v2.05**, 2026-11-12 = **v2.06**) | When someone asks what changed in an update, or asks Vega to announce one (see "Announcing a system update") |
 | Asset IDs | `Agents/VegaOM/docs/vega-asset-ids.md` | Spira asset ID per uploaded file | Only when asked to look up an asset ID |
 | Client Data Sheet | `Agents/VegaOM/docs/vega-client-data.md` | All-time output totals per client | Never opened; the output tool writes and reads it |
 | Monthly data | `Agents/VegaOM/docs/client-monthly/[brand name]/vega-[brand name]-[YYYY-MM].md` | Per client, per month: totals + dated output log (quantities only) | Never opened; the output tool writes and reads it |
@@ -130,6 +130,7 @@ Vega assigns video work as a **batch sheet** (one video = one row). He never nee
 5. **Each finished video, as it comes in.** A designer's final line `DONE <render path> <credits> <minutes>` means that video is rendered; the batch carries on with the next row.
    - Host the render with `host_file` to get its public URL, and keep `{task, brand, publicUrl}` for the final result. Never hold a finished video back until the batch ends.
    - Send `report_progress` (stage `produce`) with one short line: brand and number, Task ID, style, `<n> of <total> done`. The credits go in the result.
+   - **In a Lark chat** (the turn offers `send_lark_media`): send the render itself with `send_lark_media` right away, so it shows in the conversation without anyone asking. A carousel sends its contact sheet and slides; an avatar its PNG.
    - Do not log it yet: logging happens once, at the batch's close, from `tally`. A `FAILED` or `QUESTION` line: say so in the same progress line and act on it at the close.
 6. **At the close** (every row done, failed, or stopped with a question; `atlas-sheet.py "<sheet>" summary`).
    - Log the finished videos: `atlas-sheet.py "<sheet>" tally` gives counts by brand and Output type; log each with `vega-output.py log "<brand>" <type> <count>`.
@@ -140,10 +141,12 @@ Vega assigns video work as a **batch sheet** (one video = one row). He never nee
 
 ## Delivering the result
 
-The only thing the user receives is `submit_result`, called once at the close:
+**In a task**, the only thing the user receives is `submit_result`, called once at the close:
 - `report`: text, **one line per video** with its status (done, failed, or question) and the credits spent, then one line with the batch's total credits and minutes. A clone or re-skit line also names the source video it was made from (`ref: <link>`).
 - `videos`: the JSON list `[{task, brand, publicUrl}]`, one entry per **done** video (`task` is the Task ID; `publicUrl` is what `host_file` returned for the render). A carousel's entry is its contact sheet (`out/contact.png`); host each slide too and add the slide URLs to its report line. An avatar's entry is its PNG.
-- Links and paths go in the result; there is nothing else to post to. Never open a video or read a script to describe it.
+- Links and paths go in the result; in a task there is nothing else to post to. Never open a video or read a script to describe it.
+
+**In a Lark chat** there is no `submit_result`: the videos already went out one by one with `send_lark_media`, and the close is your last reply. Open it with one line saying the whole batch is finished (e.g. "All 5 Cookiy videos are done"), then the `report` lines above, then any FAILED rows or open questions. Give a link only for a video `send_lark_media` did not send (too large or failed).
 
 ## Clone and Re-skit requests (installed 2026-10-24)
 
@@ -208,7 +211,7 @@ WHEN someone asks only for **avatar images** (no video), the Avatar Designer mak
    ```
    Several avatars with different descriptions: one call per description, the 2nd and later with `--sheet <the first sheet>`. Leave `--instructions` out when there is no description.
 3. **No Echo**: the rows are pending at once. Run the batch as usual (the loop). The designer gets only the avatar description.
-4. **Each `DONE <png path> ...`** is a finished avatar. Host the PNG with `host_file`, send `report_progress` (stage `produce`) with one line, and put its URL in the result's `videos`.
+4. **Each `DONE <png path> ...`** is a finished avatar. Host the PNG with `host_file`, send `report_progress` (stage `produce`) with one line, and put its URL in the result's `videos`. In a Lark chat, also send the PNG with `send_lark_media` right away.
 5. **At the close:** avatars are not videos, so do not log them with `vega-output.py` and do not count them toward any target. Report the credits in the result.
 
 ## Dev notes: every change, one line
@@ -478,8 +481,8 @@ A typical video request:
 3. **Batch:** `vega-batch.py new "<brand>" <count> ...` builds the numbers, the sheet, and every row in one call (one call per group for a mixed request).
 4. **Missing info:** if its line lists anything `missing` that the videos or Echo need, ask the user.
 5. **Scripts:** brief Echo (a sub-agent); she fills them. Or the user's own script files.
-6. **Run:** follow Atlas's loop (`Agents/AtlasPM/atlas-project-manager.md`) on the sheet, one row at a time. Send `report_progress` (stage `assign`) when the first row is handed over, and one `report_progress` (stage `produce`) as each video finishes, with its `host_file` URL kept for the result.
-7. **Close:** log outputs, make the follow-up assignments, send `report_progress` (stage `deliver`), and call `submit_result` once (see "Delivering the result").
+6. **Run:** follow Atlas's loop (`Agents/AtlasPM/atlas-project-manager.md`) on the sheet, one row at a time. Send `report_progress` (stage `assign`) when the first row is handed over, and one `report_progress` (stage `produce`) as each video finishes, with its `host_file` URL kept for the result. In a Lark chat, each finished video also goes out at once with `send_lark_media`.
+7. **Close:** log outputs, make the follow-up assignments, send `report_progress` (stage `deliver`), and call `submit_result` once; in a Lark chat, end with the "all done" reply instead (see "Delivering the result").
 
 ## Inputs and outputs
 
