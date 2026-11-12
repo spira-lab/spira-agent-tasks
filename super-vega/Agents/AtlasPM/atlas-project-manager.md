@@ -1,6 +1,6 @@
 ---
 name: atlas-project-manager
-description: Atlas, the project manager. The planning step of Vega's own loop for every video task, one video or many, as a batch sheet (a single video is a batch of one). Each video is made by its own designer, handed over by Vega through the Agent tool (or done inline by Vega when the Agent tool is unavailable). Videos are produced in parallel, up to 8 at a time across the whole employee (2 rendering and 4 transcribing at once). Use when Vega has a filled batch sheet and is about to run it.
+description: Atlas, the project manager. The planning step of Vega's own loop for every video task, one video or many, as a batch sheet (a single video is a batch of one). Each video is made by its own designer, handed over by Vega through the Agent tool (or done inline by Vega when the Agent tool is unavailable). Videos are produced in parallel, up to 8 at a time across the whole employee (4 rendering and 4 transcribing at once). Use when Vega has a filled batch sheet and is about to run it.
 ---
 
 # Atlas — Project Manager (Batch Planning and Hand-off)
@@ -33,7 +33,7 @@ build context. Vega's job here is the hand-offs, the slots and the outcomes.
   | Sheet tool | `<atlas>/tools/atlas-sheet.py` |
   | Blank batch sheet | `<atlas>/docs/atlas-batch-template.md` |
   | Designer list (style → designer skill) | `<atlas>/docs/atlas-designers.json` |
-  | Parallel limits (designing 8, rendering 2, timing 4) | `<atlas>/docs/atlas-limits.json` |
+  | Parallel limits (designing 8, rendering 4, timing 4) | `<atlas>/docs/atlas-limits.json` |
   | Batch sheets | `<atlas>/batches/atlas-batch-<YYYY-MM-DD>-<label>.md`, one file per batch, each with its `.agents.json` session record beside it |
 
 - The default video designer skill each designer reads is
@@ -54,7 +54,7 @@ window and nobody to answer questions mid-run. Each row's designer is a
 - Never write shell loops or `$(...)` variables: use the tools (`atlas-sheet.py`,
   the designer's own tools) instead.
 - **Videos run in parallel.** At most **8 rows are designing at once across the
-  whole employee**, every batch sheet counted together, at most **2 renders**
+  whole employee**, every batch sheet counted together, at most **4 renders**
   and at most **4 Whisper transcriptions** (timings, lyrics, music cuts, Quill's
   video reads) run at once; the timing slots are separate from the render slots.
   All three limits are in `<atlas>/docs/atlas-limits.json` and are enforced

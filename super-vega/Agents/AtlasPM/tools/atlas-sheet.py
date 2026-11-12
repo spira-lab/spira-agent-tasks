@@ -75,7 +75,7 @@ OUTPUT_TYPES = {"organic-video", "ad-video", "avatar-image", "carousel"}
 DESIGNERS = Path(__file__).resolve().parents[1] / "docs" / "atlas-designers.json"
 RUNNABLE = {"", "pending"}
 # Parallel production (the owner's decision, 2026-11-12): at most 4 rows designing across every
-# batch sheet of this employee, at most 2 renders at once (the render slots of heavy-slot.py) and
+# batch sheet of this employee, at most 4 renders at once (the render slots of heavy-slot.py) and
 # at most 4 Whisper transcriptions at once (the timing slots of timing_slot.py).
 LIMITS = Path(__file__).resolve().parents[1] / "docs" / "atlas-limits.json"
 BATCHES = Path(__file__).resolve().parents[1] / "batches"
@@ -303,7 +303,7 @@ def statuses(path):
 def limits():
     try: d = json.loads(LIMITS.read_text())
     except (OSError, ValueError): d = {}
-    return int(d.get("designing") or 8), int(d.get("rendering") or 2), int(d.get("timing") or 4)
+    return int(d.get("designing") or 8), int(d.get("rendering") or 4), int(d.get("timing") or 4)
 
 def batch_sheets(extra=None):
     sheets = {p.resolve() for p in BATCHES.glob("*.md") if ".saving" not in p.name} if BATCHES.is_dir() else set()
