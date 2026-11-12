@@ -78,10 +78,12 @@ Product: <product name, or none>
    `slide-02.jpg`, ...), with the carousel tag (the working-memory row For `carousels`, else the
    brand's or product's row For both; 2026-10-29). Send all of them in one call: they become one
    album asset in that order. The contact sheet and the notes are never uploaded.
-   **When a call fails**, record nothing for that item. `FORBIDDEN` means the operator's Spira
-   account lacks Social Post Assets access, and `Tag not found.` means the Tag ID is no longer in
-   Spira: stop and reply `FAILED <that reason>`, never retry or pick another tag. Any other
-   error: carry on with the next item and list the failed one in the reply.
+   **When a call fails**, record nothing for that item. Every error ends with the upload target's
+   host, the Spira environment the upload went to; Tag IDs belong to that environment. `FORBIDDEN`
+   means the account lacks Social Post Assets access, `Tag not found.` means the Tag ID is not in
+   that environment, and `UNAUTHORIZED` or `UPLOAD_CREDENTIAL_*` means the sign-in for that host is
+   gone: stop and reply `FAILED <the reason as the tool gave it>`, never retry or pick another tag.
+   Any other error: carry on with the next item and list the failed one in the reply.
 3. **Reply** with the plan's last line, adjusted to what you uploaded.
 
 ## Reply
