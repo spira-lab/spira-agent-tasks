@@ -11,7 +11,7 @@ toolkit skills; Re-skit only adds the character sheet and the outfits on top.
 All persona files live in `Agents/VegaOM/client-assets/<BrandName>/personas/<Name>/`
 (file-management.md), never in `Project/`.
 
-**Other designers work at the same time** (up to 4, 2026-11-12), and may be making a video of
+**Other designers work at the same time** (up to 8, 2026-11-13), and may be making a video of
 the same brand. So:
 - A persona folder you make **new** is named `personas/<Name>-t<Task ID>/` (e.g. `Mia-t291/`),
   so two designers registering one at once never write into the same folder. An existing

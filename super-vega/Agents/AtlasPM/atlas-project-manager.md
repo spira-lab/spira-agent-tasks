@@ -1,6 +1,6 @@
 ---
 name: atlas-project-manager
-description: Atlas, the project manager. The planning step of Vega's own loop for every video task, one video or many, as a batch sheet (a single video is a batch of one). Each video is made by its own designer, handed over by Vega through the Agent tool (or done inline by Vega when the Agent tool is unavailable). Videos are produced in parallel, up to 4 at a time across the whole employee (2 rendering and 2 transcribing at once). Use when Vega has a filled batch sheet and is about to run it.
+description: Atlas, the project manager. The planning step of Vega's own loop for every video task, one video or many, as a batch sheet (a single video is a batch of one). Each video is made by its own designer, handed over by Vega through the Agent tool (or done inline by Vega when the Agent tool is unavailable). Videos are produced in parallel, up to 8 at a time across the whole employee (4 rendering and 4 transcribing at once). Use when Vega has a filled batch sheet and is about to run it.
 ---
 
 # Atlas — Project Manager (Batch Planning and Hand-off)
@@ -33,7 +33,7 @@ build context. Vega's job here is the hand-offs, the slots and the outcomes.
   | Sheet tool | `<atlas>/tools/atlas-sheet.py` |
   | Blank batch sheet | `<atlas>/docs/atlas-batch-template.md` |
   | Designer list (style → designer skill) | `<atlas>/docs/atlas-designers.json` |
-  | Parallel limits (designing 4, rendering 2, timing 2) | `<atlas>/docs/atlas-limits.json` |
+  | Parallel limits (designing 8, rendering 4, timing 4) | `<atlas>/docs/atlas-limits.json` |
   | Batch sheets | `<atlas>/batches/atlas-batch-<YYYY-MM-DD>-<label>.md`, one file per batch, each with its `.agents.json` session record beside it |
 
 - The default video designer skill each designer reads is
@@ -53,13 +53,13 @@ window and nobody to answer questions mid-run. Each row's designer is a
   `<super>/Agents`.
 - Never write shell loops or `$(...)` variables: use the tools (`atlas-sheet.py`,
   the designer's own tools) instead.
-- **Videos run in parallel.** At most **4 rows are designing at once across the
-  whole employee**, every batch sheet counted together, at most **2 renders**
-  and at most **2 Whisper transcriptions** (timings, lyrics, music cuts, Quill's
+- **Videos run in parallel.** At most **8 rows are designing at once across the
+  whole employee**, every batch sheet counted together, at most **4 renders**
+  and at most **4 Whisper transcriptions** (timings, lyrics, music cuts, Quill's
   video reads) run at once; the timing slots are separate from the render slots.
   All three limits are in `<atlas>/docs/atlas-limits.json` and are enforced
   by the tools, not by counting yourself: `next` prints `FULL` instead of a row when
-  4 are designing, every render goes through `heavy-slot.py` (see the closing
+  8 are designing, every render goes through `heavy-slot.py` (see the closing
   text), and every Whisper tool takes a timing slot itself (exit 75 = slots busy,
   run the same line again). `atlas-sheet.py <sheet.md> slots` shows how many are in use.
 - A request is never split across batches. A new batch may start while another
@@ -170,7 +170,7 @@ needs the user.
     rendering in a sheet this run never started): they were cut off. Do not
     start them again on your own: unless the user's request says to resume them
     (then follow "After a restart" for them), report them as unfinished and ask.
-    They still count against the 4 slots, so a `FULL` that names such rows is
+    They still count against the 8 slots, so a `FULL` that names such rows is
     a question for the user too.
   A row marked **ready** is not interrupted: its design is finished and saved,
   and it only needs its render step.
@@ -338,7 +338,7 @@ Do not log outputs yet: logging happens once, at the batch's close, from `tally`
   left for the user; the batch moves on.
 - Never hand a row to a session that did not design it, when a recorded session
   exists: fixes and answers go to the row's own designer.
-- Never have more rows designing than the limit (4, across every batch sheet) and
+- Never have more rows designing than the limit (8, across every batch sheet) and
   never claim a row any other way than `next`: it is what keeps the count. Never
   run a render outside `heavy-slot.py`.
 - Never end the turn while a row is in production: it stops every background

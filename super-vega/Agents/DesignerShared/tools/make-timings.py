@@ -7,7 +7,7 @@ Engine: local Whisper (needs no hosting and no Spira call). On Linux, faster-whi
 installed (same model, int8 on CPU, loaded once for all files), else the whisper CLI. The line
 printed at the end says which engine ran; timings.json records it as "engine".
 
-Runs inside a timing slot (timing_slot.py): at most 2 transcriptions at once across the employee,
+Runs inside a timing slot (timing_slot.py): at most 4 transcriptions at once across the employee,
 8 threads each. Exit 75 means every timing slot stayed busy for 5 minutes: run the same line again.
 
 --language  ISO 639 code of the speech (default en), e.g. vi, ms, th, id, zh.

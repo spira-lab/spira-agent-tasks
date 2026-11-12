@@ -17,7 +17,7 @@
    "role": "Project manager",
    "team": "managers",
    "status": "built",
-   "does": "Planning step of Vega's loop: batch sheet checks, designer choice and hand-off of each video; videos run in parallel, up to 4 at a time (2 rendering, 2 transcribing).",
+   "does": "Planning step of Vega's loop: batch sheet checks, designer choice and hand-off of each video; videos run in parallel, up to 8 at a time (4 rendering, 4 transcribing).",
    "folder": "Agents/AtlasPM"
   },
   {
