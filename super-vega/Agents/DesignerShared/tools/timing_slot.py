@@ -1,6 +1,5 @@
 """Timing slots: at most "timing" local Whisper runs at once across the employee (the owner's
-decision, 2026-11-13: one per 2 cores, at least 2, "cpus_per_timing" in
-Agents/AtlasPM/docs/atlas-limits.json), each on
+decision, 2026-11-13: 10 at a time, "timing" in Agents/AtlasPM/docs/atlas-limits.json), each on
 WHISPER_THREADS threads. Separate from the render slots of heavy-slot.py.
 
   with timing_slot("<what is transcribed>"):
@@ -12,7 +11,7 @@ it exits 75 without running anything: run the same line again.
 A slot is a lock on <super>/.locks/timing-slot-<n>.lock held by this process, freed when it ends,
 also on a crash or a restart. <super>/.locks/timing-slot-<n>.who says who holds it
 (atlas-sheet.py slots shows it)."""
-import fcntl, json, os, sys, time
+import fcntl, json, sys, time
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
@@ -25,15 +24,9 @@ POLL, MAX_WAIT, BUSY = 5, 300, 75
 WHISPER_THREADS = 8
 
 
-def cpu_count():
-    try: return len(os.sched_getaffinity(0))
-    except AttributeError: return os.cpu_count() or 1
-
-
 def timing_cap():
-    try: per = int(json.loads(LIMITS.read_text()).get("cpus_per_timing") or 2)
-    except (OSError, ValueError): per = 2
-    return max(2, cpu_count() // max(1, per))
+    try: return max(1, int(json.loads(LIMITS.read_text()).get("timing") or 10))
+    except (OSError, ValueError): return 10
 
 
 def _take(label):

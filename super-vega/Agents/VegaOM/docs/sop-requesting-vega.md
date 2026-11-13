@@ -77,7 +77,7 @@ The 🖼️ **Corporate Carousel Designer** makes 4–7 slide corporate carousel
 
 1. **Vega confirms** in his first progress message what is being made.
 2. **Echo writes the scripts**, checked against everything the brand already has, so angles don't repeat.
-3. **Atlas produces** the videos: as many at once as the machine takes (20 in design, 16 rendering, 16 transcribing on 32 cores). New batches start in free slots as the current one finishes.
+3. **Atlas produces** the videos: up to 20 in design, 10 rendering and 10 transcribing at once. New batches start in free slots as the current one finishes.
 4. **Each video is reported** the moment it's done, one by one, with a short progress line (for example "IASO #146 (Task 248) done · Vietnamese · dengue protection").
 5. **At the end**, Vega submits the result: one line per video with its status and the credits spent, and the list of videos with their public URLs.
 

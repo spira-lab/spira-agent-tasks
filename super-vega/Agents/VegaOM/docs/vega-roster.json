@@ -17,7 +17,7 @@
    "role": "Project manager",
    "team": "managers",
    "status": "built",
-   "does": "Planning step of Vega's loop: batch sheet checks, designer choice and hand-off of each video; videos run in parallel, as many at a time as the machine's cores allow (20 designing, 16 rendering, 16 transcribing on 32 cores).",
+   "does": "Planning step of Vega's loop: batch sheet checks, designer choice and hand-off of each video; videos run in parallel, up to 20 designing, 10 rendering and 10 transcribing at once.",
    "folder": "Agents/AtlasPM"
   },
   {

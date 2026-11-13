@@ -44,17 +44,9 @@ function preset(kind) {
   return kind === 'final' ? 'faster' : 'veryfast';
 }
 
-// heavy-slot.py keeps <super>/.locks/render-slot-<n>.who while a slot is held (this render's own included).
-function rendersRunning() {
-  try {
-    return fs.readdirSync(path.resolve(__dirname, '../../../../.locks')).filter((n) => /^render-slot-\d+\.who$/.test(n)).length;
-  } catch { return 0; }
-}
-
-// Splits the cores among the renders running now: a lone render takes the whole machine
-// (each Chrome also feeds an x264, so one Chrome per 2 cores), later ones take what is left.
+// Six Chromes per render (the owner's decision, 2026-11-13; was at most 4).
 function defaultWorkers() {
-  return Math.max(2, Math.min(16, Math.floor(cpuCount() / (2 * Math.max(1, rendersRunning())))));
+  return 6;
 }
 
 // Threads for each x264 process when several run side by side.
