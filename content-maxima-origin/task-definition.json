@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "packageVersion": "1.0.0",
+  "description": "Original creative workflow on production infrastructure: turn a script, brief, or idea into a finished talking-head short video, 9:16 for Reels and TikTok unless another aspect ratio is asked for, built one scene at a time and checked after each, following the skills in skills/ (start with skills/creative-video-production.md).",
+  "requirements": [
+    {"name": "ffmpeg", "kind": "system", "purpose": "Encoding, mixing, frame extraction and probing (render, gen, add-ons)", "check": "ffmpeg -version && ffprobe -version"},
+    {"name": "python3", "kind": "system", "purpose": "tools/make-timings.py and tools/bgm-extend.py", "check": "python3 --version"},
+    {"name": "@aws-sdk/client-s3 + client-lambda", "kind": "npm", "purpose": "tools/render/render.js and audit.js run their browser on AWS Lambda (CM_RENDER_LAMBDA / CM_RENDER_BUCKET)", "check": "node -e \"require('@aws-sdk/client-s3'); require('@aws-sdk/client-lambda')\"", "install": "npm install -g @aws-sdk/client-s3@3.1142.0 @aws-sdk/client-lambda@3.1142.0"},
+    {"name": "@spira-lab/cli", "kind": "npm", "purpose": "Model docs only (`spira ai models get`, skills/toolkit.md). Never used to host a file, or to submit, wait on or check a job", "check": "spira --version", "install": "npm install -g @spira-lab/cli"},
+    {"name": "spira sign-in", "kind": "credential", "purpose": "The Spira CLI must be signed in as the operator: jobs and host_file run as that account", "check": "spira auth whoami"},
+    {"name": "openai-whisper", "kind": "pip", "purpose": "Word timings for the voice-over (tools/make-timings.py, the assets stage)", "check": "python3 -c \"import importlib.util, sys; sys.exit(importlib.util.find_spec('whisper') is None)\"", "install": "pip install openai-whisper"},
+    {"name": "yt-dlp", "kind": "pip", "purpose": "Downloading a reference video from a URL (tools/style-sheet.sh)", "check": "yt-dlp --version", "install": "pip install yt-dlp", "optional": true}
+  ],
+  "workspaceDirs": ["editable/materials", "renders/deletable"],
+  "inputs": [
+    {"key": "referenceVideo", "type": "string", "description": "Reference video material, as given by the operator; the agent works out how to use it"},
+    {"key": "durationSeconds", "type": "number", "description": "Target length of the video"}
+  ],
+  "stages": [
+    {"id": "setup", "title": "Preflight, read skills, settle concept and script"},
+    {"id": "assets", "title": "Generate voice, talking head, visuals and music; build word timings"},
+    {"id": "build", "title": "Build scenes, animation, captions and sound effects; pass the audit"},
+    {"id": "render", "title": "Render MP4, host it and report"}
+  ],
+  "outputs": [
+    {"key": "video", "kind": "file", "required": true, "accept": [".mp4"], "description": "The current render under renders/"},
+    {"key": "publicUrl", "kind": "url", "description": "Hosted URL of the render (host_file)"},
+    {"key": "caption", "kind": "text", "description": "Post caption for the video"}
+  ]
+}
