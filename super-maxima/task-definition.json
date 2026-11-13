@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "packageVersion": "1.6.11",
+  "packageVersion": "1.6.12",
   "description": "Make one or more videos for a brand as Vega, the operations manager. The opening message is the request (for example 'make 3 videos for Emochi'). Start by reading Agents/VegaOM/vega-operations-manager.md in full: it routes the batch to the designers, produces the videos in parallel, up to 8 at a time, and delivers hosted URLs. A client's assets are found through Agents/VegaOM/docs/vega-client-ledger.md under Agents/VegaOM/client-assets/<Brand>/.",
   "requirements": [
     {"name": "ffmpeg", "kind": "system", "purpose": "Probing, cutting and the audio mix", "check": "ffmpeg -version && ffprobe -version"},
@@ -25,5 +25,23 @@
   "outputs": [
     {"key": "report", "kind": "text", "required": true, "description": "One line per video: status and credits spent"},
     {"key": "videos", "kind": "json", "required": true, "description": "List of {task, brand, publicUrl}, one entry per hosted video"}
+  ],
+  "subTasks": [
+    {
+      "id": "reskit",
+      "title": "Re-skit a video",
+      "when": "The operator asks to re-skit, remake or clone one source video (a link) for a brand or Brandless, keeping the source's own performance or audio.",
+      "description": "Re-skit one source video for one brand, as Vega. Read Agents/VegaOM/vega-operations-manager.md as usual and follow its 'Clone and Re-skit requests' section, with these rules for this job, which win over the skill where they differ. (1) One row only, style re-skit: first measure the source with `python3 \"Agents/VegaOM/tools/vega-source-length.py\" \"<link>\"`, then build it with `python3 \"Agents/VegaOM/tools/vega-batch.py\" new \"<brand>\" 1 --type organic-video --style re-skit --source \"<link>\"` (plus --avatar-image and --instructions as the skill says). No multi-row Atlas plan and no Echo. (2) Nobody can give an OK during this job. A source over 60 s: do not build the row; call report_error with its length and the tool's credit estimate (about 10-13 credits per second) and ask for a shorter cut. A source of 60 s or less runs straight away without waiting for an OK; give its length and the credits spent in the report. (3) Run the row through the usual loop until the designer's DONE line; never stop to wait for a review. (4) Do not upload to Social Post Assets through Hermes unless the request asks for it. (5) Host the finished video with host_file and finish with submit_result: `video` is its hosted URL; `report` is one line with the source (`ref: <link>`), what the re-skit changed, and the credits spent.",
+      "stages": [
+        {"id": "intake", "title": "Read the skill and brand memory; measure the source"},
+        {"id": "design", "title": "Build the row and brief the Re-skit designer"},
+        {"id": "render", "title": "The designer cuts and renders the video"},
+        {"id": "deliver", "title": "Host the video and write the report"}
+      ],
+      "outputs": [
+        {"key": "video", "kind": "url", "required": true, "description": "The finished video's hosted URL"},
+        {"key": "report", "kind": "text", "required": true, "description": "One line: ref: <source link>, what changed, credits spent"}
+      ]
+    }
   ]
 }
