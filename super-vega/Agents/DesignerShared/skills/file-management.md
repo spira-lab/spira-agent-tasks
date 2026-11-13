@@ -35,7 +35,7 @@ document is relative to the root, and every file the session creates goes
 inside it. Nothing is written anywhere else, except throwaway
 intermediates, which go in the session scratchpad.
 
-- **Your own scratch folder.** Up to 8 designers work at the same time
+- **Your own scratch folder.** Many designers work at the same time
   (2026-11-10), and the scratchpad is shared by them. Keep every throwaway
   file in `<scratchpad>/t<Task ID>/` (for example `t291/`), create it
   first, and never read, change or run anything outside it: another

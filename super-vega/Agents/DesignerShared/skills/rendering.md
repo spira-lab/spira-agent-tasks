@@ -16,7 +16,7 @@ better. Run it, read its one result line, move on.
 WHEN the editable is built and has passed the stage skill's first-frame
 audit (3a) and its checks before hand-over (4), it is ready to render.
 Other designers render on the same machine at the same time, so every
-render runs inside a **render slot**: at most 4 renders at once (the owner's
+render runs inside a **render slot**: at most one render per 2 cores at once (the owner's
 decision, 2026-11-13). Put `python3 <shared>/tools/heavy-slot.py <Task ID> --`
 in front of the render command, with a Bash timeout of 600000. It waits
 for a free slot, runs the command, and exits with the command's own exit
@@ -27,7 +27,7 @@ final ffmpeg encode); light steps (AI jobs, probes, single frames) run
 without a slot. A command that needs a shell (a pipe, `&&`) goes in as
 `bash -c "<command>"`.
 Transcriptions are not renders: `make-timings.py` and the other Whisper
-tools take one of the 2 **timing slots** themselves (2026-11-12), so never
+tools take one of the **timing slots** (one per 2 cores) themselves (2026-11-13), so never
 wrap them in `heavy-slot.py`. IF one exits **75**, run the same line again.
 
 ## Before you run it

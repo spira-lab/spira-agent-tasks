@@ -64,7 +64,7 @@ How the row maps onto Rey's inputs:
   ```
   Rey wrote `${CLAUDE_SKILL_DIR}`: that is `<lsc>`. **Shared state, written only as this skill says:**
   `clients/` (briefs, banks, used-logs, screens, `CLIENTS.md`), `angles-log.md` and the ledger's new
-  rows. Up to 8 designers run at once, so every table row (reserve, mark, bank and ledger ideas,
+  rows. Many designers run at once, so every table row (reserve, mark, bank and ledger ideas,
   the angles log, screen sources) goes through `lsc.py`, which holds a lock. A brief is changed
   with the Edit tool, one small replacement at a time, never rewritten whole. `skills/`, `scripts/`,
   `tools/`, `references/` (apart from the ledger rows `lsc.py append ledger` adds) and the style
