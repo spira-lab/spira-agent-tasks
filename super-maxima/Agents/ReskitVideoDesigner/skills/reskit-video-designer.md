@@ -374,11 +374,20 @@ every clip, since that is all the model has to keep the voice the same.
 3. **Price it before spending.** For each distinct model, read `spira ai models get <id>` and put
    every job's expected credits in `chain.json` and in the plan's generation table, with the
    total. Nothing is submitted before the table is written.
+4. **Check the chain:** `python3 <reskit>/tools/reskit.py chain-check <materials>` (read-only).
+   It names every `needs` or `{{label}}` with no job behind it, any cycle, and any row of the
+   plan's generation table missing from `chain.json` (a new persona's `persona_soul`,
+   `persona_edit`, `sheet` and the `outfit` all belong in the chain). Fix `chain.json` and run it
+   again; nothing is submitted until it passes. A chain you cannot make pass ends the job with
+   `FAILED <what chain-check reports>`, never a silent stop.
 
 ### 7.7 Starting the chain
 
-Start it straight away. Run the chain by hand, as the toolkit's `submit_ai_job` / `wait_ai_job` /
-`host_file` steps say, and the playbook's "Running jobs" describes:
+Start it straight away, once `chain-check` passes (7.6). On a resumed session, run `chain-check`
+again before anything else in the chain: a clip left `pending` behind a label no job produces
+never starts, so fix the chain (or end with `FAILED`) rather than waiting on it. Run the chain by
+hand, as the toolkit's `submit_ai_job` / `wait_ai_job` / `host_file` steps say, and the
+playbook's "Running jobs" describes:
 
 1. Host every local input a job needs with `host_file` (reference clips, plate sources,
    the persona sheet), all in one turn.

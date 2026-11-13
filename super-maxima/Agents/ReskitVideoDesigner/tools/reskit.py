@@ -46,8 +46,13 @@ Prints short lines; exits non-zero on a problem.
   lesson <materials> "<lesson>"
         Propose a lesson: appended to the metadata's "lessons" list (Vega decides; this tool
         never writes to the skill or its references).
+  chain-check <materials>
+        Read-only check of chain.json before the first submit and after a restart: every
+        "needs" and {{label}} names a job in the chain, a {{label}} is also in that job's
+        "needs", the needs have no cycle, and every job in plan.md's Generation plan table is
+        in the chain. Lists every problem and exits non-zero; changes no file.
 """
-import json, math, shutil, subprocess, sys, tempfile
+import json, math, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -354,9 +359,71 @@ def cmd_stage(a):
     print(f"stage = {a[1]}")
 
 
+# ---------------------------------------------------------------- chain-check
+CHAIN_MODELS = ("ai-influencer-image", "gpt-image-2", "wan-3.0", "suno-music")
+
+
+def planned_labels(plan):
+    """Labels of the Generation plan table rows whose model is one the chain runs."""
+    labels, inside = [], False
+    for line in plan.read_text(encoding="utf-8").splitlines():
+        if line.startswith("## "):
+            inside = line.strip().lower() == "## generation plan"; continue
+        if not inside or not line.lstrip().startswith("|"): continue
+        cells = [c.strip().strip("`").strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) < 2 or cells[0].lower() == "label" or set(cells[0]) <= set("-: "): continue
+        if any(m in cells[1] for m in CHAIN_MODELS): labels.append(cells[0])
+    return labels
+
+
+def cmd_chain_check(a):
+    v = Video(a[0]); path = v.materials / "chain.json"
+    if not path.is_file(): sys.exit(f"no chain.json in {v.materials}")
+    try:
+        jobs = json.loads(path.read_text(encoding="utf-8")).get("jobs")
+    except json.JSONDecodeError as e:
+        sys.exit(f"chain.json is not valid JSON: {e}")
+    if not isinstance(jobs, list): sys.exit('chain.json has no "jobs" list')
+    problems, needs = [], {}
+    for n, j in enumerate(jobs):
+        label = j.get("label") if isinstance(j, dict) else None
+        if not label:
+            problems.append(f"job #{n + 1} has no label"); continue
+        if label in needs: problems.append(f"label {label} is used by more than one job")
+        for key in ("model", "out"):
+            if not j.get(key): problems.append(f"{label}: no {key}")
+        needs[label] = list(j.get("needs") or [])
+    for j in jobs:
+        label = j.get("label") if isinstance(j, dict) else None
+        if not label: continue
+        for dep in needs[label]:
+            if dep not in needs: problems.append(f"{label} needs {dep}, and no job is labelled {dep}")
+        for ref in sorted(set(re.findall(r"\{\{\s*([^}\s]+)\s*\}\}", json.dumps(j.get("inputs") or {})))):
+            if ref not in needs: problems.append(f"{label} uses {{{{{ref}}}}}, and no job is labelled {ref}")
+            elif ref not in needs[label]: problems.append(f"{label} uses {{{{{ref}}}}} but does not list {ref} in needs")
+    state = {}
+    def visit(label, trail):
+        state[label] = 1
+        for dep in needs[label]:
+            if dep not in needs: continue
+            if state.get(dep) == 1: problems.append("needs cycle: " + " -> ".join(trail[trail.index(dep):] + [dep]))
+            elif not state.get(dep): visit(dep, trail + [dep])
+        state[label] = 2
+    for label in needs:
+        if not state.get(label): visit(label, [label])
+    if v.plan.is_file():
+        for label in planned_labels(v.plan):
+            if label not in needs: problems.append(f"plan.md plans {label}, and chain.json has no job labelled {label}")
+    else:
+        problems.append(f"no plan.md in {v.materials}")
+    for p in problems: print(p)
+    if problems: sys.exit(f"chain-check: {len(problems)} problem(s) in {path}")
+    print(f"chain-check: {len(needs)} jobs, ok")
+
+
 COMMANDS = {"stage": cmd_stage, "new": cmd_new, "fetch": cmd_fetch, "probe": cmd_probe, "frames": cmd_frames, "still": cmd_still,
             "dna": cmd_dna, "mask": cmd_mask, "cutref": cmd_cutref, "strip": cmd_strip, "safe": cmd_safe,
-            "audio-probe": cmd_audio_probe, "loudness": cmd_loudness, "lesson": cmd_lesson}
+            "audio-probe": cmd_audio_probe, "loudness": cmd_loudness, "lesson": cmd_lesson, "chain-check": cmd_chain_check}
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS: sys.exit(__doc__)

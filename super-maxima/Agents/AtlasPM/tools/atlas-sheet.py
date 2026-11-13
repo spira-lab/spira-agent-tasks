@@ -295,7 +295,7 @@ def field_value(v):
     return " ".join(f.read_text(encoding="utf-8").split())
 
 def statuses(path):
-    with open(path.with_name(path.name + ".lock"), "a") as lk:
+    with open(path.with_name(path.name + ".lock"), "a+") as lk:
         fcntl.flock(lk, fcntl.LOCK_SH)
         rows, _ = load(path)
     return {r.get("Task ID", ""): (r.get("Status") or "pending").lower() for r in rows if filled(r)}
@@ -326,7 +326,7 @@ def held_slots(kind="render"):
     file written beside it."""
     busy = []
     for f in sorted(LOCKS.glob(f"{kind}-slot-*.lock")) if LOCKS.is_dir() else []:
-        with open(f, "a") as lk:
+        with open(f, "a+") as lk:
             try: fcntl.flock(lk, fcntl.LOCK_SH | fcntl.LOCK_NB)
             except BlockingIOError:
                 who = f.with_suffix(".who")
@@ -347,10 +347,13 @@ def recover(extra=None):
     """One JSON line per designing or question row, with what a restart needs to pick it up."""
     for p in batch_sheets(extra):
         try:
-            with open(p.with_name(p.name + ".lock"), "a") as lk:
+            with open(p.with_name(p.name + ".lock"), "a+") as lk:
                 fcntl.flock(lk, fcntl.LOCK_SH)
                 rows, _ = load(p)
-        except (SystemExit, OSError, ValueError): continue
+        except OSError as e:
+            print(f"skip {p}: {e}", file=sys.stderr)
+            continue
+        except (SystemExit, ValueError): continue
         side = p.with_name(p.name + ".agents.json")
         try: agents = json.loads(side.read_text()) if side.exists() else {}
         except ValueError: agents = {}

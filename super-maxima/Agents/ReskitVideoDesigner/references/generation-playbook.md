@@ -32,8 +32,14 @@ other jobs' results (clips need the outfit and the plates), waits longer than on
 
 ```json
 {"jobs": [
- {"label": "outfit", "model": "gpt-image-2", "out": "assets/outfit_sheet.png", "hold": true, "expected_credits": 8,
-  "inputs": {"size": "16:9", "resolution": "4K", "referenceImage": ["@/abs/.../personas/Mia/sheet_4k.png"], "prompt": "<outfit prompt>"}},
+ {"label": "persona_soul", "model": "ai-influencer-image", "out": "/abs/.../personas/Mia/source/soul.png", "expected_credits": 7,
+  "inputs": {"size": "9:16", "resolution": "1080p", "prompt": "<Soul prompt>"}},
+ {"label": "persona_edit", "model": "gpt-image-2", "out": "/abs/.../personas/Mia/source/edit.png", "needs": ["persona_soul"], "expected_credits": 5,
+  "inputs": {"size": "9:16", "resolution": "2K", "referenceImage": ["{{persona_soul}}"], "prompt": "<persona-edit prompt>"}},
+ {"label": "sheet", "model": "gpt-image-2", "out": "/abs/.../personas/Mia/sheet_4k.png", "needs": ["persona_edit"], "hold": true, "expected_credits": 8,
+  "inputs": {"size": "16:9", "resolution": "4K", "referenceImage": ["{{persona_edit}}"], "prompt": "<character-sheet prompt>"}},
+ {"label": "outfit", "model": "gpt-image-2", "out": "assets/outfit_sheet.png", "needs": ["sheet"], "hold": true, "expected_credits": 8,
+  "inputs": {"size": "16:9", "resolution": "4K", "referenceImage": ["{{sheet}}"], "prompt": "<outfit prompt>"}},
  {"label": "plate_a", "model": "gpt-image-2", "out": "assets/plate_a.png", "expected_credits": 5,
   "inputs": {"size": "9:16", "resolution": "2K", "referenceImage": ["@assets/src_a.png"], "prompt": "<plate prompt>"}},
  {"label": "clip_A", "model": "wan-3.0", "out": "gen/out/A.mp4", "needs": ["outfit", "plate_a"], "expected_credits": 25,
@@ -51,6 +57,16 @@ other jobs' results (clips need the outfit and the plates), waits longer than on
   its place before submitting; a hosted URL (`https://static.viralwell.ai/...`, such as the
   request's logo or product image) passes as it is. `{{label}}` marks another job's result:
   that job waits, and you fill in its `resultUrls[0]` once it has landed. Never host a job's output.
+- **New persona or existing one.** The example makes a new persona, so the chain starts with
+  `persona_soul` → `persona_edit` → `sheet` → `outfit`, each listing the one before it in `needs`
+  and using it as `{{label}}`. When the persona already has a sheet, drop the first three jobs
+  and give `outfit` the sheet as a local file instead: no `needs`,
+  `"referenceImage": ["@/abs/.../personas/Mia/sheet_4k.png"]`.
+- **Every planned job is in the chain.** Each row of the plan's generation table is a job in
+  `chain.json` before the first submit, and every `needs` and `{{label}}` names one of them. A
+  clip that needs `outfit` while no job is labelled `outfit` waits forever. Check with
+  `python3 <reskit>/tools/reskit.py chain-check <materials>` (read-only): it lists every missing
+  label, cycle or unplanned row and exits non-zero until the chain is whole.
 - Each job entry also carries, as you update it: `status` (`pending`, `submitted`, `done`,
   `failed`), `job_id` (written the moment `submit_ai_job` returns it), `submissions` (how many
   times it was submitted), `credits` and `urls` once it lands, and `approved` on a `hold` job.
