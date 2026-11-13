@@ -24,7 +24,8 @@ skill names below (hosting the finished render, model docs).
 
 Run every command from the root, with root-relative paths; never `cd`
 into a folder (a later command then resolves its paths from the wrong
-place).
+place). `<materials>/<name>` below is the video's materials folder,
+`editable/materials/NN-name-MM-DD` (file-management sections 2 and 3).
 
 Every generation is three steps:
 
@@ -145,7 +146,7 @@ video that is presenter-less by that rule uses the voice-over directly
 keeps the rate of the clip it is given. HeyGen
 and a supplied clip are not guaranteed to be 24 fps. A clip at any other
 rate repeats or drops frames in the render, which shows as the presenter
-juddering, and the renderer names it in a warning. Before switching a
+juddering; check a clip's rate with `ffprobe` before placing it. Before switching a
 step to another video model, or adding one, check the frame rate it
 outputs; if it is not 24, the render rate or the clip has to change
 first, and the finding is recorded here.
@@ -304,9 +305,9 @@ Every clip of the video takes the same two references. In this mode Omni
 does not open on the persona image, so the room or the framing can shift
 (a test put the presenter on a different chair): plan the layout from
 the clips, not from `persona.png`. Once `th-01.mp4` is in, make its
-contact sheet, `tools/style-sheet.sh <materials>/<name>/th-01.mp4
-<materials>/<name>/deletable`, look at it as in 3k step 5, and check the
-layout on the stage with `audit.js --at`.
+contact sheet as in 3k step 5, look at it, and check the layout on the
+stage by seeking the editable to those moments (stage-canvas-html
+section 4).
 
 **All chunks are one batch.** Write every chunk's payload
 (`jobs/th-01.json`, `jobs/th-02.json`, ...), submit them all with
@@ -336,7 +337,8 @@ python3 tools/make-timings.py <materials>/<name>/vo.mp3 --from th-01.mp4 th-02.m
 
 Without a product, the clips keep the persona image's framing: the face
 sits where it sits in `persona.png`, so plan the layout around it from
-that image, and check it on the stage with `audit.js --at`. Do not cut
+that image, and check it on the stage by seeking the editable
+(stage-canvas-html section 4). Do not cut
 frames out of the clips to look at them; the one contact sheet of a
 product clip (above) is the exception.
 
@@ -467,8 +469,8 @@ steps, in order:
      `python3 tools/make-timings.py <materials>/<name>/vo.mp3`.
    - **A recording:** no job, and it comes first in the session, before
      the concept: its words are what the video is about. Start the
-     video with the request's script, or with none
-     (`tools/new-video.sh "<brand, or voiceover>" < /dev/null`), then
+     video (name, editable, materials folder and metadata, file-management
+     sections 3 and 4) with the request's script, or with none, then
      one command converts the recording to `vo.mp3` as it is, builds
      its timings, and, unless a script was saved, writes the
      transcript to `script.txt` as the script:
@@ -498,8 +500,9 @@ the voice-over. Skip the persona (3a), the avatar edit (3b), the
 talking-head clips (3e), and HeyGen (3j); generate no speech (3i). It comes first in the
 session, before the concept: its words are what the video is about.
 
-1. **Start the video with no script**:
-   `tools/new-video.sh "<brand, or talking head>" < /dev/null`.
+1. **Start the video with no script**: name, editable, materials folder
+   and metadata as file-management sections 3 and 4 say, and no
+   `script.txt` yet.
 2. **Bring the clip in as `th-01.mp4`**, re-encoded to H.264 so the
    stage and the renderer play it (an upload may be MOV or HEVC), then
    host it with `host_file` (section 2):
@@ -519,7 +522,8 @@ session, before the concept: its words are what the video is about.
    the narration, and its length is the video's length.
 5. **Look at where the person is**, from a contact sheet of frames
    across the clip:
-   `tools/style-sheet.sh <materials>/<name>/th-01.mp4 <materials>/<name>/deletable`.
+   `ffmpeg -y -v error -i <materials>/<name>/th-01.mp4 -vf "fps=1,scale=216:-1,tile=6x<rows>" -frames:v 1 <materials>/<name>/deletable/contact-sheet.jpg`,
+   rows being the clip's seconds divided by six, rounded up.
    Open only `deletable/contact-sheet.jpg`. Note where the face and the
    body sit in the frame, how much of it they fill, whether they move,
    and where the free space is, and plan where every animated element
@@ -535,7 +539,7 @@ does, and its cut-out carries the scenes like any talking head
 the voice stay in sync. The output ratio is the clip's own ratio.
 
 **Captions follow the clip's speech.** `tools/captions.py` (stage skill
-section 6) times every word from Whisper's `timings.json` and writes it
+section 4b) times every word from Whisper's `timings.json` and writes it
 as `script.txt` has it, so the subtitles match what the person says,
 word for word, in the clip's language.
 

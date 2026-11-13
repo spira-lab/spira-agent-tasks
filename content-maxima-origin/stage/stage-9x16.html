@@ -399,7 +399,7 @@
     });
   });
 
-  if (RENDER) body.classList.add('render');
+  if (new URLSearchParams(location.search).has('render')) body.classList.add('render');
   fit();
 })();
 </script>

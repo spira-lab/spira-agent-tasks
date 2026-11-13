@@ -38,11 +38,6 @@ dropped.
 UGC Casually taken shot of one [age] [gender], alone in the frame, [pretty/handsome/cute good looking], [beautiful and attractive with a natural easy smile, or the description that fits], [hair style] in a [outfit style], [what it is not, when needed; remove if unnecessary]. [He/She] is wearing a [outfit detail]. [Framed from the legs up if standing, waist up if sitting], [standing/sitting] relaxed in [setting location] [daylight/night time], looking at the camera, no posing, no filters, no text
 ```
 
-The outfit colour is chosen against the scene backgrounds the video
-will use, not on its own (creative-video-production section 5). This is
-the last point in the pipeline where it can be set, so fix a colour that
-reads against them here rather than working around it later.
-
 ## 3. GPT Image 2, persona edit
 
 The Soul output, or the user's photo on Auto voice (toolkit 3a), is the
@@ -63,10 +58,6 @@ Edit this photo. Keep the same person with the exact same face, hair, expression
 - A product never goes into this edit (toolkit 3b): the prompt is the
   same with or without one. The product comes in with the talking-head
   clips (section 5).
-- The clothing colour is not fixed here. WHEN the finished persona turns
-  out too close to a scene background, that background is the thing to
-  change (creative-video-production section 5): the persona is not
-  regenerated, and this edit does not repaint the outfit.
 
 ## 4. GPT Image 2, transparent background
 

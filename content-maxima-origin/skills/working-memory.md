@@ -1,8 +1,8 @@
 # Working memory
 
 A living record kept across sessions. Entries are facts, one per line,
-not instructions. The Reword table and Used tracks are the only
-sections you add to on your own. Preferences are written only when the user asks for one to be
+not instructions. The Reword table is the only section you add to on
+your own. Preferences are written only when the user asks for one to be
 recorded; never add, change, or remove a preference otherwise.
 
 ## Preferences
@@ -30,9 +30,3 @@ Captions, subtitles, and any text on screen always use the original.
 | GitHub | Git-Hub |
 | Cookiy | Cookie |
 | B-roll | Bee roll |
-
-## Used tracks
-
-Library music beds already used in this root, one per line: the file
-and the video's name. Read when choosing a bed (creative-video-production
-section 1) and added to once one is chosen.
