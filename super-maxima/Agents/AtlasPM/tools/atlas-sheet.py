@@ -7,7 +7,7 @@ The sheet is a Markdown table (.md); an .xlsx sheet also works.
       Takes the first row whose Status is blank or pending, marks it designing,
       and prints {"task_id": ..., "request": ...}. Prints NONE when no row is left.
       Prints "FULL <n>/<cap>" and the rows counted (and claims nothing) when <cap> rows are
-      already designing across every sheet in <atlas>/batches/ (docs/atlas-limits.json, 20).
+      already designing across every sheet in <atlas>/batches/ (docs/atlas-limits.json, 8).
       An avatar row's request carries only the avatar description; a carousel row's (any style
       ending in "carousel", e.g. corporate carousel; Output type carousel) only the brand, its
       numbers, the instructions (with the product and the brand website) and Echo's topic angle
@@ -74,9 +74,9 @@ INPUTS = COLS[:COLS.index("Status")]
 OUTPUT_TYPES = {"organic-video", "ad-video", "avatar-image", "carousel"}
 DESIGNERS = Path(__file__).resolve().parents[1] / "docs" / "atlas-designers.json"
 RUNNABLE = {"", "pending"}
-# Parallel production (the owner's decision, 2026-11-13): at most 20 rows designing across every
-# batch sheet of this employee, at most 10 renders at once (the render slots of heavy-slot.py) and
-# at most 10 Whisper transcriptions at once (the timing slots of timing_slot.py).
+# Parallel production (the owner's decision, 2026-11-13): at most 8 rows designing across every
+# batch sheet of this employee, at most 4 renders at once (the render slots of heavy-slot.py) and
+# at most 4 Whisper transcriptions at once (the timing slots of timing_slot.py).
 LIMITS = Path(__file__).resolve().parents[1] / "docs" / "atlas-limits.json"
 BATCHES = Path(__file__).resolve().parents[1] / "batches"
 LOCKS = PROJECT / ".locks"
@@ -303,7 +303,7 @@ def statuses(path):
 def limits():
     try: d = json.loads(LIMITS.read_text())
     except (OSError, ValueError): d = {}
-    return int(d.get("designing") or 20), int(d.get("rendering") or 10), int(d.get("timing") or 10)
+    return int(d.get("designing") or 8), int(d.get("rendering") or 4), int(d.get("timing") or 4)
 
 def batch_sheets(extra=None):
     sheets = {p.resolve() for p in BATCHES.glob("*.md") if ".saving" not in p.name} if BATCHES.is_dir() else set()

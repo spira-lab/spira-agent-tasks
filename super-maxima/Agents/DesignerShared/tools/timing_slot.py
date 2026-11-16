@@ -1,5 +1,5 @@
 """Timing slots: at most "timing" local Whisper runs at once across the employee (the owner's
-decision, 2026-11-13: 10 at a time, "timing" in Agents/AtlasPM/docs/atlas-limits.json), each on
+decision, 2026-11-13: 4 at a time, "timing" in Agents/AtlasPM/docs/atlas-limits.json), each on
 WHISPER_THREADS threads. Separate from the render slots of heavy-slot.py.
 
   with timing_slot("<what is transcribed>"):
@@ -25,7 +25,7 @@ WHISPER_THREADS = 8
 
 
 def timing_cap():
-    try: return max(1, int(json.loads(LIMITS.read_text()).get("timing") or 10))
+    try: return max(1, int(json.loads(LIMITS.read_text()).get("timing") or 4))
     except (OSError, ValueError): return 10
 
 

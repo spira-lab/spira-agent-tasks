@@ -16,7 +16,7 @@ better. Run it, read its one result line, move on.
 WHEN the editable is built and has passed the stage skill's first-frame
 audit (3a) and its checks before hand-over (4), it is ready to render.
 Other designers render on the same machine at the same time, so every
-render runs inside a **render slot**: at most 10 renders at once (the owner's
+render runs inside a **render slot**: at most 4 renders at once (the owner's
 decision, 2026-11-13). Put `python3 <shared>/tools/heavy-slot.py <Task ID> --`
 in front of the render command, with a Bash timeout of 600000. It waits
 for a free slot, runs the command, and exits with the command's own exit

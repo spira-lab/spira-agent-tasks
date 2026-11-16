@@ -66,7 +66,7 @@ python3 <shared>/tools/make-timings.py <path to vo.mp3> --language <code> --prom
 `--language` is the speech's ISO 639 code (`en` by default; `vi`, `ms`, `th`,
 `id`, ...). Always pass `--prompt` with the brand name, the product name, and
 any people or other proper nouns the script says (e.g. `--prompt "Cookiy Earn,
-Cookiy Earn Text Agent, Davin"`). It waits for one of the 2 timing slots shared
+Cookiy Earn Text Agent, Davin"`). It waits for one of the 4 timing slots shared
 by every designer; exit 75 means they stayed busy for 5 minutes: run the same
 line again.
 This transcribes with **ElevenLabs Scribe** through the Spira CLI (the owner's

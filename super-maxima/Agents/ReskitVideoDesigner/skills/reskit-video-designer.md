@@ -86,7 +86,7 @@ arguments):
 | `node <reskit>/tools/capture_site.js` | screenshots, logo, colors and text from the brand's own website |
 | `<reskit>/tools/caption.html`, `beat.html`, `popup.html`, `sheet_template.html` | overlay and sheet templates |
 | `python3 <shared>/tools/make-timings.py` | transcripts and speech checks (Scribe first, Whisper fallback): the source's word timings, and every re-voiced clip checked against its script |
-| `python3 <shared>/tools/heavy-slot.py <Task ID> -- <command>` | runs a heavy command in one of the render slots (10) (Bash timeout 600000; exit 75 = slots busy, run the same line again). Every `build_edit.py` run, every `render_html.js --batch`, every `composite.py` and every frame-sequence ffmpeg encode goes through it |
+| `python3 <shared>/tools/heavy-slot.py <Task ID> -- <command>` | runs a heavy command in one of the render slots (4) (Bash timeout 600000; exit 75 = slots busy, run the same line again). Every `build_edit.py` run, every `render_html.js --batch`, every `composite.py` and every frame-sequence ffmpeg encode goes through it |
 | `python3 <shared>/tools/brand-lock.py` | `append <file> @<textfile>` for a line in `truth.md`, `outfits.md` or a lessons file; `<BrandName> -- <command>` for anything else written in the brand's client-assets |
 
 Other designers work at the same time as you (up to 8, 2026-11-13). Keep throwaway files in

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Run a render inside one of the machine's render slots, so parallel designers never run more
-renders at once than the machine can take (the owner's decision, 2026-11-13: 10 at a time,
+renders at once than the machine can take (the owner's decision, 2026-11-13: 4 at a time,
 "rendering" in Agents/AtlasPM/docs/atlas-limits.json).
 
   python3 "<shared>/tools/heavy-slot.py" <Task ID> -- <command> [args ...]
@@ -24,7 +24,7 @@ LIMITS = PROJECT / "Agents" / "AtlasPM" / "docs" / "atlas-limits.json"
 POLL, MAX_WAIT, BUSY = 5, 300, 75
 
 def render_cap():
-    try: return max(1, int(json.loads(LIMITS.read_text()).get("rendering") or 10))
+    try: return max(1, int(json.loads(LIMITS.read_text()).get("rendering") or 4))
     except (OSError, ValueError): return 10
 
 def take_slot(task):
