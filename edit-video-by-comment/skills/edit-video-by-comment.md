@@ -79,6 +79,7 @@ re-map their `time` yourself.
 | `taskType` | Read and follow |
 |---|---|
 | `content-maxima` | `skills/edit-video-content-maxima.md` |
+| `content-maxima-origin` | `skills/edit-video-content-maxima.md` |
 
 Any other value: `report_error` naming the types this task can edit.
 Never route by guessing from other fields.

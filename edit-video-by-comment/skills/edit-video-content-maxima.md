@@ -1,6 +1,6 @@
 ---
 name: edit-video-content-maxima
-description: Edit a content-maxima video according to review comments, in its own editable, under content-maxima's rules; re-audit, render, host, report per comment. Read when edit-video-by-comment routes `content-maxima` here.
+description: Edit a content-maxima video according to review comments, in its own editable, under content-maxima's rules; re-audit, render, host, report per comment. Read when edit-video-by-comment routes `content-maxima` or `content-maxima-origin` here.
 ---
 
 # Edit a content-maxima Video
@@ -9,8 +9,9 @@ The video is a content-maxima **editable** (HTML stage) rendered to MP4.
 Edit that same editable with content-maxima's tools and rules. Nothing is
 rebuilt and no new video is started.
 
-- `<cm>`: the linked task directory ending in `/content-maxima`. IF none is
-  listed or it does not exist: `report_error` (package not installed).
+- `<cm>`: the linked task directory ending in `/` + the review's `taskType`
+  (`/content-maxima` or `/content-maxima-origin`). IF none is listed or it
+  does not exist: `report_error` (package not installed).
 - `<video>`: file name of `source.video.path` without `.mp4` (`NN-name-MM-DD`).
 - `<r>`: the part of `source.video.path` before `renders/`, empty in the
   standard layout (`7f3c2a91/renders/final.mp4` gives `7f3c2a91/`). Every
