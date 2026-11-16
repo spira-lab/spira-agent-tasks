@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 // Frame-by-frame render of a stage editable to H.264 MP4 with VO, sound effects and music.
 // Usage: node tools/render/render.js <editable.html> <out.mp4>
-//   * always 30 fps (FPS in intra.js): clips at any other rate are motion-interpolated
-//     to 30 in their all-keyframe copies, so the presenter does not judder
+//   * always 24 fps, the rate of Omni clips: a clip at any other rate judders, so a
+//     new video model's output rate is checked first (toolkit 3, Frame rate); a clip not
+//     at 24 is named in a warning
 //   * the capture runs on AWS Lambda in chunks (lambda.js: CM_RENDER_LAMBDA names the
 //     function, CM_RENDER_BUCKET the bucket); the segments are concatenated here
 //   * frames captured as JPEG q92: PNG encode + transfer was two thirds of the per-frame cost
 //   * every <video> is swapped for an all-keyframe copy before capture (intra.js): a
-//     seek then decodes one frame instead of everything since the last keyframe, and a
-//     clip at another rate is interpolated to FPS. The copies are cached in materials/<name>/deletable/intra/ and shared with audit.js
+//     seek then decodes one frame instead of everything since the last keyframe. The
+//     copies are cached in materials/<name>/deletable/intra/ and shared with audit.js
 //   * sound effects are the editable's <audio class="sfx" data-at="ms"> tags, mixed at
 //     the level stored in each file: the library is levelled against a -16 LUFS voice,
 //     so no gain or loudness normalisation is applied to an effect
@@ -28,8 +29,11 @@ const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path'), os = require('os');
 const { readEditable } = require('./stage');
 const { renderChunks } = require('./lambda');
-const { FPS, intraCopies, probe, clipFpsWarnings } = require('./intra');
+const { intraCopies, probe, clipFpsWarnings } = require('./intra');
 const { writeStems, saveStems } = require('./stems');
+
+// The rate of Omni (gemini-omni-flash-1.1) clips. Switching or adding a video model means checking its output rate against this.
+const FPS = 24;
 
 const [htmlArg, outArg, ...extra] = process.argv.slice(2);
 if (!htmlArg || !outArg || extra.length) {
@@ -100,7 +104,7 @@ function archivePrevious() {
   const prepared = writeStems(ed, dir, tmp, (ed.durationMs / 1000).toFixed(3));
   archivePrevious();
   const t0 = Date.now();
-  const swap = await intraCopies(dir, ed, fps);
+  const swap = await intraCopies(dir, ed);
   const tPrep = Date.now();
   const segs = await renderChunks({ dir, rel, ed, swap, fps, frames, tmp });
   console.log(`  capture done in ${((Date.now() - tPrep) / 1000).toFixed(0)}s`);

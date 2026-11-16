@@ -345,10 +345,10 @@ moves an existing render to `renders/deletable/` first, captures every
 frame on AWS Lambda in parallel chunks, mixes the audio (voice at -16
 LUFS, effects under it, bed 10 dB under it, faded in 1 s and out 1.5 s), checks
 the file (duration, frame count, stereo). Output is 1080 x 1920 H.264
-with stereo AAC at 30 fps. Any clip not at 30 fps (a 24 fps Omni
-clip, a 25 fps HeyGen one) is motion-interpolated to 30 in its cached all-keyframe
-copies, so each output frame is one clip frame and the presenter does
-not judder (toolkit section 3, Frame rate).
+with stereo AAC at 24 fps, the rate of the Omni clips, so each output
+frame is one clip frame. A clip at any other rate repeats or drops
+frames on the stage, which shows as the presenter juddering; the
+renderer names such a clip in a warning (toolkit section 3, Frame rate).
 The render is final as it comes out, with no cover or other step after
 it.
 
