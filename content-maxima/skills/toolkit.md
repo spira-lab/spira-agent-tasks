@@ -140,15 +140,15 @@ video that is presenter-less by that rule uses the voice-over directly
 | Background music | `suno-music` | 6.6 per track |
 | Avatar motion control, persona driven by a reference video | `kling-3.0-motion-control` pro | 9.52 per second |
 
-**Frame rate.** The render is always 24 fps, the rate of
-`gemini-omni-flash-1.1` (240 frames in a 10 s clip); the cut-out (3f)
-keeps the rate of the clip it is given. HeyGen
-and a supplied clip are not guaranteed to be 24 fps. A clip at any other
-rate repeats or drops frames in the render, which shows as the presenter
-juddering, and the renderer names it in a warning. Before switching a
-step to another video model, or adding one, check the frame rate it
-outputs; if it is not 24, the render rate or the clip has to change
-first, and the finding is recorded here.
+**Frame rate.** The render is always 30 fps. A generated clip need not
+be: `gemini-omni-flash-1.1` is 24 fps (240 frames in a 10 s clip), HeyGen
+is 25 fps, and the cut-out (3f) keeps the rate of the clip it is given. The audit and the
+render interpolate every clip that is not 30 fps to 30 (motion
+interpolation, in the all-keyframe copies under
+`materials/<name>/deletable/intra/`), so nothing is to be done about
+it. The first audit of a video pays for this, a few minutes, and later
+audits and the render reuse the copies. Never convert a clip's frame
+rate yourself.
 
 ## 3a. Persona base image: `ai-influencer-image`
 
