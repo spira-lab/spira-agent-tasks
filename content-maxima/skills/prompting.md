@@ -120,9 +120,10 @@ and check its Reword section. Any word listed there goes into the
 spoken line in its reword spelling, not its original.
 
 IF you hear a word mispronounced in the output and it is not in the
-list, find a spelling that makes the model say it right and add the
-pair to the Reword table, so the next session does not repeat the
-search.
+list, find a spelling that makes the model say it right and use it in
+this video. Never write it into `skills/working-memory.md`, which is
+read-only; name the pair in the final message so it can be added to the
+package.
 
 The reword lives in the spoken line only. In the subtitle, the caption,
 and any text on screen where the word appears, use the original word,

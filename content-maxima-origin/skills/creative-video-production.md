@@ -95,9 +95,7 @@ Elements to consider:
     asked for if they named one. Leave out `late-start` and `silence`
     tracks unless nothing else fits. Then choose one from the shortlist
     by judgement: the one whose mood and energy carry this script best.
-    WHEN working memory's Used tracks lists one of the shortlist for this
-    root, prefer another, and add the chosen track to that list. The
-    track is hosted, not in the package: fetch it as the bed with
+    The track is hosted, not in the package: fetch it as the bed with
     `python3 tools/fetch-resource.py music/<file>
     editable/materials/<name>/bgm.mp3`, and put its gain on the music
     tag exactly as the index reads, without the unit: `<audio id="bgm" …

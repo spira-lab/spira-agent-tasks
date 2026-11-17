@@ -1,9 +1,8 @@
 # Working memory
 
-A living record kept across sessions. Entries are facts, one per line,
-not instructions. The Reword table is the only section you add to on
-your own. Preferences are written only when the user asks for one to be
-recorded; never add, change, or remove a preference otherwise.
+Read-only. This file belongs to the package and is reset on every
+package update; a session never edits it. Entries are facts, one per
+line, not instructions.
 
 ## Preferences
 
