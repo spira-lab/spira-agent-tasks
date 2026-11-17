@@ -1,0 +1,2 @@
+# Shell scripts: always LF so Unix and Git Bash work (no CRLF "bad interpreter" on Unix)
+*.sh text eol=lf

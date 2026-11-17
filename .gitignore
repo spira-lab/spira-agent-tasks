@@ -1,0 +1,5 @@
+# These packages are copied into bypassPermissions agent workspaces: their clutter
+# must not come back with them, and a credential file must never become a shipped asset.
+**/node_modules/
+**/.DS_Store
+**/.env
