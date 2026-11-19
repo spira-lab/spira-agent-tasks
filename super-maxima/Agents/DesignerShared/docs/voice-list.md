@@ -15,5 +15,5 @@ designer that needs a voice and has none from the request or the brand picks fro
 | George | `JBFqnCBsd6RMkjVDRZzb` | older man, British, warm | trust, finance, narration |
 | Daniel | `onwK4e9ZLuTAKqWW03F9` | adult man, British, steady | news style, authority |
 
-Voices already on file for a brand (in Vega's working memory or `Agents/VegaOM/client-assets/<Brand>/voice.md`) always come first.
+Voices already on file for a brand (in Nova's working memory or `Agents/NovaOM/client-assets/<Brand>/voice.md`) always come first.
 Brand voices in use: Cookiy `tximUd8WQcg4iM1FuJZQ` (avatar), IASO Jessica `cgSgspJ2msm6clMCkdW9` (`eleven_v3`), PartGenie Brian `nPczCjzI2devNBz1zQrb`.

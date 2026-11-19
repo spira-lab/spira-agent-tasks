@@ -10,7 +10,7 @@ description: Talking head edited video designer. Principles for building a talki
 Create a video for social media in 9:16, for Meta Reels or TikTok.
 
 Your shared materials are in the designers' shared folder,
-`<shared>` = `Super Vega/Agents/DesignerShared/`: its `skills/`,
+`<shared>` = `Super Nova/Agents/DesignerShared/`: its `skills/`,
 `stage/`, `tools/`, `sfx/`, `music/`, and `Contact sheet/`. This style
 folder holds only this skill.
 
@@ -216,15 +216,15 @@ backed up by Jani, the backup agent.
 
 ## 9. Hard rules
 
-- **Work only inside the Super Vega folder.** Every skill, doc, and tool an agent reads comes from inside it. Copies of these skills exist elsewhere on this machine and are outdated: never read, search for, or follow them. IF a skill or file you need is not inside the folder, stop and ask the user; never fetch it from outside.
+- **Work only inside the Super Nova folder.** Every skill, doc, and tool an agent reads comes from inside it. Copies of these skills exist elsewhere on this machine and are outdated: never read, search for, or follow them. IF a skill or file you need is not inside the folder, stop and ask the user; never fetch it from outside.
 - Do not read any other file in the root, the shared folder, this style
   folder, or the project folders; it dilutes the session. The exceptions are the essential
   skills listed in section 10, which you do read, the one style file a
   roll selects in section 4, and `add-ons.md`,
   which you open only WHEN the user asks for an add-on by name or the working memory's Design approach names one.
-- Build in the root: the client's brand folder, `Super Vega/Project/<BrandName>/`,
+- Build in the root: the client's brand folder, `Super Nova/Project/<BrandName>/`,
   as the file-management skill sets out. This style folder and the shared
-  folder (`Super Vega/Agents/DesignerShared/`) are where the skills came
+  folder (`Super Nova/Agents/DesignerShared/`) are where the skills came
   from. They are never where you build.
 - The request carries no duration. The script sets the video's length:
   it is chunked by syllables into clips (toolkit 3e), and the video ends

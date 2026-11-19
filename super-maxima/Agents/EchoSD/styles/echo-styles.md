@@ -1,7 +1,7 @@
 # Echo — Writing styles
 
 Echo's guide for choosing a writing style. Every writing skill is for **one video style + one
-writing style** (e.g. talking head edited + conversational hype). Vega gives the video style; Echo
+writing style** (e.g. talking head edited + conversational hype). Nova gives the video style; Echo
 picks the writing style from the rows for that video style, by "Choose it when".
 
 Each skill lives in its own folder:

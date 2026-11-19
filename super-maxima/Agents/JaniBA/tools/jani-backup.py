@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Jani's backup tool. Copies Super Vega's Project folder to the backup drive, checks every
-copied file against the original, writes the ledgers (on the drive, in Jani's docs, and in Vega's
+"""Jani's backup tool. Copies Super Nova's Project folder to the backup drive, checks every
+copied file against the original, writes the ledgers (on the drive, in Jani's docs, and in Nova's
 data), and only then clears what was backed up from Project/ and from the designers' scratch.
 
 Each backed-up video's designer sessions (the designers' full conversation logs, kept in Claude's
@@ -14,14 +14,18 @@ cleared together. It is counted as a carousel, not a video.
 Work made today is never touched: a video whose project was created today, and any other file or
 folder changed today, is neither backed up nor cleared (it may be unfinished or get feedback).
 
-  python3 "<jani>/tools/jani-backup.py" plan
+  python3 "<jani>/tools/jani-backup.py" plan [--keep-brand <Brand> ...] [--include-today]
       Looks, changes nothing. Prints one JSON line: the plan id, what would be backed up and
       cleared (videos per brand, other items, size), what is kept because it is from today, the
       drive's free space, and any blocker. The plan is saved for `run`.
+      --keep-brand (repeatable; the owner's request, 2026-11-18) keeps that whole Project/<Brand>
+      folder on the Mac: none of it is backed up or cleared. The plan saves the list and `run` uses it.
+      --include-today (only on the owner's word; the owner, 2026-11-18: "include everything made today
+      to the backup") backs up and clears today's work too. The plan saves it and `run` uses it.
   python3 "<jani>/tools/jani-backup.py" run --plan <plan id>
       Runs that plan, and only if nothing changed since it was made (same day, same files, same
       sizes): copy to "<drive>/<backup root>/Project <YYYY-MM-DD>/", check every file (size and
-      SHA-256), write the ledgers, record the videos in Vega's data, then clear them from Project/
+      SHA-256), write the ledgers, record the videos in Nova's data, then clear them from Project/
       and clear their designers' scratch. A file whose copy does not match is not cleared.
   python3 "<jani>/tools/jani-backup.py" status
       The drive, and the last runs.
@@ -39,9 +43,10 @@ AGENTS = SUPER / "Agents"
 CONFIG = JANI / "docs" / "jani-config.json"
 PLANS = JANI / "docs" / "plans"
 RUNS = JANI / "docs" / "jani-runs.json"
-MAX_RECORD = AGENTS / "VegaOM" / "docs" / "vega-backups.md"
+MAX_RECORD = AGENTS / "NovaOM" / "docs" / "nova-backups.md"
+ATLAS_STATE = AGENTS / "NovaOM" / "docs" / "nova-atlas-session.json"
 BATCHES = AGENTS / "AtlasPM" / "batches"
-SCRATCH_ROOT = Path("/tmp") / f"claude-{os.getuid()}" / re.sub(r"[^A-Za-z0-9]", "-", str(PROJECT))
+SCRATCH_ROOT = Path("/private/tmp") / f"claude-{os.getuid()}" / re.sub(r"[^A-Za-z0-9]", "-", str(PROJECT))
 SESSIONS_ROOT = Path.home() / ".claude" / "projects" / re.sub(r"[^A-Za-z0-9]", "-", str(PROJECT))
 SKIP_NAMES = {".DS_Store"}
 SETS = {"video", "carousel"}   # whole sets: backed up, checked and cleared together
@@ -57,20 +62,8 @@ def cfg():
     return json.loads(CONFIG.read_text())
 
 
-def drive_mount(volume):
-    """Where the backup drive is mounted on this Linux host. A directory that is not a mount point
-    does not count, so nothing is ever written to the root disk by mistake; when the drive is not
-    mounted the returned path does not exist."""
-    user = Path.home().name
-    for base in (Path("/mnt"), Path("/media"), Path("/media") / user, Path("/run/media") / user):
-        p = base / volume
-        if os.path.ismount(p):
-            return p
-    return Path("/mnt/.not-mounted") / volume
-
-
 def drive_paths(c):
-    vol = drive_mount(c["volume"])
+    vol = Path("/Volumes") / c["volume"]
     return vol, vol / c["backup_root"]
 
 
@@ -112,6 +105,7 @@ def videos_of(brand_dir):
     md = brand_dir / "metadata"
     cd = brand_dir / "carousels"
     for f in sorted(md.glob("*.json")) if md.is_dir() else []:
+        if f.name.endswith(".post.json"): continue   # a video's post copy: it belongs to that video (owner_of), not a video of its own
         try: d = json.loads(f.read_text())
         except (OSError, ValueError): d = {}
         name = d.get("name") or f.stem
@@ -154,43 +148,57 @@ def sessions_for(task_id):
     return [f for f in files if f.is_file()]
 
 
-def survey():
-    """Top-level units to handle: whole video sets and other items, each kept or backed up."""
+INCLUDE_TODAY = False   # set by plan/run when the owner asks to include today's work
+
+
+def survey(keep_brands=()):
+    """Top-level units to handle: whole video sets and other items, each kept or backed up.
+    A brand in keep_brands is kept whole (all its units go to kept)."""
     units, kept = [], []
     for brand_dir in sorted(p for p in PROJECT.iterdir() if p.is_dir()):
-        brand = brand_dir.name
-        vids = videos_of(brand_dir)
-        sets = {n: [] for n in vids}
-        others = []
-        # walk two levels deep: editable/, editable/materials/, renders/, renders/deletable/, metadata/, archive/,
-        # carousels/ (each carousels/<name>/ belongs to its carousel's set, by its name)
-        for top in sorted(brand_dir.iterdir()):
-            if top.name in SKIP_NAMES: continue
-            if top.is_file():
-                others.append(top); continue
-            for child in sorted(top.iterdir()):
-                if child.name in SKIP_NAMES: continue
-                if child.is_dir() and child.name in {"materials", "deletable"}:
-                    for g in sorted(child.iterdir()):
-                        if g.name in SKIP_NAMES: continue
-                        o = owner_of(g.relative_to(brand_dir).parts, vids)
-                        (sets[o] if o else others).append(g)
-                    continue
-                o = owner_of(child.relative_to(brand_dir).parts, vids)
-                (sets[o] if o else others).append(child)
-        for n, items in sets.items():
-            if not items: continue
-            v = vids[n]
-            ses = sessions_for(v["task_id"])
-            if any(is_today(f.stat().st_mtime) for f in ses): ses = []   # a designer worked on it today: its logs wait
-            u = {"kind": v.get("kind", "video"), "brand": brand, "video": n, "created": v["created"], "task_id": v["task_id"],
-                 "brand_number": v["brand_number"], "paths": [str(p.relative_to(PROJECT)) for p in items],
-                 "sessions": [str(f) for f in ses],
-                 "size": sum(size_of(p) for p in items) + sum(f.stat().st_size for f in ses)}
-            (kept if v["created"] == today().isoformat() else units).append(u)
-        for p in others:
-            u = {"kind": "other", "brand": brand, "video": None, "paths": [str(p.relative_to(PROJECT))], "size": size_of(p)}
-            (kept if is_today(newest_mtime(p)) else units).append(u)
+        b_units, b_kept = survey_brand(brand_dir)
+        if brand_dir.name in keep_brands:
+            kept += b_units + b_kept
+        else:
+            units += b_units; kept += b_kept
+    return units, kept
+
+
+def survey_brand(brand_dir):
+    units, kept = [], []
+    brand = brand_dir.name
+    vids = videos_of(brand_dir)
+    sets = {n: [] for n in vids}
+    others = []
+    # walk two levels deep: editable/, editable/materials/, renders/, renders/deletable/, metadata/, archive/,
+    # carousels/ (each carousels/<name>/ belongs to its carousel's set, by its name)
+    for top in sorted(brand_dir.iterdir()):
+        if top.name in SKIP_NAMES: continue
+        if top.is_file():
+            others.append(top); continue
+        for child in sorted(top.iterdir()):
+            if child.name in SKIP_NAMES: continue
+            if child.is_dir() and child.name in {"materials", "deletable"}:
+                for g in sorted(child.iterdir()):
+                    if g.name in SKIP_NAMES: continue
+                    o = owner_of(g.relative_to(brand_dir).parts, vids)
+                    (sets[o] if o else others).append(g)
+                continue
+            o = owner_of(child.relative_to(brand_dir).parts, vids)
+            (sets[o] if o else others).append(child)
+    for n, items in sets.items():
+        if not items: continue
+        v = vids[n]
+        ses = sessions_for(v["task_id"])
+        if not INCLUDE_TODAY and any(is_today(f.stat().st_mtime) for f in ses): ses = []   # a designer worked on it today: its logs wait
+        u = {"kind": v.get("kind", "video"), "brand": brand, "video": n, "created": v["created"], "task_id": v["task_id"],
+             "brand_number": v["brand_number"], "paths": [str(p.relative_to(PROJECT)) for p in items],
+             "sessions": [str(f) for f in ses],
+             "size": sum(size_of(p) for p in items) + sum(f.stat().st_size for f in ses)}
+        (kept if v["created"] == today().isoformat() and not INCLUDE_TODAY else units).append(u)
+    for p in others:
+        u = {"kind": "other", "brand": brand, "video": None, "paths": [str(p.relative_to(PROJECT))], "size": size_of(p)}
+        (kept if is_today(newest_mtime(p)) and not INCLUDE_TODAY else units).append(u)
     return units, kept
 
 
@@ -215,6 +223,12 @@ def blockers(c, need):
         free = shutil.disk_usage(vol).free
         if free < need * 1.05:
             b.append(f"not enough space on the drive: {free / 1e9:.1f} GB free, {need / 1e9:.1f} GB needed")
+    try:
+        st = json.loads(ATLAS_STATE.read_text())
+        if st.get("running"):
+            b.append(f"a batch is running ({Path(st['running']).name}): back up when it is done")
+    except (OSError, ValueError):
+        pass
     return b
 
 
@@ -265,7 +279,7 @@ def write_ledgers(dest, units, results, plan_id, started):
              f"- From: {PROJECT}",
              f"- Size: {total / 1e9:.2f} GB, {sum(len(x['files']) for x in ledger['units'] if x['backed_up'])} files",
              "- Every file was checked against the original (size and SHA-256); the checksums are in jani-ledger.json.",
-             "- To restore a video: copy its paths below back into the Super Vega Project folder.",
+             "- To restore a video: copy its paths below back into the Super Nova Project folder.",
              "- Designer sessions: each video's designer conversation logs, in `Designer sessions/<Brand>/<video>/`.", ""]
     for brand in sorted({u["brand"] for u in units}):
         bu = [u for u in ledger["units"] if u["brand"] == brand]
@@ -293,17 +307,17 @@ def record_runs(dest, ok_units, total, plan_id):
     # the drive's own index of every backup
     idx = dest.parent / "jani-backups.md"
     if not idx.exists():
-        idx.write_text("# Super Vega backups\n\n| Date | Folder | Videos | Size |\n|---|---|---|---|\n")
+        idx.write_text("# Super Nova backups\n\n| Date | Folder | Videos | Size |\n|---|---|---|---|\n")
     with open(idx, "a") as f:
         f.write(f"| {datetime.now():%Y-%m-%d %H:%M} | {dest.name} | {sum(1 for u in ok_units if u['kind'] == 'video')} "
                 f"| {total / 1e9:.2f} GB |\n")
 
 
 def record_max(dest, ok_units):
-    """Vega's data: which videos are backed up, and where."""
+    """Nova's data: which videos are backed up, and where."""
     if not MAX_RECORD.exists():
         MAX_RECORD.write_text(
-            "# Vega — Backups\n\nVideos backed up by Jani and cleared from Project/. Written only by Jani's tool.\n"
+            "# Nova — Backups\n\nVideos backed up by Jani and cleared from Project/. Written only by Jani's tool.\n"
             "Their numbers stay used: a backed-up video's Task ID and Brand number are never issued again.\n\n"
             "| Backed up | Brand | Task ID | Brand no. | Video | Backup folder |\n|---|---|---|---|---|---|\n")
     with open(MAX_RECORD, "a") as f:
@@ -370,16 +384,19 @@ def clear_scratch(ok_units):
 
 
 # ---------------------------------------------------------------- commands
-def plan():
+def plan(keep_brands=(), include_today=False):
+    global INCLUDE_TODAY
+    INCLUDE_TODAY = include_today
     c = cfg()
-    units, kept = survey()
+    units, kept = survey(keep_brands)
     need = sum(u["size"] for u in units)
     bad = [p for u in units for p in u["paths"] if EXFAT_BAD.search(p)]
     b = blockers(c, need) + ([f"names the drive cannot hold: {bad[:5]}"] if bad else [])
     pid = f"{datetime.now():%Y%m%d-%H%M}-{uuid.uuid4().hex[:4]}"
     PLANS.mkdir(parents=True, exist_ok=True)
     (PLANS / f"{pid}.json").write_text(json.dumps({"id": pid, "day": today().isoformat(), "units": units,
-                                                   "kept": kept, "fingerprint": fingerprint(units)}, ensure_ascii=False))
+                                                   "kept": kept, "keep_brands": list(keep_brands), "include_today": include_today,
+                                                   "fingerprint": fingerprint(units)}, ensure_ascii=False))
     per_brand, car_brand = {}, {}
     for u in units:
         if u["kind"] == "video": per_brand[u["brand"]] = per_brand.get(u["brand"], 0) + 1
@@ -393,6 +410,7 @@ def plan():
          "kept_today": {"videos": sum(1 for u in kept if u["kind"] == "video"),
                         "carousels": sum(1 for u in kept if u["kind"] == "carousel"),
                         "other_items": sum(1 for u in kept if u["kind"] == "other")},
+         "kept_brands": list(keep_brands), "include_today": include_today,
          "drive": c["volume"], "drive_free_gb": round(shutil.disk_usage(vol).free / 1e9, 1) if vol.is_dir() else None,
          "blockers": b})
 
@@ -404,7 +422,9 @@ def run(pid):
     p = json.loads(pf.read_text())
     if p["day"] != today().isoformat():
         out({"result": "FAILED", "reason": "the plan is from another day: run plan again"}, 1)
-    units, _ = survey()
+    global INCLUDE_TODAY
+    INCLUDE_TODAY = bool(p.get("include_today"))
+    units, _ = survey(p.get("keep_brands", []))
     if [u["paths"] for u in units] != [u["paths"] for u in p["units"]] or fingerprint(units) != p["fingerprint"]:
         out({"result": "FAILED", "reason": "Project/ changed since the plan: run plan again"}, 1)
     b = blockers(c, sum(u["size"] for u in units))
@@ -458,7 +478,7 @@ def status():
 def main():
     a = sys.argv[1:]
     if not a: sys.exit(__doc__)
-    if a[0] == "plan": plan()
+    if a[0] == "plan": plan([a[i + 1] for i, x in enumerate(a[:-1]) if x == "--keep-brand"], "--include-today" in a)
     elif a[0] == "run" and "--plan" in a and a.index("--plan") + 1 < len(a): run(a[a.index("--plan") + 1])
     elif a[0] == "status": status()
     else: sys.exit(__doc__)

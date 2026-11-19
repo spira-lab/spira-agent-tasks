@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Capture a screenshot of a brand's website with headless Chrome, through the shared playwright-core
-// (global module). Used only when a clone needs UI screens and the
+// (Agents/DesignerShared/tools/render/node_modules). Used only when a clone needs UI screens and the
 // request provides none; provided material always wins.
 //
 // Usage: node capture_site.js <url> <out.png> [--mobile] [--width 1080] [--height 1920]
@@ -9,14 +9,14 @@
 //   --width/--height/--scale   the viewport otherwise (default 1440 x 900 at scale 2)
 //   --full-page  the whole scrolling page instead of the viewport
 //   --wait <ms>  extra time after load for animations and lazy images (default 2500)
-// <out.png> may be absolute, relative to the current folder, or relative to the Super Vega folder;
-// it must be inside Super Vega/Project/ (only folders inside Project/ are created).
-// Chrome: CHROME_PATH if set, else /usr/bin/chromium. Prints one JSON line.
-const path = require('path'), fs = require('fs');
+// <out.png> may be absolute, relative to the current folder, or relative to the Super Nova folder;
+// it must be inside Super Nova/Project/ (only folders inside Project/ are created).
+// Chrome: CHROME_PATH if set, else the installed Google Chrome. Prints one JSON line.
+const path = require('path'), fs = require('fs'), os = require('os');
 
 const SUPER = path.resolve(__dirname, '..', '..', '..');
 const PROJECT = path.join(SUPER, 'Project');
-const { chromium } = require('playwright-core');
+const { chromium } = require(path.join(SUPER, 'Agents', 'DesignerShared', 'tools', 'render', 'node_modules', 'playwright-core'));
 
 const argv = process.argv.slice(2);
 const flag = n => argv.includes(n);
@@ -36,7 +36,7 @@ fs.mkdirSync(path.dirname(out), { recursive: true });
 
 (async () => {
   const launch = { headless: true };
-  if (process.env.CHROME_PATH) launch.executablePath = process.env.CHROME_PATH; else launch.executablePath = '/usr/bin/chromium';
+  if (process.env.CHROME_PATH) launch.executablePath = process.env.CHROME_PATH; else launch.channel = 'chrome';
   const browser = await chromium.launch(launch);
   try {
     const ctxOpts = flag('--mobile')

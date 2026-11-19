@@ -8,21 +8,14 @@ The Avatar Designer is the one source of personas (the owner's rule). Everything
 its method (`Agents/AvatarDesigner/skills/avatar-designer.md`) and the shared prompting and
 toolkit skills; Re-skit only adds the character sheet and the outfits on top.
 
-All persona files live in `Agents/VegaOM/client-assets/<BrandName>/personas/<Name>/`
-(file-management.md), never in `Project/`.
-
-**Other designers work at the same time** (up to 8, 2026-11-13), and may be making a video of
-the same brand. So:
-- A persona folder you make **new** is named `personas/<Name>-t<Task ID>/` (e.g. `Mia-t291/`),
-  so two designers registering one at once never write into the same folder. An existing
-  folder keeps its name, whatever it is.
-- Before making a new persona or a new `voice.md`, look in `personas/` again: one may have
-  appeared since you last looked (another designer's `-t` folder made for the same image or
-  brand). Reuse it when it fits.
-- Append to `outfits.md` only with
-  `python3 <shared>/tools/brand-lock.py append <persona>/outfits.md @<textfile>`, and write a new
-  `voice.md` inside `python3 <shared>/tools/brand-lock.py <BrandName> -- bash -c "<command>"`,
-  checking first that it is still missing.
+**Where the files live** (the owner's rule, 2026-11-17). Only an **anchor** persona keeps an image
+in `Agents/NovaOM/client-assets/<BrandName>/personas/<Name>/`: a persona is an anchor when its
+folder there holds a `sheet_4k.png` (today Spiraverse, IASO and Emochi). Use that sheet as it is;
+never move, replace or add images beside it. Every other image is made for this video and stays in
+its materials, `<materials>/persona/<Name>/` (a one-off persona's `source/` and `sheet_4k.png`, and
+every outfit sheet, anchor or not), so it is backed up and cleared with the project. In
+client-assets each persona keeps text only: `outfits.md` (the ledger) and `voice.md`
+(file-management.md).
 
 ## 1. Which persona
 
@@ -31,14 +24,16 @@ there about personas (e.g. a new persona for every video) wins over the steps be
 
 1. **The request gives one** (`Use this avatar image: <path or URL>`): that is the persona.
    Never make another beside it, and never run Soul to "match" it.
-   - Look in `client-assets/<BrandName>/personas/` for a folder whose `source/` holds that image
-     (or a sheet made from it). If there is one, use its `sheet_4k.png` and its `outfits.md`.
-   - Otherwise register it: make `personas/<Name>-t<Task ID>/` (the name from the request or the file name;
-     a first name that fits the brand when there is none), copy the image into `source/`, and
-     build the sheet from it (section 3).
-2. **None is given, but the brand already has a persona** in `client-assets/<BrandName>/personas/`:
-   use it (the most recently used one when there are several, from the ledgers' last dates).
-3. **None at all:** make one by the Avatar Designer's method, then the sheet (section 2).
+   - Look in `client-assets/<BrandName>/personas/` for an anchor whose sheet was made from that
+     image. If there is one, use its `sheet_4k.png` and its `outfits.md`.
+   - Otherwise register it for this video: make `<materials>/persona/<Name>/` (the name from the
+     request or the file name; a first name that fits the brand when there is none), copy the
+     image into its `source/`, and build the sheet there (section 3).
+2. **None is given, but the brand has an anchor persona** (a `sheet_4k.png` in
+   `client-assets/<BrandName>/personas/<Name>/`): use it (the most recently used one when there
+   are several, from the ledgers' last dates).
+3. **None at all:** make one for this video by the Avatar Designer's method, in
+   `<materials>/persona/<Name>/`, then the sheet (section 2).
 
 ## 2. Making a persona (the Avatar Designer's method)
 
@@ -61,7 +56,7 @@ Read `prompting.md` sections 1–3 and `toolkit.md` 3a–3b. Then:
    distorted hands, no text. At most 2 extra generations in all.
 
 Put these jobs in the chain like any other (they are its first jobs, and the sheet needs them),
-save the base and the edit in `personas/<Name>/source/`, and record them in the video's metadata.
+save the base and the edit in `<materials>/persona/<Name>/source/`, and record them in the video's metadata.
 
 ## 3. The character sheet
 
@@ -80,12 +75,13 @@ plain light-grey backdrop.
 - **From several real photos of the person** (when the brand provides them): no generation.
   Copy `tools/sheet_template.html` into the persona folder as `sheet.html`, set the seven
   `src` attributes and the name, and render it at 3840x2160
-  (`python3 <shared>/tools/heavy-slot.py <Task ID> -- node <reskit>/tools/render_html.js sheet.html sheet_4k.png 3840 2160 1`). Keep every panel
+  (`node <reskit>/tools/render_html.js sheet.html sheet_4k.png 3840 2160 1`). Keep every panel
   at or below its photo's native resolution where possible.
 
 Resolution matters: a sheet assembled from small panels gives the video model little facial
-detail, and close-ups suffer first. Save it as `personas/<Name>/sheet_4k.png` and start an empty
-`outfits.md` (section 5).
+detail, and close-ups suffer first. Save it as `<materials>/persona/<Name>/sheet_4k.png` and start
+an empty `client-assets/<BrandName>/personas/<Name>/outfits.md` (section 5; text only, no image
+goes in that folder).
 
 Sheets made before this layout was settled may have another arrangement (more panels, no borders,
 no name label). Use them as they are, and word the outfit prompt for the layout the sheet actually
@@ -123,19 +119,19 @@ The outfit job is `"hold": true` in the chain: when it lands, look at it (face, 
 match the original sheet in every panel; the outfit is identical across panels and reads as the
 kind asked for; it is not a near-copy of an outfit in the ledger or of what the source performer
 wears; it stands out from the setting; and nothing on it carries another company's logo or mark,
-shoes included, since the clips copy it faithfully), then set `"approved": true` on it in
-`chain.json`. Only then do you submit the clips. A failed check is a redo (at most 2 extra) with
-the same kind-only prompt, or another kind; tightening the prompt never means adding a garment
-or a colour.
+shoes included, since the clips copy it faithfully), then `spira_chain.py approve <chain.json> outfit`.
+Only then do the clips go. A failed check is a `redo` (at most 2 extra) with the same kind-only
+prompt, or another kind; tightening the prompt never means adding a garment or a colour.
 
-Save the approved sheet in `personas/<Name>/outfits/<YYYY-MM-DD>_<short-outfit-name>.png`
-(copy it from the video's `assets/`, where `wait_ai_job` saved it) and append it to the ledger.
+Save the approved sheet in `<materials>/persona/<Name>/outfits/<YYYY-MM-DD>_<short-outfit-name>.png`
+(copy it from the video's `assets/`, where the chain saved it; anchor personas too, never in
+client-assets) and append it to the ledger.
 
 ## 4a. The voice
 
 When a video re-voices or adds speech, the persona speaks in a voice Wan 3.0 generates from words.
 So she sounds the same across videos, her voice is written once and kept:
-`personas/<Name>/voice.md`, one sentence in plain words: an explicit adult age, nationality and
+`client-assets/<BrandName>/personas/<Name>/voice.md`, one sentence in plain words: an explicit adult age, nationality and
 accent, pitch, and the voice's texture. Write it the first time she speaks, choosing what suits her look and the
 brand's audience, and never change it. Each clip adds only the delivery the scene needs (deadpan,
 excited, sighing) after it. Never base it on the source performer's voice, and never send that
@@ -143,14 +139,16 @@ voice to the model.
 
 ## 5. The ledger
 
-`personas/<Name>/outfits.md`, newest last:
+`client-assets/<BrandName>/personas/<Name>/outfits.md`, newest last (text only; it stays there
+after the project is backed up and cleared):
 
 ```
 | Date | Video | Outfit (exact description) | Sheet file |
 |---|---|---|---|
-| 2026-10-19 | CookiyLabs 14-cookiylabs-10-19 | oversized dusty-lilac crewneck sweatshirt, light-grey jersey lounge shorts | outfits/2026-10-19_lilac-sweatshirt.png |
+| 2026-10-19 | CookiyLabs 14-cookiylabs-10-19 | oversized dusty-lilac crewneck sweatshirt, light-grey jersey lounge shorts | editable/materials/14-cookiylabs-10-19/persona/Maya/outfits/2026-10-19_lilac-sweatshirt.png |
 ```
 
-The Video column is `<BrandName> <video name>`, so the row points back to its metadata. The
+The Video column is `<BrandName> <video name>`, so the row points back to its metadata; the Sheet
+file is the image's path inside `Project/<BrandName>/` (it moves to the backup drive with the project). The
 Outfit column records the kind asked for and what the model made, so the next check can spot a
 repeat. It is a record only: never copy it into a prompt.

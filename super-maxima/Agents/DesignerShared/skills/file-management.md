@@ -10,12 +10,12 @@ skill says where it goes, what it is called, and what happens to it when
 it is superseded. Nothing about paths, folders, or naming is decided
 anywhere else.
 
-## 1. Super Vega, the Project folder, and the brand folder
+## 1. Super Nova, the Project folder, and the brand folder
 
-Everything lives inside the **Super Vega** folder:
+Everything lives inside the **Super Nova** folder:
 
 ```
-Super Vega/
+Super Nova/
   Agents/                         every agent; read from, never written to
     DesignerShared/               the shared folder: what every video designer uses
     <Style>VideoDesigner/         one folder per video style, holding its style skill
@@ -23,40 +23,26 @@ Super Vega/
     <BrandName>/                  one folder per client brand: the root
 ```
 
-The **shared folder** is `Super Vega/Agents/DesignerShared/`, the folder
+The **shared folder** is `Super Nova/Agents/DesignerShared/`, the folder
 that holds the shared `skills/`, `stage/`, `tools/`, `sfx/`, `music/`, and
 `Contact sheet/`. Your own **style folder** (e.g.
 `Agents/TalkingHeadEditedVideoDesigner/`) holds only your style skill. Both
 are read from, never written to.
 
-The session is opened in `Super Vega/Project/`. The **root** of a video
+The session is opened in `Super Nova/Project/`. The **root** of a video
 is its client's **brand folder**, `Project/<BrandName>/`. Every path in this
 document is relative to the root, and every file the session creates goes
 inside it. Nothing is written anywhere else, except throwaway
 intermediates, which go in the session scratchpad.
 
-- **Your own scratch folder.** Many designers work at the same time
-  (2026-11-10), and the scratchpad is shared by them. Keep every throwaway
-  file in `<scratchpad>/t<Task ID>/` (for example `t291/`), create it
-  first, and never read, change or run anything outside it: another
-  task's jobs file or frames are not yours, even when the name fits.
-- **Shared brand files.** A brand's files outside `Project/`
-  (`Agents/VegaOM/client-assets/<Brand>/`) and the lessons files are
-  shared with the other designers. Add a line to them only with
-  `python3 <shared>/tools/brand-lock.py append <file> @<textfile>`;
-  make or change anything else there only inside
-  `python3 <shared>/tools/brand-lock.py <Brand> -- <command>`, reading
-  the file again inside it first (another designer may have just made
-  it: reuse it then). Never run one brand-lock inside another.
-
 - **BrandName** is the brand as given in the request, with spaces and
   special characters removed and capitalization kept: "Glow Lab Co."
   becomes `GlowLabCo`. It is the same name the operations manager uses for
-  the brand in his own files, so one brand has one folder everywhere.
+  the brand in her own files, so one brand has one folder everywhere.
 - Create `Project/<BrandName>/` the first time a brand has a video. Every
   later video of that brand goes into the same folder.
 - IF the request's brand is `Brandless`, or it names no brand, the video is a generic one for no client: use `Project/Brandless/`. A Brandless video shows no brand at all: no brand name, no logo, nothing drawn or written to stand in for one (the word "Brandless" never appears on screen).
-- Never build in `Super Vega/` itself, in `Project/` itself, or anywhere
+- Never build in `Super Nova/` itself, in `Project/` itself, or anywhere
   in `Agents/`.
 
 ## 2. Layout
@@ -95,7 +81,7 @@ editable, its materials folder, its render, and its metadata file.
   the whole system, so it never repeats however the folders are cleared.
   It is padded to at least two digits (`7` becomes `07`).
   - Every request carries two numbers, both issued by the operations
-    manager (Vega): the **Task ID** (system-wide) and the **Brand
+    manager (Nova): the **Task ID** (system-wide) and the **Brand
     number** (per brand, its place in the brand's own count). The Task
     ID goes in the name; both go in the metadata file (the owner's
     decision, 2026-10-24, matching how videos were already named).
@@ -170,7 +156,7 @@ regenerated after its file has been deleted.
 
 ```json
 {
-  "root": "/abs/path/to/Super Vega/Project/NovaSkin",
+  "root": "/abs/path/to/Super Nova/Project/NovaSkin",
   "task_id": "01",
   "brand_number": "01",
   "name": "01-novaskin-09-20",
@@ -190,7 +176,6 @@ regenerated after its file has been deleted.
       "prompt": "the exact prompt or instruction used, verbatim",
       "source": "/abs/path of the sheet it was cut from, or null",
       "url": "output URL returned by the generative AI service, or null",
-      "job_id": "the id submit_ai_job returned, or null",
       "credits": 5,
       "generated": "2026-09-20T14:02",
       "replaced_by": null
@@ -208,12 +193,6 @@ regenerated after its file has been deleted.
 }
 ```
 
-- **The moment `submit_ai_job` returns**, before waiting for it, add the
-  asset's entry with `"status": "submitted"` and `"job_id": "<the id>"`
-  (and the prompt and credits). When the job finishes, set the status to
-  `in-use` (or `deletable`) and fill in `file` and `url`. After a restart
-  this is how a job already paid for is waited for instead of submitted
-  again.
 - Every generated asset gets an entry the moment it is generated,
   including candidates that are later rejected. `credits` is the
   job's cost from the toolkit's price table, recorded at submission;

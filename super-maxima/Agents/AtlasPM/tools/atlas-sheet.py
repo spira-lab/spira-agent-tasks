@@ -6,17 +6,12 @@ The sheet is a Markdown table (.md); an .xlsx sheet also works.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> next
       Takes the first row whose Status is blank or pending, marks it designing,
       and prints {"task_id": ..., "request": ...}. Prints NONE when no row is left.
-      Prints "FULL <n>/<cap>" and the rows counted (and claims nothing) when <cap> rows are
-      already designing across every sheet in <atlas>/batches/ (docs/atlas-limits.json, 8).
       An avatar row's request carries only the avatar description; a carousel row's (any style
       ending in "carousel", e.g. corporate carousel; Output type carousel) only the brand, its
       numbers, the instructions (with the product and the brand website) and Echo's topic angle
       from the Script column; a scriptless carousel style's (lifestyle story carousel, 2026-11-03)
       the same without an angle (its designer picks its own idea). An old style name (e.g. "carousel") reads as its current one
       (the _aliases in atlas-designers.json).
-  python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> request <task id>
-      Prints a row's request again, as `next` did, whatever its status (to brief a new
-      designer for a row after a restart). Changes nothing.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> list <status>
       Prints the Task IDs whose Status is <status>, one per line, in sheet order.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> agent <task id> [<agent id>]
@@ -29,14 +24,6 @@ The sheet is a Markdown table (.md); an .xlsx sheet also works.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> wait [seconds] [--also <sheet2.md> ...]
       Blocks until any row's status changes (a designer marking its row) or the seconds run
       out (default 110, at most 540), then prints {"changed": [...], "timeout": bool}.
-  python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> slots
-      Prints {"designing", "cap", "rendering", "render_cap", "renders", "timing", "timing_cap",
-      "timings", "free"} across every batch sheet; "renders" names who holds each busy render
-      slot (heavy-slot.py), "timings" each busy Whisper timing slot (timing_slot.py).
-  python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> recover
-      After a restart: one JSON line per designing or question row in every batch sheet, with
-      its agent id, its metadata and chain.json files, and the jobs submitted there that have
-      no result yet ("jobs_in_flight": wait for those, never submit them again).
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> summary
       Counts rows by status and lists every row that is not done.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> create
@@ -44,12 +31,12 @@ The sheet is a Markdown table (.md); an .xlsx sheet also works.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> add "Column=value" ...
       Appends one row: pending when it has a Script, draft (waiting for its script) when not. A value starting with @ is read from that file
       (e.g. "Script=@<path>"), so a script never has to pass through anyone's context.
-      Files must be inside the Super Vega folder.
+      Files must be inside the Super Nova folder.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> set <task id> "Column=value" ...
       Changes a draft or pending row (Echo, the script director, fills "Script=@<file>" this way).
       A draft row becomes pending once it has a script.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> tally
-      Counts finished (done) rows by brand and Output type, for Vega's output log.
+      Counts finished (done) rows by brand and Output type, for Nova's output log.
       Output types: organic-video, ad-video, avatar-image, carousel.
   python3 "<atlas>/tools/atlas-sheet.py" <sheet.md> remove <task id>
       Data Cleaner only, for a CANCELLED task: deletes the row and its session record.
@@ -61,7 +48,7 @@ import fcntl, json, os, re, sys, time
 from datetime import datetime
 from pathlib import Path
 
-# <super>/Agents/AtlasPM/tools/atlas-sheet.py -> <super> (Super Vega) is three levels up
+# <super>/Agents/AtlasPM/tools/atlas-sheet.py -> <super> (Super Nova) is three levels up
 PROJECT = Path(__file__).resolve().parents[3]
 AGENTS = PROJECT / "Agents"
 DEFAULT_SKILL = AGENTS / "TalkingHeadEditedVideoDesigner" / "skills" / "talking-head-edited-video-designer.md"
@@ -74,13 +61,6 @@ INPUTS = COLS[:COLS.index("Status")]
 OUTPUT_TYPES = {"organic-video", "ad-video", "avatar-image", "carousel"}
 DESIGNERS = Path(__file__).resolve().parents[1] / "docs" / "atlas-designers.json"
 RUNNABLE = {"", "pending"}
-# Parallel production (the owner's decision, 2026-11-13): at most 8 rows designing across every
-# batch sheet of this employee, at most 4 renders at once (the render slots of heavy-slot.py) and
-# at most 4 Whisper transcriptions at once (the timing slots of timing_slot.py).
-LIMITS = Path(__file__).resolve().parents[1] / "docs" / "atlas-limits.json"
-BATCHES = Path(__file__).resolve().parents[1] / "batches"
-LOCKS = PROJECT / ".locks"
-IN_FLIGHT = {"submitted", "queued", "running", "processing", "pending"}
 
 # ---------- markdown table ----------
 def md_cells(line):
@@ -146,7 +126,7 @@ def music_line(v):
     return f"Music: {v}"
 
 def inside_skill(value, what, task):
-    """Skills are read only from inside the Super Vega folder; outside copies may be outdated."""
+    """Skills are read only from inside the Super Nova folder; outside copies may be outdated."""
     p = Path(value).expanduser()
     p = (p if p.is_absolute() else PROJECT / p).resolve()
     if not p.is_relative_to(PROJECT):
@@ -204,8 +184,8 @@ def check_style(value):
         sys.exit(f"no designer for style {style!r}; available: {known}")
 
 def full_path(v):
-    """Designers work from inside Project/, so a file path written relative to the Super Vega
-    folder (e.g. Agents/VegaOM/client-assets/...) is passed on as a full path. URLs pass as they are."""
+    """Designers work from inside Project/, so a file path written relative to the Super Nova
+    folder (e.g. Agents/NovaOM/client-assets/...) is passed on as a full path. URLs pass as they are."""
     v = (v or "").strip()
     if not v or "://" in v or Path(v).is_absolute(): return v
     p = (PROJECT / v).resolve()
@@ -213,13 +193,17 @@ def full_path(v):
 
 AVATAR_STYLE = "avatar"
 
+POST_COPY_SKILL = Path(__file__).resolve().parents[2] / "DesignerShared" / "skills" / "post-copy.md"
+POST_COPY = (f"Before you report it done, write its post copy (title, caption, hashtags) as {POST_COPY_SKILL} says: "
+             "casual and organic, written to the audience, never a recap of the video (the owner's rule, 2026-11-12).")
+
 def build_request(r):
     r = dict(r)
     style = style_name(r.get("Style"))
     if is_carousel(style):
         # A carousel row (the owner's decisions, 2026-10-27): 4:5 slides made by that style's carousel
         # designer (corporate carousel: the Corporate Carousel Designer).
-        # Its inputs are only Echo's topic angle (the Script column) and the website; Vega's batch tool
+        # Its inputs are only Echo's topic angle (the Script column) and the website; Nova's batch tool
         # puts "Product: <name>." and "Brand website: <url>" in Instructions. No video-only fields:
         # no duration, music, style reference, source video, logo, color, avatar or after-video skill.
         skill = inside_skill(designer_for(r), "Designer skill", r['Task ID'])
@@ -232,11 +216,13 @@ def build_request(r):
                       "This is a carousel task: slides as JPEGs, 4:5 (1080x1350) unless the instructions ask for a 9:16 story, no video and no music."]
             if r.get("Instructions"): lines.append(f"These are the instructions: {r['Instructions']}")
             lines.append("This is a scriptless carousel: there is no topic angle. Pick and research your own idea as your skill says, and work from the instructions above.")
+            lines.append(POST_COPY)
             return "\n".join(lines)
         lines += [f"Brand number: {r['Brand number']}",
                   "This is a carousel task: 4:5 slides (1080x1350 JPEGs), no video and no music."]
         if r.get("Instructions"): lines.append(f"These are the instructions: {r['Instructions']}")
         lines += ["Here is the topic angle:", r.get("Script") or ""]
+        lines.append(POST_COPY)
         return "\n".join(lines)
     if style == AVATAR_STYLE:
         # An avatar row: the designer gets only what the avatar looks like (the owner's rule,
@@ -267,6 +253,7 @@ def build_request(r):
         lines += ["Here is the script:", r["Script"]]
     else:
         lines.append("This is a scriptless video: there is no script. Work from the instructions above.")
+    lines.append(POST_COPY)
     if r.get("After video skill"):
         after = inside_skill(r['After video skill'], "After video skill", r['Task ID'])
         lines.append(f"Read this skill right after you complete the video and continue: {after}")
@@ -295,80 +282,10 @@ def field_value(v):
     return " ".join(f.read_text(encoding="utf-8").split())
 
 def statuses(path):
-    with open(path.with_name(path.name + ".lock"), "a+") as lk:
+    with open(path.with_name(path.name + ".lock"), "a") as lk:
         fcntl.flock(lk, fcntl.LOCK_SH)
         rows, _ = load(path)
     return {r.get("Task ID", ""): (r.get("Status") or "pending").lower() for r in rows if filled(r)}
-
-def limits():
-    try: d = json.loads(LIMITS.read_text())
-    except (OSError, ValueError): d = {}
-    return int(d.get("designing") or 8), int(d.get("rendering") or 4), int(d.get("timing") or 4)
-
-def batch_sheets(extra=None):
-    sheets = {p.resolve() for p in BATCHES.glob("*.md") if ".saving" not in p.name} if BATCHES.is_dir() else set()
-    if extra is not None: sheets.add(extra)
-    return sorted(sheets)
-
-def designing_elsewhere(own):
-    """(sheet, Task ID) of every designing row in the other batch sheets. Never reads `own`:
-    the caller holds its lock, and a second lock on it from this process would wait forever."""
-    out = []
-    for p in batch_sheets():
-        if p == own: continue
-        try: st = statuses(p)
-        except (SystemExit, OSError, ValueError): continue
-        out += [(p, t) for t, s in st.items() if s == "designing"]
-    return out
-
-def held_slots(kind="render"):
-    """Who holds each busy render (heavy-slot.py) or timing (timing_slot.py) slot, from the .who
-    file written beside it."""
-    busy = []
-    for f in sorted(LOCKS.glob(f"{kind}-slot-*.lock")) if LOCKS.is_dir() else []:
-        with open(f, "a+") as lk:
-            try: fcntl.flock(lk, fcntl.LOCK_SH | fcntl.LOCK_NB)
-            except BlockingIOError:
-                who = f.with_suffix(".who")
-                busy.append(who.read_text(encoding="utf-8").strip() if who.exists() else f.stem)
-    return busy
-
-def jobs_in_flight(node, out):
-    """Every job entry with a job_id still waiting for its result (chain.json, metadata jobs/assets)."""
-    if isinstance(node, dict):
-        if node.get("job_id") and str(node.get("status") or "").lower() in IN_FLIGHT:
-            out.append({k: node.get(k) for k in ("job_id", "status", "file", "kind", "model", "id") if node.get(k) is not None})
-        for v in node.values(): jobs_in_flight(v, out)
-    elif isinstance(node, list):
-        for v in node: jobs_in_flight(v, out)
-    return out
-
-def recover(extra=None):
-    """One JSON line per designing or question row, with what a restart needs to pick it up."""
-    for p in batch_sheets(extra):
-        try:
-            with open(p.with_name(p.name + ".lock"), "a+") as lk:
-                fcntl.flock(lk, fcntl.LOCK_SH)
-                rows, _ = load(p)
-        except OSError as e:
-            print(f"skip {p}: {e}", file=sys.stderr)
-            continue
-        except (SystemExit, ValueError): continue
-        side = p.with_name(p.name + ".agents.json")
-        try: agents = json.loads(side.read_text()) if side.exists() else {}
-        except ValueError: agents = {}
-        for r in rows:
-            task, status = r.get("Task ID", ""), (r.get("Status") or "pending").lower()
-            if status not in {"designing", "question"} or not task or not filled(r): continue
-            nn = task.zfill(2)
-            files = sorted(str(f) for f in (PROJECT / "Project").glob(f"*/metadata/{nn}-*.json"))
-            files += sorted(str(f) for f in (PROJECT / "Project").glob(f"*/editable/materials/{nn}-*/chain.json"))
-            jobs = []
-            for f in files:
-                try: jobs_in_flight(json.loads(Path(f).read_text(encoding="utf-8")), jobs)
-                except (OSError, ValueError): pass
-            print(json.dumps({"sheet": str(p), "task_id": task, "status": status, "started": r.get("Started", ""),
-                              "agent": agents.get(task), "files": files, "jobs_in_flight": jobs}))
 
 def wait(path, secs, also=()):
     """Block until a row's status changes, so Atlas never has to end his turn to be woken.
@@ -390,46 +307,22 @@ def main():
     if len(sys.argv) < 3: sys.exit(__doc__)
     path = Path(sys.argv[1]).expanduser().resolve(); cmd = sys.argv[2]
     if cmd == "create": return create(path)
-    if cmd == "slots":
-        cap, render_cap, timing_cap = limits()
-        designing = 0
-        for p in batch_sheets(path if path.is_file() else None):
-            try: designing += sum(1 for s in statuses(p).values() if s == "designing")
-            except (SystemExit, OSError, ValueError): pass
-        busy, timings = held_slots("render"), held_slots("timing")
-        print(json.dumps({"designing": designing, "cap": cap, "rendering": len(busy), "render_cap": render_cap,
-                          "renders": busy, "timing": len(timings), "timing_cap": timing_cap,
-                          "timings": timings, "free": max(0, cap - designing)})); return
-    if cmd == "recover":
-        return recover(path if path.is_file() else None)
     if not path.is_file(): sys.exit(f"No sheet at {path}")
     if cmd == "wait":
         a = sys.argv[3:]; also = []
         while "--also" in a:
             i = a.index("--also"); also.append(a[i + 1]); del a[i:i + 2]
         return wait(path, a[0] if a else 110, also)
-    if cmd == "next":
-        # Taken before the sheet's own lock, by every `next` alike, so two batches never both
-        # claim the last free slot and never wait on each other's sheets.
-        BATCHES.mkdir(parents=True, exist_ok=True)
-        slots_lock = open(BATCHES / ".slots.lock", "a")
-        fcntl.flock(slots_lock, fcntl.LOCK_EX)
     lock = open(path.with_name(path.name + ".lock"), "a")
     fcntl.flock(lock, fcntl.LOCK_EX)          # released when the process exits
     rows, handle = load(path)
     for r in rows:
         for c in COLS: r.setdefault(c, "")
     if cmd == "next":
-        cap = limits()[0]
         for r in rows:
             if filled(r) and r["Status"].lower() in RUNNABLE:
                 if not r["Task ID"] or not r["Brand number"] or (needs_script(r) and not r["Script"]):
                     sys.exit("a pending row is missing its Task ID, Brand number, or Script")
-                mine = [x["Task ID"] for x in rows if filled(x) and x["Status"].lower() == "designing"]
-                others = designing_elsewhere(path)
-                if len(mine) + len(others) >= cap:
-                    print(f"FULL {len(mine) + len(others)}/{cap}")
-                    print("designing: " + ", ".join(mine + [f"{p.name} {t}" for p, t in others])); return
                 request = build_request(r)   # validate before marking, so a rejected row stays pending
                 r["Status"] = "designing"; r["Started"] = datetime.now().strftime("%Y-%m-%d %H:%M")
                 save(path, rows, handle)
@@ -452,11 +345,6 @@ def main():
                 r["Status"] = status; r["Result"] = " ".join(result.split())[:1500]
                 save(path, rows, handle); print(f"{task}: {status}"); return
         sys.exit(f"no row with Task ID {task}")
-    if cmd == "request":
-        for r in rows:
-            if r["Task ID"] == sys.argv[3]:
-                print(json.dumps({"task_id": r["Task ID"], "request": build_request(r)})); return
-        sys.exit(f"no row with Task ID {sys.argv[3]}")
     if cmd == "list":
         want = sys.argv[3].lower()
         for r in rows:
@@ -501,7 +389,7 @@ def main():
                     if "=" not in pair: sys.exit(f"expected Column=value, got {pair!r}")
                     k, v = pair.split("=", 1); k = k.strip()
                     if k not in INPUTS and k != "Topic": sys.exit(f"unknown column {k!r}")
-                    if k in {"Task ID", "Brand number"}: sys.exit(f"{k} comes from Vega's numbers tool and is never changed here")
+                    if k in {"Task ID", "Brand number"}: sys.exit(f"{k} comes from Nova's numbers tool and is never changed here")
                     r[k] = field_value(v.strip())
                 check_style(r["Style"])
                 if r["Output type"] not in OUTPUT_TYPES:
@@ -521,7 +409,7 @@ def main():
             tmp = side.with_name(side.name + ".saving"); tmp.write_text(json.dumps(agents, indent=1)); os.replace(tmp, side)
         print(f"{task}: removed"); return
     if cmd == "tally":
-        # Vega's bookkeeping: finished rows counted by brand and output type, one JSON line
+        # Nova's bookkeeping: finished rows counted by brand and output type, one JSON line
         out = {}
         for r in rows:
             if (r["Status"] or "").lower() == "done":

@@ -1,5 +1,5 @@
 """Shared helpers for the Re-skit designer's tools: where things are, a video's names, the
-metadata file, the editable page. Imported by reskit.py and build_edit.py
+metadata file, the editable page. Imported by reskit.py, spira_chain.py and build_edit.py
 (all in this folder); never run on its own.
 
 Layout (the shared file-management skill, exactly):
@@ -7,10 +7,12 @@ Layout (the shared file-management skill, exactly):
   Project/<BrandName>/editable/materials/NN-name-MM-DD/      everything the build uses
   Project/<BrandName>/renders/NN-name-MM-DD.mp4              the final video
   Project/<BrandName>/metadata/NN-name-MM-DD.json            every job, prompt, credit, lesson
-Brand-level files that must survive backups:
-  Agents/VegaOM/client-assets/<BrandName>/personas/<Name>/ and .../brand/
+Brand-level files that must survive backups (text, plus anchor sheets only; 2026-11-17):
+  Agents/NovaOM/client-assets/<BrandName>/personas/<Name>/ and .../brand/
+One-off persona, outfit and site-capture images stay in the video's materials:
+  Project/<BrandName>/editable/materials/NN-name-MM-DD/persona/<Name>/ and .../ui/
 """
-import fcntl, hashlib, html, json, re, shutil, subprocess, sys, tempfile
+import fcntl, hashlib, html, json, re, shutil, subprocess, tempfile
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
@@ -21,10 +23,8 @@ AGENTS = RESKIT.parent
 SUPER = AGENTS.parent
 PROJECT = SUPER / "Project"
 SHARED = AGENTS / "DesignerShared"
-CLIENT_ASSETS = AGENTS / "VegaOM" / "client-assets"
+CLIENT_ASSETS = AGENTS / "NovaOM" / "client-assets"
 PLAYWRIGHT = SHARED / "tools" / "render" / "node_modules" / "playwright-core"
-sys.path.insert(0, str(SHARED / "tools"))
-import profile as scratch_profile   # redirects tempfile to the scratch root
 MAKE_TIMINGS = SHARED / "tools" / "make-timings.py"
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"   # the asset CDN refuses Python's default agent
 
@@ -83,7 +83,7 @@ def locked(path):
     """An exclusive lock for one file, kept in the system temp folder (never beside the file,
     so no lock files land in the brand folder)."""
     key = hashlib.sha1(str(Path(path).resolve()).encode()).hexdigest()[:16]
-    with open(Path(scratch_profile.OS_TEMP) / f"reskit-{key}.lock", "a") as lk:
+    with open(Path(tempfile.gettempdir()) / f"reskit-{key}.lock", "a") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
         yield
 
@@ -96,7 +96,7 @@ def read_meta(v):
 
 
 def update_meta(v, fn):
-    """Read-modify-write the metadata file under a lock (the build writes it, and the agent edits it by hand while jobs land)."""
+    """Read-modify-write the metadata file under a lock (the chain and the build both write it)."""
     with locked(v.metadata):
         d = read_meta(v)
         fn(d)
@@ -181,7 +181,7 @@ def write_editable(v, edit=None, note=""):
 <meta name="generator" content="reskit-video-designer">
 <title>{html.escape(v.name)}</title>
 <style>
- body {{ font: 14px/1.45 Arial, sans-serif; margin: 24px; color: #111; background: #fff; max-width: 960px; }}
+ body {{ font: 14px/1.45 -apple-system, Helvetica, Arial, sans-serif; margin: 24px; color: #111; background: #fff; max-width: 960px; }}
  code {{ background: #f2f2f2; padding: 2px 5px; border-radius: 4px; }}
  table {{ border-collapse: collapse; margin: 8px 0 20px; }} td, th {{ border: 1px solid #ddd; padding: 4px 8px; text-align: left; }}
  .note {{ color: #555; }}

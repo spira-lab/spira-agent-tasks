@@ -1,89 +1,106 @@
 ---
 name: toolkit
-description: Which tool to use for each production step, with the model ID, inputs, cost, and caveats, and how a generation is run with submit_ai_job, wait_ai_job and host_file. Fixed choices. Consult before generating any asset; never substitute a model.
+description: Which tool to use for each production step, with the exact Spira CLI command, model ID, inputs, cost, and caveats. Fixed choices. Consult before generating any asset; never substitute a model.
 ---
 
 # Toolkit
 
-Every generated asset is a Spira AI job, run with the tools on the MCP
-server `worker_tools`: `submit_ai_job`, `wait_ai_job` and `host_file`.
-This document names the one tool for each job, so no session spends
-credits or context finding it. The choices are fixed: do not substitute
-another model because it looks similar or cheaper.
+Every generated asset comes from the Spira CLI. This document names the
+one tool for each job, so no session spends credits or context finding
+it. The choices are fixed: do not substitute another model because it
+looks similar or cheaper.
 
-## 1. Running a generation
+## 1. The CLI
 
-The worker has already checked the sign-in; there is no preflight. The
-price of a job comes from this document, from `spira ai models get
-<modelId>`, or from the quote `submit_ai_job` returns. Do not check the
-balance: other sessions share it.
+The CLI is the npm package `@spira-lab/cli`, installed globally and
+invoked as `spira`. It does not announce itself; look for it.
 
-**Never run a job or an upload through the `spira` CLI**, and never
-write a script that wraps it. The CLI is for `spira ai models get <modelId>`
-only (reading a model's docs).
+Preflight once per session, before any generation:
 
-Every generation is three steps:
+```bash
+spira --version
+spira auth whoami
+spira credits balance
+```
 
-1. **Write the payload**, the job's full inputs object, to
-   `<materials folder>/<out-file>.json`. It is the record of what was
-   asked.
-2. **Submit** with `submit_ai_job`: `modelId` is the model id, `inputs` is
-   the same object as the payload file. It returns the `jobId`. Write
-   `{"jobId": "<id>", "model": "<model-id>"}` to
-   `<materials folder>/<out-file>.pending` at once.
-3. **Collect** with `wait_ai_job`: `jobId` (`timeoutSec` up to 600 for
-   video). It waits and returns the result URLs only. Download each URL
-   into the video's materials folder (see the file-management skill) with
-   the `ai` tool's download action; never with `curl` or `wget`, which are
-   denied. Delete the `.pending` file once the result is saved.
+If `spira` is not found, install it with `npm install -g @spira-lab/cli`
+and run the preflight again. If the sign-in or the balance check fails,
+stop and tell the user. The balance is checked so you know there is
+enough to work with; it is not a way to measure what this session
+spends, because other sessions draw on the same balance.
+
+Every generation is one job:
+
+```bash
+spira --json ai jobs create --model-id <modelId> --inputs-json '<json>' --wait
+```
+
+`--wait` blocks (default limit 10 minutes, `--wait-timeout 20m` to
+raise it) and prints a compact result on stdout:
+
+```json
+{ "id": "<jobId>", "modelId": "<modelId>", "status": "succeeded", "resultUrls": ["https://..."] }
+```
 
 Then:
 
-1. Record the job's result URL as `url` in the asset's metadata entry,
-   and the exact inputs prompt as `prompt`.
-2. Record the job's credit cost as `credits` in the same entry: the quote
-   `submit_ai_job` returned, or when it gave none, this document's price
-   for that model and option (a per-generation price as is, a per-second
-   price times the seconds billed). Never use the account balance: it is
-   shared with other sessions running at the same time. Every job gets
-   one, including rejected candidates and failed runs that were billed.
+1. Download each result into the video's materials folder (see the
+   file-management skill) with `curl -L -o <materials path> <resultUrl>`.
+2. Record the job's `resultUrls` as `url` in the asset's metadata entry,
+   and the exact `--inputs-json` prompt as `prompt`.
+3. Record the job's credit cost as `credits` in the same entry, read
+   from the job itself: `spira --json ai jobs status <jobId>` returns
+   the exact charge as `data.credits`. Only when that field is missing,
+   work it out from this document's price for that model and option (a
+   per-generation price as is, a per-second price times the seconds
+   billed). Never use the account balance: it is shared with other
+   sessions running at the same time, so the job's own figure is the
+   only true cost of this production. Every job gets one, including
+   rejected candidates and failed runs that were billed.
 
-If a job fails, `wait_ai_job` returns the provider's error: read it, fix
-the payload, and resubmit once; never resubmit an unchanged payload in a
-loop. If the wait times out (`stillRunning`), call `wait_ai_job` again
-with the same `jobId`. IF a session was cut off, read every
-`*.pending` file and call `wait_ai_job` on the id it holds; never call
-`submit_ai_job` for an output that has a `.pending` record. To inspect a
-model's inputs and prices: `spira ai models get <modelId>`.
+If a job fails or times out: `spira --json ai jobs status <jobId>` shows
+the full job and provider error. To inspect a model's inputs and prices:
+`spira ai models get <modelId>`.
 
 **Independent jobs run in parallel, never one after another.** Whenever
-several jobs do not depend on each other's results, submit them all in
-one message (one `submit_ai_job` call each), then wait on them all in one
-message (one `wait_ai_job` call each). Serial waiting costs the sum of
-their times; parallel costs the longest one. This applies to every batch
-in this kit: the talking-head chunks, the background removal of each
-clip, a set of b-roll stills, a set of transparent elements. A job that
-depends on another's output starts the moment that output is in, not
-after the whole batch is done. Never wait with `sleep` or a polling loop.
+several jobs do not depend on each other's results, create them all at
+once: launch each `jobs create` without `--wait`, collect the job IDs,
+then `spira ai jobs wait <jobId>` on each. Serial waiting costs the sum
+of their times; parallel costs the longest one. This applies to every
+batch in this kit: the talking-head chunks, the background removal of
+each clip, a set of b-roll stills, a set of transparent elements. A job
+that depends on another's output starts the moment that output is in,
+not after the whole batch is done.
 
 ## 2. Hosting local files
 
-Every model input that is an image, a video, or audio must be a public
-HTTPS URL. Three cases:
+Every model input that is an image or a video must be a public HTTPS
+URL. Every file is hosted through the **Spira CLI**; nothing else is used
+for hosting. Three cases:
 
-- **The file came from a job.** Its result URL is already hosted. Pass
-  that URL straight into the next job. Never host a job's output.
+- **The file came from a CLI job.** Its `resultUrls` entry is already
+  hosted. Pass that URL straight into the next job. Never re-upload a
+  CLI output.
 - **The file is already hosted on Spira**: its URL starts with
   `https://static.viralwell.ai/`, like the logo and product images the
   request gives from the brand's records. Use that URL as is. Never
-  host it again.
+  re-upload it.
 - **The file exists only on disk** (a frame cut locally, a re-encoded
-  clip, a persistent avatar, a file given only as a local path). Host
-  it with the `host_file` tool (`worker_tools`), `path` as the local
-  file path; the URL it returns is the job's input. Never upload
-  through the `spira` CLI.
+  clip, a persistent avatar, a file given only as a local path). Upload
+  it with the Spira CLI and use the URL it returns:
 
-Host only what a job actually needs, at the moment it needs it.
+```bash
+spira assets upload "<file>" --json
+```
+
+The URL is in `data.url` of the JSON, in the form
+`https://static.viralwell.ai/assets/media/<account>/uploads/<timestamp>-<id>.<ext>`.
+The hosted file gets a generated name, so the local file keeps its own
+name and stays the reference. It takes image, video, and audio files. IF
+the upload fails on sign-in, check with `spira auth whoami` and tell the
+user; never look for credentials anywhere.
+
+Upload only what a job actually needs, at the moment it needs it.
 Record the returned URL in the asset's metadata entry as `url`.
 
 ## 3. Tool map
@@ -99,7 +116,7 @@ Record the returned URL in the asset's metadata entry as `url`.
 | Talking-head cut-out | `pixelcut-video-background-removal` | 2.2 per source second |
 | Background music | `suno-music` | 7 per track |
 | Avatar motion control, persona driven by a reference video | `kling-3.0-motion-control` pro | 9.52 per second |
-| Video from a reference or an image, person replacement (Cloner, Re-skit; approved by the owner 2026-10-24) | `wan-3.0` | 6.18 per second at 720p, 12.35 at 1080p (3.09 at 480p); wait with `timeoutSec` 600 (the maximum) and call `wait_ai_job` again while it reports `stillRunning` |
+| Video from a reference or an image, person replacement (Cloner, Re-skit; approved by the owner 2026-10-24) | `wan-3.0` | 6.18 per second at 720p, 12.35 at 1080p (3.09 at 480p); wait with `--timeout 30m` |
 | Sound effect from a prompt (Cloner, Re-skit) | `elevenlabs-sound-effects` | 12 per generation |
 | Persistent avatar voice (only with an avatar in the request, 3i) | `elevenlabs-text-to-speech` | 0.01 per character |
 | Persistent avatar talking head (only with an avatar in the request, 3i) | `heygen-avatar-4` | 10 per second |
@@ -120,8 +137,10 @@ head, skip Soul entirely. That image is the base likeness. Host it
 reference, exactly as a Soul output would be. Do not generate a
 persona of your own beside it, and do not run Soul to "match" it.
 
-Payload (`submit_ai_job`, `modelId` `ai-influencer-image`):
-`{"prompt":"<persona description>","size":"9:16","resolution":"1080p"}`.
+```bash
+spira --json ai jobs create --model-id ai-influencer-image \
+  --inputs-json '{"prompt":"<persona description>","size":"9:16","resolution":"1080p"}' --wait
+```
 
 Inputs: `prompt` (required), `size` (default `9:16`; also 16:9, 4:3,
 3:4, 1:1, 2:3, 3:2), `resolution` (`720p` or `1080p`; use `1080p`).
@@ -136,8 +155,10 @@ Takes the Soul output, or the user's own avatar image when one was
 provided, as the reference and returns the production-ready persona
 image.
 
-Payload (`submit_ai_job`, `modelId` `gpt-image-2`):
-`{"prompt":"<edit instruction>","referenceImage":["<soul result url>"],"size":"9:16","resolution":"2K"}`.
+```bash
+spira --json ai jobs create --model-id gpt-image-2 \
+  --inputs-json '{"prompt":"<edit instruction>","referenceImage":["<soul resultUrl>"],"size":"9:16","resolution":"2K"}' --wait
+```
 
 The prompt must:
 
@@ -163,8 +184,10 @@ Inputs: `prompt` (required), `referenceImage` (array of URLs), `size`
 For any cut-out element that will sit on the stage: props, icons,
 objects, stickers.
 
-Payload (`submit_ai_job`, `modelId` `gpt-image-2`):
-`{"prompt":"<element>, on a fully transparent background, PNG with alpha, no backdrop, no shadow on the ground, no frame","size":"1:1","resolution":"1K"}`.
+```bash
+spira --json ai jobs create --model-id gpt-image-2 \
+  --inputs-json '{"prompt":"<element>, on a fully transparent background, PNG with alpha, no backdrop, no shadow on the ground, no frame","size":"1:1","resolution":"1K"}' --wait
+```
 
 The prompt must say transparent background explicitly, in those words.
 It does not happen by default, and a white or grey backdrop cannot be
@@ -192,8 +215,10 @@ The sheet itself goes to deletable once the elements are cut.
 For scene images that serve as stock photography behind or beside the
 talking head.
 
-Payload (`submit_ai_job`, `modelId` `gpt-image-2`):
-`{"prompt":"<scene>, photographic, natural light","size":"9:16","resolution":"2K"}`.
+```bash
+spira --json ai jobs create --model-id gpt-image-2 \
+  --inputs-json '{"prompt":"<scene>, photographic, natural light","size":"9:16","resolution":"2K"}' --wait
+```
 
 Use `9:16` for full-bleed stage backgrounds, `16:9` for inset shots.
 A single full-screen shot is generated at `2K`: at `1K` a 9:16 image
@@ -232,7 +257,7 @@ the same model. Never make some chunks with Omni and the failed ones with
 Seedance: the face, the voice, and the look change from clip to clip and
 every cut shows it.
 
-- An Omni job fails: `wait_ai_job` returns the provider's error.
+- An Omni job fails: `spira --json ai jobs status <jobId>` shows why.
   Run that chunk once more with Omni.
 - IF it fails again, or Omni is down or refuses the persona, **switch
   the whole video to Seedance**: move every Omni `th-*` file to
@@ -252,8 +277,8 @@ talking-head clip as soon as it arrives, before it goes on the stage:
 python3 <shared>/tools/make-timings.py <clip.mp4> --txt <materials folder>/deletable/clip-check --language <code> --prompt "<brand, product, and other names in the line>"
 ```
 
-It writes `<clip>.txt` there, transcribed with local Whisper (in one of the 2
-shared timing slots; exit 75 = slots busy, run the same line again).
+It writes `<clip>.txt` there, transcribed with ElevenLabs Scribe through the
+Spira CLI, with Whisper as the fallback only when Scribe fails (2026-10-22).
 
 Compare that text with the chunk's `text` in `chunks.json`. A word heard
 differently (a brand name, a similar-sounding word) is **not** a
@@ -321,8 +346,10 @@ in.
 
 ### The Omni job
 
-Payload (`submit_ai_job`, `modelId` `gemini-omni-flash-1.1`):
-`{"prompt":"<line and delivery>","referenceImage":["<persona result url>"],"duration":"<4|6|8|10>","size":"9:16","resolution":"1080p"}`.
+```bash
+spira --json ai jobs create --model-id gemini-omni-flash-1.1 \
+  --inputs-json '{"prompt":"<line and delivery>","referenceImage":["<persona resultUrl>"],"duration":"<4|6|8|10>","size":"9:16","resolution":"1080p"}' --wait
+```
 
 Inputs: `prompt` (required; the spoken line goes in it, in the
 prompting skill's format), `referenceImage` (the persona; with a product,
@@ -376,19 +403,27 @@ exactly like this:
    `--inputs-json` object for that chunk: its text in the prompt, its
    `duration` from `chunks.json`. No job is submitted until every payload
    file exists.
-2. Submit them all with `submit_ai_job` in one message, one call per
-   payload (`modelId` `gemini-omni-flash-1.1`, `inputs` the payload file's
-   object), and write each returned `jobId` to `th-NN.pending`.
+2. Submit them all with the jobs tool, which keeps each job ID in
+   `th-NN.job`:
 
-3. Wait for them all with `wait_ai_job` in one message, one call per
-   `jobId`, then download each result URL with the `ai` tool's download
-   action as `th-NN.mp4` and keep the URL as `th-NN.url`. Never use
-   `curl` or `wget`.
+   ```bash
+   python3 <shared>/tools/spira-jobs.py submit gemini-omni-flash-1.1 <materials folder>/th-*.json
+   ```
+
+3. Wait for them all and download each result as it returns
+   (`th-NN.url` and `th-NN.mp4`):
+
+   ```bash
+   python3 <shared>/tools/spira-jobs.py wait mp4 <materials folder>/th-*.job
+   ```
+
+   Never write these as shell loops: the session's approved tool list
+   refuses loops and variables, so the tool does the looping.
 
 4. Only then move to the cut-outs: every clip goes to Pixelcut in the same
    batched form, never one at a time.
 
-Payload, pending, and url files are working files; move them to deletable
+Payload, job, and url files are working files; move them to deletable
 when the clips are in.
 
 ### Seedance 1.5 Pro: the fallback only
@@ -399,8 +434,10 @@ payloads under the same `th-NN` names (the Omni files are already in
 deletable), and run the same batch steps with `seedance-1.5-pro` in
 place of `gemini-omni-flash-1.1`.
 
-Payload (`submit_ai_job`, `modelId` `seedance-1.5-pro`):
-`{"prompt":"<line and delivery>","referenceImage":["<persona result url>"],"duration":"8","size":"9:16","resolution":"1080p","sound":true}`.
+```bash
+spira --json ai jobs create --model-id seedance-1.5-pro \
+  --inputs-json '{"prompt":"<line and delivery>","referenceImage":["<persona resultUrl>"],"duration":"8","size":"9:16","resolution":"1080p","sound":true}' --wait
+```
 
 Inputs: `prompt` (required), `referenceImage` (up to 2 public URLs: the
 persona, then the product when there is one), `duration` (`4`, `8`, or
@@ -425,8 +462,10 @@ sit on the stage with real transparency. Pixelcut is the only cut-out
 model; never use `bria-video-background-removal` (replaced by the owner's
 decision, 2026-10-20).
 
-Payload (`submit_ai_job`, `modelId` `pixelcut-video-background-removal`):
-`{"referenceVideo":["<clip result url>"],"mode":"Transparent"}`.
+```bash
+spira --json ai jobs create --model-id pixelcut-video-background-removal \
+  --inputs-json '{"referenceVideo":["<clip resultUrl>"],"mode":"Transparent"}' --wait
+```
 
 Inputs: `referenceVideo` (exactly one public URL, up to **100 MiB** and
 **60 seconds**, no prompt) and `mode` set to `Transparent`. Nothing else:
@@ -457,11 +496,13 @@ Cost is 2.2 credits per source second.
 
 **All cut-outs are one batch, exactly like the clips.** Never remove
 backgrounds one clip at a time. With every talking-head clip in and
-its `.url` file written (3e step 3), submit every cut-out at once with
-`submit_ai_job` (`modelId` `pixelcut-video-background-removal`, the
-clip's hosted URL from its `.url` file as `referenceVideo`, in one
-message), then wait for them all with `wait_ai_job` in one message and
-download each result as `th-NN-cut.webm`.
+its `.url` file written (3e step 3), submit every cut-out at once, then
+wait for them all (`th-NN-cut.webm`):
+
+```bash
+python3 <shared>/tools/spira-jobs.py cutout <materials folder>/th-??.url
+python3 <shared>/tools/spira-jobs.py wait webm <materials folder>/th-*-cut.job
+```
 
 Then run the alpha check on every `.webm`.
 
@@ -493,8 +534,10 @@ the user asking for a change.
 Generates the music bed that sits under the VO and the talking head.
 The CLI offers one Suno version, `v5_5`, and that is the one used.
 
-Payload (`submit_ai_job`, `modelId` `suno-music`):
-`{"mode":"v5_5","customMode":true,"instrumental":true,"style":"<style>","title":"<title>"}`.
+```bash
+spira --json ai jobs create --model-id suno-music \
+  --inputs-json '{"mode":"v5_5","customMode":true,"instrumental":true,"style":"<style>","title":"<title>"}' --wait
+```
 
 Inputs: `mode` (`v5_5`, the only value), `customMode` true,
 `instrumental` true, `style` (required in custom mode; the genre, mood,
@@ -523,8 +566,10 @@ in the CLI is 3.0, and that is the one used.
 used to animate graphics, props, products, text, or b-roll stills;
 those are not motion-controlled by anything in this kit.
 
-Payload (`submit_ai_job`, `modelId` `kling-3.0-motion-control`):
-`{"prompt":"<optional guidance>","referenceImage":["<matching image url>"],"referenceVideo":["<motion clip url>"],"characterOrientation":"image","duration":"<clip length>","mode":"pro","sound":false}`.
+```bash
+spira --json ai jobs create --model-id kling-3.0-motion-control \
+  --inputs-json '{"prompt":"<optional guidance>","referenceImage":["<matching image url>"],"referenceVideo":["<motion clip url>"],"characterOrientation":"image","duration":"<clip length>","mode":"pro","sound":false}' --wait
+```
 
 Inputs: `referenceImage` (exactly one URL, the persona),
 `referenceVideo` (exactly one URL, the motion source),
@@ -588,8 +633,9 @@ Omni or Seedance talking-head clips (3e). Instead:
 1. **Speech.** Make the voice-over with ElevenLabs, the full approved
    script as the text, with the voice ID and model from the request:
 
-   Payload (`submit_ai_job`, `modelId` `elevenlabs-text-to-speech`):
-   `{"text":"<full approved script>","voiceId":"<voice ID>","providerModelId":"<model>"}`.
+   ```bash
+   spira ai jobs create --model-id elevenlabs-text-to-speech --inputs-json '{"text":"<full approved script>","voiceId":"<voice ID>","providerModelId":"<model>"}' --wait --json
+   ```
 
    Download the result as `vo.mp3` into the materials folder. Its result
    URL is already hosted, so pass it straight to HeyGen.
@@ -597,8 +643,9 @@ Omni or Seedance talking-head clips (3e). Instead:
    (section 2), then make the talking head with HeyGen, driven by that
    speech:
 
-   Payload (`submit_ai_job`, `modelId` `heygen-avatar-4`):
-   `{"referenceImage":["<avatar image url>"],"referenceAudio":["<vo.mp3 url>"],"size":"9:16","resolution":"1080p"}`.
+   ```bash
+   spira ai jobs create --model-id heygen-avatar-4 --inputs-json '{"referenceImage":["<avatar image url>"],"referenceAudio":["<vo.mp3 url>"],"size":"9:16","resolution":"1080p"}' --wait --json
+   ```
 
 No chunking: the full script is one speech file and one HeyGen job, not
 split into clip-length pieces; the chunking in 3e does not
@@ -613,8 +660,9 @@ WHEN the video has no talking head (an explainer), the script is spoken
 by a narrator: one voice-over made with ElevenLabs, the full approved
 script as the text.
 
-Payload (`submit_ai_job`, `modelId` `elevenlabs-text-to-speech`):
-`{"text":"<full approved script>","voiceId":"<voice ID>","providerModelId":"<model>"}`.
+```bash
+spira ai jobs create --model-id elevenlabs-text-to-speech --inputs-json '{"text":"<full approved script>","voiceId":"<voice ID>","providerModelId":"<model>"}' --wait --json
+```
 
 The voice comes only from the request (`Use this voice: elevenlabs
 <voice ID> <model>` in its instructions). IF it gives none, stop and

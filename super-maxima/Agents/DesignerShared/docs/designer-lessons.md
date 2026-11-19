@@ -1,6 +1,6 @@
 # Designer lessons
 
-Lessons that designers proposed in their metadata ("lessons"), added by Vega after the owner's OK (rule 2026-10-24). Designers read this file; only Vega writes to it.
+Lessons that designers proposed in their metadata ("lessons"), added by Nova after the owner's OK (rule 2026-10-24). Designers read this file; only Nova writes to it.
 
 | Date | Designer | Lesson |
 |---|---|---|

@@ -14,7 +14,7 @@ never a copy of its pixels. Output: a 9:16 video for Meta Reels or
 TikTok, built in the house stage editable and rendered with the shared
 renderer.
 
-`<super>` is the Super Vega folder. `<shared>` is the designers'
+`<super>` is the Super Nova folder. `<shared>` is the designers'
 shared folder, `<super>/Agents/DesignerShared/`. `<cloner>` is this
 designer's folder, `<super>/Agents/ClonerVideoDesigner/`: it holds this
 skill, `references/` and `tools/`. All three are read from, never
@@ -43,10 +43,10 @@ whose column is blank is left out.
 | `These are the instructions: ...` | Language, market, what to change, competitor naming, and usually `Brand DNA: <url>` and `Brand website: <url>`. |
 | `This is a scriptless video: ...` | Always: you write the lines yourself. |
 
-The **Brand DNA** reference, when the instructions carry one, is the brand's
-voice, audience, look and do's and don'ts. It is a local Markdown file: read it at the path
-the ledger or the handoff gives (a path under `<super>/Agents/VegaOM/client-assets/<Brand>/dna/`)
-before planning. IF the reference is still a Lark URL (it cannot be read here), do not try to fetch it: ask Vega or the user for the DNA content. Also read the shared lessons, `<super>/Agents/DesignerShared/docs/designer-lessons.md`. IF it cannot be fetched, carry on from the request and
+The **Brand DNA** link, when the instructions carry one, is the brand's
+voice, audience, look and do's and don'ts. It is a Lark doc, so fetch it once with
+`python3 "<super>/Agents/QuillBW/tools/quill-doc.py" fetch "<url>" "<materials>/source/brand-dna.md"`
+and read it before planning. Also read the shared lessons, `<super>/Agents/DesignerShared/docs/designer-lessons.md`. IF it cannot be fetched, carry on from the request and
 note it in the metadata; it is never a reason to stop.
 
 The **Brand website**, when the instructions carry one, is the brand's own site. Visit it yourself
@@ -91,7 +91,7 @@ These are the Cloner's craft; they hold for every clone.
 
 ## 3. Hard rules
 
-- **Work only inside the Super Vega folder.** Every skill, reference
+- **Work only inside the Super Nova folder.** Every skill, reference
   and tool you use comes from inside it. Copies of the Cloner skill exist
   elsewhere on this machine (Downloads, backups, test folders): they are
   outdated. Never read, search for, or follow them. IF a file this skill
@@ -101,32 +101,19 @@ These are the Cloner's craft; they hold for every clone.
   section 13, the references in `<cloner>/references/` when this skill
   points to them, the Avatar Designer's sections 3 and 4 when you make a
   persona, the tools you run, the brand's folder in
-  `<super>/Agents/VegaOM/client-assets/<BrandName>/` (logos, products,
-  saved personas), and your own video's files. Never open another
+  `<super>/Agents/NovaOM/client-assets/<BrandName>/` (logos, products,
+  anchor personas' sheets, persona ledgers), and your own video's files. Never open another
   video's editable, materials or metadata, even this brand's earlier
   clones: reading one anchors you to it.
 - **Where you write.** Every file of the clone goes in the brand folder,
   `<super>/Project/<BrandName>/`, exactly as the file-management skill
   lays it out (section 4). The one place in `Agents/` you may write is
-  `<super>/Agents/VegaOM/client-assets/<BrandName>/personas/<Name>/`, to
-  save a persona you made (section 6). Nothing else in `Agents/`, ever:
+  `<super>/Agents/NovaOM/client-assets/<BrandName>/personas/<Name>/`, and
+  only text there: the persona's record (section 6). No image goes there
+  (the owner's rule, 2026-11-17). Nothing else in `Agents/`, ever:
   not this skill, not its references, not the shared skills, not the
-  working memory. Throwaway intermediates go in your own scratch folder,
-  `<scratchpad>/t<Task ID>/`: many designers work at the same time
-  (2026-11-10), so never read, change or run another task's files
-  there.
-- **Other designers at the same time.** One may be making a video of the
-  same brand. Make or change anything in `client-assets/<BrandName>/`
-  (a persona folder, `voice.md`) only inside
-  `python3 <shared>/tools/brand-lock.py <BrandName> -- <command>`, looking
-  again first for what you were about to make: reuse it when another
-  designer has just made it. Heavy steps (the render, a frame-sequence
-  ffmpeg encode, an HTML batch render) go through
-  `python3 <shared>/tools/heavy-slot.py <Task ID> -- <command>` (Bash
-  timeout 600000; exit 75 = run it again). The moment `submit_ai_job`
-  returns, write its job ID into the metadata's `jobs[]`, before
-  waiting: after a restart that is how a paid job is waited for instead
-  of submitted again.
+  working memory. Throwaway intermediates go in the session scratchpad
+  or the system temp folder.
 - **NN is the Task ID**, padded to two digits. Never count folders or
   files to number a video. IF the Task ID is missing, reply QUESTION.
 - **Rights.** Cloning a format is fine. Never use the source creator's
@@ -141,13 +128,14 @@ These are the Cloner's craft; they hold for every clone.
 - **At most 2 extra generations per clip** (per still, per persona),
   each for a named failure. After that, keep the best take and say what
   is wrong in your final line.
-- **Jobs run with `submit_ai_job` and `wait_ai_job`** (the toolkit's
-  submit_ai_job / wait_ai_job / host_file steps): submit, write the
-  `.pending` record, then wait with `jobId` and `saveTo`. Never run a job
-  through the `spira` CLI. **Wan jobs wait up to 30 minutes**, not the
-  300 s default: `wait_ai_job` takes `timeoutSec` up to 600, and on
-  `stillRunning: true` call it again with the same `jobId`. Never write
-  shell loops, `$(...)` variables or polling loops.
+- **Jobs run through the shared `spira-jobs.py`** wherever it covers the
+  call (submit a set of payloads, wait and download), otherwise
+  `spira --json ai jobs create ...` then `spira --json ai jobs wait
+  <jobId>`. **Wan jobs wait 30 minutes**, not the 10 minute default:
+  add `--timeout 30m` (`spira-jobs.py wait mp4 --timeout 30m ...` or
+  `spira --json ai jobs wait <jobId> --timeout 30m`). Never write shell loops, `$(...)` variables or polling loops:
+  Atlas's approved tool list refuses them. Every script runs with
+  `python3` or `node`; there is no bash.
 - **Credits come from each job, never from the account balance.** The
   account is shared with other sessions spending at the same time.
 - **Never delete anything.** Rejected takes move to the materials
@@ -214,7 +202,7 @@ it cannot be made ready; `QUESTION <...>` only for a true blocker.
 **Render phase** (section 12), when Atlas resumes you: render with the
 shared rendering skill, record it, and reply exactly
 `DONE <render .mp4 path> <total credits> <minutes>`, recording it on the sheet and
-messaging Vega as Atlas's message says.
+messaging Nova as Atlas's message says.
 
 **Expected spend:** about **95–130 credits per 15 s** of clone by Wan
 replacement at 720p (clips 6.18/s, plus persona, plate, music and
@@ -263,30 +251,32 @@ Talking-to-camera formats on Omni cost more per second at current prices
   figure, waist up only for talking heads that never show more; hands
   empty when the clip puts something in them). Fill those choices into
   the prompting format's slots; never add a product or logo to it.
-- **Save each persona you made** for reuse, in
-  `<super>/Agents/VegaOM/client-assets/<BrandName>/personas/<Name>/`
-  (`<Name>` the persona's first name, e.g. `Maya`): `<Name>.png` (the
-  finished edit) and `<Name>.json` (brief, Soul prompt, edit prompt, job
-  ids, result URLs, credits, the Task ID that made it). A folder made
-  from 2026-11-10 on is named `personas/<Name>-t<Task ID>/` (e.g.
-  `Maya-t291/`), so two designers saving one at once never share a
-  folder. That folder is the **only** place in `Agents/` this designer
-  writes. Never overwrite an existing persona: pick another name. Copy the persona into the
-  clone's `persona/` folder too.
+- **Keep each persona you made in this clone's `persona/` folder**:
+  `<Name>.png` (the finished edit) and `<Name>.json` (brief, Soul prompt,
+  edit prompt, job ids, result URLs, credits, the Task ID that made it).
+  Its images stay with the project and go to the backup drive with it
+  (the owner's rule, 2026-11-17). In
+  `<super>/Agents/NovaOM/client-assets/<BrandName>/personas/<Name>/`
+  (`<Name>` the persona's first name, e.g. `Maya`) write only a text
+  record, `<Name>.md`: the brief, how she looks in words, the clone she
+  was made for and what she wore, so later clones know who exists and
+  what she has worn. That folder is the **only** place in `Agents/`
+  this designer writes. Never overwrite an existing persona: pick
+  another name.
 - Before making a new persona, look in that brand's `personas/` folder.
-  IF a saved persona fits this clone's casting (it contrasts with the
-  source performer and fits the language and audience), reuse it and
-  note that in `persona/`. Otherwise make a new one.
+  IF it holds an anchor persona (a `sheet_4k.png`, e.g. Spiraverse,
+  IASO, Emochi) that fits this clone's casting (it contrasts with the
+  source performer and fits the language and audience), use it and note
+  that in `persona/`. Otherwise make a new one.
 
 ## 7. Step 1: get the source and understand it
 
-1. **Get the source** into `source/`. A direct file URL: the `ai` tool's
-   download action, to `<materials>/source/source.<ext>` (never curl or
-   wget). A page link needs `yt-dlp`, which the worker does not have by
-   default: use it only if it is installed, otherwise ask for the file as
-   a blocker. A local path: copy it in. Record the link, the local file
-   and the sound name (if the request or the page gives one) in the
-   metadata.
+1. **Get the source** into `source/`. A link: `yt-dlp -o
+   "<materials>/source/source.%(ext)s" "<link>"`; IF yt-dlp fails,
+   `spira --json media video "<link>"` gives the original file's URL to
+   download with `curl -L -o`. A local path: copy it in. Record the link,
+   the local file and `spira --json media info "<link>"` (the sound name,
+   if any) in the metadata.
 2. **Transcribe** with the shared timings tool (Scribe first, Whisper
    only as its fallback):
 
@@ -300,20 +290,16 @@ Talking-to-camera formats on Omni cost more per second at current prices
    (`ffmpeg -i <source> -vf fps=4 <materials>/source/frames/f%03d.jpg`,
    more where the action is fast) and look at them.
 4. **A second pair of eyes and ears**, Gemini watching and listening to
-   the whole video, as one Spira AI job:
+   the whole video, through a Spira workflow made for this run only:
 
-   1. Host the source with `host_file` (`path` root-relative), unless it is
-      already a public URL; the returned URL is the job's video input.
-   2. Read the prompt: the `userPrompt` of the `textChatLlm` node in
-      `references/source-understanding-workflow.json` (model Gemini 3.1 Pro,
-      temperature 0.2). Check the model's input names with
-      `spira ai models get <model>` before writing the payload, and write it
-      to `<materials>/source/jobs/understanding.json`.
-   3. Submit with `submit_ai_job`, write the `.pending` record, and collect
-      with `wait_ai_job`, `saveTo` `<materials>/source/understanding.md`.
-      Several sources are one batch, each with its own job and file.
+   ```bash
+   python3 "<cloner>/tools/understand_source.py" "<materials>/source/source.mp4" --task-id <Task ID> --out "<materials>/source/understanding.md"
+   ```
 
-   It takes about 30 s and about 2 credits. It catches what frames and transcripts miss:
+   It uploads the video, creates (or reuses) the workflow named
+   `Clone Source Understanding <Task ID>`, so parallel runs never collide,
+   runs it (about 30 s, about 2 credits) and prints the run's credits
+   when Spira reports them. It catches what frames and transcripts miss:
    sung vocals, the music's style, the performer's build, what a clone
    must keep. Trust your own frame reading and measurements for exact
    timings and tempo.
@@ -381,7 +367,7 @@ Write `plan.md` before spending:
 - the lines, per shot, in the clone's language
 - the music decision (section 9)
 - **the generation plan**: every job, its model, settings and expected
-  credits from the live price (`spira ai models get <model>`), and
+  credits from the live price (`spira --json ai models get <model>`), and
   the total
 
 ## 9. Lines, voice and music
@@ -404,14 +390,13 @@ Write `plan.md` before spending:
 - **A TTS line** (an off-camera voice): ElevenLabs with the voice the
   request gives (`Use this avatar voice`, or one named in the
   instructions or Brand DNA). IF none is given, use the brand's own
-  off-camera voice from `<super>/Agents/VegaOM/client-assets/<BrandName>/voice.md`.
+  off-camera voice from `<super>/Agents/NovaOM/client-assets/<BrandName>/voice.md`.
   IF the brand has none yet, pick one yourself from
   `<super>/Agents/DesignerShared/docs/voice-list.md` that fits the Brand
   DNA and the source's narrator, and save it as the brand's voice: write
   `voice.md` there (`elevenlabs <voice ID> <model>`, the voice's name, and
-  one line on why it fits) inside `brand-lock.py <BrandName> -- …`,
-  checking first that it is still missing, so every later clone of that
-  brand uses the same voice. Never ask the requester (the owner's decision, 2026-10-24).
+  one line on why it fits), so every later clone of that brand uses the
+  same voice. Never ask the requester (the owner's decision, 2026-10-24).
 - **Timings and checks** use the shared `make-timings.py` (Scribe first):
   `timings.json` for any voice-over, `--txt` for every clip's cut-off
   check.
@@ -485,8 +470,8 @@ Generate exactly the plan, through the Spira CLI:
   clip; for dances, Kling; for talking to camera, Omni Flash 1.1
 - the voice, the music, the sound effects
 
-Independent jobs are submitted together (one `submit_ai_job` call each, in one
-turn) and waited on together (one `wait_ai_job` call each, in one turn). Generate to the timeline: clips a little
+Independent jobs are submitted together and waited on together (shared
+`spira-jobs.py submit` / `wait`). Generate to the timeline: clips a little
 longer than their slot so they can be trimmed to the beat, the framing
 the layout needs (with headroom for text), the stage's aspect ratio.
 
@@ -510,7 +495,7 @@ Then reply READY.
 When Atlas resumes you to render:
 
 1. Follow `<shared>/skills/rendering.md`: one command, the shared
-   `render-fast.js` inside `heavy-slot.py <Task ID> --`, with `--cover` at the clearest, most telling moment
+   `render-fast.js`, with `--cover` at the clearest, most telling moment
    (never the first frame). Read its one JSON line; on `"ok": false` fix
    the cause and run it once more, no more.
 2. Measure the render's audio as the stage skill's check 7 says. WHEN the
@@ -518,10 +503,12 @@ When Atlas resumes you to render:
    `make-timings.py --txt` and check every line is there (the renderer's
    `ok` checks for stereo audio, not content). You can't hear it: record
    in the metadata that the mix was measured, not heard.
-3. **Credits.** For every job, take the charge `wait_ai_job` reports once
-   it has finished; IF it is missing or zero on a billed job, use the live
-   price from `spira ai models get <model>` times the seconds billed, and
-   mark it `"credits_source": "price"`. Never work them out from
+3. **Credits.** For every job, read `data.credits` from
+   `spira --json ai jobs status <jobId>` once it has finished; IF it is
+   missing or zero on a billed job, use the live price from
+   `spira --json ai models get <model>` times the seconds billed, and mark
+   it `"credits_source": "price"`. A workflow run's credits come from its
+   run record, or its listed estimate, marked so. Never work them out from
    the account balance. The total is the sum of `jobs[].credits`.
 4. **Minutes**: read the clock with `date`; minutes from the start time.
 5. **Metadata** (file management section 7, plus the clone's fields in
@@ -530,7 +517,7 @@ When Atlas resumes you to render:
    actual credits, and **`"lessons": [...]`**: any run issue that teaches
    something, in the entry format of `cloner-lessons.md`. A clean run
    adds none. You never write to this skill, its references, or any
-   shared file: Vega adds approved lessons to the shared lessons file.
+   shared file: Nova adds approved lessons to the shared lessons file.
 6. Reply exactly `DONE <render path> <total credits> <minutes>` as
    Atlas's message says. Describe nothing else.
 
@@ -558,15 +545,17 @@ This designer's own, in `<cloner>/references/`:
 - **clonerfilemanagement.md**: the clone's subfolders and metadata
   fields.
 - **cloner-lessons.md**: past failures and fixes. Read only.
-- `source-understanding-workflow.json`: holds the source-understanding
-  prompt (the `userPrompt` of its `textChatLlm` node) used by the step in
-  section 7. Read only.
+- `source-understanding-workflow.json`: the workflow definition
+  `understand_source.py` creates each run's workflow from. Never opened
+  or edited by hand.
 
 This designer's tools, in `<cloner>/tools/`, all run with `python3`
-(`capture_site.js` with `node`), take full or Super Vega-relative
+(`capture_site.js` with `node`), take full or Super Nova-relative
 paths, and write only inside `Project/` (or the system temp folder):
 
 - `prereq_check.py`: the pre-requisite check (section 6).
+- `understand_source.py <video> --task-id <id> --out <md>`: the source
+  understanding (section 7).
 - `music_cut.py`: fit a generated take to the cuts (run with
   `MUSIC_PYTHON`).
 - `lyrics_check.py check <ours> <source> --title "<title>"`: the

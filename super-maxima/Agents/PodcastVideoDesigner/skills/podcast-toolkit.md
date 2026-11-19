@@ -1,6 +1,6 @@
 ---
 name: podcast-toolkit
-description: The podcast designer's own toolkit. Which tool to use for each step of a podcast video, with the model ID, inputs and cost for submit_ai_job, the voice library, and the podcast tool for the local mechanical steps. Fixed choices. Consult before generating any asset; never substitute a model.
+description: The podcast designer's own toolkit. Which tool to use for each step of a podcast video, with the exact Spira CLI command, model ID, inputs, cost, the voice library, and the podcast tool that runs every mechanical step. Fixed choices. Consult before generating any asset; never substitute a model.
 ---
 
 # Podcast Toolkit
@@ -11,7 +11,7 @@ everything except two sections of it, which you do read:
 (hosting local files)**. Nothing else in the shared toolkit applies to a
 podcast video.
 
-`<podcast>` is this designer's folder, `Super Vega/Agents/PodcastVideoDesigner`.
+`<podcast>` is this designer's folder, `Super Nova/Agents/PodcastVideoDesigner`.
 
 ## 1. Tool map
 
@@ -22,17 +22,16 @@ podcast video.
 | Each line's voice | `elevenlabs-voice-clone-tts` | 0.01 per character |
 | Each line's talking clip | `heygen-avatar-4` | 10 per second |
 | Background music | `elevenlabs-music-generation` | 0.25 per second |
-| Word timings | ElevenLabs Scribe (via the shared make-timings tool) (Whisper `medium.en` as fallback) | about 1 credit a minute |
+| Word timings | ElevenLabs Scribe via the Spira CLI (Whisper `medium.en` as fallback) | about 1 credit a minute |
 
 ## 2. The podcast tool
 
-`<podcast>/tools/podcast.py` runs the local mechanical steps: the line
-list, the image split, the audio joining and padding, the checks, the
+`<podcast>/tools/podcast.py` runs every mechanical step: the line
+voices and talking clips (at most 3 jobs at a time, failed jobs
+retried), the audio padding and joining, the uploads, the checks, the
 word alignment, the captions, the music level, and the black check. Use
 it for those steps; never do them by hand and never write shell loops
-(the approved tool list refuses them). It makes no generation and no
-upload: every generation is `submit_ai_job` + `wait_ai_job`, and every
-local file a job needs is hosted with `host_file`.
+(the approved tool list refuses them).
 
 ```bash
 python3 <podcast>/tools/podcast.py <command> <materials folder> [...]
@@ -40,30 +39,25 @@ python3 <podcast>/tools/podcast.py <command> <materials folder> [...]
 
 `<materials folder>` is the video's materials folder,
 `<root>/editable/materials/<name>/`. The commands, in the order the skill
-uses them: `lines`, `split`, `join`, `mark`, `pad`, `check`, `align`, `captions`, `music`, and
+uses them: `lines`, `split`, `tts`, `join`, `mark`, `pad`, `upload`,
+`heygen --test`, `heygen`, `check`, `align`, `captions`, `music`, and
 `black <render>`. Run it with no arguments for the full usage.
 
-You add every generation to the video's metadata file with its credits,
-as it lands. If a line or a clip is generated again, move the old file
-to the materials `deletable/` folder first and mark its metadata entry
-`deletable`. At most 2 extra generations per output.
-
-Each job: `submit_ai_job` (modelId, inputs) returns a jobId; write a
-`.pending` record next to the output; `wait_ai_job` (jobId, saveTo,
-timeoutSec up to 600) returns the file; delete the `.pending` record.
-Re-wait on `stillRunning`. Never submit an output that has a `.pending`
-record. Independent jobs go in one turn, one call each.
+Every generation the tool runs is added to the video's metadata file
+with its credits. If a line or a clip is generated again, the old file
+moves to the materials `deletable/` folder first and its metadata entry
+follows it.
 
 ## 3. Persona base images: `ai-influencer-image`
 
 One Soul image per co-host, both submitted at once (they do not depend
-on each other): two `submit_ai_job` calls in one turn, then two
-`wait_ai_job` calls in one turn. The prompt is the Higgsfield Soul format
-in the prompting skill (section 2), filled for that persona, sitting,
-framed from the waist up.
+on each other). The prompt is the Higgsfield Soul format in the
+prompting skill (section 2), filled for that persona, sitting, framed
+from the waist up.
 
-```json
-{"modelId":"ai-influencer-image","inputs":{"prompt":"<persona, Soul format>","size":"9:16","resolution":"1080p"}}
+```bash
+spira --json ai jobs create --model-id ai-influencer-image \
+  --inputs-json '{"prompt":"<persona, Soul format>","size":"9:16","resolution":"1080p"}' --wait
 ```
 
 Save them as `persona/soul-left.png` and `persona/soul-right.png` in the
@@ -74,10 +68,9 @@ materials folder: left is persona 1, right is persona 2.
 One 16:9 image at 2K of both co-hosts together, with the two Soul images
 as references, persona 1 first.
 
-Host the two Soul images with `host_file`, then submit:
-
-```json
-{"modelId":"gpt-image-2","inputs":{"prompt":"<two-shot format>","referenceImage":["<soul-left url>","<soul-right url>"],"size":"16:9","resolution":"2K"}}
+```bash
+spira --json ai jobs create --model-id gpt-image-2 \
+  --inputs-json '{"prompt":"<two-shot format>","referenceImage":["<soul-left url>","<soul-right url>"],"size":"16:9","resolution":"2K"}' --wait
 ```
 
 The prompt is this format, filled in:
@@ -125,17 +118,17 @@ every line its co-host speaks.
 
 Every line of the script is its own clip, voiced with ElevenLabs Voice
 TTS: `providerModelId` `eleven_multilingual_v2`, `qualityMode` `stable`,
-the co-host's voice URL as `referenceAudio`:
+the co-host's voice URL as `referenceAudio`. The tool does it:
 
-```json
-{"modelId":"elevenlabs-voice-clone-tts","inputs":{"text":"<the line's say>","referenceAudio":["<voice url>"],"providerModelId":"eleven_multilingual_v2","qualityMode":"stable"}}
+```bash
+python3 <podcast>/tools/podcast.py tts <materials>
 ```
 
-Submit the lines in parallel, in batches of about 3 (sending every line
-at once makes requests fail), and wait on each with `saveTo` set to its
-file. The files are numbered in script order with the speaker in the
-name, `lines/01_M.mp3`, `lines/02_F.mp3`, and so on. A line that fails
-is read, fixed and submitted once more (within the 2-extra limit).
+At most 3 jobs run at a time, and a failed job is retried: sending
+every line at once makes requests fail. The files are numbered in
+script order with the speaker in the name, `lines/01_M.mp3`,
+`lines/02_F.mp3`, and so on. A line that still fails after its retries
+is listed; run it again with `--only <n>`.
 
 The spoken text is each line's `say` in `lines.json`. It starts as the
 script's text; a word in the working memory's Reword table goes into
@@ -146,19 +139,18 @@ own spelling stays in `text`, which is what the captions use.
 
 One clip per line: the co-host's padded square half as
 `referenceImage`, that line's padded audio as `referenceAudio`, size
-`1:1`, resolution `1080p`, mode `stable`, talkingStyle `stable`. After
-`pad`, host `persona/left-sq.png`, `persona/right-sq.png` and every
-`lines/NN_TAG-pad.mp3` with `host_file` (the hosted URLs go into
-`cast.json` `images` and each line's `audio_url` in `lines.json`):
+`1:1`, resolution `1080p`, mode `stable`, talkingStyle `stable`. The
+tool does it, after `pad` and `upload`:
 
-```json
-{"modelId":"heygen-avatar-4","inputs":{"referenceImage":["<side image url>"],"referenceAudio":["<padded line url>"],"size":"1:1","resolution":"1080p","mode":"stable","talkingStyle":"stable"}}
+```bash
+python3 <podcast>/tools/podcast.py heygen <materials> --test
+python3 <podcast>/tools/podcast.py heygen <materials>
 ```
 
-Test first: submit the shortest line only, extract a frame
-(`ffmpeg -ss <s> -i clips/NN_TAG.mp4 -frames:v 1 clips/NN_TAG-frame.jpg`)
-and look at it before anything else renders. Then submit every other
-line, in batches of about 3, with `saveTo` `clips/NN_TAG.mp4`. Then:
+`--test` renders the shortest line only and saves a frame from it to
+look at (`clips/NN_TAG-frame.jpg`). Look at it before anything else
+renders. Without `--test`, every line still missing a clip renders, 3
+at a time, failed jobs retried, into `clips/NN_TAG.mp4`. Then:
 
 ```bash
 python3 <podcast>/tools/podcast.py check <materials>
@@ -166,7 +158,7 @@ python3 <podcast>/tools/podcast.py check <materials>
 
 It confirms every clip is as long as its padded audio and that the
 pre-lap and listening silences are still in the clip. A clip that fails
-is submitted again for that line only.
+is rendered again with `heygen <materials> --only <n>`.
 
 Credits: 10 per second of the clip, padding included.
 
@@ -175,8 +167,9 @@ Credits: 10 per second of the clip, padding included.
 One instrumental that fits the topic, about the video's length plus 1
 second (a whole number of seconds, at most 300).
 
-```json
-{"modelId":"elevenlabs-music-generation","inputs":{"prompt":"<the mood, instruments, and tempo that fit the topic>. A sparse instrumental bed, no vocals, no drops, no builds, a soft ending.","duration":"<seconds>"}}
+```bash
+spira --json ai jobs create --model-id elevenlabs-music-generation \
+  --inputs-json '{"prompt":"<the mood, instruments, and tempo that fit the topic>. A sparse instrumental bed, no vocals, no drops, no builds, a soft ending.","duration":"<seconds>"}' --wait
 ```
 
 Save it as `bgm.mp3` in the materials folder. Then set its level:

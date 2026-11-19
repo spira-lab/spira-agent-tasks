@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Iris's track sheet builder. Reads Vega's output logs and targets, works out each brand's month
+"""Iris's track sheet builder. Reads Nova's output logs and targets, works out each brand's month
 (made, goal, still needed, pace), week, today, and all time, and writes the track sheet page with
-that data in it. Changes nothing of Vega's.
+that data in it. Changes nothing of Nova's.
 
   python3 "<iris>/tools/iris-report.py" [--month YYYY-MM]
       Writes <iris>/report/iris-track-sheet.html (this month, or the month given) and prints one
@@ -10,7 +10,7 @@ that data in it. Changes nothing of Vega's.
 Counts are original videos (organic + ad).
 The brand "Test" (test runs, not official content) is left out.
 The page also carries the skills used (finished items per style, from the batch sheets) and the
-agents in the system (from Vega's roster).
+agents in the system (from Nova's roster).
 """
 import subprocess, calendar, json, math, os, re, shutil, sys
 from datetime import date, datetime, timedelta
@@ -18,11 +18,11 @@ from pathlib import Path
 
 IRIS = Path(__file__).resolve().parents[1]
 SUPER = IRIS.parents[1]
-MAX_DOCS = SUPER / "Agents" / "VegaOM" / "docs"
+MAX_DOCS = SUPER / "Agents" / "NovaOM" / "docs"
 MONTHLY = MAX_DOCS / "client-monthly"
-TARGETS = MAX_DOCS / "vega-targets.md"
-LEDGER = MAX_DOCS / "vega-client-ledger.md"
-BACKUPS = MAX_DOCS / "vega-backups.md"
+TARGETS = MAX_DOCS / "nova-targets.md"
+LEDGER = MAX_DOCS / "nova-client-ledger.md"
+BACKUPS = MAX_DOCS / "nova-backups.md"
 JANI = SUPER / "Agents" / "JaniBA"
 TEMPLATE = IRIS / "report" / "iris-template.html"
 OUT = IRIS / "report" / "iris-track-sheet.html"
@@ -41,7 +41,7 @@ def key(name): return re.sub(r"[^A-Za-z0-9]", "", name or "")
 
 
 def ledger_brands():
-    """Every client brand in Vega's Client Ledger: stored key -> display name. A brand gets its own
+    """Every client brand in Nova's Client Ledger: stored key -> display name. A brand gets its own
     section as soon as it is onboarded, before its first video."""
     out, table = {}, False
     for line in LEDGER.read_text(encoding="utf-8").splitlines() if LEDGER.exists() else []:
@@ -54,7 +54,7 @@ def ledger_brands():
 
 
 def read_log(path):
-    """[(date, type)] from one of Vega's monthly files (same format his output tool writes)."""
+    """[(date, type)] from one of Nova's monthly files (same format her output tool writes)."""
     if not path.exists(): return []
     out, in_log = [], False
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -63,6 +63,32 @@ def read_log(path):
             c = [x.strip() for x in line.strip().strip("|").split("|")]
             if len(c) >= 2 and re.fullmatch(r"\d{4}-\d{2}-\d{2}", c[0]): out.append((c[0], c[1]))
     return out
+
+
+TRACK = SUPER / "Agents" / "NovaOM" / "tools" / "track.py"   # the shared tracker (2026-11-19)
+TYPES = {"organic-video": "Organic video", "ad-video": "Ad video", "organic-post": "Organic post",
+         "ad-post": "Ad post", "carousel": "Carousel"}
+_BASE = None
+
+
+def shared():
+    try: return json.loads((SUPER / "agent.json").read_text()).get("tracking", "base") != "local"
+    except (OSError, ValueError): return True
+
+
+def base_rows():
+    global _BASE
+    if _BASE is None:
+        r = subprocess.run([sys.executable, str(TRACK), "export"], capture_output=True, text=True)
+        if r.returncode: sys.exit(f"shared tracker: {(r.stderr or r.stdout).strip()[:300]}")
+        _BASE = json.loads(r.stdout)
+    return _BASE
+
+
+def base_entries(brand):
+    """[(date, type)] for one brand's done and uploaded tasks, every agent's, from the shared Base."""
+    return [(str(x.get("Done date") or "")[:10], TYPES.get(x.get("Output type"), "Organic video")) for x in base_rows()
+            if x.get("Brand") == brand and x.get("Status") in ("done", "uploaded") and x.get("Done date")]
 
 
 def targets():
@@ -88,7 +114,9 @@ def brand_data(brand, tg, ym, today, names):
     y, m = map(int, ym.split("-"))
     dim = calendar.monthrange(y, m)[1]
     entries = []
-    for f in sorted((MONTHLY / brand).glob(f"vega-{brand}-*.md")): entries += read_log(f)
+    if shared(): entries = base_entries(brand)
+    else:
+        for f in sorted((MONTHLY / brand).glob(f"nova-{brand}-*.md")): entries += read_log(f)
     t = tg.get(brand, {})
     # counts from: the target's start date when it falls in this month (earlier months count whole)
     first = 1
@@ -147,27 +175,15 @@ def folder_size(path):
     return total
 
 
-def drive_mount(volume):
-    """Where the backup drive is mounted on this Linux host. A directory that is not a mount point
-    does not count, so nothing is ever written to the root disk by mistake; when the drive is not
-    mounted the returned path does not exist."""
-    user = Path.home().name
-    for base in (Path("/mnt"), Path("/media"), Path("/media") / user, Path("/run/media") / user):
-        p = base / volume
-        if os.path.ismount(p):
-            return p
-    return Path("/mnt/.not-mounted") / volume
-
-
 def storage():
-    """This machine's disk, what Super Vega takes, the backup drive, and what Jani has backed up."""
+    """The Mac's disk, what Super Nova takes, the backup drive, and what Jani has backed up."""
     gb = lambda b: round(b / 1e9, 1)
-    host = shutil.disk_usage("/")
-    out = {"host": {"total": gb(host.total), "used": gb(host.total - host.free), "free": gb(host.free)},
-           "super_vega": {"size": gb(folder_size(SUPER)), "project": gb(folder_size(SUPER / "Project"))}}
+    mac = shutil.disk_usage("/")
+    out = {"mac": {"total": gb(mac.total), "used": gb(mac.total - mac.free), "free": gb(mac.free)},
+           "super_nova": {"size": gb(folder_size(SUPER)), "project": gb(folder_size(SUPER / "Project"))}}
     try: vol = json.loads((JANI / "docs" / "jani-config.json").read_text())["volume"]
     except (OSError, ValueError, KeyError): vol = None
-    d = drive_mount(vol) if vol else None
+    d = Path("/Volumes") / vol if vol else None
     if d and d.is_dir():
         u = shutil.disk_usage(d)
         out["backup_drive"] = {"name": vol, "connected": True, "total": gb(u.total), "used": gb(u.total - u.free), "free": gb(u.free)}
@@ -186,12 +202,12 @@ def storage():
 
 BATCHES = SUPER / "Agents" / "AtlasPM" / "batches"
 HERMES_DOCS = SUPER / "Agents" / "HermesMU" / "docs"
-DEV_NOTES = MAX_DOCS / "vega-dev-notes.md"
+DEV_NOTES = MAX_DOCS / "nova-dev-notes.md"
 DEV_NOTES_SHOWN = 10
 
 
 def dev_notes():
-    """The latest changes to the system, newest first, from Vega's dev notes."""
+    """The latest changes to the system, newest first, from Nova's dev notes."""
     try: text = DEV_NOTES.read_text(encoding="utf-8")
     except OSError: return []
     out = []
@@ -229,7 +245,7 @@ def credits(ym):
     batch sheets dated that month (the designers' own counts, fixes included). Never the Spira
     account's balance or its all-time total, which also hold the owner's own use."""
     total, by_brand, videos = 0.0, {}, 0
-    try: reg = json.loads((MAX_DOCS / "vega-task-register.json").read_text()).get("tasks", {})
+    try: reg = json.loads((MAX_DOCS / "nova-task-register.json").read_text()).get("tasks", {})
     except (OSError, ValueError): reg = {}
     for sheet in sorted(BATCHES.glob(f"atlas-batch-{ym}-*.md")):
         lines = [l for l in sheet.read_text(encoding="utf-8").splitlines() if l.startswith("|")]
@@ -256,7 +272,7 @@ def skills(ym):
     sheets by the date in their name; all time, every sheet). A blank Style is talking head edited; an
     old style name counts under its current one (Style carousel is corporate carousel)."""
     aliases = style_aliases()
-    try: reg = json.loads((MAX_DOCS / "vega-task-register.json").read_text()).get("tasks", {})
+    try: reg = json.loads((MAX_DOCS / "nova-task-register.json").read_text()).get("tasks", {})
     except (OSError, ValueError): reg = {}
     cells = lambda l: [x.strip() for x in re.split(r"(?<!\\)\|", l.strip().strip("|"))]   # a \| inside a cell is text
     month, all_time = {}, {}
@@ -291,8 +307,8 @@ def skills(ym):
 
 
 def roster():
-    """The agents in the system, from Vega's roster."""
-    try: return json.loads((MAX_DOCS / "vega-roster.json").read_text(encoding="utf-8")).get("agents", [])
+    """The agents in the system, from Nova's roster."""
+    try: return json.loads((MAX_DOCS / "nova-roster.json").read_text(encoding="utf-8")).get("agents", [])
     except (OSError, ValueError): return []
 
 
@@ -301,7 +317,8 @@ def main():
     today = date.today()
     ym = a[a.index("--month") + 1] if "--month" in a else today.strftime("%Y-%m")
     tg = targets(); names = ledger_brands()
-    found = ({p.name for p in MONTHLY.iterdir() if p.is_dir()} if MONTHLY.is_dir() else set()) | set(tg) | set(names)
+    found = ({p.name for p in MONTHLY.iterdir() if p.is_dir()} if MONTHLY.is_dir() and not shared() else set()) | set(tg) | set(names)
+    if shared(): found |= {x.get("Brand") for x in base_rows() if x.get("Brand")}
     brands = sorted((b for b in found if b not in LEFT_OUT), key=lambda b: names.get(b, b).lower()) + \
              sorted(b for b in found if b in LEFT_OUT)   # test runs: shown last, never in the totals
     y, m = map(int, ym.split("-"))

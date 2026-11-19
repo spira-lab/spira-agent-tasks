@@ -1,0 +1,7 @@
+# Luciana — outfit ledger
+
+Persona: 32-year-old Mexican-American Latina mom, warm olive-tan skin, shoulder-length straight golden-blonde hair with dark brown roots worn down, small pearl stud earrings; warm, natural smile. Made 2026-10-29 for CookiyLabs 41-cookiylabs-10-29 ("HOME MOM" re-skit; the request asked for a Latina woman with blonde hair) under the re-skit rule "a new persona for every video": Soul base + GPT Image 2 clean-up in `source/`, master sheet `sheet_2k.png` (16:9 2K; 4K sheets failed at the provider earlier the same day). The persona was generated already wearing this video's outfit, so the master sheet is also this video's outfit sheet. The first sheet came out with orange-copper ombre hair; the approved sheet is the second take, with the hair colour corrected to golden blonde (the Soul base and clean-up in `source/` still show the copper tone, a nose stud and rings; clip prompts say no rings, no other jewellery). Her baby in that video (a skit character, not a persona) is `source/baby_sheet.png`: a baby girl with dark-brown hair in a mustard-yellow ribbed romper.
+
+| Date | Video | Outfit (exact description) | Sheet file |
+|---|---|---|---|
+| 2026-10-29 | CookiyLabs 41-cookiylabs-10-29 | fitted dusty-rose ribbed knit long-sleeve top (V-neck, slightly cropped), high-waisted cream wide-leg lounge pants, cream ankle socks, small pearl stud earrings, no other jewellery | outfits/2026-10-29_dusty-rose-rib-top.png |

@@ -1,0 +1,1380 @@
+{
+ "429": {
+  "persona": "Savanna",
+  "group": "01",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraversenov15.md",
+  "with": null,
+  "created": "2026-11-15T10:33",
+  "approved": "2026-11-15T11:18",
+  "regens": {
+   "Brook": "434",
+   "Zara": "435",
+   "Alessia": "436"
+  }
+ },
+ "430": {
+  "persona": "Mike",
+  "group": "02",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraversenov15.md",
+  "with": "Savanna",
+  "created": "2026-11-15T10:34",
+  "approved": "2026-11-15T11:18",
+  "regens": {
+   "Ethan": "437",
+   "Marc": "438",
+   "Rafael": "439"
+  }
+ },
+ "431": {
+  "persona": "Gus",
+  "group": "07",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraversenov15.md",
+  "with": null,
+  "created": "2026-11-15T10:34",
+  "approved": "2026-11-15T11:26",
+  "regens": {
+   "Herb": "443",
+   "Norman": "444",
+   "Otis": "445"
+  }
+ },
+ "432": {
+  "persona": "Daniel",
+  "group": "08",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraversenov15.md",
+  "with": null,
+  "created": "2026-11-15T10:34",
+  "approved": "2026-11-15T11:18",
+  "regens": {
+   "Marcus": "440",
+   "Thiago": "441",
+   "Arjun": "442"
+  }
+ },
+ "433": {
+  "persona": "Itzel",
+  "group": "04",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraversenov15itzel.md",
+  "with": null,
+  "created": "2026-11-15T10:41",
+  "approved": "2026-11-15T11:38",
+  "regens": {
+   "Nicole": "447",
+   "Valeria": "448",
+   "Daniela": "449"
+  }
+ },
+ "434": {
+  "persona": "Brook",
+  "group": "01",
+  "role": "regen 1",
+  "of": "429",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-15T11:18"
+ },
+ "435": {
+  "persona": "Zara",
+  "group": "01",
+  "role": "regen 2",
+  "of": "429",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-15T11:18"
+ },
+ "436": {
+  "persona": "Alessia",
+  "group": "01",
+  "role": "regen 3",
+  "of": "429",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-15T11:18"
+ },
+ "437": {
+  "persona": "Ethan",
+  "group": "02",
+  "role": "regen 1",
+  "of": "430",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens.md",
+  "with": "Brook",
+  "created": "2026-11-15T11:18"
+ },
+ "438": {
+  "persona": "Marc",
+  "group": "02",
+  "role": "regen 2",
+  "of": "430",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens.md",
+  "with": "Zara",
+  "created": "2026-11-15T11:18"
+ },
+ "439": {
+  "persona": "Rafael",
+  "group": "02",
+  "role": "regen 3",
+  "of": "430",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens.md",
+  "with": "Alessia",
+  "created": "2026-11-15T11:18"
+ },
+ "440": {
+  "persona": "Marcus",
+  "group": "08",
+  "role": "regen 1",
+  "of": "432",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-15T11:18"
+ },
+ "441": {
+  "persona": "Thiago",
+  "group": "08",
+  "role": "regen 2",
+  "of": "432",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-15T11:18"
+ },
+ "442": {
+  "persona": "Arjun",
+  "group": "08",
+  "role": "regen 3",
+  "of": "432",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-15T11:18"
+ },
+ "443": {
+  "persona": "Herb",
+  "group": "07",
+  "role": "regen 1",
+  "of": "431",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-2.md",
+  "with": null,
+  "created": "2026-11-15T11:26"
+ },
+ "444": {
+  "persona": "Norman",
+  "group": "07",
+  "role": "regen 2",
+  "of": "431",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-2.md",
+  "with": null,
+  "created": "2026-11-15T11:26"
+ },
+ "445": {
+  "persona": "Otis",
+  "group": "07",
+  "role": "regen 3",
+  "of": "431",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-2.md",
+  "with": null,
+  "created": "2026-11-15T11:26"
+ },
+ "446": {
+  "persona": "Chloe",
+  "group": "03",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraversenov15chloe.md",
+  "with": null,
+  "created": "2026-11-15T11:37",
+  "approved": "2026-11-15T13:32",
+  "regens": {
+   "Jessica": "459",
+   "Hana": "460",
+   "Tiffany": "461"
+  }
+ },
+ "447": {
+  "persona": "Nicole",
+  "group": "04",
+  "role": "regen 1",
+  "of": "433",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-3.md",
+  "with": null,
+  "created": "2026-11-15T11:38"
+ },
+ "448": {
+  "persona": "Valeria",
+  "group": "04",
+  "role": "regen 2",
+  "of": "433",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-3.md",
+  "with": null,
+  "created": "2026-11-15T11:38"
+ },
+ "449": {
+  "persona": "Daniela",
+  "group": "04",
+  "role": "regen 3",
+  "of": "433",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-3.md",
+  "with": null,
+  "created": "2026-11-15T11:38"
+ },
+ "450": {
+  "persona": "Mabel",
+  "group": "06",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraversenov15mabel.md",
+  "with": null,
+  "created": "2026-11-15T12:34",
+  "approved": "2026-11-15T13:27",
+  "regens": {
+   "Doris": "453",
+   "Ruth": "454",
+   "Ingrid": "455"
+  }
+ },
+ "451": {
+  "persona": "Sofia",
+  "group": "09",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraversenov15sofiaroxy.md",
+  "with": null,
+  "created": "2026-11-15T13:04",
+  "approved": "2026-11-15T13:32",
+  "regens": {
+   "Sina": "456",
+   "Claire": "457",
+   "Rania": "458"
+  }
+ },
+ "452": {
+  "persona": "Roxy",
+  "group": "10",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraversenov15sofiaroxy.md",
+  "with": null,
+  "created": "2026-11-15T13:04",
+  "approved": "2026-11-15T13:38",
+  "regens": {
+   "Gina": "462",
+   "Celia": "463",
+   "Dionne": "464"
+  }
+ },
+ "453": {
+  "persona": "Doris",
+  "group": "06",
+  "role": "regen 1",
+  "of": "450",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-4.md",
+  "with": null,
+  "created": "2026-11-15T13:27"
+ },
+ "454": {
+  "persona": "Ruth",
+  "group": "06",
+  "role": "regen 2",
+  "of": "450",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-4.md",
+  "with": null,
+  "created": "2026-11-15T13:27"
+ },
+ "455": {
+  "persona": "Ingrid",
+  "group": "06",
+  "role": "regen 3",
+  "of": "450",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-4.md",
+  "with": null,
+  "created": "2026-11-15T13:27"
+ },
+ "456": {
+  "persona": "Sina",
+  "group": "09",
+  "role": "regen 1",
+  "of": "451",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-5.md",
+  "with": null,
+  "created": "2026-11-15T13:32"
+ },
+ "457": {
+  "persona": "Claire",
+  "group": "09",
+  "role": "regen 2",
+  "of": "451",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-5.md",
+  "with": null,
+  "created": "2026-11-15T13:32"
+ },
+ "458": {
+  "persona": "Rania",
+  "group": "09",
+  "role": "regen 3",
+  "of": "451",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-5.md",
+  "with": null,
+  "created": "2026-11-15T13:32"
+ },
+ "459": {
+  "persona": "Jessica",
+  "group": "03",
+  "role": "regen 1",
+  "of": "446",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-6.md",
+  "with": null,
+  "created": "2026-11-15T13:32"
+ },
+ "460": {
+  "persona": "Hana",
+  "group": "03",
+  "role": "regen 2",
+  "of": "446",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-6.md",
+  "with": null,
+  "created": "2026-11-15T13:32"
+ },
+ "461": {
+  "persona": "Tiffany",
+  "group": "03",
+  "role": "regen 3",
+  "of": "446",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-6.md",
+  "with": null,
+  "created": "2026-11-15T13:32"
+ },
+ "462": {
+  "persona": "Gina",
+  "group": "10",
+  "role": "regen 1",
+  "of": "452",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-7.md",
+  "with": null,
+  "created": "2026-11-15T13:38"
+ },
+ "463": {
+  "persona": "Celia",
+  "group": "10",
+  "role": "regen 2",
+  "of": "452",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-7.md",
+  "with": null,
+  "created": "2026-11-15T13:38"
+ },
+ "464": {
+  "persona": "Dionne",
+  "group": "10",
+  "role": "regen 3",
+  "of": "452",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-7.md",
+  "with": null,
+  "created": "2026-11-15T13:38"
+ },
+ "465": {
+  "persona": "Hannah",
+  "group": "05",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraversenov15hannah.md",
+  "with": null,
+  "created": "2026-11-15T14:02",
+  "approved": "2026-11-15T15:02",
+  "regens": {
+   "Nia": "466",
+   "Leena": "467",
+   "Keira": "468"
+  }
+ },
+ "466": {
+  "persona": "Nia",
+  "group": "05",
+  "role": "regen 1",
+  "of": "465",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-8.md",
+  "with": null,
+  "created": "2026-11-15T15:02"
+ },
+ "467": {
+  "persona": "Leena",
+  "group": "05",
+  "role": "regen 2",
+  "of": "465",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-8.md",
+  "with": null,
+  "created": "2026-11-15T15:02"
+ },
+ "468": {
+  "persona": "Keira",
+  "group": "05",
+  "role": "regen 3",
+  "of": "465",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraverseregens-8.md",
+  "with": null,
+  "created": "2026-11-15T15:02"
+ },
+ "469": {
+  "persona": "Chloe",
+  "group": "03",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-15-spiraversechloerap.md",
+  "with": null,
+  "created": "2026-11-15T15:14",
+  "approved": null,
+  "regens": {}
+ },
+ "523": {
+  "persona": "Chloe",
+  "group": "03",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraversenov16.md",
+  "with": null,
+  "created": "2026-11-16T16:16",
+  "approved": "2026-11-16T18:41",
+  "regens": {
+   "Jessica": "532",
+   "Hana": "533",
+   "Tiffany": "534"
+  }
+ },
+ "524": {
+  "persona": "Itzel",
+  "group": "04",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraversenov16.md",
+  "with": null,
+  "created": "2026-11-16T16:16",
+  "approved": "2026-11-16T18:40",
+  "regens": {
+   "Nicole": "529",
+   "Valeria": "530",
+   "Daniela": "531"
+  }
+ },
+ "525": {
+  "persona": "Hannah",
+  "group": "05",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraversenov16.md",
+  "with": null,
+  "created": "2026-11-16T16:16",
+  "approved": "2026-11-16T19:27",
+  "regens": {
+   "Nia": "539",
+   "Leena": "540",
+   "Keira": "541"
+  }
+ },
+ "526": {
+  "persona": "Daniel",
+  "group": "08",
+  "role": "test",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraversenov16.md",
+  "with": null,
+  "created": "2026-11-16T16:16",
+  "approved": null,
+  "regens": {},
+  "note": "Moved to test by Angelica, 2026-11-16 19:05: re-skit not successful; a new Daniel re-skit will come from the doc. No regens, no Spiraverse tag."
+ },
+ "527": {
+  "persona": "Sofia",
+  "group": "09",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraversenov16.md",
+  "with": null,
+  "created": "2026-11-16T16:16",
+  "approved": "2026-11-16T20:50",
+  "regens": {
+   "Sina": "545",
+   "Claire": "546",
+   "Rania": "547"
+  }
+ },
+ "528": {
+  "persona": "Roxy",
+  "group": "10",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraversenov16.md",
+  "with": null,
+  "created": "2026-11-16T16:16",
+  "approved": "2026-11-16T18:42",
+  "regens": {
+   "Gina": "535",
+   "Celia": "536",
+   "Dionne": "537"
+  }
+ },
+ "529": {
+  "persona": "Nicole",
+  "group": "04",
+  "role": "regen 1",
+  "of": "524",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-16T18:40"
+ },
+ "530": {
+  "persona": "Valeria",
+  "group": "04",
+  "role": "regen 2",
+  "of": "524",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-16T18:40"
+ },
+ "531": {
+  "persona": "Daniela",
+  "group": "04",
+  "role": "regen 3",
+  "of": "524",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-16T18:40"
+ },
+ "532": {
+  "persona": "Jessica",
+  "group": "03",
+  "role": "regen 1",
+  "of": "523",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-2.md",
+  "with": null,
+  "created": "2026-11-16T18:41"
+ },
+ "533": {
+  "persona": "Hana",
+  "group": "03",
+  "role": "regen 2",
+  "of": "523",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-2.md",
+  "with": null,
+  "created": "2026-11-16T18:41"
+ },
+ "534": {
+  "persona": "Tiffany",
+  "group": "03",
+  "role": "regen 3",
+  "of": "523",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-2.md",
+  "with": null,
+  "created": "2026-11-16T18:41"
+ },
+ "535": {
+  "persona": "Gina",
+  "group": "10",
+  "role": "regen 1",
+  "of": "528",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-3.md",
+  "with": null,
+  "created": "2026-11-16T18:42"
+ },
+ "536": {
+  "persona": "Celia",
+  "group": "10",
+  "role": "regen 2",
+  "of": "528",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-3.md",
+  "with": null,
+  "created": "2026-11-16T18:42"
+ },
+ "537": {
+  "persona": "Dionne",
+  "group": "10",
+  "role": "regen 3",
+  "of": "528",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-3.md",
+  "with": null,
+  "created": "2026-11-16T18:42"
+ },
+ "538": {
+  "persona": "Daniel",
+  "group": "08",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraversenov16daniel.md",
+  "with": null,
+  "created": "2026-11-16T19:11",
+  "approved": "2026-11-16T20:14",
+  "regens": {
+   "Marcus": "542",
+   "Thiago": "543",
+   "Arjun": "544"
+  }
+ },
+ "539": {
+  "persona": "Nia",
+  "group": "05",
+  "role": "regen 1",
+  "of": "525",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-4.md",
+  "with": null,
+  "created": "2026-11-16T19:27"
+ },
+ "540": {
+  "persona": "Leena",
+  "group": "05",
+  "role": "regen 2",
+  "of": "525",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-4.md",
+  "with": null,
+  "created": "2026-11-16T19:27"
+ },
+ "541": {
+  "persona": "Keira",
+  "group": "05",
+  "role": "regen 3",
+  "of": "525",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-4.md",
+  "with": null,
+  "created": "2026-11-16T19:27"
+ },
+ "542": {
+  "persona": "Marcus",
+  "group": "08",
+  "role": "regen 1",
+  "of": "538",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-5.md",
+  "with": null,
+  "created": "2026-11-16T20:14"
+ },
+ "543": {
+  "persona": "Thiago",
+  "group": "08",
+  "role": "regen 2",
+  "of": "538",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-5.md",
+  "with": null,
+  "created": "2026-11-16T20:14"
+ },
+ "544": {
+  "persona": "Arjun",
+  "group": "08",
+  "role": "regen 3",
+  "of": "538",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-5.md",
+  "with": null,
+  "created": "2026-11-16T20:14"
+ },
+ "545": {
+  "persona": "Sina",
+  "group": "09",
+  "role": "regen 1",
+  "of": "527",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-6.md",
+  "with": null,
+  "created": "2026-11-16T20:50"
+ },
+ "546": {
+  "persona": "Claire",
+  "group": "09",
+  "role": "regen 2",
+  "of": "527",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-6.md",
+  "with": null,
+  "created": "2026-11-16T20:50"
+ },
+ "547": {
+  "persona": "Rania",
+  "group": "09",
+  "role": "regen 3",
+  "of": "527",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-16-spiraverseregens-6.md",
+  "with": null,
+  "created": "2026-11-16T20:50"
+ },
+ "598": {
+  "persona": "Mabel",
+  "group": "06",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraversenov17.md",
+  "with": null,
+  "created": "2026-11-17T14:30",
+  "approved": "2026-11-17T15:27",
+  "regens": {
+   "Doris": "606",
+   "Ruth": "607",
+   "Ingrid": "608"
+  }
+ },
+ "599": {
+  "persona": "Gus",
+  "group": "07",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraversenov17.md",
+  "with": null,
+  "created": "2026-11-17T14:30",
+  "approved": "2026-11-17T19:07",
+  "regens": {
+   "Herb": "615",
+   "Norman": "616",
+   "Otis": "617"
+  }
+ },
+ "600": {
+  "persona": "Daniel",
+  "group": "08",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraversenov17.md",
+  "with": null,
+  "created": "2026-11-17T14:30",
+  "approved": "2026-11-17T15:26",
+  "regens": {
+   "Marcus": "603",
+   "Thiago": "604",
+   "Arjun": "605"
+  }
+ },
+ "601": {
+  "persona": "Sofia",
+  "group": "09",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraversenov17.md",
+  "with": null,
+  "created": "2026-11-17T14:30",
+  "approved": "2026-11-17T16:14",
+  "regens": {
+   "Sina": "612",
+   "Claire": "613",
+   "Rania": "614"
+  }
+ },
+ "602": {
+  "persona": "Roxy",
+  "group": "10",
+  "role": "test",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraversenov17.md",
+  "with": null,
+  "created": "2026-11-17T14:30",
+  "approved": "2026-11-17T15:29",
+  "regens": {},
+  "note": "Moved to test by the owner, 2026-11-17 19:21 (\"move today's request for Roxy to test, not assigned on spiraverse number count\"); the requester had stopped the group at 19:20. No Spiraverse tag, not uploaded."
+ },
+ "603": {
+  "persona": "Marcus",
+  "group": "08",
+  "role": "regen 1",
+  "of": "600",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-17T15:26"
+ },
+ "604": {
+  "persona": "Thiago",
+  "group": "08",
+  "role": "regen 2",
+  "of": "600",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-17T15:26"
+ },
+ "605": {
+  "persona": "Arjun",
+  "group": "08",
+  "role": "regen 3",
+  "of": "600",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-17T15:26"
+ },
+ "606": {
+  "persona": "Doris",
+  "group": "06",
+  "role": "regen 1",
+  "of": "598",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-2.md",
+  "with": null,
+  "created": "2026-11-17T15:27"
+ },
+ "607": {
+  "persona": "Ruth",
+  "group": "06",
+  "role": "regen 2",
+  "of": "598",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-2.md",
+  "with": null,
+  "created": "2026-11-17T15:27"
+ },
+ "608": {
+  "persona": "Ingrid",
+  "group": "06",
+  "role": "regen 3",
+  "of": "598",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-2.md",
+  "with": null,
+  "created": "2026-11-17T15:27"
+ },
+ "609": {
+  "persona": "Gina",
+  "group": "10",
+  "role": "test",
+  "of": "602",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-3.md",
+  "with": null,
+  "created": "2026-11-17T15:29",
+  "note": "Moved to test by the owner, 2026-11-17 19:21 (\"move today's request for Roxy to test, not assigned on spiraverse number count\"); the requester had stopped the group at 19:20. No Spiraverse tag, not uploaded."
+ },
+ "610": {
+  "persona": "Celia",
+  "group": "10",
+  "role": "test",
+  "of": "602",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-3.md",
+  "with": null,
+  "created": "2026-11-17T15:29",
+  "note": "Moved to test by the owner, 2026-11-17 19:21 (\"move today's request for Roxy to test, not assigned on spiraverse number count\"); the requester had stopped the group at 19:20. No Spiraverse tag, not uploaded."
+ },
+ "611": {
+  "persona": "Dionne",
+  "group": "10",
+  "role": "test",
+  "of": "602",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-3.md",
+  "with": null,
+  "created": "2026-11-17T15:29",
+  "note": "Moved to test by the owner, 2026-11-17 19:21 (\"move today's request for Roxy to test, not assigned on spiraverse number count\"); the requester had stopped the group at 19:20. No Spiraverse tag, not uploaded."
+ },
+ "612": {
+  "persona": "Sina",
+  "group": "09",
+  "role": "regen 1",
+  "of": "601",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-4.md",
+  "with": null,
+  "created": "2026-11-17T16:14"
+ },
+ "613": {
+  "persona": "Claire",
+  "group": "09",
+  "role": "regen 2",
+  "of": "601",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-4.md",
+  "with": null,
+  "created": "2026-11-17T16:14"
+ },
+ "614": {
+  "persona": "Rania",
+  "group": "09",
+  "role": "regen 3",
+  "of": "601",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-4.md",
+  "with": null,
+  "created": "2026-11-17T16:14"
+ },
+ "615": {
+  "persona": "Herb",
+  "group": "07",
+  "role": "regen 1",
+  "of": "599",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-5.md",
+  "with": null,
+  "created": "2026-11-17T19:07"
+ },
+ "616": {
+  "persona": "Norman",
+  "group": "07",
+  "role": "regen 2",
+  "of": "599",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-5.md",
+  "with": null,
+  "created": "2026-11-17T19:07"
+ },
+ "617": {
+  "persona": "Otis",
+  "group": "07",
+  "role": "regen 3",
+  "of": "599",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-5.md",
+  "with": null,
+  "created": "2026-11-17T19:07"
+ },
+ "618": {
+  "persona": "Roxy",
+  "group": "10",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraversenov17roxy.md",
+  "with": null,
+  "created": "2026-11-17T19:28",
+  "approved": "2026-11-17T20:36",
+  "regens": {
+   "Gina": "619",
+   "Celia": "620",
+   "Dionne": "621"
+  }
+ },
+ "619": {
+  "persona": "Gina",
+  "group": "10",
+  "role": "regen 1",
+  "of": "618",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-6.md",
+  "with": null,
+  "created": "2026-11-17T20:36"
+ },
+ "620": {
+  "persona": "Celia",
+  "group": "10",
+  "role": "regen 2",
+  "of": "618",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-6.md",
+  "with": null,
+  "created": "2026-11-17T20:36"
+ },
+ "621": {
+  "persona": "Dionne",
+  "group": "10",
+  "role": "regen 3",
+  "of": "618",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-17-spiraverseregens-6.md",
+  "with": null,
+  "created": "2026-11-17T20:36"
+ },
+ "622": {
+  "persona": "Chloe",
+  "group": "03",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraversenov18.md",
+  "with": null,
+  "created": "2026-11-18T08:44",
+  "approved": "2026-11-18T09:41",
+  "regens": {
+   "Jessica": "631",
+   "Hana": "632",
+   "Tiffany": "633"
+  }
+ },
+ "623": {
+  "persona": "Daniel",
+  "group": "08",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraversenov18.md",
+  "with": null,
+  "created": "2026-11-18T08:44",
+  "approved": "2026-11-18T10:20",
+  "regens": {
+   "Marcus": "647",
+   "Thiago": "648",
+   "Arjun": "649"
+  }
+ },
+ "624": {
+  "persona": "Sofia",
+  "group": "09",
+  "role": "test",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraversenov18.md",
+  "with": null,
+  "created": "2026-11-18T08:44",
+  "approved": "2026-11-18T12:51",
+  "regens": {
+   "Sina": "650",
+   "Claire": "651",
+   "Rania": "652"
+  },
+  "note": "Moved to test by Jekylle, 2026-11-18 16:11: Sofia's group (624, 650, 651, 652) taken off today's uploads. The requester will send a new re-skit link and instructions for Sofia, so her slot stays open. No Spiraverse tag."
+ },
+ "625": {
+  "persona": "Roxy",
+  "group": "10",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraversenov18.md",
+  "with": null,
+  "created": "2026-11-18T08:44",
+  "approved": "2026-11-18T09:23",
+  "regens": {
+   "Gina": "628",
+   "Celia": "629",
+   "Dionne": "630"
+  }
+ },
+ "626": {
+  "persona": "Mabel",
+  "group": "06",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraversenov18b.md",
+  "with": null,
+  "created": "2026-11-18T09:10",
+  "approved": "2026-11-18T09:50",
+  "regens": {
+   "Doris": "644",
+   "Ruth": "645",
+   "Ingrid": "646"
+  }
+ },
+ "627": {
+  "persona": "Gus",
+  "group": "07",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraversenov18b.md",
+  "with": null,
+  "created": "2026-11-18T09:10",
+  "approved": "2026-11-18T15:06",
+  "regens": {
+   "Herb": "662",
+   "Norman": "663",
+   "Otis": "664"
+  }
+ },
+ "628": {
+  "persona": "Gina",
+  "group": "10",
+  "role": "regen 1",
+  "of": "625",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-18T09:23"
+ },
+ "629": {
+  "persona": "Celia",
+  "group": "10",
+  "role": "regen 2",
+  "of": "625",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-18T09:23"
+ },
+ "630": {
+  "persona": "Dionne",
+  "group": "10",
+  "role": "regen 3",
+  "of": "625",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens.md",
+  "with": null,
+  "created": "2026-11-18T09:23"
+ },
+ "631": {
+  "persona": "Jessica",
+  "group": "03",
+  "role": "regen 1",
+  "of": "622",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-2.md",
+  "with": null,
+  "created": "2026-11-18T09:41"
+ },
+ "632": {
+  "persona": "Hana",
+  "group": "03",
+  "role": "regen 2",
+  "of": "622",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-2.md",
+  "with": null,
+  "created": "2026-11-18T09:41"
+ },
+ "633": {
+  "persona": "Tiffany",
+  "group": "03",
+  "role": "regen 3",
+  "of": "622",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-2.md",
+  "with": null,
+  "created": "2026-11-18T09:41"
+ },
+ "639": {
+  "persona": "Itzel",
+  "group": "04",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraversenov18c.md",
+  "with": null,
+  "created": "2026-11-18T09:46",
+  "approved": "2026-11-18T13:32",
+  "regens": {
+   "Nicole": "659",
+   "Valeria": "660",
+   "Daniela": "661"
+  }
+ },
+ "640": {
+  "persona": "Hannah",
+  "group": "05",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraversenov18c.md",
+  "with": null,
+  "created": "2026-11-18T09:46",
+  "approved": "2026-11-18T15:46",
+  "regens": {
+   "Nia": "665",
+   "Leena": "666",
+   "Keira": "667"
+  }
+ },
+ "644": {
+  "persona": "Doris",
+  "group": "06",
+  "role": "regen 1",
+  "of": "626",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-3.md",
+  "with": null,
+  "created": "2026-11-18T09:50"
+ },
+ "645": {
+  "persona": "Ruth",
+  "group": "06",
+  "role": "regen 2",
+  "of": "626",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-3.md",
+  "with": null,
+  "created": "2026-11-18T09:50"
+ },
+ "646": {
+  "persona": "Ingrid",
+  "group": "06",
+  "role": "regen 3",
+  "of": "626",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-3.md",
+  "with": null,
+  "created": "2026-11-18T09:50"
+ },
+ "647": {
+  "persona": "Marcus",
+  "group": "08",
+  "role": "regen 1",
+  "of": "623",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-4.md",
+  "with": null,
+  "created": "2026-11-18T10:20"
+ },
+ "648": {
+  "persona": "Thiago",
+  "group": "08",
+  "role": "regen 2",
+  "of": "623",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-4.md",
+  "with": null,
+  "created": "2026-11-18T10:20"
+ },
+ "649": {
+  "persona": "Arjun",
+  "group": "08",
+  "role": "regen 3",
+  "of": "623",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-4.md",
+  "with": null,
+  "created": "2026-11-18T10:20"
+ },
+ "650": {
+  "persona": "Sina",
+  "group": "09",
+  "role": "test",
+  "of": "624",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-5.md",
+  "with": null,
+  "created": "2026-11-18T12:51",
+  "note": "Moved to test by Jekylle, 2026-11-18 16:11: Sofia's group (624, 650, 651, 652) taken off today's uploads. The requester will send a new re-skit link and instructions for Sofia, so her slot stays open. No Spiraverse tag."
+ },
+ "651": {
+  "persona": "Claire",
+  "group": "09",
+  "role": "test",
+  "of": "624",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-5.md",
+  "with": null,
+  "created": "2026-11-18T12:51",
+  "note": "Moved to test by Jekylle, 2026-11-18 16:11: Sofia's group (624, 650, 651, 652) taken off today's uploads. The requester will send a new re-skit link and instructions for Sofia, so her slot stays open. No Spiraverse tag."
+ },
+ "652": {
+  "persona": "Rania",
+  "group": "09",
+  "role": "test",
+  "of": "624",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-5.md",
+  "with": null,
+  "created": "2026-11-18T12:51",
+  "note": "Moved to test by Jekylle, 2026-11-18 16:11: Sofia's group (624, 650, 651, 652) taken off today's uploads. The requester will send a new re-skit link and instructions for Sofia, so her slot stays open. No Spiraverse tag."
+ },
+ "659": {
+  "persona": "Nicole",
+  "group": "04",
+  "role": "regen 1",
+  "of": "639",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-6.md",
+  "with": null,
+  "created": "2026-11-18T13:32"
+ },
+ "660": {
+  "persona": "Valeria",
+  "group": "04",
+  "role": "regen 2",
+  "of": "639",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-6.md",
+  "with": null,
+  "created": "2026-11-18T13:32"
+ },
+ "661": {
+  "persona": "Daniela",
+  "group": "04",
+  "role": "regen 3",
+  "of": "639",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-6.md",
+  "with": null,
+  "created": "2026-11-18T13:32"
+ },
+ "662": {
+  "persona": "Herb",
+  "group": "07",
+  "role": "regen 1",
+  "of": "627",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-7.md",
+  "with": null,
+  "created": "2026-11-18T15:06"
+ },
+ "663": {
+  "persona": "Norman",
+  "group": "07",
+  "role": "regen 2",
+  "of": "627",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-7.md",
+  "with": null,
+  "created": "2026-11-18T15:06"
+ },
+ "664": {
+  "persona": "Otis",
+  "group": "07",
+  "role": "regen 3",
+  "of": "627",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-7.md",
+  "with": null,
+  "created": "2026-11-18T15:06"
+ },
+ "665": {
+  "persona": "Nia",
+  "group": "05",
+  "role": "regen 1",
+  "of": "640",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-8.md",
+  "with": null,
+  "created": "2026-11-18T15:46"
+ },
+ "666": {
+  "persona": "Leena",
+  "group": "05",
+  "role": "regen 2",
+  "of": "640",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-8.md",
+  "with": null,
+  "created": "2026-11-18T15:46"
+ },
+ "667": {
+  "persona": "Keira",
+  "group": "05",
+  "role": "regen 3",
+  "of": "640",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-8.md",
+  "with": null,
+  "created": "2026-11-18T15:46"
+ },
+ "668": {
+  "persona": "Sofia",
+  "group": "09",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraversenov18d.md",
+  "with": null,
+  "created": "2026-11-18T16:41",
+  "approved": "2026-11-18T17:39",
+  "regens": {
+   "Sina": "669",
+   "Claire": "670",
+   "Rania": "671"
+  }
+ },
+ "669": {
+  "persona": "Sina",
+  "group": "09",
+  "role": "regen 1",
+  "of": "668",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-9.md",
+  "with": null,
+  "created": "2026-11-18T17:39"
+ },
+ "670": {
+  "persona": "Claire",
+  "group": "09",
+  "role": "regen 2",
+  "of": "668",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-9.md",
+  "with": null,
+  "created": "2026-11-18T17:39"
+ },
+ "671": {
+  "persona": "Rania",
+  "group": "09",
+  "role": "regen 3",
+  "of": "668",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-9.md",
+  "with": null,
+  "created": "2026-11-18T17:39"
+ },
+ "672": {
+  "persona": "Savanna",
+  "group": "01",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraversenov18e.md",
+  "with": null,
+  "created": "2026-11-18T18:41",
+  "approved": "2026-11-18T21:42",
+  "regens": {
+   "Brook": "677",
+   "Zara": "678",
+   "Alessia": "679"
+  }
+ },
+ "673": {
+  "persona": "Mike",
+  "group": "02",
+  "role": "original",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraversenov18f.md",
+  "with": null,
+  "created": "2026-11-18T18:41",
+  "approved": "2026-11-18T19:18",
+  "regens": {
+   "Ethan": "674",
+   "Marc": "675",
+   "Rafael": "676"
+  }
+ },
+ "674": {
+  "persona": "Ethan",
+  "group": "02",
+  "role": "regen 1",
+  "of": "673",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-10.md",
+  "with": null,
+  "created": "2026-11-18T19:18"
+ },
+ "675": {
+  "persona": "Marc",
+  "group": "02",
+  "role": "regen 2",
+  "of": "673",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-10.md",
+  "with": null,
+  "created": "2026-11-18T19:18"
+ },
+ "676": {
+  "persona": "Rafael",
+  "group": "02",
+  "role": "regen 3",
+  "of": "673",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-10.md",
+  "with": null,
+  "created": "2026-11-18T19:18"
+ },
+ "677": {
+  "persona": "Brook",
+  "group": "01",
+  "role": "regen 1",
+  "of": "672",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-11.md",
+  "with": null,
+  "created": "2026-11-18T21:42"
+ },
+ "678": {
+  "persona": "Zara",
+  "group": "01",
+  "role": "regen 2",
+  "of": "672",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-11.md",
+  "with": null,
+  "created": "2026-11-18T21:42"
+ },
+ "679": {
+  "persona": "Alessia",
+  "group": "01",
+  "role": "regen 3",
+  "of": "672",
+  "sheet": "Agents/AtlasPM/batches/atlas-batch-2026-11-18-spiraverseregens-11.md",
+  "with": null,
+  "created": "2026-11-18T21:42"
+ }
+}

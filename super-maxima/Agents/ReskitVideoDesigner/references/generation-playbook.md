@@ -1,13 +1,13 @@
 # Generation playbook
 
 Field knowledge for making the pieces of a skit. The shared toolkit (`DesignerShared/skills/toolkit.md`)
-governs the submit_ai_job / wait_ai_job / host_file steps, hosting and every model it names; this
-file adds what a re-skit needs on top. Prices change: read each model's price with
-`spira ai models get <id>` (read-only), and that figure goes in the plan.
+governs the CLI, hosting and every model it names; this file adds what a re-skit needs on top.
+Prices change: `spira_chain.py price <chain.json>` reads the live price list for every job in
+the chain, and is the figure that goes in the plan.
 
 ## What each tool is for
 
-| Need | Model | Notes and live price (2026-10-24, check with `spira ai models get`) |
+| Need | Model | Notes and live price (2026-10-24, check with `price`) |
 |---|---|---|
 | A new persona's base image | `ai-influencer-image` (Soul) | 9:16, 1080p, ~7. Only when no persona exists (persona-and-outfits.md). |
 | Persona clean-up, character sheet, outfit sheets, background plates, a prop | `gpt-image-2` | Edits from a reference image. 1K ~4, 2K ~5, 4K ~8. 16:9 4K for sheets, 9:16 2K for plates. |
@@ -22,77 +22,51 @@ Seedance, no chunker. Every spoken line in a re-skit is made by Wan 3.0 over the
 
 ## Running jobs
 
-Every generation of a video is listed in one plan file, `materials/chain.json`, which you write
-and update by hand. You submit and collect each job with the toolkit's `submit_ai_job` and
-`wait_ai_job` steps (never the `spira` CLI, never a script), and host local inputs with
-`host_file`. The file carries what a re-skit needs on top of a plain batch: jobs that wait on
-other jobs' results (clips need the outfit and the plates), waits longer than one `wait_ai_job`
-(Wan clips run up to 25 minutes: call it again on `stillRunning`), the outfit hold, the
-2-extra-generations limit, and the credits of every job.
+Every generation of a video goes in one chain file, `materials/chain.json`, run by
+`tools/spira_chain.py` (its header has the format). It does what the shared `spira-jobs.py` does
+(submit everything first, then wait, download each result) and adds what a re-skit needs and
+`spira-jobs.py` does not cover: jobs that wait on other jobs' results (clips need the outfit and
+the plates), waits longer than the CLI's 10-minute default (Wan clips run up to 25 minutes),
+the outfit hold, the 2-extra-generations limit, and the credits of every job recorded in the
+metadata the moment it lands. Use `spira-jobs.py` directly only for a set of independent jobs
+outside the chain, such as a batch of transcripts' sources or a one-off still, and record those
+jobs in the metadata yourself.
 
 ```json
 {"jobs": [
- {"label": "persona_soul", "model": "ai-influencer-image", "out": "/abs/.../personas/Mia/source/soul.png", "expected_credits": 7,
-  "inputs": {"size": "9:16", "resolution": "1080p", "prompt": "<Soul prompt>"}},
- {"label": "persona_edit", "model": "gpt-image-2", "out": "/abs/.../personas/Mia/source/edit.png", "needs": ["persona_soul"], "expected_credits": 5,
-  "inputs": {"size": "9:16", "resolution": "2K", "referenceImage": ["{{persona_soul}}"], "prompt": "<persona-edit prompt>"}},
- {"label": "sheet", "model": "gpt-image-2", "out": "/abs/.../personas/Mia/sheet_4k.png", "needs": ["persona_edit"], "hold": true, "expected_credits": 8,
-  "inputs": {"size": "16:9", "resolution": "4K", "referenceImage": ["{{persona_edit}}"], "prompt": "<character-sheet prompt>"}},
- {"label": "outfit", "model": "gpt-image-2", "out": "assets/outfit_sheet.png", "needs": ["sheet"], "hold": true, "expected_credits": 8,
-  "inputs": {"size": "16:9", "resolution": "4K", "referenceImage": ["{{sheet}}"], "prompt": "<outfit prompt>"}},
- {"label": "plate_a", "model": "gpt-image-2", "out": "assets/plate_a.png", "expected_credits": 5,
+ {"label": "outfit", "model": "gpt-image-2", "out": "assets/outfit_sheet.png", "hold": true,
+  "inputs": {"size": "16:9", "resolution": "4K", "referenceImage": ["@/abs/.../personas/Mia/sheet_4k.png"], "prompt": "<outfit prompt>"}},
+ {"label": "plate_a", "model": "gpt-image-2", "out": "assets/plate_a.png",
   "inputs": {"size": "9:16", "resolution": "2K", "referenceImage": ["@assets/src_a.png"], "prompt": "<plate prompt>"}},
- {"label": "clip_A", "model": "wan-3.0", "out": "gen/out/A.mp4", "needs": ["outfit", "plate_a"], "expected_credits": 25,
+ {"label": "clip_A", "model": "wan-3.0", "out": "gen/out/A.mp4",
   "inputs": {"generationType": "reference_to_video", "duration": "4", "resolution": "720p", "size": "9:16", "sound": false,
              "referenceVideo": ["@gen/ref/A.mp4"], "referenceImage": ["{{outfit}}", "{{plate_a}}"], "prompt": "<clip prompt>"}},
- {"label": "clip_B", "model": "wan-3.0", "out": "gen/out/B.mp4", "needs": ["outfit", "plate_a"], "expected_credits": 63,
+ {"label": "clip_B", "model": "wan-3.0", "out": "gen/out/B.mp4",
   "inputs": {"generationType": "reference_to_video", "duration": "10", "resolution": "720p", "size": "9:16", "sound": true,
-             "referenceVideo": ["@gen/ref/B.mp4"], "referenceImage": ["{{outfit}}", "{{plate_a}}"], "prompt": "<dialogue prompt>"}},
- {"label": "music", "model": "suno-music", "out": "music/take.mp3", "expected_credits": 7,
+             "referenceVideo": ["@gen/ref/B.mp4"], "referenceImage": ["{{outfit}}", "{{plate_b}}"], "prompt": "<dialogue prompt>"}},
+ {"label": "music", "model": "suno-music", "out": "music/take.mp3",
   "inputs": {"mode": "v5_5", "customMode": true, "instrumental": true, "style": "<genre, sounds, tempo, energy>", "title": "<title>"}}
 ]}
 ```
 
-- `@<path>` marks a local file: host it once with `host_file` and write the URL it returns in
-  its place before submitting; a hosted URL (`https://static.viralwell.ai/...`, such as the
-  request's logo or product image) passes as it is. `{{label}}` marks another job's result:
-  that job waits, and you fill in its `resultUrls[0]` once it has landed. Never host a job's output.
-- **New persona or existing one.** The example makes a new persona, so the chain starts with
-  `persona_soul` → `persona_edit` → `sheet` → `outfit`, each listing the one before it in `needs`
-  and using it as `{{label}}`. When the persona already has a sheet, drop the first three jobs
-  and give `outfit` the sheet as a local file instead: no `needs`,
-  `"referenceImage": ["@/abs/.../personas/Mia/sheet_4k.png"]`.
-- **Every planned job is in the chain.** Each row of the plan's generation table is a job in
-  `chain.json` before the first submit, and every `needs` and `{{label}}` names one of them. A
-  clip that needs `outfit` while no job is labelled `outfit` waits forever. Check with
-  `python3 <reskit>/tools/reskit.py chain-check <materials>` (read-only): it lists every missing
-  label, cycle or unplanned row and exits non-zero until the chain is whole.
-- Each job entry also carries, as you update it: `status` (`pending`, `submitted`, `done`,
-  `failed`), `job_id` (written the moment `submit_ai_job` returns it), `submissions` (how many
-  times it was submitted), `credits` and `urls` once it lands, and `approved` on a `hold` job.
-- **Parallel.** Submit every job whose `needs` are all `done` in one turn, one `submit_ai_job`
-  call each, then wait on them all in one turn, one `wait_ai_job` call each with `saveTo` set to
-  the job's `out` (a second result is saved beside it as `<name>-2.<ext>`; Suno's two takes are
-  `take.mp3` and `take-2.mp3`). A job that depends on another starts the moment that one is in.
-- A job with a `job_id` and no result is never submitted again; a job that is merely slow (some
-  sit QUEUED for 20 minutes) is waited on, because a duplicate costs the full price again. After
-  a restart, `wait_ai_job` every `submitted` job in `chain.json` first.
-- A job that returns `FAILED` carries the provider's error: read it, fix the inputs in
-  `chain.json`, and submit once more (a redo, counted below).
-- **The outfit hold.** A `"hold": true` job keeps its dependents waiting until you have looked at
-  its result and set `"approved": true`.
-- **At most 2 extra generations per job** (the toolkit's rule): `submissions` never goes above
-  3. A redo moves the current take to `deletable/` (keeping its name), marks its metadata asset
-  `deletable` with the reason, and submits one more. When the limit is reached, keep the best
-  take and say what is wrong in your final line.
-- **Cost before spend:** `expected_credits` of every job (from `spira ai models get <id>`) is
-  written into `chain.json` and the plan before the first submit, with the total.
-- **Records.** The moment a job lands, add it to the metadata's `assets[]` (label, job ID, model,
-  exact inputs and prompt, result URL, file, credits, where the credit figure came from), update
-  `credits_total`, and append a row to the plan's job log (label, job ID, model, settings,
-  credits, render time). A failed job's credits are what it reports, else 0, noted as such.
-- Credits: the job's own charge when the result reports one, else the model's price for those
-  inputs. Never the account balance: other sessions share it.
+- `@<path>` uploads a local file once; a hosted URL (`https://static.viralwell.ai/...`, such as
+  the request's logo or product image) passes as it is. `{{label}}` is another job's result,
+  and the job waits for it. Never re-upload a CLI output.
+- Start it with the Bash tool's `run_in_background` (`python3 <reskit>/tools/spira_chain.py run
+  <chain.json>`), then do the hands-on work. When you need its results, block with `wait --for
+  9` (under the 10-minute Bash limit), never a polling loop. `status` shows every job.
+- The job IDs are saved the moment they exist, so running the chain again never resubmits a
+  job. A job that is merely slow (some sit QUEUED for 20 minutes) is never resubmitted: a
+  duplicate costs the full price again.
+- The statuses the CLI really returns (spira 0.0.32) are QUEUED, RUNNING, COMPLETED, FAILED and
+  CANCELED, in capitals in `jobs status`; `jobs wait` ends with a lower-case `"status":
+  "completed"`. Compare them case-insensitively. The chain handles them (it re-checks a FAILED job
+  once, since a job can flip), and reads the job's charge from `jobs status` (`data.credits`).
+- **At most 2 extra generations per job** (the toolkit's rule): `redo <chain.json> <label> "<why>"`
+  moves the current take to `deletable/` and queues one more; a third redo is refused. Then
+  keep the best take and say what is wrong in your final line.
+- Credits: the job's own charge when the CLI reports one, else the live price-list figure for
+  those inputs. Never the account balance: other sessions share it.
 
 ## Reference clips for person replacement
 
@@ -510,7 +484,7 @@ passes above. Keep the screens on the device instead of cutting to flat full-fra
    flat solid pure green colour filling the entire display edge to edge inside the thin black
    bezel: no browser, no window, no interface, no text, no reflections".
 2. Rebuild every product state as one HTML page selected by URL hash (`screens.html#plan2`) at
-   1440x900, scale 2, and render them all with `render_html.js --batch` (through `heavy-slot.py`).
+   1440x900, scale 2, and render them all with `render_html.js --batch`.
 3. Composite in Python (numpy + Pillow; cv2 is not installed). Find the corners from the green
    mask (TL/BR = min/max of x+y, TR/BL = max/min of x−y). Solve the homography by SVD, with the
    screen padded about 10 px past the green edge, and warp each state on. Despill only clearly
@@ -519,11 +493,11 @@ passes above. Keep the screens on the device instead of cutting to flat full-fra
    a small sine wobble) and put the screen through the same transform, so it never slips. Give
    the screen a filmed look: a 0.7 px blur, contrast `*0.94 + 10`, a soft vignette and grain.
 4. Keep the source's cut times as the shot boundaries. Cut any finger tapping the screen and use
-   a drawn cursor in the HTML. Encode the frames (`libx264 -crf 16`) as one `insert`. Run the
-   composite and the encode through `python3 <shared>/tools/heavy-slot.py <Task ID> -- …`.
+   a drawn cursor in the HTML. Encode the frames (`libx264 -crf 16`) as one `insert`.
 Worked example to reuse: `<reskit>/examples/laptop-overlay/composite.py` with its `screens.html`
-(Task 58's laptop b-roll; the plates and rendered PNGs it reads are not kept, only the code).
-This only works when the screen shots have no person in them. When hands or a person stay in front of the screen,
+(Task 58's laptop b-roll; the plates and rendered PNGs it reads are not kept, only the code); the step-by-step walkthrough doc is
+https://ljpp9tldvzuk.jp.larksuite.com/docx/XWBddt6KWojencxzHbCjaedtpTh. This only works when the
+screen shots have no person in them. When hands or a person stay in front of the screen,
 generate the clip with "a plain glowing white screen", track the bright screen per frame and
 multiply the UI into it (Task 61), so the hands stay in front.
 
@@ -563,9 +537,11 @@ of 2026-10-24 for organic posts): an organic re-skit uses the source's sound the
 creator did, so there is no licensing reason to replace it, and generated tracks sounded like a
 boring stock ad library (Vizard test, Tasks 98-102). With no `Music:` line:
 
-- **Keep the source audio, music and all.** It is **always pitch-adjusted** (the owner's rule):
-  +0.6 semitones by default (`pitch_semitones` in the build), resampled and tempo-corrected so
-  length and lip sync hold. +1.5 sounded processed.
+- **Keep the source audio, music and all.** Kept source **voices are always pitch-adjusted** (the
+  owner's rule): +0.6 semitones by default (`pitch_semitones` in the build), resampled and
+  tempo-corrected so length and lip sync hold. +1.5 sounded processed. **Music is never pitched**
+  (the owner, 2026-11-18: "The pitch adjustment is for voice not music"): a source that is only a
+  song is kept at its original pitch (`"audio": "music"`, the source as the music, `"pitch": false`).
 - **New dialogue over the source's song:** keep the song where no old voice is heard and carry the
   new lines on it; where old voices and the song can't be parted, bed the new lines on a speech-free
   stretch of the source's music, never cut mid-word. Note it in `music`.
@@ -577,7 +553,7 @@ boring stock ad library (Vizard test, Tasks 98-102). With no `Music:` line:
   and end on the final fade. This is a musical repeat of the song, not the room-tone loop forbidden
   below (a short raw slice looped under a hold).
 - **Speech added to a music-only source:** keep the song and lay the new lines on it, the song about
-  14 LU under the voice (pitch-adjusted like any kept source audio), so it still plays like the trend
+  14 LU under the voice (at its original pitch: music is never pitched), so it still plays like the trend
   it came from with a person talking over it.
 - **A source with no music at all** may get an original track (the `Music: original` rules below).
 
@@ -601,7 +577,7 @@ names a track when the platform knows it) and the frames (someone mouthing words
 Brief Suno in custom mode: genre and the defining sounds, vocal type, the measured tempo, and the
 energy shape in plain sound words. Lyrics: hook first, about the brand's story but never naming
 the brand (generators mangle names), no profanity, no lines borrowed from known songs (search
-any line you're unsure of). One job returns two takes (`take.mp3`, `take-2.mp3`). Transcribe both
+any line you're unsure of). One job returns two takes (`take.mp3`, `take_b.mp3`). Transcribe both
 with word timestamps (`make-timings.py`) and pick the take and the window by measurement: the
 hook or drop lands on the edit's turning point, and the window never starts mid-word. The
 rejected take goes to `deletable/`.
@@ -615,7 +591,7 @@ finishes. Inserts and b-roll are concatenated in place. Overlays are full-frame 
 or pop-up stickers with exact in and out times; pop-ups get the three-frame scale-in. With
 `"audio": "clips"` (a re-voiced video), each segment's sound is its own generated clip's audio,
 cut at the same points as the picture; a kept source music bed rides under it (`music` with
-`"pitch": true`). With `"audio": "source"`, source
+`"pitch": false`: music keeps its original pitch). With `"audio": "source"`, source
 audio is cut with matching segment boundaries and 30 ms fades at every cut; inserted silence is
 covered with room tone from a truly quiet stretch of the source (`roomtone`). **Never loop room tone that has music, voices or a steady tone in it** (the owner, 2026-10-29: a looped slice under the end card sounds like a skipping CD): the slice must be at least 10 dB below the source and 0.5 s longer than the longest insert or hold, so it never repeats; the build stops otherwise. When the source has music or voices under everything, set `roomtone` to null and carry the inserts and the end card on one continuous music bed (`music`, `music_under_lu` about 14-18) that ends on the build's final 1.5 s fade, never a join at the cut. The build reports an audio loop under a room-tone fill and any dropout (more than 6 dB down for about 0.1 s) at an insert cut as problems: fix them before READY. A held last frame
 reads as the video getting stuck when the shot already lasts long enough for its text: then end

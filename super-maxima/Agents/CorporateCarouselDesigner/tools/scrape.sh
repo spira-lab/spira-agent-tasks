@@ -2,9 +2,9 @@
 # Usage: scrape.sh <url> <outdir>   -> page.txt meta.json links.txt style.json
 set -euo pipefail
 URL="$1"; OUT="${2:-research}"; mkdir -p "$OUT"
-CHROME="${CHROME_PATH:-/usr/bin/chromium}"
+CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 TMP="$OUT/dom.html"
-UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
+UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
 "$CHROME" --headless=new --disable-gpu --user-agent="$UA" --virtual-time-budget=10000 --dump-dom "$URL" > "$TMP" 2>/dev/null || true
 if [ "$(wc -c < "$TMP")" -lt 20000 ]; then curl -sL -A "$UA" -H "Accept-Language: en-US,en;q=0.9" "$URL" -o "$TMP.curl" || true; [ "$(wc -c < "$TMP.curl" 2>/dev/null || echo 0)" -gt "$(wc -c < "$TMP")" ] && mv "$TMP.curl" "$TMP"; rm -f "$TMP.curl"; fi
 python3 - "$TMP" "$OUT" "$URL" <<'PY'
@@ -55,7 +55,7 @@ os.makedirs(f'{out}/img',exist_ok=True); got=0
 for i,u in enumerate(seen[:8]):
     try:
         ext=os.path.splitext(u.split('?')[0])[1] or '.jpg'
-        req=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130.0 Safari/537.36','Referer':url}); data=urllib.request.urlopen(req,timeout=20).read()
+        req=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 Chrome/130.0 Safari/537.36','Referer':url}); data=urllib.request.urlopen(req,timeout=20).read()
         if len(data)<2000: continue
         open(f'{out}/img/{i:02d}{ext}','wb').write(data); got+=1
     except Exception: pass

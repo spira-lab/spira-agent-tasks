@@ -1,0 +1,8 @@
+| Date | Video | Outfit (exact description) | Sheet file |
+|---|---|---|---|
+| 2026-11-03 | Brandless 187-mika-wow-dance-11-03 | kind asked: casual going-out outfit; model made: black sleeveless cowl-neck top, black straight-leg jeans, black high-top sneakers | Project/Brandless/editable/materials/187-mika-wow-dance-11-03/assets/outfit_sheet.png |
+| 2026-11-03 | Brandless 190-easy-bedtime-dance-11-03 | rejected, never delivered: lilac fleece button-up pajama set with white star print and star slippers | outfits/2026-11-03_star-fleece-pajamas.png |
+| 2026-11-03 | Brandless 190-easy-bedtime-dance-11-03 | kind asked: grown woman's loose, modest pajama outfit (oversized, baggy, per the owner's guardrails); model made: plain oversized dusty-blue button-up shirt, half-tucked, with baggy matching pants and white socks | outfits/2026-11-03_loose-pajamas.png |
+| 2026-11-03 | Brandless 188-still-thinks-im-real-11-03 | kind asked: casual home outfit; model made: plain cream knit sweater, grey drawstring joggers, white sneakers | outfits/2026-11-03_home-cream-knit.png |
+| 2026-11-03 | Brandless 191-mika-wow-dance-11-03 | kind asked: summery weekend café outfit; model made: off-white semi-sheer puff-sleeve crop top with a low square neck and front tie, off-white tiered ruffle mini shorts, white strappy block-heel sandals | outfits/2026-11-03_cafe-tie-front.png |
+| 2026-11-03 | Brandless 189-lipsync-deep-meaning-11-03 | kind asked: smart office outfit; model made: plain white collared button-up shirt, black tailored trousers, black pointed heels | outfits/2026-11-03_office-white-shirt.png |

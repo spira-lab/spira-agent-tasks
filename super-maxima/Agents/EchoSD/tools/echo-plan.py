@@ -20,7 +20,7 @@ reading DNA or scripts herself. Every command prints a short result.
       Both print the plan path and the writing style given to each script by cycling
       (least recently used first, the latest one avoided).
   restyle <plan> <script no.> "<writing style>"   change one script's writing style
-  dna <plan> --dna <DNA file path>
+  dna <plan> --dna <Lark URL>
       Fetches the DNA (about the product, or about the brand when there is no product) into
       the work folder (dna.md). Prints its size only.
   brief <plan> "<writing style>"
@@ -137,7 +137,7 @@ def init(args):
                 (fdir / "old").mkdir(exist_ok=True)
                 shutil.move(str(f.with_suffix(".angle")), str(fdir / "old" / f"{f.stem}_{now:%Y%m%d-%H%M%S}.angle"))
             ins = r.get("Instructions") or ""
-            if car:   # the product and website Vega's batch tool added are for the designer, not the writer
+            if car:   # the product and website Nova's batch tool added are for the designer, not the writer
                 ins = re.sub(r"\s*Product:\s.*?\.\s*(?=Brand website:)", " ", ins)
                 ins = re.sub(r"\s*Brand website:\s*\S+", "", ins).strip()
             scripts.append({"n": n, "task_id": r["Task ID"], "video_style": r.get("Style") or "talking head edited",
@@ -179,10 +179,11 @@ def dna(p, plan, args):
     for kind in ("dna",):
         url = opt(args, "--dna")
         if not url or url.lower() == "none": continue
-        src = Path(url).expanduser(); src = src if src.is_absolute() else SUPER / src
-        try: content = src.read_text(encoding="utf-8")
-        except OSError as e:
-            sys.exit(f"FAILED cannot read DNA {url}: {e}")
+        r = subprocess.run(["lark-cli", "docs", "+fetch", "--doc", url, "--doc-format", "markdown"],
+                           capture_output=True, text=True, stdin=subprocess.DEVNULL)
+        try: content = json.loads(r.stdout)["data"]["document"]["content"]
+        except (json.JSONDecodeError, KeyError, TypeError):
+            sys.exit(f"FAILED cannot read DNA {url}: {(r.stderr or r.stdout).strip()[:200]}")
         f = p.parent / "dna.md"; f.write_text(content, encoding="utf-8")
         plan["dna"][kind] = rel(f)
     if "dna" not in plan["dna"]: sys.exit("QUESTION DNA missing")
@@ -221,7 +222,7 @@ def brief_text(plan, scripts, rewrite=False):
                       + (f", instructions: {s['instructions']}" if s['instructions'] else "") for s in scripts)
     redo = ("These scripts were too close to earlier ones for this brand: the same angle, or near-identical "
             "phrasing. Rewrite each from scratch with a new angle and your own phrasing.\n\n") if rewrite else ""
-    return f"""You are one of Echo's scriptwriters in Super Vega ({SUPER}). {redo}Work only inside that folder. Do not start other agents and do not message anyone.
+    return f"""You are one of Echo's scriptwriters in Super Nova ({SUPER}). {redo}Work only inside that folder. Do not start other agents and do not message anyone.
 Never read any video designer skill or file (Agents/DesignerShared/, Agents/*VideoDesigner/): they are for making the video, not the script, and would change how you write. Your writing skill is your only guide.
 
 1. Read your writing skill in full and follow it exactly. It is the only writing style you use: {SUPER / skill}

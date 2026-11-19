@@ -1,4 +1,4 @@
-# Super Vega: the system and the client/brand records are tracked.
+# Super Nova: the system and the client/brand records are tracked.
 # Work produced while running (videos, batches, logs, task records) and installable
 # environments are not.
 
@@ -16,20 +16,31 @@ Project/*
 !Project/.gitkeep
 Backup/*.zip
 
+# Lark connector runtime
+Lark connect/inbox/*
+Lark connect/taken/*
+Lark connect/done/*
+Lark connect/logs/*
+Lark connect/state/*
+!Lark connect/*/.gitkeep
+
 # Task records written while running
 Agents/AtlasPM/batches/*
 !Agents/AtlasPM/batches/.gitkeep
-Agents/VegaOM/docs/user-scripts/*
-!Agents/VegaOM/docs/user-scripts/.gitkeep
-Agents/VegaOM/docs/vega-inbox/*
-!Agents/VegaOM/docs/vega-inbox/done/
-Agents/VegaOM/docs/vega-inbox/done/*
-!Agents/VegaOM/docs/vega-inbox/done/.gitkeep
-Agents/VegaOM/docs/client-monthly/*/
-Agents/VegaOM/assets/vega-photos/
-Agents/VegaOM/docs/vega-task-register.json
-Agents/VegaOM/docs/vega-iris.json
-Agents/VegaOM/docs/vega-backups.md
+Agents/NovaOM/docs/atlas-runs/*
+!Agents/NovaOM/docs/atlas-runs/.gitkeep
+Agents/NovaOM/docs/user-scripts/*
+!Agents/NovaOM/docs/user-scripts/.gitkeep
+Agents/NovaOM/docs/nova-inbox/*
+!Agents/NovaOM/docs/nova-inbox/done/
+Agents/NovaOM/docs/nova-inbox/done/*
+!Agents/NovaOM/docs/nova-inbox/done/.gitkeep
+Agents/NovaOM/docs/client-monthly/*/
+Agents/NovaOM/docs/nova-task-register.json
+Agents/NovaOM/docs/nova-batch-queue*.json
+Agents/NovaOM/docs/nova-atlas-session.json
+Agents/NovaOM/docs/nova-iris.json
+Agents/NovaOM/docs/nova-backups.md
 Agents/EchoSD/scripts/*
 Agents/EchoSD/work/*
 Agents/EchoSD/adhoc/*
@@ -44,6 +55,18 @@ Agents/CorporateCarouselDesigner/state/*
 !Agents/CorporateCarouselDesigner/state/.gitkeep
 Agents/IrisRP/report/iris-track-sheet.html
 
-# Lock files (render slots and brand locks live in .locks/)
+# Lock files and personal settings
 *.lock
-.locks/
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+
+# client-assets keeps text records and anchor character sheets only (the owner's rule,
+# 2026-11-17); one-off persona, outfit and site-capture images belong in Project/.
+Agents/NovaOM/client-assets/*/personas/*/outfits/
+Agents/NovaOM/client-assets/*/personas/*/source/
+Agents/NovaOM/client-assets/*/brand/ui/
+
+# This machine's identity (2026-11-19): never shared, so a pull can't change who an agent is
+agent.json
+Lark connect/config.json
+Agents/AtlasPM/docs/higgsfield-approved.json

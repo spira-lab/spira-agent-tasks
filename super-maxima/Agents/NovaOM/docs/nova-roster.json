@@ -1,0 +1,183 @@
+{
+ "_about": "Super Nova's agent roster: one place that lists every agent. The report (Iris), the workflow schematic and the SOP read it. Edit it when an agent is added, changed or retired. status: built | new | not ready | planned | decommissioned (not ready: built but not ready for production, the owner's word; decommissioned: removed from the system, kept on the roster for the record). styles: the Atlas designer styles an agent covers.",
+ "updated": "2026-11-03",
+ "agents": [
+  {
+   "name": "Nova",
+   "emoji": "🧭",
+   "role": "Operations manager",
+   "team": "managers",
+   "status": "built",
+   "does": "Takes requests from Lark, builds batches, posts every finished video, closes batches, runs the helpers.",
+   "folder": "Agents/NovaOM"
+  },
+  {
+   "name": "Atlas",
+   "emoji": "🗺️",
+   "role": "Project manager",
+   "team": "managers",
+   "status": "built",
+   "does": "Runs batch sheets: up to 6 designing and 2 rendering at once, with the tail handoff between batches.",
+   "folder": "Agents/AtlasPM"
+  },
+  {
+   "name": "Echo",
+   "emoji": "✍️",
+   "role": "Script director",
+   "team": "helpers",
+   "status": "built",
+   "does": "Writes scripts per brand writing style, with angle and phrasing repeat checks.",
+   "folder": "Agents/EchoSD"
+  },
+  {
+   "name": "Quill",
+   "emoji": "🪶",
+   "role": "Brief writer",
+   "team": "helpers",
+   "status": "built",
+   "does": "Turns a brand's site and notes into a DNA doc in Lark and hands Nova the brief.",
+   "folder": "Agents/QuillBW"
+  },
+  {
+   "name": "Hermes",
+   "emoji": "📤",
+   "role": "Media uploader",
+   "team": "helpers",
+   "status": "built",
+   "does": "Uploads finished videos to Spira under the right tag. Never posts.",
+   "folder": "Agents/HermesMU"
+  },
+  {
+   "name": "Iris",
+   "emoji": "📊",
+   "role": "Report keeper",
+   "team": "helpers",
+   "status": "built",
+   "does": "Builds the track sheet: targets, uploads, credits, skills used, storage and dev notes.",
+   "folder": "Agents/IrisRP"
+  },
+  {
+   "name": "Jani",
+   "emoji": "💾",
+   "role": "Backup agent",
+   "team": "helpers",
+   "status": "built",
+   "does": "Backs up finished projects to the external drive on the owner's word, checks every file, then clears them.",
+   "folder": "Agents/JaniBA"
+  },
+  {
+   "name": "Data Cleaner",
+   "emoji": "🧹",
+   "role": "Archivist",
+   "team": "helpers",
+   "status": "built",
+   "does": "Archives failed attempts on a redo or cancel and frees numbers on a cancel.",
+   "folder": "Agents/DataCleaner"
+  },
+  {
+   "name": "Talking Head Edited Designer",
+   "emoji": "🎬",
+   "role": "Video designer",
+   "team": "designers",
+   "status": "built",
+   "styles": [
+    "talking head edited"
+   ],
+   "does": "9:16 talking-head videos with Omni Flash 1.1 clips, b-roll, captions, SFX and music.",
+   "folder": "Agents/TalkingHeadEditedVideoDesigner"
+  },
+  {
+   "name": "Explainer Designer",
+   "emoji": "📐",
+   "role": "Video designer",
+   "team": "designers",
+   "status": "built",
+   "styles": [
+    "explainer"
+   ],
+   "does": "Narrated explainers over animated infographics, in any language.",
+   "folder": "Agents/ExplainerVideoDesigner"
+  },
+  {
+   "name": "Podcast Designer",
+   "emoji": "🎙️",
+   "role": "Video designer",
+   "team": "designers",
+   "status": "not ready",
+   "styles": [
+    "podcast"
+   ],
+   "does": "Two AI co-hosts in conversation, lip-synced, cut like a podcast.",
+   "folder": "Agents/PodcastVideoDesigner"
+  },
+  {
+   "name": "Avatar Designer",
+   "emoji": "🎨",
+   "role": "Image designer",
+   "team": "designers",
+   "status": "built",
+   "styles": [
+    "avatar"
+   ],
+   "does": "Avatar images only (Higgsfield Soul + GPT Image 2). The one source of personas and character sheets.",
+   "folder": "Agents/AvatarDesigner"
+  },
+  {
+   "name": "Cloner",
+   "emoji": "🧬",
+   "role": "Video designer",
+   "team": "designers",
+   "status": "new",
+   "styles": [
+    "clone"
+   ],
+   "does": "Rebuilds a reference video's format for a brand with new lines, voice, persona and shots.",
+   "folder": "Agents/ClonerVideoDesigner"
+  },
+  {
+   "name": "Re-skit",
+   "emoji": "🎭",
+   "role": "Video designer",
+   "team": "designers",
+   "status": "new",
+   "styles": [
+    "re-skit"
+   ],
+   "does": "Re-skits a trending video: keeps the motion and voices (pitch-adjusted), recasts the person, changes the meaning.",
+   "folder": "Agents/ReskitVideoDesigner"
+  },
+  {
+   "name": "Corporate Carousel Designer",
+   "emoji": "🖼️",
+   "role": "Image designer",
+   "team": "designers",
+   "status": "new",
+   "styles": [
+    "corporate carousel"
+   ],
+   "does": "4–7 slide corporate brand carousels (1080×1350, 4:5) from a topic angle and the brand's website: research, design brief, copy, GPT Image 2 assets, HTML layout, rendered JPEGs and captions.",
+   "folder": "Agents/CorporateCarouselDesigner"
+  },
+  {
+   "name": "Lifestyle Story Carousel Designer",
+   "emoji": "📸",
+   "role": "Image designer",
+   "team": "designers",
+   "status": "new",
+   "styles": [
+    "lifestyle story carousel"
+   ],
+   "does": "5–10 slide photoreal lifestyle story carousels (4:5 feed or 9:16 story) with no script: picks its own idea per client, researches pains, locks one person and place (Soul + GPT Image 2.5, Nano Banana 2.1), real product UI on screens, local grade and text, 6-check self-grade, captions. Rey's Carousel Skill V2.",
+   "folder": "Agents/LifestyleStoryCarouselDesigner"
+  },
+  {
+   "name": "Repurpose",
+   "emoji": "♻️",
+   "role": "Add-on skill",
+   "team": "designers",
+   "status": "decommissioned",
+   "does": "Made repurposed cuts of a finished video. Hardly used (1 cut, Cookiy, October); removed from the system on 2026-10-24 (the owner's decision).",
+   "folder": "Agents/DesignerShared/retired/repurpose"
+  }
+ ]
+}

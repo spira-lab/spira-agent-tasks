@@ -13,10 +13,10 @@ below is fixed and done in order.
 
 Your materials:
 
-- This style folder, `<podcast>` = `Super Vega/Agents/PodcastVideoDesigner/`:
+- This style folder, `<podcast>` = `Super Nova/Agents/PodcastVideoDesigner/`:
   this skill, the **podcast toolkit** (`skills/podcast-toolkit.md`), and
   the podcast tool (`tools/podcast.py`).
-- The designers' shared folder, `<shared>` = `Super Vega/Agents/DesignerShared/`:
+- The designers' shared folder, `<shared>` = `Super Nova/Agents/DesignerShared/`:
   the shared skills and the stage template.
 
 Before deciding anything, open `<shared>/skills/working-memory.md` and
@@ -76,9 +76,8 @@ into that line's `say` (toolkit section 6).
 
 ### Step 3. The conversation track
 
-1. Voice every line as its own clip with `submit_ai_job` /
-   `wait_ai_job` (toolkit section 6): `lines/01_M.mp3`,
-   `lines/02_F.mp3`, and so on, in parallel batches of about 3.
+1. `tts`: every line voiced as its own clip, `lines/01_M.mp3`,
+   `lines/02_F.mp3`, and so on, at most 3 jobs at a time.
 2. `join`: the lines joined in order with a 0.35 second pause between
    turns, into `vo.mp3`. It notes the start and end time of every line.
    The edit is timed from these.
@@ -105,19 +104,18 @@ and the time each clip starts on the timeline (`clip_start` in
 
 ### Step 5. The talking clips
 
-1. `host_file` for the two padded halves and every padded line; write
-   the URLs into `cast.json` and `lines.json`.
-2. Test: submit the shortest line only (toolkit section 7) and look at a
-   frame from it. IF the person, the framing, or the lip-sync is wrong,
-   stop and fix it before rendering the rest.
-3. Submit every other line, in batches of about 3, into
-   `clips/NN_TAG.mp4`.
+1. `upload`: the two padded halves and every padded line, with spira
+   assets upload.
+2. `heygen --test`: the shortest line only. Look at the frame it saves.
+   IF the person, the framing, or the lip-sync is wrong, stop and fix it
+   before rendering the rest.
+3. `heygen`: every other line, 3 at a time, into `clips/NN_TAG.mp4`.
 4. `check`: every clip as long as its audio, the pre-lap and listening
-   silences still there. Submit a failing clip again for that line only.
+   silences still there. Render a failing clip again with `--only`.
 
 ### Step 6. Word timings and captions
 
-1. `align`: ElevenLabs Scribe (Whisper only as the
+1. `align`: ElevenLabs Scribe through the Spira CLI (Whisper only as the
    fallback, 2026-10-22), word timestamps on `vo.mp3`, then the
    words aligned to the script, so captions use the script's exact
    spelling (e.g. Niño) with Whisper's timing. Saved as `timings.json`.
@@ -211,7 +209,7 @@ backup agent.
 
 ## 4. Hard rules
 
-- **Work only inside the Super Vega folder.** Every skill, doc, and tool an agent reads comes from inside it. Copies of these skills exist elsewhere on this machine and are outdated: never read, search for, or follow them. IF a skill or file you need is not inside the folder, stop and ask the user; never fetch it from outside.
+- **Work only inside the Super Nova folder.** Every skill, doc, and tool an agent reads comes from inside it. Copies of these skills exist elsewhere on this machine and are outdated: never read, search for, or follow them. IF a skill or file you need is not inside the folder, stop and ask the user; never fetch it from outside.
 - Follow the steps in order. Never render a talking clip before the
   shots are planned and the audio is padded; the plan lives in the
   audio.
@@ -223,7 +221,7 @@ backup agent.
   only WHEN the user asks for an add-on by name or the working memory's
   Design approach names one.
 - Build in the root: the client's brand folder,
-  `Super Vega/Project/<BrandName>/`, as the file-management skill sets
+  `Super Nova/Project/<BrandName>/`, as the file-management skill sets
   out. This style folder and the shared folder are where the skills came
   from. They are never where you build.
 - Besides what the html references, the materials folder keeps the

@@ -1,0 +1,525 @@
+{
+ "_about": "Spiraverse personas, built from the persona docs by nova-spiraverse.py index",
+ "groups": [
+  {
+   "group": "01",
+   "doc": "Agents/NovaOM/client-assets/Spira/spiraverse/01-savanna.md",
+   "profile": "Female - Performance marketer, tech- and social-media savvy, turned content creator",
+   "gender": "female",
+   "accounts": [
+    {
+     "role": "original",
+     "name": "Savanna",
+     "handle": "@SoSavvy",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1793833203208-658b85ca-9526-46f0-bea9-6f21afef9808.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Savanna.jpg",
+     "partner": "Mike",
+     "traits": null,
+     "region": null,
+     "tag_id": "3f6a62f1-1dc1-4c6b-bbcd-13514d428ee5"
+    },
+    {
+     "role": "regen 1",
+     "name": "Brook",
+     "handle": "@brookbrief",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794412519875-b625d739-c74f-4fb2-a0be-6f0f0757794d.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Brook.jpg",
+     "partner": "Ethan",
+     "traits": null,
+     "region": "White American",
+     "tag_id": "49775271-7d43-4638-95f4-1e920d9c66bd"
+    },
+    {
+     "role": "regen 2",
+     "name": "Zara",
+     "handle": "@zarascales",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794412529191-58250a3e-63f1-48c9-9af3-df6abfc257c5.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Zara.jpg",
+     "partner": "Marc",
+     "traits": null,
+     "region": "Lebanese-American",
+     "tag_id": "a185b463-bcc4-42d6-a47c-c8af39af8dd5"
+    },
+    {
+     "role": "regen 3",
+     "name": "Alessia",
+     "handle": "@alessiasells",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794412528302-1e1ec5b1-3055-403b-a6ab-b4cdded80cf4.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Alessia.jpg",
+     "partner": "Rafael",
+     "traits": null,
+     "region": "Italian-American",
+     "tag_id": "aa8a33b9-2469-4fa8-82fa-db661b0124a6"
+    }
+   ]
+  },
+  {
+   "group": "02",
+   "doc": "Agents/NovaOM/client-assets/Spira/spiraverse/02-mike.md",
+   "profile": "Male - Creative designer, ex-agency, now co-runs OOOMarketing (Out of Office Marketing) with his girlfriend Savanna",
+   "gender": "male",
+   "accounts": [
+    {
+     "role": "original",
+     "name": "Mike",
+     "handle": "@makelikemike",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1793835040288-bc6f41d7-df9b-44f2-90b2-5b03eacbce70.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Mike.jpg",
+     "partner": "Savanna",
+     "traits": null,
+     "region": null,
+     "tag_id": "d9bbafcc-b9e8-4380-9f45-5d858394004b"
+    },
+    {
+     "role": "regen 1",
+     "name": "Ethan",
+     "handle": "@itsmeethan",
+     "sheet": "https://static.viralwell.ai/assets/media/86641e68-954b-412d-b3b5-e3710b105cbf/generated-1794233622846-f1bc95f5-7f76-49ce-9cf3-2946f61af37e.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Ethan.jpg",
+     "partner": "Brook",
+     "traits": null,
+     "region": "Korean-American",
+     "tag_id": "b68f3042-d6ca-44be-88d9-fe831a9f2697"
+    },
+    {
+     "role": "regen 2",
+     "name": "Marc",
+     "handle": "@marc_o_polo",
+     "sheet": "https://static-dev.viralwell.ai/assets/media/ab9d20cb-c47b-442b-aa39-386887dc361c/generated-1794365871005-58f9a44f-bec7-4c6c-af53-0eb30e793d2e.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Marc.jpg",
+     "partner": "Zara",
+     "traits": null,
+     "region": null,
+     "tag_id": "762acf23-70ff-4106-b9eb-7ee9e01aefb0"
+    },
+    {
+     "role": "regen 3",
+     "name": "Rafael",
+     "handle": "@theaftermath",
+     "sheet": "https://static-dev.viralwell.ai/assets/media/ab9d20cb-c47b-442b-aa39-386887dc361c/generated-1794367925927-18676583-4d9c-49ae-83ed-793d4fdf0398.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Rafael.jpg",
+     "partner": "Alessia",
+     "traits": null,
+     "region": "Filipino-American",
+     "tag_id": "45a30cd2-ffdb-4c44-8977-109f5abdc205"
+    }
+   ]
+  },
+  {
+   "group": "03",
+   "doc": "Agents/NovaOM/client-assets/Spira/spiraverse/03-chloe.md",
+   "profile": "Female - Tech sales account executive by day, fitness and lifestyle creator after 6pm",
+   "gender": "female",
+   "accounts": [
+    {
+     "role": "original",
+     "name": "Chloe",
+     "handle": "@chloediaries",
+     "sheet": "https://static.viralwell.ai/assets/media/86641e68-954b-412d-b3b5-e3710b105cbf/generated-1794228664029-717b2a48-97e3-4bfc-a7b1-681022d7fb7d.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Chloe.jpg",
+     "partner": null,
+     "traits": null,
+     "region": null,
+     "tag_id": "247fc364-8d90-4fc8-8529-f56507c0ce9e"
+    },
+    {
+     "role": "regen 1",
+     "name": "Jessica",
+     "handle": "@jessicaxoxo",
+     "sheet": "https://static.viralwell.ai/assets/media/86641e68-954b-412d-b3b5-e3710b105cbf/generated-1794147929479-8271e056-56e2-4135-8956-ee643997565e.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Jessica.jpg",
+     "partner": null,
+     "traits": null,
+     "region": "Asian-American",
+     "tag_id": "abce20ea-d691-4766-abd4-20e7710e3de5"
+    },
+    {
+     "role": "regen 2",
+     "name": "Hana",
+     "handle": "@hana.banana",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794413929943-e97f86bc-4d45-4aec-ad10-5458862f1f65.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Hana.jpg",
+     "partner": null,
+     "traits": null,
+     "region": null,
+     "tag_id": "175ee463-a7ff-40a8-a7ba-0d1cdd16a419"
+    },
+    {
+     "role": "regen 3",
+     "name": "Tiffany",
+     "handle": "@mustluv.tiff",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794415065014-a4142d4c-59da-4c24-87ad-de2c5bc4477b.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Tiffany.jpg",
+     "partner": null,
+     "traits": null,
+     "region": "Korean-American",
+     "tag_id": "a8978318-317f-4f14-8d4d-bf164f40bfe1"
+    }
+   ]
+  },
+  {
+   "group": "04",
+   "doc": "Agents/NovaOM/client-assets/Spira/spiraverse/04-itzel.md",
+   "profile": "Female - Model turned founder of her own lip-oil line, sharing beauty, fashion and the business behind it",
+   "gender": "female",
+   "accounts": [
+    {
+     "role": "original",
+     "name": "Itzel",
+     "handle": "@itzelbeauty",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794402625675-97fd4513-7e6d-4649-9ba9-51257c88eded.jpg",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Itzel.jpg",
+     "partner": null,
+     "traits": null,
+     "region": "Mexican-American",
+     "tag_id": "6b041622-3771-4e32-95c7-337fe4b85eea"
+    },
+    {
+     "role": "regen 1",
+     "name": "Nicole",
+     "handle": "@nicoluv",
+     "sheet": "https://static.viralwell.ai/assets/media/86641e68-954b-412d-b3b5-e3710b105cbf/generated-1794221243880-a485ce57-7697-46f3-9088-f68c188621e4.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Nicole.jpg",
+     "partner": null,
+     "traits": null,
+     "region": "Brazilian-American",
+     "tag_id": "13bce0e1-5e89-41e1-b53f-97cb7b39a214"
+    },
+    {
+     "role": "regen 2",
+     "name": "Valeria",
+     "handle": "@ValeriaPlans",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794402628352-e9e45768-71b1-470c-a37b-05c99f7b7815.jpg",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Valeria.jpg",
+     "partner": null,
+     "traits": null,
+     "region": "Colombian-American",
+     "tag_id": "da1a24bc-3675-4fad-bac9-5b72a13c873e"
+    },
+    {
+     "role": "regen 3",
+     "name": "Daniela",
+     "handle": "@DaniMovesDaily",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794402630291-3e4a7ea9-f748-444d-87e6-d926513e0bdd.jpg",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Daniela.jpg",
+     "partner": null,
+     "traits": null,
+     "region": null,
+     "tag_id": "65647213-fe2b-4dcc-8fb2-88cf00ec9a5c"
+    }
+   ]
+  },
+  {
+   "group": "05",
+   "doc": "Agents/NovaOM/client-assets/Spira/spiraverse/05-hannah.md",
+   "profile": "Female - Founder of a boutique pilates studio who runs five accounts with Spira",
+   "gender": "female",
+   "accounts": [
+    {
+     "role": "original",
+     "name": "Hannah",
+     "handle": "@corewithhannah",
+     "sheet": "https://static-dev.viralwell.ai/assets/media/ab9d20cb-c47b-442b-aa39-386887dc361c/generated-1794366880583-8018c4d3-ab8e-4c18-bf68-03b053e18f54.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Hannah.jpg",
+     "partner": null,
+     "traits": null,
+     "region": "White American",
+     "tag_id": "90b9122c-b681-40ac-93b6-80d5df81ab52"
+    },
+    {
+     "role": "regen 1",
+     "name": "Nia",
+     "handle": "@niaturally",
+     "sheet": "https://static-dev.viralwell.ai/assets/media/ab9d20cb-c47b-442b-aa39-386887dc361c/generated-1794371809243-6cfd64de-a7e8-462e-9c43-8f97b36d3c24.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Nia.jpg",
+     "partner": null,
+     "traits": null,
+     "region": null,
+     "tag_id": "900b1084-861e-48a1-bfd2-bab30c7b60d6"
+    },
+    {
+     "role": "regen 2",
+     "name": "Leena",
+     "handle": "@Leena.on.me",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794417085142-4a653b2d-9a3a-4439-970c-a0c1f7de6eea.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Leena.jpg",
+     "partner": null,
+     "traits": null,
+     "region": null,
+     "tag_id": "0f5f19e3-fbdd-474c-848f-4ccd7de63115"
+    },
+    {
+     "role": "regen 3",
+     "name": "Keira",
+     "handle": "@redhotpeppergirl",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794417310411-1dc03908-b9b7-4a65-8574-86987ff2a61d.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Keira.jpg",
+     "partner": null,
+     "traits": null,
+     "region": "Irish American",
+     "tag_id": "62ae16d5-24b5-4323-93f0-3f6507876e7a"
+    }
+   ]
+  },
+  {
+   "group": "06",
+   "doc": "Agents/NovaOM/client-assets/Spira/spiraverse/06-mabel.md",
+   "profile": "Female - Marketing coordinator who has colour-coded everything, including her feelings",
+   "gender": "female",
+   "accounts": [
+    {
+     "role": "original",
+     "name": "Mabel",
+     "handle": "@MabelOnFile",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794402617086-1336f5bd-9fbf-4e85-ab66-e106ae55e6f4.jpg",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Mabel.jpg",
+     "partner": null,
+     "traits": "a sky-high platinum-blonde beehive, huge ice-blue eyes behind oval wire glasses, thin high arched brows, a tiny pursed mouth and a very long slender neck; slim. Keep them exactly as on the character sheet: do not exaggerate, soften or change them, and keep the face, nose and eyes as they are",
+     "region": null,
+     "tag_id": "db22d599-0f84-41f2-875e-5ccc14ac2360"
+    },
+    {
+     "role": "regen 1",
+     "name": "Doris",
+     "handle": "@Dorkiiiis",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794414679534-15d5dd7b-586f-40e3-9ca5-938a00a73269.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Doris.jpg",
+     "partner": null,
+     "traits": "very tall and very slim, a long thin neck, a gaunt angular face, heavy-lidded eyes, a small mouth with thin lips, thin legs (the owner's words) and long straight lavender hair. Keep them exactly as on the character sheet: do not exaggerate, soften or change them, and keep the face, nose and eyes as they are",
+     "region": null,
+     "tag_id": "6c7fc826-bee3-466b-92fb-96bfcba6f86c"
+    },
+    {
+     "role": "regen 2",
+     "name": "Ruth",
+     "handle": "@ruth.cause",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794726199636-eee98598-f5d3-40fb-ae74-0bbe5d891775.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Ruth.jpg",
+     "partner": null,
+     "traits": "a sleek dark-green beehive updo with loose face-framing strands, wide-set eyes and a long neck; slim. Keep them exactly as on the character sheet: do not exaggerate, soften or change them, and keep the face, nose and eyes as they are",
+     "region": null,
+     "tag_id": "02908365-a426-4685-88eb-7fc88d6d7557"
+    },
+    {
+     "role": "regen 3",
+     "name": "Ingrid",
+     "handle": "@ingridation",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794415088785-551ccf37-e77d-4ec9-b3e1-6dcbd2c61328.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Ingrid.jpg",
+     "partner": null,
+     "traits": "tall and slim, with very long platinum-blonde box braids, a long neck and wide pale eyes. Keep them exactly as on the character sheet: do not exaggerate, soften or change them, and keep the face, nose and eyes as they are",
+     "region": null,
+     "tag_id": "8ed7b1ed-6eb8-4910-8adf-d919345bacfa"
+    }
+   ]
+  },
+  {
+   "group": "07",
+   "doc": "Agents/NovaOM/client-assets/Spira/spiraverse/07-gus.md",
+   "profile": "Male - Third-generation hardware store owner on a daily posting streak he will not break",
+   "gender": "male",
+   "accounts": [
+    {
+     "role": "original",
+     "name": "Gus",
+     "handle": "@HardwareGus",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794402619680-5b890bb2-cc89-49f1-808a-84013422573d.jpg",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Gus.jpg",
+     "partner": null,
+     "traits": "a short, stocky man: a round body on short legs, a thick, short, almost non-existent neck (the owner's words) under a square head, bushy brush brows, a big push-broom moustache and the lime-green stair-step tuft on short black hair. Keep them exactly as on the character sheet: do not exaggerate, soften or change them, and keep the face, nose and eyes as they are",
+     "region": null,
+     "tag_id": "1cabefba-ccbf-4476-80a9-f8a0c7683fee"
+    },
+    {
+     "role": "regen 1",
+     "name": "Herb",
+     "handle": "@herbivore",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794415004930-3011c684-2443-4b7f-85f7-9275439c9ff9.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Herb.jpg",
+     "partner": null,
+     "traits": "a big, gigantic, towering man with huge bulging muscles and very broad shoulders (he dwarfs everything around him), with his brown mushroom haircut, huge push-broom moustache and strong square jaw (the owner's wording). His teeth are normal, as on the character sheet. Keep them exactly as on the character sheet: do not exaggerate, soften or change them, and keep the face, nose and eyes as they are",
+     "region": null,
+     "tag_id": "25203a3d-a61d-4649-8770-1d2a8007e8de"
+    },
+    {
+     "role": "regen 2",
+     "name": "Norman",
+     "handle": "@whatitsliketobe",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794415073164-547342fd-f718-4dfb-a5e8-15410ba680f2.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Norman.jpg",
+     "partner": null,
+     "traits": "a thick neck, big ears, a weak chin, a thick moustache, square shoulders and a high waist (the owner's list). Keep them exactly as on the character sheet: do not exaggerate, soften or change them, and keep the face, nose and eyes as they are",
+     "region": null,
+     "tag_id": "991671a0-eabe-4ccb-85cd-f684fe3ceb9d"
+    },
+    {
+     "role": "regen 3",
+     "name": "Otis",
+     "handle": "@otissito",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794415005100-1e75eaf3-714c-498e-8eef-fad95deee8b2.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Otis.jpg",
+     "partner": null,
+     "traits": "enormous ears, a very long thin neck, a dark bowl haircut and a big push-broom moustache. Keep them exactly as on the character sheet: do not exaggerate, soften or change them, and keep the face, nose and eyes as they are",
+     "region": null,
+     "tag_id": "6ba3c13b-5b89-406c-9974-618bb5a61f68"
+    }
+   ]
+  },
+  {
+   "group": "08",
+   "doc": "Agents/NovaOM/client-assets/Spira/spiraverse/08-daniel.md",
+   "profile": "Male - Startup founder who still runs the company's socials himself, turned the founder who finally fixed it",
+   "gender": "male",
+   "accounts": [
+    {
+     "role": "original",
+     "name": "Daniel",
+     "handle": "@DanielBuilds",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794402632612-402b6dc8-ea39-4e8e-a2f1-76adc6573a26.jpg",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Daniel.jpg",
+     "partner": null,
+     "traits": null,
+     "region": "Korean-American",
+     "tag_id": "dba07dd0-5cbd-443b-a55e-f349fdc05974"
+    },
+    {
+     "role": "regen 1",
+     "name": "Marcus",
+     "handle": "@MarcusAgencyKid",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794402635383-89f535fe-1d2a-4ff1-8dfd-9d704caa3b16.jpg",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Marcus.jpg",
+     "partner": null,
+     "traits": null,
+     "region": "Black American",
+     "tag_id": "ca6e87ef-1231-40a9-a217-641683936c6c"
+    },
+    {
+     "role": "regen 2",
+     "name": "Thiago",
+     "handle": "@ThiagoOnTheRoad",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794402638325-facd8467-1ed4-4150-8cbd-3e4fc8aeb701.jpg",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Thiago.jpg",
+     "partner": null,
+     "traits": null,
+     "region": null,
+     "tag_id": "260bf636-9507-416d-80db-dc783b3aaf3c"
+    },
+    {
+     "role": "regen 3",
+     "name": "Arjun",
+     "handle": "@ArjunInBloom",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794402641236-f3b75415-9ea3-4d31-957c-6e0b5fe435eb.jpg",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Arjun.jpg",
+     "partner": null,
+     "traits": null,
+     "region": null,
+     "tag_id": "96b42487-573d-431e-b040-ac09b4c2588e"
+    }
+   ]
+  },
+  {
+   "group": "09",
+   "doc": "Agents/NovaOM/client-assets/Spira/spiraverse/09-sofia.md",
+   "profile": "Female - Founder of a small-batch cold-brew brand, building it in public",
+   "gender": "female",
+   "accounts": [
+    {
+     "role": "original",
+     "name": "Sofia",
+     "handle": "@sofistartsup",
+     "sheet": "https://static-dev.viralwell.ai/assets/media/ab9d20cb-c47b-442b-aa39-386887dc361c/generated-1794275088344-4d096c2d-cfc2-4dbb-8966-61950685b163.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Sofia.jpg",
+     "partner": null,
+     "traits": null,
+     "region": null,
+     "tag_id": "6c332dcf-1cce-4bc5-b848-7526624839f3"
+    },
+    {
+     "role": "regen 1",
+     "name": "Sina",
+     "handle": "@sinamatic",
+     "sheet": "https://static-dev.viralwell.ai/assets/media/ab9d20cb-c47b-442b-aa39-386887dc361c/generated-1794275057367-ca9d30aa-d330-47be-aaea-08f0cd6cfcab.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Sina.jpg",
+     "partner": null,
+     "traits": null,
+     "region": null,
+     "tag_id": "595cd65f-4844-455a-a428-6904a75eb05c"
+    },
+    {
+     "role": "regen 2",
+     "name": "Claire",
+     "handle": "@clairehandlesit",
+     "sheet": "https://static-dev.viralwell.ai/assets/media/ab9d20cb-c47b-442b-aa39-386887dc361c/generated-1794365870377-037df768-f505-4b63-8db2-93412ccf5491.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Claire.jpg",
+     "partner": null,
+     "traits": null,
+     "region": "White American",
+     "tag_id": "a6a1a80b-86d3-4964-9aab-1c3b16cbdc63"
+    },
+    {
+     "role": "regen 3",
+     "name": "Rania",
+     "handle": "@raniaway",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794440786289-1a7d3a75-161d-4270-8ca7-93c958e09bcb.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Rania.jpg",
+     "partner": null,
+     "traits": null,
+     "region": null,
+     "tag_id": "8824d2bc-78d1-403f-9b8a-df1eaff2b0cf"
+    }
+   ]
+  },
+  {
+   "group": "10",
+   "doc": "Agents/NovaOM/client-assets/Spira/spiraverse/10-roxy.md",
+   "profile": "Female - Model and \"it girl\" turned CMO of a creator startup",
+   "gender": "female",
+   "accounts": [
+    {
+     "role": "original",
+     "name": "Roxy",
+     "handle": "@itsroxy",
+     "sheet": "https://static.viralwell.ai/assets/media/86641e68-954b-412d-b3b5-e3710b105cbf/generated-1794226719173-ecd2a15d-ba22-4793-b3e9-3c482a37d271.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Roxy.jpg",
+     "partner": null,
+     "traits": "maintain the figure of the person from the character sheet image. Keep it as on the image and keep the face as it is. Never describe the body with explicit wording in a prompt",
+     "region": "Italian-American",
+     "tag_id": "0bc8a94d-4fa8-42fc-b12d-4bde5a7efea1"
+    },
+    {
+     "role": "regen 1",
+     "name": "Gina",
+     "handle": "@ginaandtonic",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794440656885-1603b460-e517-4745-aff6-72e67484840e.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Gina.jpg",
+     "partner": null,
+     "traits": "maintain the figure of the person from the character sheet image. Keep it as on the image and keep the face as it is. Never describe the body with explicit wording in a prompt",
+     "region": "Italian-American",
+     "tag_id": "725e7048-67a9-4201-85cb-14d04bf05c65"
+    },
+    {
+     "role": "regen 2",
+     "name": "Celia",
+     "handle": "@itscelia",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794440515393-e84318d9-0e8a-4bee-844e-5257f1d4b529.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Celia.jpg",
+     "partner": null,
+     "traits": "maintain the figure of the person from the character sheet image. Keep it as on the image and keep the face as it is. Never describe the body with explicit wording in a prompt",
+     "region": "Cuban-American",
+     "tag_id": "ed54aa7b-64fc-4d5c-8fcd-836b8d2982ca"
+    },
+    {
+     "role": "regen 3",
+     "name": "Dionne",
+     "handle": "@dionnewithit",
+     "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/generated-1794440511150-dcd3b4bc-1d26-4251-89e3-dcc85f171a0d.png",
+     "photo": "Agents/NovaOM/client-assets/Spira/spiraverse/profile-photos/Dionne.jpg",
+     "partner": null,
+     "traits": "maintain the figure of the person from the character sheet image. Keep it as on the image and keep the face as it is. Never describe the body with explicit wording in a prompt",
+     "region": "African-American",
+     "tag_id": "182228e0-aa14-4ad9-87d2-521fd45ba337"
+    }
+   ]
+  }
+ ]
+}

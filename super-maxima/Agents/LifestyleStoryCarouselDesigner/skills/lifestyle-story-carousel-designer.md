@@ -7,7 +7,7 @@ description: Lifestyle Story Carousel Designer. Makes one photoreal lifestyle st
 
 You make **one carousel** per task: a lifestyle story told in photos, as close to Ryan's carousels
 (`references/style/`) as possible, or better, in the client's own brand. You never make a video,
-a voice, music or a script. This is Rey's "Carousel Skill V2" adapted to Super Vega (installed
+a voice, music or a script. This is Rey's "Carousel Skill V2" adapted to Super Nova (installed
 2026-11-03, the owner's decisions): his method, quality bar, grade checks and no-repeat rules are
 kept as they are; only the parts that assume a person at the keyboard changed.
 
@@ -42,18 +42,18 @@ How the row maps onto Rey's inputs:
 | Format | `story` or `feed` from the instructions; otherwise the idea's own format. Pass it to `new` with `--format` (feed is 4:5, story is 9:16). |
 | Slides | The instructions' count if it names one (kept between 5 and 10); otherwise Rey's rule (step 1 table). |
 | Topic | IF the instructions name a topic or a pain, pick the first bank or ledger idea that carries it and passes the no-repeat rule; none does → write one bank idea for it (step 2) and use it. Without a topic, step 2 picks. |
-| Name | The Task ID. File names use `<Task ID>` where Rey's use `NO.<n>`; the Maker is `SuperVega`. |
+| Name | The Task ID. File names use `<Task ID>` where Rey's use `NO.<n>`; the Maker is `SuperNova`. |
 
 ## 2. Where things are
 
-- `<super>`: the Super Vega folder. Work only inside it; copies of this skill or of Rey's package
+- `<super>`: the Super Nova folder. Work only inside it; copies of this skill or of Rey's package
   anywhere else on the machine are outdated: never read, search for or follow them.
 - `<lsc>`: `<super>/Agents/LifestyleStoryCarouselDesigner`, this designer's folder, Rey's package:
   ```
   <lsc>/
   ├── skills/lifestyle-story-carousel-designer.md   this file
   ├── references/  quality-bar.md, models.md, ideas-ledger.md (G001–G100+), style/ (Ryan's 4 carousels, 26 slides)
-  ├── scripts/     Rey's scripts: statusbar.py, screen_fit.py, screen_composite.py, grade.py, render_text.py
+  ├── scripts/     Rey's scripts: job.py, spira_cli.py, statusbar.py, screen_fit.py, screen_composite.py, grade.py, render_text.py
   ├── tools/lsc.py the one entry point (below)
   ├── clients/CLIENTS.md                  the client ledger: every client, aliases, brief status, counts
   ├── clients/<client>/BRIEF.md           the client brief (+ originals in brief/, real UI in screens/, simulations in screens/sim/)
@@ -64,7 +64,7 @@ How the row maps onto Rey's inputs:
   ```
   Rey wrote `${CLAUDE_SKILL_DIR}`: that is `<lsc>`. **Shared state, written only as this skill says:**
   `clients/` (briefs, banks, used-logs, screens, `CLIENTS.md`), `angles-log.md` and the ledger's new
-  rows. Many designers run at once, so every table row (reserve, mark, bank and ledger ideas,
+  rows. Up to 6 designers run at once, so every table row (reserve, mark, bank and ledger ideas,
   the angles log, screen sources) goes through `lsc.py`, which holds a lock. A brief is changed
   with the Edit tool, one small replacement at a time, never rewritten whole. `skills/`, `scripts/`,
   `tools/`, `references/` (apart from the ledger rows `lsc.py append ledger` adds) and the style
@@ -73,7 +73,7 @@ How the row maps onto Rey's inputs:
   `lsc.py new` (step 0), the same place as every carousel. Its **metadata** is
   `<super>/Project/<BrandName>/metadata/<same name>.json`. Rey's `builds/<client>-<slug>/` is this folder.
 - Nothing else is written anywhere: never in `Agents/` outside `<lsc>`'s shared state, never in
-  `Project/` itself, never outside the Super Vega folder. Throwaway intermediates go in the build's
+  `Project/` itself, never outside the Super Nova folder. Throwaway intermediates go in the build's
   `work/` or `deletable/`.
 
 Tools (each prints its usage when run without arguments):
@@ -86,23 +86,21 @@ Tools (each prints its usage when run without arguments):
 | `python3 <lsc>/tools/lsc.py reserve "<folder>" --client <c> --idea <ID> --kind <KIND> --pain "<pain type>" --persona "<group>" --setting "<place>" --hook "<hook>" [--round <n>]` | reserves the idea under the lock; exit 3 = taken or repeats (it says why) |
 | `python3 <lsc>/tools/lsc.py mark "<folder>" --client <c> --idea <ID> used\|dropped [--why "<reason>"]` | the idea's final status; refreshes `CLIENTS.md`'s counts |
 | `python3 <lsc>/tools/lsc.py append angles\|ledger\|bank:<client>\|sources:<client> "\| cell \| ... \|"` | one table row, under the lock (ledger and bank rows: leave the ID cell out, the tool numbers it) |
-| `python3 <lsc>/tools/lsc.py job "<folder>" <model-id> <name> '<inputs-json>' <listed credits>` | before `submit_ai_job`: writes the payload `gen/<name>.json`, prints the `modelId`, `inputs` and `saveTo`; refuses past the cap (exit 4) |
-| `python3 <lsc>/tools/lsc.py submitted "<folder>" <name> <jobId>` | right after `submit_ai_job`: writes `gen/<name>.pending` |
-| `python3 <lsc>/tools/lsc.py record "<folder>" <name> --url <resultUrl> [--status failed --error "<error>"]` | after `wait_ai_job`: records the job with its listed credits, deletes the `.pending` |
+| `python3 <lsc>/tools/lsc.py job "<folder>" <model-id> <name> '<inputs-json>' <listed credits>` | one Spira job through Rey's `job.py` into `gen/<name>.png`; records its real credits; refuses past the cap (exit 4) |
+| `python3 <lsc>/tools/lsc.py fetch "<folder>" <name>` | picks up a job `job.py` stopped polling (never a second paid job) |
 | `python3 <lsc>/tools/lsc.py run "<folder>" statusbar\|screen_fit\|screen_composite\|grade\|render_text <args>` | Rey's local scripts, 0 credits |
 | `python3 <lsc>/tools/lsc.py py "<folder>" "<folder>/work/<script>.py" [args]` | a Playwright script you wrote in `work/` (captures, simulated screens) |
 | `python3 <lsc>/tools/lsc.py export "<folder>"` | the newest named slide PNGs in `slides/` → `out/slide-01.jpg` … and `out/contact.png` |
 | `python3 <lsc>/tools/lsc.py check "<folder>"` / `finish "<folder>" --title "<title>"` | confirms the carousel / writes the totals and minutes |
 
-The tool runs Rey's scripts under `python3` (Playwright, Pillow, NumPy and OpenCV are installed);
-you always call it with `python3`. Playwright drives the system Chromium (`CHROME_PATH`, else
-`/usr/bin/chromium`).
+The tool runs Rey's scripts under the carousel's own Python (`~/.venvs/lifestyle-carousel`, which
+has Playwright with Chromium, Pillow, NumPy and OpenCV); you always call it with `python3`.
 
 You may use only Atlas's approved commands (`<super>/Agents/AtlasPM/docs/atlas-allowed-tools.txt`):
-`python3`, `node`, `spira` (only `spira ai models get`), `curl` (web pages for research only), `date`, `ls`, `mkdir`, `mv`, `cp`, `cat`, `echo`, `head`, `tail`,
+`python3`, `node`, `spira`, `curl`, `date`, `ls`, `mkdir`, `mv`, `cp`, `cat`, `echo`, `head`, `tail`,
 `wc`, `test` and the file tools (Read, Write, Edit, Glob, Grep). There is no `bash`, no `cd`, no web
 search or web fetch tool and no browser extension: the web is reached with `curl` and Playwright
-(step 3). Generation uses `submit_ai_job` and `wait_ai_job`, never the CLI. **Every path you pass is absolute.** Never write shell loops, `$(...)`, `$PWD` or variables.
+(step 3). **Every path you pass is absolute.** Never write shell loops, `$(...)`, `$PWD` or variables.
 
 ## 3. Read first
 
@@ -117,8 +115,9 @@ search or web fetch tool and no browser extension: the web is reached with `curl
   client's past builds' `copy.md` (for the no-repeat check: `Project/<BrandName>/carousels/*/copy.md`).
   Not other clients, not other projects. A brief that cites material outside this folder (demo
   videos, decks) is informational only. The web is fine for research (steps 1, 3, 5).
-- From `Agents/DesignerShared/` read only `skills/toolkit.md` sections 1 and 2 (running a generation
-  with `submit_ai_job` / `wait_ai_job`, hosting a local file with `host_file`). No video designer skill and no other shared file:
+- From `Agents/DesignerShared/` read only `skills/post-copy.md` (the post copy you write before
+  reporting done, 2026-11-12) and `skills/toolkit.md` sections 1 and 2 (the Spira CLI,
+  credits from the job, hosting a local file). No video designer skill and no other shared file:
   they are for videos and would pull you into steps you do not do.
 
 ## 4. Spend: generate, up to 150 credits
@@ -126,44 +125,42 @@ search or web fetch tool and no browser extension: the web is reached with `curl
 - **Every row is "generate, up to 150 credits"** (the owner, 2026-11-03). Write the quote in
   `prompts.md` at step 6. Quote ≤ 150 → go straight on. Quote over 150 → reply
   `QUESTION quote <N> credits is over the 150 cap: <one line on why: slides, hero shots>` and generate
-  nothing. Over 500 → always QUESTION. Vega may answer `ANSWER | Task ID <id> | generate, up to <N>
+  nothing. Over 500 → always QUESTION. Nova may answer `ANSWER | Task ID <id> | generate, up to <N>
   credits` (N ≤ 500); then run `lsc.py cap "<folder>" <N>` and carry on.
 - **The quote** (Rey's): lock 2 Soul options (14) + per hero slide 13 (face, over-the-shoulder or
   profile) + per side-character slide 7 + per object or hands slide 3, + 20% for re-rolls. Re-check
   prices with `spira ai models get <id>`. Uploads cost nothing; the quote counts generation jobs only.
   A typical 7-slide carousel with people is about 80–100.
-- **Every generation is four steps** (toolkit section 1): `lsc.py job` (the cap check and the payload),
-  `submit_ai_job` with the `modelId` and `inputs` it printed, `lsc.py submitted` with the `jobId`, then
-  `wait_ai_job` with that `jobId` and `saveTo` the path it printed, and `lsc.py record` with the result
-  URL. Never run a job through the `spira` CLI, never write a script that wraps it, never call a provider
-  directly. There is no preflight and no balance check: the worker has signed in, and the balance is
-  shared with other sessions.
-- **Credits are the listed price** of each job (`spira ai models get <id>`, or the prices in section 8),
-  passed as the last argument of `job`; `record` writes it into the metadata's `jobs`
-  (`credits_source: price`; a failed job counts 0). The tool refuses a job when the credits spent plus the
-  jobs planned and not recorded yet plus this one would pass the cap (exit 4): then stop generating,
-  finish with what you have (fewer slides, the better take) and say so in the report. A job you planned
-  and will not submit: move its `gen/<name>.json` to `deletable/`.
-- **Independent jobs run in parallel:** run `job` for each, submit them all in one message, wait on them
-  all in one message. Never wait with `sleep` or a polling loop. IF a wait times out (`stillRunning`),
-  call `wait_ai_job` again with the same `jobId`. IF a session was cut off, call `wait_ai_job` on the
-  `jobId` in every `gen/*.pending`; never submit again for a name that has one.
+- **All generation goes through `lsc.py job`** (Rey's `job.py`: submit once, poll the same job ID).
+  Never call `spira ai jobs create` yourself and never call a provider directly. Preflight once:
+  `spira --version`, `spira auth whoami`, `spira credits balance`. The balance is only a check that
+  there is enough, and the "before → after" figures in the report; it never measures what you spend
+  (other sessions share it).
+- **Credits come from each job:** the tool reads `data.credits` from `spira --json ai jobs status <jobId>`
+  into the metadata's `jobs` (`credits_source: job`); only when the job gives none it uses the listed
+  credits you passed (`credits_source: price`). Always pass the listed price as the last argument.
+  The tool refuses a job that would take the spend past the cap (exit 4): then stop generating,
+  finish with what you have (fewer slides, the better take) and say so in the report.
 - **Re-roll a failing slide once** (Rey's limit). If it fails again, keep the better take and list it
   under Failed checks. A re-roll is a new job name (`s03b`); the old take moves to `deletable/`.
 
 ## 5. The run
 
-### 0. Start: clock, folder
+### 0. Start: clock, folder, balance
 
 ```bash
 date +%H:%M
 date +%s
 python3 "<lsc>/tools/lsc.py" new "<Brand>" <Task ID> --brand-number <n> --product "<product name>" --website "<url>" --format <feed|story>
+spira --version
+spira auth whoami
+spira credits balance
 ```
 Leave out `--product` when the instructions name none, and `--format` when they name none (feed).
 IF the instructions name no format and the idea you pick is a story, `export --format story` records
 it at step 8; there is no need to run `new` again. `new` prints the folder (`<folder>` below); on a resumed session it prints the existing one:
-carry on from what is there, and first collect every `gen/*.pending` job (section 4).
+carry on from what is there. IF `spira auth whoami` fails (401), reply `QUESTION Spira sign-in
+failed (401): someone needs to run spira auth login`. Never enter credentials.
 
 ### 1. Decide the inputs (don't ask)
 
@@ -232,7 +229,7 @@ is a bank idea. All research happens inside the run (steps 2–3); nothing is pr
   means the broad group** the brief's audience table names (for PartGenie: engineer, FAE, buyer,
   student or maker); no table → split the brief's audience line into groups, add the table to
   `BRIEF.md`, and use it. "Junior engineer" and "senior engineer" are both engineer.
-- **Reserve it at once** (Super Vega: the designers of one batch pick at the same time, so the pick is
+- **Reserve it at once** (Super Nova: the designers of one batch pick at the same time, so the pick is
   claimed before research, not at a gate):
   ```bash
   python3 "<lsc>/tools/lsc.py" reserve "<folder>" --client <client> --idea <ID> --kind <KIND> --pain "<pain type>" --persona "<broad group>" --setting "<specific place>" --hook "<filled hook>"
@@ -377,8 +374,8 @@ with `lsc.py append sources:<client> "| <file> | <URL> | <date captured> | <devi
 **Capture only factual UI:**
 - Use `<lsc>/clients/<client>/screens/` if it already has the screens the copy needs, at the right device size.
 - Otherwise capture with Playwright at the chosen size and save to `<lsc>/clients/<client>/screens/<device>/`:
-  write the script in `<folder>/work/capture-<name>.py` (Python, `playwright.sync_api`, the system Chromium
-  via `executable_path=os.environ.get("CHROME_PATH") or "/usr/bin/chromium"`, signed out) and run it with `python3 "<lsc>/tools/lsc.py" py "<folder>" "<folder>/work/capture-<name>.py"`.
+  write the script in `<folder>/work/capture-<name>.py` (Python, `playwright.sync_api`, Chromium,
+  signed out) and run it with `python3 "<lsc>/tools/lsc.py" py "<folder>" "<folder>/work/capture-<name>.py"`.
   Script the feature in use: navigate, type the query, click, wait for the real result, scroll. Typed
   inputs are the only text you write; everything else is what the product really returns. Never type an
   invented URL, shop name or domain (it may be someone's real business): use a plain-language request,
@@ -409,23 +406,23 @@ the screen" into every phone prompt here.
 ### 7. Lock the person, then the slides (no picking by anyone else)
 
 - Generate 2 Soul options of the person (`lsc.py job "<folder>" ai-influencer-image lock-a '<json>' 7`,
-  and `lock-b`; submit and wait on both at once). Pick the one that best fits the noun phrase with no artifacts
+  then `lock-b`; both at once is fine). Pick the one that best fits the noun phrase with no artifacts
   (hands, eyes, text), and write why in the report. **References must be public URLs:** a job's own
-  result URL (`wait_ai_job` returns it, and the metadata's `jobs` keep it as `resultUrl`) is already hosted:
-  pass it as is, never re-host a Spira output (toolkit section 2). Only a file that exists only on disk
-  (a crop you made) is hosted, with `host_file` (its URL).
+  result URL (the tool prints it, and `gen/<name>.json` keeps it as `source_url`) is already hosted:
+  pass it as is, never re-upload a Spira output (toolkit section 2). Only a file that exists only on disk
+  (a crop you made) is uploaded, with `spira --json assets upload "<file>"` (its `data.url`).
 - Then slide 01 alone. It is the **place reference** for every no-person and hands slide (Nano Banana
   gets the place, never the person lock). Check the face, outfit and place against the lock. If it holds,
   do the rest, one job per slide:
-  `python3 "<lsc>/tools/lsc.py" job "<folder>" <model> s<NN> '<inputs-json>' <listed credits>`, then the
-  submit, `submitted`, wait and `record` of section 4. Slides that don't depend on each other run at the same time.
+  `python3 "<lsc>/tools/lsc.py" job "<folder>" <model> s<NN> '<inputs-json>' <listed credits>`.
+  Slides that don't depend on each other may run at the same time.
 - Check every slide: same person, outfit and place; the right camera angle; no melted text or extra
   fingers; the phone upright. **Re-roll a failing slide once.** If it fails again, keep the better take
   and list it under Failed checks.
 - The **whole phone in view, nothing in front of it** (no book, hand or cup over the screen). A
   half-hidden screen gives `screen_fit.py` no bottom edge, so the fitted screen leans and spills onto
   what covers it. Check this before fitting; re-roll if it fails.
-- GPT Image 2.5 can queue 30+ minutes. Don't resubmit: when `wait_ai_job` says `stillRunning`, wait again on the same `jobId`.
+- GPT Image 2.5 can queue 30+ minutes. Don't resubmit: if `job` says it stopped polling, run `fetch`.
 
 ### 8. Screens, grade, text (local, 0 credits)
 
@@ -439,7 +436,7 @@ All through `lsc.py run "<folder>" <script> ...`, with intermediates in `<folder
 - Grade: `grade <in.png> <folder>/work/s<NN>-graded.png <left|right|top-left|top-right> [strength]`
   (saturation −6%, contrast −5%, a faint off-frame glow).
 - Text: write `<folder>/work/text.json` (the format is at the top of `scripts/render_text.py`) with
-  `"out_dir": "<folder>/slides"`, `"name": "<Task ID> - <Client> - <Title>"`, `"maker": "SuperVega"`,
+  `"out_dir": "<folder>/slides"`, `"name": "<Task ID> - <Client> - <Title>"`, `"maker": "SuperNova"`,
   `"version": 1`, the size (feed `1080`×`1350`; story `1152`×`2048`), `"style"` (story `box`, feed
   `outline`), `"brand"` (the brief's brand color) and the slides; then `render_text <folder>/work/text.json`.
   Place text in **each photo's own open space**, never one fixed band. Story = lowercase on black boxes;
@@ -483,14 +480,15 @@ All through `lsc.py run "<folder>" <script> ...`, with intermediates in `<folder
 - **Scorecard** (step 9): one row per slide, 6 checks 1–5, total /30.
 - **Run cost:**
   ```
-  | Started | Delivered | Time to complete | Paid jobs | Credits |
+  | Started | Delivered | Time to complete | Paid jobs | Credits (balance before → after) |
   |---|---|---|---|---|
   ```
-  Credits here are the sum of the jobs' listed credits (the metadata's `total_credits`).
+  Credits here are the sum of the jobs' own credits (the metadata's `total_credits`); the balance figures
+  are context only.
 - **Failed checks:** anything in this skill you couldn't follow, and why. Don't re-run paid jobs to hide them.
 - Guesses, brief/site conflicts, simulated UI, and anything a person should know.
 
-`<folder>/out/notes.md` (what Vega sends the requester):
+`<folder>/out/notes.md` (what Nova posts in the requester's thread):
 ```
 # <Task ID> · <Client> · <title>
 <format> · <N> slides · idea <ID> (<kind>, <pain type>)
@@ -514,10 +512,10 @@ All through `lsc.py run "<folder>" <script> ...`, with intermediates in `<folder
 Then the logs and the metadata:
 ```bash
 python3 "<lsc>/tools/lsc.py" mark "<folder>" --client <client> --idea <ID> used
-python3 "<lsc>/tools/lsc.py" append angles "| <Task ID> <Title> | <Client> | SuperVega | <9:16 story or 4:5 feed> | <N> | <Kind> | <pain type> | <pains used> | <persona group> | <person noun phrase> | <place> | <feature> | <idea ID> |"
+python3 "<lsc>/tools/lsc.py" append angles "| <Task ID> <Title> | <Client> | SuperNova | <9:16 story or 4:5 feed> | <N> | <Kind> | <pain type> | <pains used> | <persona group> | <person noun phrase> | <place> | <feature> | <idea ID> |"
 python3 "<lsc>/tools/lsc.py" finish "<folder>" --title "<title>"
 ```
-No doc or drive delivery: Vega delivers the slides.
+No doc or drive delivery: Nova delivers the slides.
 
 ## 6. Files
 
@@ -528,14 +526,14 @@ Project/<BrandName>/
     copy.md          per slide: text, shot type, angle, frame, text space; hero, place, device choices, skipped ideas
     prompts.md       every prompt, listed prices, the quote and the cap
     report.md        Rey's report (summary, idea, lock, scorecard, run cost, failed checks)
-    gen/             every Spira output: <name>.png + <name>.json (the payload) + <name>.pending (jobId, until recorded)
+    gen/             every Spira output: <name>.png + <name>.json (source_url) + <name>.job.json (jobId)
     work/            bars, fitted screens, graded photos, text.json, capture scripts, saved pages
-    slides/          render_text.py's named PNGs: "<Task ID> - <Client> - <Title> - Slide NN - SuperVega - vN.png"
+    slides/          render_text.py's named PNGs: "<Task ID> - <Client> - <Title> - Slide NN - SuperNova - vN.png"
     out/
       slide-01.jpg … slide-NN.jpg   (feed 1080×1350; story 1080×1920)
       contact.png
       notes.md       with the ## Captions section
-    jobs.jsonl       every Spira job, as `record` logged it
+    jobs.jsonl       every Spira job, as the tool logged it
     deletable/       rejected takes, replaced files
   metadata/<Task ID>-<brandname>-<MM-DD>.json
 ```
@@ -558,7 +556,7 @@ is designed, so the render step only confirms.
   ```
   - `"ok": true`: read the clock with `date`, run `finish` again (it refreshes the minutes), and reply
     `DONE <folder> <total credits> <minutes>`, with the folder's full path, the metadata's
-    `total_credits` and the minutes from your start time. Record it on the sheet and message Vega
+    `total_credits` and the minutes from your start time. Record it on the sheet and message Nova
     exactly as Atlas's render message says (the `VIDEO` line carries the folder path:
     `VIDEO DONE <folder> <credits> <minutes> | sheet <sheet.md> | Task ID <Task ID>`).
   - `"ok": false`: fix what it names (a missing caption, a slide not exported, a missing report) and
@@ -574,10 +572,11 @@ IF this run taught something the references do not already say, add it to the me
 You never ask for approval, an idea, a person, a place, a font or a go: decide. Reply
 `QUESTION <what is missing>` to Atlas only when:
 
-- the quote is over the cap (150, or the cap Vega raised), or over 500 (section 4);
+- the quote is over the cap (150, or the cap Nova raised), or over 500 (section 4);
 - the request has no Task ID, no Brand number, or no website;
 - the client's website cannot be reached at all (curl and a Playwright capture both fail) and the brief
   is not `confirmed`;
+- the Spira sign-in or the balance check fails;
 - every idea in the bank and the ledger fails the no-repeat or truth rules for this client.
 
 A failed job, a page behind a sign-in, a brief marked draft, a client not in the ledger or a site with no
@@ -606,18 +605,22 @@ Same [place] as the reference image; keep the room, change the light to [time an
 
 ## Hard rules
 
-1. Nothing is generated before the quote is written and fits the cap (150 unless Vega raised it; never over 500).
+1. Nothing is generated before the quote is written and fits the cap (150 unless Nova raised it; never over 500).
 2. **Never run a GPT edit on an image GPT already edited.** Each version is one edit from its Soul source.
 3. People = Soul → GPT 2.5. Never Nano Banana or GPT alone for faces.
 4. Real product UI, or a factual HTML simulation of it (step 5); never AI-generated.
 5. One hero and one place per carousel (side characters max 2 slides); the product only in the last 2–3 slides.
-6. Every generation through `lsc.py job` + `submit_ai_job` + `wait_ai_job` + `lsc.py record`; never the CLI; credits are the listed price, never the balance.
+6. Every generation through the Spira CLI, through `lsc.py job`; credits from each job, never from the balance.
 7. Every brief, screen, style ref and log lives in `<lsc>`; every build file in the build folder. Nothing anywhere else.
 8. The idea is reserved with `lsc.py reserve` before research, and marked used (or dropped) at the end; every shared table row goes through `lsc.py`.
 9. Never sign in, post, like or follow anywhere; never use anyone's browser.
 10. Never delete a file: move it to `deletable/`. Never skip step 0 or step 10.
 
-## Job traps
+## CLI traps (Rey's)
 
-- GPT Image 2.5 can queue 30+ minutes. Don't resubmit: wait again on the same `jobId`.
-- `PROVIDER_FAILED` isn't charged: `record` it as failed, then retry once under a new job name.
+- `--wait` gives up after 10 minutes and a retry makes a **second paid job**. `job.py` submits once and
+  polls the same ID (up to an hour); after that, `lsc.py fetch` picks it up.
+- GPT Image 2.5 can queue 30+ minutes. Don't resubmit.
+- Result URLs need a browser User-Agent or they return 403 (`job.py` and `fetch` send one; with `curl`,
+  pass `-A "Mozilla/5.0"`). `PROVIDER_FAILED` isn't charged; retry once (a new job name).
+- On this Mac `spira` is a normal executable; `spira_cli.py`'s Windows `.cmd` handling does not apply.

@@ -11,6 +11,9 @@ script.txt and cast.json (both written by you), and everything the tool writes:
   split <two-shot image>
              Cut the 16:9 two-shot in half -> persona/left.png, persona/right.png, and pad each
              to a square with black on its left and right (no crop) -> persona/left-sq.png, right-sq.png.
+  tts [--only 3,7]
+             Every line's audio with ElevenLabs Voice TTS (voice clone, eleven_multilingual_v2,
+             stable), at most 3 jobs at a time, failed jobs retried -> lines/NN_TAG.mp3.
   join       Join the lines in order with a 0.35 s pause between turns -> vo.mp3, and note every
              line's start and end (lines.json).
   mark prelap <n> [...] | mark listen <n> [...] | mark clear
@@ -18,6 +21,11 @@ script.txt and cast.json (both written by you), and everything the tool writes:
              listen <n>: line n is a listening shot (split screen with line n-1's speaker).
   pad        Pad each line's audio for its plan -> lines/NN_TAG-pad.mp3, and set each clip's
              start on the timeline (lines.json clip_start).
+  upload     Upload the two padded halves and every padded line with spira assets upload.
+  heygen --test | heygen [--only 3,7]
+             --test renders the shortest line only and saves a frame to look at
+             (clips/NN_TAG-frame.jpg). Without it: every line still missing a clip, 3 at a time,
+             failed jobs retried -> clips/NN_TAG.mp4 (HeyGen Avatar 4, 1:1, 1080p, stable).
   check      Every clip's length matches its padded audio, and the pre-lap and listening
              silences are still in the clip.
   align      Scribe (Whisper as fallback; shared make-timings.py) on vo.mp3, then the words aligned to the script:
@@ -31,12 +39,11 @@ script.txt and cast.json (both written by you), and everything the tool writes:
              Look for black in the finished video: whole black frames and black bands at the
              edges or on the split-screen seam. Prints the times; none means clean.
 
-This tool makes no generation and no upload: the voices (lines/NN_TAG.mp3) and the talking clips
-(clips/NN_TAG.mp4) are generated with submit_ai_job / wait_ai_job, and the padded halves and
-padded lines are hosted with host_file, all by you (see the skill). Every generation is recorded
-in the video's metadata file (assets, with its credits), written by hand.
+Every generation is added to the video's metadata file (assets, with its credits) when the
+metadata file exists: <root>/metadata/<name>.json.
 """
-import json, re, subprocess, sys
+import json, math, re, shutil, subprocess, sys, time
+from concurrent.futures import ThreadPoolExecutor
 from difflib import SequenceMatcher
 from datetime import datetime
 from pathlib import Path
@@ -46,6 +53,8 @@ SHARED = HERE.parents[1] / "DesignerShared"
 PAUSE = 0.35          # seconds between turns
 PRELAP = 1.0          # silence added to the start of a pre-lap clip
 MIN_PRELAP_LINE = 1.5 # never pre-lap out of a line shorter than this
+MAX_JOBS = 3
+TRIES = 3
 
 # ---------- helpers ----------
 def die(msg): print(msg); sys.exit(1)
@@ -89,6 +98,46 @@ def retire(m, f):
             if e.get("file") == str(f) and e.get("status") == "in-use":
                 e.update(status="deletable", file=str(new), replaced_by=str(f))
         save(mf, d)
+
+def spira(*args, timeout=3600):
+    out = run(["spira", "--json", *args], timeout=timeout)
+    return json.loads(out)
+
+def result_url(d):
+    urls = d.get("resultUrls") or (d.get("data") or {}).get("resultUrls") or []
+    return urls[0] if urls else None
+
+def download(url, dest, tries=4):
+    """Fetch a result file. Sends a browser User-Agent: static.viralwell.ai refuses Python's default (HTTP 403)."""
+    import urllib.request
+    for t in range(1, tries + 1):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"})
+            with urllib.request.urlopen(req, timeout=300) as r, open(dest, "wb") as f:
+                shutil.copyfileobj(r, f)
+            return
+        except Exception:
+            if t == tries: raise
+            time.sleep(3 * t)
+
+def job(model, inputs, dest, label):
+    """One generation with --wait, retried up to TRIES times. Returns (url, error)."""
+    err = None
+    for t in range(1, TRIES + 1):
+        try:
+            d = spira("ai", "jobs", "create", "--model-id", model, "--inputs-json", json.dumps(inputs, ensure_ascii=False),
+                      "--wait", "--wait-timeout", "20m", timeout=1500)
+            url = result_url(d)
+            if not url: raise RuntimeError(f"no result ({d.get('status') or (d.get('data') or {}).get('status')})")
+        except Exception as e:
+            err = str(e)[:300]; print(f"{label}: try {t} failed: {err}", flush=True)
+            time.sleep(5 * t); continue
+        try:                                   # the job is done and billed: never re-create it for a failed download
+            download(url, dest)
+            return url, None
+        except Exception as e:
+            return None, f"download failed ({str(e)[:200]}); the job was billed, its result is at {url}"
+    return None, err
 
 def pick(L, only):
     if not only: return L
@@ -149,6 +198,25 @@ def cmd_split(m, a):
         print(f"persona/{side}.png {h.size[0]}x{h.size[1]} -> persona/{side}-sq.png {side_len}x{side_len} "
               f"(picture {h.size[0]} wide in the middle, {(side_len - h.size[0]) // 2} px black each side)")
 
+# ---------- tts ----------
+def cmd_tts(m, a):
+    L = lines_of(m); (m / "lines").mkdir(exist_ok=True)
+    todo = pick(L, opt(a, "--only"))
+    def one(l):
+        dest = m / "lines" / f"{l['file']}.mp3"; retire(m, dest)
+        inputs = {"text": l["say"], "referenceAudio": [l["voice"]], "providerModelId": "eleven_multilingual_v2", "qualityMode": "stable"}
+        url, err = job("elevenlabs-voice-clone-tts", inputs, dest, l["file"])
+        if url:
+            credits = round(0.01 * len(l["say"]), 2)
+            meta_add(m, {"file": str(dest), "kind": "audio", "tool": "elevenlabs-voice-clone-tts", "prompt": json.dumps(inputs, ensure_ascii=False),
+                         "url": url, "credits": credits})
+            print(f"{dest.name} {dur(dest):.2f}s {credits} credits", flush=True)
+        return l["n"], url, err
+    with ThreadPoolExecutor(MAX_JOBS) as ex: res = list(ex.map(one, todo))
+    failed = [f"{n}: {e}" for n, u, e in res if not u]
+    if failed: die("FAILED lines (rerun with --only): " + "; ".join(failed))
+    print(f"{len(res)} lines voiced")
+
 # ---------- join ----------
 def cmd_join(m, a):
     L = lines_of(m); t = 0.0; inputs = []; fc = []
@@ -157,7 +225,7 @@ def cmd_join(m, a):
     k = 0
     for i, l in enumerate(L):
         f = m / "lines" / f"{l['file']}.mp3"
-        if not f.exists(): die(f"missing {f.name}: generate the line voices first")
+        if not f.exists(): die(f"missing {f.name}: run `tts` first")
         d = dur(f); l["dur"] = round(d, 3); l["start"] = round(t, 3); l["end"] = round(t + d, 3); t += d
         inputs += ["-i", str(f)]; fc.append(f"[{k}:a]aresample=44100,aformat=channel_layouts=mono[a{k}]"); k += 1
         if i < len(L) - 1:
@@ -207,6 +275,56 @@ def cmd_pad(m, a):
         l["pad_dur"] = round(dur(dst), 3); l["clip_start"] = round(l["start"] - l["pad_start"], 3)
         print(f"{dst.name}  +{l['pad_start']:.2f}s start, +{l['pad_end']:.2f}s end -> {l['pad_dur']:.2f}s, clip starts at {l['clip_start']:.2f}s")
     save(m / "lines.json", L)
+
+# ---------- upload ----------
+def upload(f):
+    d = spira("assets", "upload", str(f))
+    u = (d.get("data") or {}).get("url") or d.get("url")
+    if not u: raise RuntimeError(f"no url for {f.name}")
+    return u
+
+def cmd_upload(m, a):
+    L = lines_of(m); cast = load(m / "cast.json")
+    for side in ("left", "right"):
+        f = m / "persona" / f"{side}-sq.png"
+        if not f.exists(): die(f"missing {f.name}: run `split` first")
+        u = upload(f); cast.setdefault("images", {})[side] = u; print(f"{f.name} {u}", flush=True)
+    save(m / "cast.json", cast)
+    for l in L:
+        f = m / "lines" / f"{l['file']}-pad.mp3"
+        if not f.exists(): die(f"missing {f.name}: run `pad` first")
+        l["audio_url"] = upload(f); print(f"{f.name} {l['audio_url']}", flush=True)
+    save(m / "lines.json", L)
+
+# ---------- heygen ----------
+def cmd_heygen(m, a):
+    L = lines_of(m); cast = load(m / "cast.json"); imgs = cast.get("images") or die("run `upload` first")
+    (m / "clips").mkdir(exist_ok=True)
+    if "--test" in a:
+        todo = [min(L, key=lambda l: l.get("pad_dur", 1e9))]
+    elif opt(a, "--only"):
+        todo = pick(L, opt(a, "--only"))
+    else:
+        todo = [l for l in L if not (m / "clips" / f"{l['file']}.mp4").exists()]
+    if any(not l.get("audio_url") for l in todo): die("some lines have no uploaded audio: run `upload`")
+    def one(l):
+        dest = m / "clips" / f"{l['file']}.mp4"; retire(m, dest)
+        inputs = {"referenceImage": [imgs[l["side"]]], "referenceAudio": [l["audio_url"]], "size": "1:1",
+                  "resolution": "1080p", "mode": "stable", "talkingStyle": "stable"}
+        url, err = job("heygen-avatar-4", inputs, dest, l["file"])
+        if url:
+            credits = round(10 * math.ceil(l["pad_dur"]), 2)
+            meta_add(m, {"file": str(dest), "kind": "video", "tool": "heygen-avatar-4", "prompt": json.dumps(inputs), "url": url, "credits": credits})
+            print(f"{dest.name} {dur(dest):.2f}s {credits} credits", flush=True)
+        return l, url, err
+    with ThreadPoolExecutor(1 if "--test" in a else MAX_JOBS) as ex: res = list(ex.map(one, todo))
+    failed = [f"{l['n']}: {e}" for l, u, e in res if not u]
+    if failed: die("FAILED clips (rerun with --only): " + "; ".join(failed))
+    if "--test" in a:
+        l = todo[0]; fr = m / "clips" / f"{l['file']}-frame.jpg"
+        run(["ffmpeg", "-y", "-v", "error", "-ss", str(min(l["pad_dur"] / 2, 2)), "-i", str(m / "clips" / f"{l['file']}.mp4"), "-frames:v", "1", str(fr)])
+        print(f"TEST frame to look at: {fr}")
+    print(f"{len(res)} clips rendered")
 
 # ---------- check ----------
 def silent_spans(f):
@@ -340,8 +458,8 @@ def cmd_black(m, a):
     for s, e, why in spans: print(f"BLACK {s:.1f}s-{e + 0.1:.1f}s: {why}")
     die(f"{len(spans)} black span(s)")
 
-CMDS = {"lines": cmd_lines, "split": cmd_split, "join": cmd_join, "mark": cmd_mark, "pad": cmd_pad,
-        "check": cmd_check, "align": cmd_align, "captions": cmd_captions,
+CMDS = {"lines": cmd_lines, "split": cmd_split, "tts": cmd_tts, "join": cmd_join, "mark": cmd_mark, "pad": cmd_pad,
+        "upload": cmd_upload, "heygen": cmd_heygen, "check": cmd_check, "align": cmd_align, "captions": cmd_captions,
         "music": cmd_music, "black": cmd_black}
 
 if __name__ == "__main__":

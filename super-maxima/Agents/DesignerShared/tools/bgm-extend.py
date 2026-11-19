@@ -3,8 +3,6 @@
 silence, then chains copies with 2 s crossfades until the target length,
 and trims to it. Usage: python3 tools/bgm-extend.py in.mp3 out.wav SECONDS"""
 import subprocess, sys, math, os, tempfile
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import profile as scratch_profile  # noqa: E402,F401  (redirects tempfile to the scratch root)
 
 src, out, target = sys.argv[1], sys.argv[2], float(sys.argv[3])
 XF = 2.0

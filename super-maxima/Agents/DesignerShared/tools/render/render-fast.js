@@ -7,16 +7,16 @@
 //   2. Pre-decodes every <video> clip in the editable once, in order, into still
 //      frames (JPEG, or PNG with alpha for transparent clips). Seeking compressed
 //      video for every frame was 90% of the old renderer's CPU.
-//   3. Headless Chrome draws each frame in software (SwiftShader); the clips show the
+//   3. Headless Chrome draws each frame on the GPU (Metal); the clips show the
 //      pre-decoded frame for that moment instead of seeking.
-//   4. Frames are encoded with libx264.
+//   4. Frames are encoded on the Mac's media engine (h264_videotoolbox).
 //   5. Audio: voice normalised to -16 LUFS, music bed 20 LU under it with fades,
 //      and every <audio class="sfx" data-at="<seconds>"> mixed in at its time.
 //   6. Embeds the frame at --cover seconds as the MP4's cover image.
 //   7. Checks the output and prints one JSON line. Exit code 0 only if it passed.
-const { chromium } = require('playwright-core'); const profile = require('./profile');
+const { chromium } = require('playwright-core');
 const { spawn, execFileSync, execFile } = require('child_process');
-const fs = require('fs'), path = require('path'), http = require('http');
+const fs = require('fs'), path = require('path'), http = require('http'), os = require('os');
 
 // ---------- arguments ----------
 const argv = process.argv.slice(2);
@@ -27,7 +27,7 @@ if (!htmlArg || !outArg) { console.error('usage: render-fast.js <editable.html> 
 const coverSec = parseFloat(opt('--cover', 'NaN'));
 if (!(coverSec > 0)) { console.error('--cover <seconds> is required and must be after 0: the clearest poster frame, never the first frame'); process.exit(2); }
 const sfxGain = parseFloat(opt('--sfx-gain', '0'));
-const WORKERS = parseInt(opt('--workers', String(profile.defaultWorkers())), 10);
+const WORKERS = parseInt(opt('--workers', '4'), 10);
 const fps = parseInt(opt('--fps', '30'), 10);
 
 const htmlPath = path.resolve(htmlArg), out = path.resolve(outArg);
@@ -46,7 +46,7 @@ const sfxTags = [...html.matchAll(/<audio[^>]*class="[^"]*\bsfx\b[^"]*"[^>]*>/g)
   .map(t => ({ src: attr(t, 'src'), at: parseFloat(attr(t, 'data-at')), gain: parseFloat(attr(t, 'data-gain') || '0') }))
   .filter(s => s.src && s.at >= 0 && s.at * 1000 < durationMs);
 const frames = Math.round(durationMs / 1000 * fps);
-const tmp = profile.makeTempDir('render-fast-');
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'render-fast-'));
 const t0 = Date.now();
 const run = (cmd, args) => new Promise((res, rej) => execFile(cmd, args, { maxBuffer: 1 << 26 }, (e, so, se) => e ? rej(new Error(se || e.message)) : res(so)));
 
@@ -81,7 +81,7 @@ async function predecode() {
         const lib = JSON.parse(await run('ffprobe', ['-v', 'error', '-c:v', probe.codec_name === 'vp9' ? 'libvpx-vp9' : 'libvpx',
           '-select_streams', 'v:0', '-show_entries', 'stream=pix_fmt', '-of', 'json', file])).streams[0] || {};
         alpha = fmtHasAlpha(lib.pix_fmt);
-      } catch {}
+      } catch (e) {}
     }
     const key = `c${i}`; const outDir = path.join(framesRoot, key); fs.mkdirSync(outDir, { recursive: true });
     if (alpha) {
@@ -134,12 +134,13 @@ const INSTALL = meta => {
   }));
   return vids.filter(v => v.__m).length;
 };
-const ENC = ['-c:v', 'libx264', '-preset', profile.preset('final'), '-crf', '17', '-threads', String(profile.x264Threads())];
+const hwEncoder = (() => { try { return execFileSync('ffmpeg', ['-hide_banner', '-encoders']).toString().includes('h264_videotoolbox'); } catch (e) { return false; } })();
+const ENC = hwEncoder ? ['-c:v', 'h264_videotoolbox', '-b:v', '10M', '-profile:v', 'high', '-allow_sw', '0'] : ['-c:v', 'libx264', '-preset', 'medium', '-crf', '17'];
 
 async function worker(id, from, to, port, meta) {
   const seg = path.join(tmp, `seg${String(id).padStart(2, '0')}.mp4`);
-  const launch = { args: ['--force-device-scale-factor=1', ...profile.gpuArgs()] };
-  launch.executablePath = process.env.CHROME_PATH || '/usr/bin/chromium';
+  const launch = { args: ['--force-device-scale-factor=1', '--use-angle=metal', '--enable-gpu-rasterization', '--ignore-gpu-blocklist', '--enable-zero-copy'] };
+  if (process.env.CHROME_PATH) launch.executablePath = process.env.CHROME_PATH; else launch.channel = 'chrome';
   const browser = await chromium.launch(launch);
   const page = await browser.newPage({ deviceScaleFactor: 1 });
   page.on('pageerror', e => console.error(`w${id} page error:`, e.message));
@@ -233,7 +234,7 @@ async function worker(id, from, to, port, meta) {
   fs.rmSync(tmp, { recursive: true, force: true });
   const usedClips = meta.filter(m => m.count).length;
   console.log(JSON.stringify({ ok: problems.length === 0, out, seconds: gotSecs, frames: gotFrames, cover_at: coverSec,
-    clips_predecoded: `${usedClips}/${meta.length}`, alpha_clips: meta.filter(m => m.count && m.ext === '.png').length, sfx_mixed: sfxMixed, encoder: 'software',
+    clips_predecoded: `${usedClips}/${meta.length}`, alpha_clips: meta.filter(m => m.count && m.ext === '.png').length, sfx_mixed: sfxMixed, encoder: hwEncoder ? 'hardware' : 'software',
     previous_moved_to: movedPrevious, render_seconds: Math.round((Date.now() - t0) / 1000), problems }));
   process.exit(problems.length ? 1 : 0);   // keep-alive sockets otherwise hold the event loop open
 })().catch(e => { console.error(e); fs.rmSync(tmp, { recursive: true, force: true }); process.exit(1); });

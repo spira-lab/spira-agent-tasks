@@ -1,6 +1,6 @@
 {
  "name": "Clone Source Understanding <Task ID>",
- "note": "Spira workflow definition: video in -> Gemini 3.1 Pro (textChatLlm) -> breakdown text. Used only as the source of the prompt (userPrompt): the agent runs it as a submit_ai_job per source, see the skill section 7. Read only.",
+ "note": "Spira workflow definition: video in -> Gemini 3.1 Pro (textChatLlm) -> breakdown text. Never created by hand: Agents/ClonerVideoDesigner/tools/understand_source.py creates one workflow per run, named 'Clone Source Understanding <Task ID>', from this definition. Read only.",
  "workflowDefinition": {
   "edges": [
    {

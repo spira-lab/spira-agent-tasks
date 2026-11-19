@@ -1,0 +1,38 @@
+# Atlas's approved tool list. The background Atlas session and every designer it starts may use
+# only these; anything else is refused (nobody is there to approve it). One entry per line.
+# File and agent tools
+Read
+Write
+Edit
+Glob
+Grep
+Agent
+SendMessage
+ToolSearch
+TaskOutput
+# Production commands
+Bash(spira:*)
+Bash(python3:*)
+Bash(node:*)
+Bash(ffmpeg:*)
+Bash(ffprobe:*)
+Bash(curl:*)
+Bash(yt-dlp:*)
+# Higgsfield CLI (owner, 2026-11-14): kept, but ONLY with approval. Use it only when Nova passes on the owner's OK for that job (e.g. a Wan outage); otherwise use the usual Spira route.
+Bash(higgsfield:*)
+# Plain shell helpers used by the skills
+Bash(date:*)
+Bash(pwd)
+Bash(ls:*)
+Bash(mkdir:*)
+Bash(mv:*)
+Bash(cp:*)
+Bash(du:*)
+Bash(cat:*)
+Bash(echo:*)
+Bash(printf:*)
+Bash(head:*)
+Bash(tail:*)
+Bash(wc:*)
+Bash(xargs:*)
+Bash(test:*)

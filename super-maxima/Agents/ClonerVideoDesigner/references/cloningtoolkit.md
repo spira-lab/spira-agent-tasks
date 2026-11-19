@@ -26,8 +26,8 @@ generated, and the source creator's face never survives into the clone.
 If a technique would put the source's actual pixels into the clone, it's
 the wrong technique.
 
-`<shared>` is `Super Vega/Agents/DesignerShared`; `<cloner>` is
-`Super Vega/Agents/ClonerVideoDesigner`.
+`<shared>` is `Super Nova/Agents/DesignerShared`; `<cloner>` is
+`Super Nova/Agents/ClonerVideoDesigner`.
 
 ## Before anything: the pre-requisite check
 
@@ -36,39 +36,34 @@ clone. A missing login, model, tool or renderer found at the end costs
 the whole run. Where files go is in `clonerfilemanagement.md` and the
 shared file-management skill.
 
-## Everything runs through submit_ai_job and wait_ai_job
+## Everything runs through the Spira CLI
 
-Every generation and processing job (images, personas, video, cut-outs,
-voice, music, transcripts, source understanding) is a Spira AI job run with
-the tools on the MCP server `worker_tools`: `submit_ai_job`, `wait_ai_job`
-and `host_file`, as the toolkit's submit_ai_job / wait_ai_job / host_file
-steps describe. Never run a job through the `spira` CLI. Local tools only
-handle files: ffmpeg for cutting, joining and inspecting, and the shared
-tools. A remote file is fetched with the `ai` tool's download action (never
-curl or wget).
+Use the Spira CLI for every generation and processing tool: images,
+personas, video, cut-outs, voice, music, transcripts. Local tools only
+handle files: ffmpeg for cutting, joining and inspecting, yt-dlp for
+downloading the source, and the shared tools.
 
 - **Before the first call to any model**, read its schema:
-  `spira ai models get <model-id>` (read-only docs). It lists the accepted fields,
+  `spira --json ai models get <model-id>`. It lists the accepted fields,
   allowed values, notes and live prices. The notes often warn of a limit
   before you hit it.
 - **Every input must be a public URL.** Host local files as the shared
-  toolkit section 2 says (`host_file`, `path` root-relative, the URL it
-  returns is the input); never re-host a job's output or a `static.viralwell.ai` URL.
-- **A set of jobs:** write one payload file per job, submit them all in
-  one turn (one `submit_ai_job` call each, `modelId` and `inputs`), write
-  each returned `jobId` to its `.pending` file at once, then wait on all of
-  them in one turn (one `wait_ai_job` call each, with `jobId` and `saveTo`).
-  A single job is the same two calls. `wait_ai_job` waits 300 s by default
-  and up to 600 with `timeoutSec`; on `stillRunning: true` call it again
-  with the same `jobId` and `saveTo` (Wan jobs can take 30 minutes: wait
-  again until done).
+  toolkit section 2 says (`spira assets upload "<file>" --json`, the URL in
+  `data.url`); never re-upload a CLI output or a `static.viralwell.ai` URL.
+- **A set of jobs:** write one payload file per job, then
+  `python3 "<shared>/tools/spira-jobs.py" submit <model-id> <payloads...>`
+  and `... wait <ext> <files.job...>`. It submits everything first, then
+  waits and downloads each result. **A single job:**
+  `spira --json ai jobs create --model-id <id> --inputs-json '<json>'`,
+  save the job id at once (there is no command to list jobs later), then
+  `spira --json ai jobs wait <jobId>` (Wan jobs: add `--timeout 30m`).
 - **Never block the whole clone on one job, and never poll from the
   shell.** Submit every independent job together and keep working on the
   stage while they render. Video jobs take one to more than ten minutes.
-- **Check a job:** call `wait_ai_job` again with the same `jobId`: it
-  returns `status`, `resultUrls` for the output and the provider's error
-  when it failed, and is not charged again. The charge is the live price
-  times what was billed.
+- **Check a job:** `spira --json ai jobs status <jobId>`: `data.status`,
+  `data.latestExecution.resultUrls` for the output,
+  `data.latestExecution.error` for why it failed, `data.credits` for the
+  charge, `createdAt`/`updatedAt` for the true render time.
 - **Credits come from the job,** never the balance (the account is
   shared). See the skill, section 12.
 - **Record speed, cost and quality for every job** in `jobs.md` and the
@@ -405,10 +400,14 @@ something a prompt can describe. Each step below answers one of those.
   Decide from the understanding step below, not by default, and never ask.
 
 **1. Understand the source's music. Three ears, each wrong somewhere.**
-- **Name it if you can:** the sound name, if the request or the source page gives one. Knowing it's a "slowed" edit explains the
+- **Name it if you can:** `spira --json media info <url>`, or the sound
+  name if the request gives one. Knowing it's a "slowed" edit explains the
   tempo and texture.
 - **Gemini listens for the *what*:** vocals and lyrics, instruments,
-  genre, structure: the source-understanding job (the skill, section 7).
+  genre, structure: `understand_source.py` (the skill, section 7). The
+  script sets only the run's video URL and sends the full definition back;
+  **never update the workflow by hand with a partial definition**, which
+  wipes the Gemini node.
 - **Measure the *numbers*:** tempo, key, energy over time, where hits land
   against the cuts (librosa, through `music_cut.py`). Gemini once said
   ~120 BPM where four measurements agreed on 99.4. Trust the measurement.
@@ -485,7 +484,7 @@ backup route. Wait and retry on a schedule within the run; IF it stays
 down, reply FAILED with the outage as the reason. Never switch to an
 unlisted model.
 
-**FAILED with `error: null`:** call `wait_ai_job` again with the same `jobId`
+**FAILED with `error: null`:** re-check the status and `latestExecution`
 before planning a retake (see the lessons).
 
 **Rejections are free.** Charges land only on completed jobs.
@@ -556,7 +555,7 @@ that you were on new ground:
 
 ## Cost and speed at a glance
 
-Live Spira prices, 2026-10-24 (`spira ai models get <id>`). These
+Live Spira prices, 2026-10-24 (`spira --json ai models get <id>`). These
 replace the older figures in the original Cloner notes. Always confirm
 with `models get` before planning.
 
@@ -569,7 +568,7 @@ with `models get` before planning.
 | Person replacement, extra shots, motion + speech | `wan-3.0` | **720p 6.18/s** (480p 3.09, 1080p 12.35) | 3–8 min per clip |
 | Dances only | `kling-3.0-motion-control` | 9.52/s pro, 7.14/s standard | 6–8 min per clip |
 | Cut-out | `pixelcut-video-background-removal` | 2.2/s of source | about 1 min |
-| Source understanding | source-understanding job (Gemini 3.1 Pro, skill section 7) | about 2 | about 30 s |
+| Source understanding | `understand_source.py` → workflow `Clone Source Understanding <Task ID>` (Gemini 3.1 Pro) | about 2 | about 30 s |
 | Transcript | `make-timings.py` (Scribe) | about 1 per minute | seconds |
 | Music | `suno-music` (`v5_5`, custom mode) | 7 per job = 2 songs of about 65 s | about 25 s |
 | Voice line | `elevenlabs-text-to-speech` | 0.01 per character | seconds |

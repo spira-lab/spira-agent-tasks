@@ -1,7 +1,7 @@
 # Hermes — Working memory
 
 What the user asked Hermes to remember, kept across sessions. His upload tool reads it.
-Written only when the user (through Vega) asks Hermes to remember, change, or forget something.
+Written only when the user (through Nova) asks Hermes to remember, change, or forget something.
 
 ## Upload tags
 
@@ -10,8 +10,7 @@ under. A row with a Product applies to that product; a row with the Product empt
 rest of the brand. **For** says which rows of a batch the tag is for: `videos`, `carousels`
 (every slide of a carousel), or empty for both. A row for the kind (videos or carousels) wins over
 a row for both; then the product's own row wins over the brand's. The Tag ID is what the tool
-uploads with; Spira refuses an upload whose Tag ID no longer exists (`Tag not found.`). A Tag ID
-belongs to one Spira environment, the upload target that the tool names in its errors.
+uploads with; the tool checks it still exists in Spira before every upload.
 
 | Brand | Product | For | Tag (category / tag) | Tag ID |
 |---|---|---|---|---|

@@ -3,7 +3,7 @@
 Shared by every video designer, kept across sessions. It holds two things: the **design
 approach** (how designers work) and **word fixes** (the Reword table). A design approach entry
 applies to every video, unless it names a brand or a product: then it applies only to that
-brand's or product's videos. Vega, the operations manager, keeps the brands' standing
+brand's or product's videos. Nova, the operations manager, keeps the brands' standing
 preferences; those reach a designer through the request: its instructions, music, voice, and
 the other fields Atlas passes on.
 
@@ -76,4 +76,7 @@ Captions, subtitles, and any text on screen always use the original.
 | Kilohms (10 kΩ) | ten kilo-ohms ("10 kilohms" was transcribed as "ten kelms" with Brian, eleven_multilingual_v2) |
 | FUCASO | Foo-kah-so (with eleven_v3 it came back transcribed as "Fucaso", three syllables; the plain spelling was not tried) |
 | ICANS | eye-cans (with eleven_v3 it came back transcribed as "ICANS") |
+| Sp.PD-KHOM (Indonesian) | es-pe pe-de ka-ha-o-em (with gemini-omni-flash-1.1 it came back transcribed as "SPPD-KHOM", spelled letter by letter; the plain spelling was not tried) |
+| bervolume (Indonesian) | ber-vo-lu-me (with gemini-omni-flash-1.1 the plain spelling came back transcribed as "bervolum" twice; "ber-vo-lu-me" came back transcribed as "bervolume") |
 | pemerhati (Malay) | pe-merhati (with eleven_v3 and voice cgSgspJ2msm6clMCkdW9 the plain spelling came out as "pemberhati"; "pe-merhati" came back transcribed as "pemerhati") |
+| pengilat (Malay, "pengilat kuku") | peng-ilat (with eleven_v3 and voice cgSgspJ2msm6clMCkdW9 the plain spelling and "pe-ngilat" both came back transcribed as "penyilat"; "peng-ilat" came back transcribed as "pengilat") |

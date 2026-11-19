@@ -6,11 +6,15 @@ bar = 150
 canvas = Image.new("RGB", (W, H), (255, 255, 255))
 canvas.paste(im.crop((0, 0, W, H - bar)), (0, bar))
 d = ImageDraw.Draw(canvas)
-# the clock face: a semibold sans (Noto Sans SemiBold, then DejaVu Sans Bold, then Pillow's default).
+# the clock face: a semibold system sans (Rey's Windows build used Segoe UI Semibold, C:/Windows/Fonts/seguisb.ttf).
+# On this Mac: SF Pro (SFNS.ttf, a variable font set to its Semibold instance), then Helvetica Neue, Arial, Pillow's default.
 def clock_font(size):
-    for path, index, variation in (("/usr/share/fonts/truetype/noto/NotoSans-SemiBold.ttf", 0, None),
-                                   ("/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf", 0, None),
-                                   ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 0, None)):
+    for path, index, variation in (("/System/Library/Fonts/SFNS.ttf", 0, b"Semibold"),
+                                   ("/System/Library/Fonts/HelveticaNeue.ttc", 10, None),   # 10 = Helvetica Neue Medium
+                                   ("/System/Library/Fonts/HelveticaNeue.ttc", 0, None),
+                                   ("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 0, None),
+                                   ("/Library/Fonts/Arial Unicode.ttf", 0, None),
+                                   ("C:/Windows/Fonts/seguisb.ttf", 0, None)):
         try:
             f = ImageFont.truetype(path, size, index=index)
         except OSError:

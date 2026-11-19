@@ -6,7 +6,7 @@ description: The Cloner's additions to the shared file-management skill - what g
 # Where the Cloner saves its work
 
 The shared file-management skill is the rule: the brand folder
-`Super Vega/Project/<BrandName>/`, one editable per video in
+`Super Nova/Project/<BrandName>/`, one editable per video in
 `editable/`, its materials in `editable/materials/NN-name-MM-DD/`, the
 render in `renders/`, the metadata in `metadata/`. This file only adds
 what a clone needs on top of it.
@@ -18,25 +18,26 @@ what a clone needs on top of it.
 - **name** is the brand in lowercase letters and digits (`cookiylabs`);
   **MM-DD** is the day the editable was created. The source's own short
   title goes in the metadata as `source_title`.
-- Nothing is written in `Agents/`, except a persona you made, saved in
-  `Agents/VegaOM/client-assets/<BrandName>/personas/<Name>-t<Task ID>/`
-  (the skill, section 6). Nothing is written in Downloads or outside
-  Super Vega; throwaway scratch goes in your own `<scratchpad>/t<Task ID>/`
-  (other designers share the scratchpad at the same time).
+- Nothing is written in `Agents/`, except the text record of a persona
+  you made, `Agents/NovaOM/client-assets/<BrandName>/personas/<Name>/<Name>.md`
+  (the skill, section 6). Persona images stay in the clone's `persona/`
+  folder (the owner's rule, 2026-11-17). Nothing is written in Downloads or outside Super Nova;
+  throwaway scratch goes in the session scratchpad or the system temp
+  folder.
 
 ## Inside the materials folder
 
 ```
 editable/materials/NN-name-MM-DD/
-  source/        source.<ext> (the downloaded or copied source), info.json (ffprobe info),
+  source/        source.<ext> (the downloaded or copied source), info.json (spira media info),
                  source.txt (transcript), frames/, understanding.md, brand-dna.<ext>,
                  brand/ (screenshots captured or provided, products.json if pulled),
                  cuts/ (source clips cut for Wan or Kling: audio stripped, text removed)
   plan.md        what drives the source, the shot list, the approach per shot, the casting,
                  the lines, the music decision, the generation plan with expected credits
   script.txt     the clone's lines, when Omni speaks them (the chunker's input)
-  persona/       each persona used: <Name>.png and <Name>.json, or <Name>.md pointing to
-                 its client-assets folder
+  persona/       each persona used: <Name>.png and <Name>.json (made for this clone), or
+                 <Name>.md pointing to the anchor sheet in client-assets
   stills/        background plates, persona edits, transparent elements, each with its prompt JSON
   clips/         every generated clip with its payload JSON, .job and .url files; the trimmed
                  clips the stage plays (<clip>-trim.mp4)
@@ -78,7 +79,7 @@ verbatim), plus:
 {
   "style": "clone",
   "source": { "link": "<the request's source>", "file": "/abs/.../source/source.mp4",
-              "sound_name": "<from the request or the source page, or null>" },
+              "sound_name": "<from spira media info, or null>" },
   "source_title": "fan-outfit-change",
   "brand_dna": "<url or null>",
   "method": "wan replacement, 4 clips | kling dance | omni talking head | ...",
@@ -98,8 +99,8 @@ verbatim), plus:
 }
 ```
 
-- **Credits.** Each job's credits come from the job itself (the charge
-  `wait_ai_job` reports for it), or the live price times the seconds
+- **Credits.** Each job's credits come from the job itself (`data.credits`
+  in `spira --json ai jobs status`), or the live price times the seconds
   billed when the job carries none. Never from the account balance.
   Every asset entry carries its `job_id`; the job's credits sit on its
   first asset entry and `0` on any further file from the same job (Suno's
@@ -108,7 +109,7 @@ verbatim), plus:
   missing from one list. A failed job that was not billed has `0`.
 - **Lessons.** A run issue that teaches something becomes one entry in
   `lessons`, in the format of `cloner-lessons.md`. A clean run has an
-  empty list. Lessons are proposals: Vega adds approved ones to the shared
+  empty list. Lessons are proposals: Nova adds approved ones to the shared
   lessons file. Never write to the skill or its references.
 - **No clock file and no balance.** The start time comes from `date` at
   the start, the minutes from `date` at the end.

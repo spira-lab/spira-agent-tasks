@@ -12,9 +12,9 @@ Prints short lines; exits non-zero on a problem.
         metadata/NN-name-MM-DD.json, renders/deletable/. NN is the Task ID. Never overwrites:
         on a resumed session it prints the existing paths. --topic only for Brandless.
   fetch <materials> "<link or local path>"
-        Get the source video into source/source.mp4 (yt-dlp for a link, ffmpeg as the
-        fallback for a direct video URL; a local file is copied). Saves the link's info as source/info.json and
-        records the source in the metadata.
+        Get the source video into source/source.mp4 (yt-dlp for a link, `spira media video` as
+        the fallback, merging its separate audio file back in; a local file is copied). Saves the
+        link's info as source/info.json and records the source in the metadata.
   probe <video> [--scene 0.3]
         Length, size, fps, audio, and every scene change (each camera setup becomes one clip).
   frames <video> <out dir> [--every 0.5] [--width 270] [--from S] [--to S]
@@ -22,8 +22,8 @@ Prints short lines; exits non-zero on a problem.
         order; the times are printed). Read the sheet to describe every shot and gesture.
   still <video> <seconds> <out.png>
         One full-resolution frame (for a plate or a check).
-  dna <materials> "<DNA file path>"
-        Copy the brand's DNA file into source/dna.md. Prints its size.
+  dna <materials> "<Lark DNA url>"
+        Fetch the brand's DNA into source/dna.md (lark-cli, as Echo does). Prints its size.
   mask <video> <out.png> <x0> <x1> <y0> <y1> [--th 228] [--dilate 14] [--times t1,t2,...]
         A mask of the burned-in caption for ffmpeg removelogo: darken-blend frames from across
         the video so the moving person drops out, keep the bright text inside the box, and
@@ -44,20 +44,15 @@ Prints short lines; exits non-zero on a problem.
   loudness <file>
         Integrated loudness (LUFS) and true peak, with ffmpeg ebur128.
   lesson <materials> "<lesson>"
-        Propose a lesson: appended to the metadata's "lessons" list (Vega decides; this tool
+        Propose a lesson: appended to the metadata's "lessons" list (Nova decides; this tool
         never writes to the skill or its references).
-  chain-check <materials>
-        Read-only check of chain.json before the first submit and after a restart: every
-        "needs" and {{label}} names a job in the chain, a {{label}} is also in that job's
-        "needs", the needs have no cycle, and every job in plan.md's Generation plan table is
-        in the chain. Lists every problem and exits non-zero; changes no file.
 """
-import json, math, re, shutil, subprocess, sys, tempfile
+import json, math, shutil, subprocess, sys, tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from reskit_common import (PROJECT, SHARED, UA, MATERIAL_DIRS, Video, brand_key, video_name, update_meta,
-                           read_meta, write_editable, ffprobe_json, duration, loudness, scene_changes, now, to_deletable, scratch_profile)
+                           read_meta, write_editable, ffprobe_json, duration, loudness, scene_changes, now, to_deletable)
 
 
 def opt(a, flag, default=None):
@@ -146,12 +141,34 @@ def cmd_fetch(a):
         got = sorted((v.materials / "source").glob("download.*"))
         vids = [g for g in got if g.suffix in (".mp4", ".mkv", ".webm", ".mov")]
         if r.returncode != 0 or not vids:
-            print(f"yt-dlp failed ({(r.stderr or '').strip()[-200:]}); trying ffmpeg on the link as a direct video URL", file=sys.stderr)
+            print(f"yt-dlp failed ({(r.stderr or '').strip()[-200:]}); trying spira media video", file=sys.stderr)
+            m = subprocess.run(["spira", "--json", "media", "video", src], capture_output=True, text=True)
+            try:
+                d = json.loads(m.stdout[m.stdout.index("{"):])["data"]
+            except (ValueError, KeyError):
+                sys.exit(f"could not download {src}: {(m.stderr or m.stdout).strip()[-300:]}")
+            # spira 0.0.32: data.files = [{kind: video|audio, url, containsVideo, containsAudio}, ...];
+            # a video-only rung comes with a second, audio-only file that must be merged back in.
+            files = d.get("files") or []
+            vfile = next((f for f in files if f.get("containsVideo") or f.get("kind") == "video"), None)
+            afile = next((f for f in files if f is not vfile and (f.get("kind") == "audio" or
+                          (f.get("containsAudio") and not f.get("containsVideo")))), None)
+            urls = [u for u in json.dumps(d).split('"') if u.startswith("http")]
+            vurl = (vfile or {}).get("url") or d.get("videoUrl") or d.get("url") or (urls[0] if urls else None)
+            if not vurl: sys.exit(f"no video url in spira media video's answer for {src}")
             raw = v.materials / "source" / "download.mp4"
-            f = subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-c", "copy", str(raw)], capture_output=True, text=True)
-            if f.returncode != 0 or not raw.exists():
-                sys.exit(f"could not download {src}: {(f.stderr or r.stderr or '').strip()[-300:]}. "
-                         "Save the video to source/download.mp4 with the ai tool's download action and run fetch again with that path.")
+            run(["curl", "-sSfL", "-A", UA, "-o", raw, vurl])
+            aurl = (afile or {}).get("url") or d.get("audioUrl")
+            if vfile and vfile.get("containsAudio"): aurl = None     # the video file already has its sound
+            if aurl:
+                araw = v.materials / "source" / "download-audio.m4a"
+                run(["curl", "-sSfL", "-A", UA, "-o", araw, aurl])
+                merged = v.materials / "source" / "download-merged.mp4"
+                run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-i", araw, "-map", "0:v:0", "-map", "1:a:0", "-c", "copy", merged])
+                raw = merged
+            info = {"title": d.get("title"), "spira_media": {k: x for k, x in d.items() if k != "files"},
+                    "spira_files": [{k: f.get(k) for k in ("kind", "filename", "formatId", "containsVideo", "containsAudio")}
+                                    for f in files]}
         else:
             raw = vids[0]
             js = sorted((v.materials / "source").glob("download*.info.json"))
@@ -165,13 +182,13 @@ def cmd_fetch(a):
     if raw.suffix == ".mp4" and vs.get("codec_name") == "h264":
         shutil.copy2(raw, out) if raw.resolve() != out.resolve() else None
     else:
-        run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-c:v", "libx264", "-crf", "16", "-preset", scratch_profile.preset("intermediate"),
+        run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-c:v", "libx264", "-crf", "16", "-preset", "medium",
              "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", out])
     for g in sorted((v.materials / "source").glob("download*")):   # raw downloads: kept, out of the way
         if g.resolve() != out.resolve(): to_deletable(g, v.materials / "deletable")
     (v.materials / "source" / "info.json").write_text(json.dumps({"link": src, **info}, indent=1, ensure_ascii=False) + "\n")
     update_meta(v, lambda d: d.update({"source": {"link": src, "file": str(out), "title": info.get("title"),
-                                                  "uploader": info.get("uploader"), "fetched": now()}, "stage": "fetched"}))
+                                                  "uploader": info.get("uploader"), "fetched": now()}}))
     cmd_probe([str(out)])
 
 
@@ -193,27 +210,18 @@ def cmd_frames(a):
     every = float(opt(a, "--every", "0.5")); width = int(opt(a, "--width", "270"))
     t0 = float(opt(a, "--from", "0")); t1 = opt(a, "--to")
     src, out = Path(a[0]), Path(a[1]); out.mkdir(parents=True, exist_ok=True)
-    keep = "--keep-frames" in a
     end = float(t1) if t1 else duration(src)
-    work = Path(tempfile.mkdtemp(prefix="reskit-frames-"))
-    try:
-        run(["ffmpeg", "-v", "error", "-y", "-ss", t0, "-t", max(0.1, end - t0), "-i", src, "-vf",
-             f"fps=1/{every},scale={width}:-2", "-q:v", "4", work / "f%04d.jpg"])
-        frames = sorted(work.glob("f*.jpg"))
-        times = [round(t0 + i * every, 2) for i in range(len(frames))]
-        for f, t in zip(frames, times):
-            f.rename(work / f"t{t:07.2f}.jpg")
-        cols = 6; rows = max(1, math.ceil(len(frames) / cols))
-        run(["ffmpeg", "-v", "error", "-y", "-ss", t0, "-t", max(0.1, end - t0), "-i", src, "-vf",
-             f"fps=1/{every},scale={width}:-2,tile={cols}x{rows}:padding=4:color=white", "-frames:v", "1", "-q:v", "3",
-             work / "contact.jpg"])
-        shutil.copy2(work / "contact.jpg", out / "contact.jpg")
-        if keep:
-            for f in work.glob("t*.jpg"): shutil.copy2(f, out / f.name)
-    finally:
-        shutil.rmtree(work, ignore_errors=True)
-    print(f"{len(frames)} frames; contact sheet {out / 'contact.jpg'} ({cols} across, left to right, top to bottom)"
-          + (f"; frames in {out}" if keep else "; single frames: use `still` or add --keep-frames"))
+    run(["ffmpeg", "-v", "error", "-y", "-ss", t0, "-t", max(0.1, end - t0), "-i", src, "-vf",
+         f"fps=1/{every},scale={width}:-2", "-q:v", "4", out / "f%04d.jpg"])
+    frames = sorted(out.glob("f*.jpg"))
+    times = [round(t0 + i * every, 2) for i in range(len(frames))]
+    for f, t in zip(frames, times):
+        f.rename(out / f"t{t:07.2f}.jpg")
+    cols = 6; rows = max(1, math.ceil(len(frames) / cols))
+    run(["ffmpeg", "-v", "error", "-y", "-ss", t0, "-t", max(0.1, end - t0), "-i", src, "-vf",
+         f"fps=1/{every},scale={width}:-2,tile={cols}x{rows}:padding=4:color=white", "-frames:v", "1", "-q:v", "3",
+         out / "contact.jpg"])
+    print(f"{len(frames)} frames -> {out}; contact sheet {out / 'contact.jpg'} ({cols} across, left to right, top to bottom)")
     print("times:", " ".join(f"{t:.2f}" for t in times))
 
 
@@ -226,10 +234,12 @@ def cmd_still(a):
 # ---------------------------------------------------------------- dna
 def cmd_dna(a):
     v = Video(a[0]); url = a[1]
+    r = subprocess.run(["lark-cli", "docs", "+fetch", "--doc", url, "--doc-format", "markdown"],
+                       capture_output=True, text=True, stdin=subprocess.DEVNULL)
     try:
-        content = Path(url).expanduser().read_text(encoding="utf-8")
-    except OSError as e:
-        sys.exit(f"cannot read the DNA {url}: {e}")
+        content = json.loads(r.stdout)["data"]["document"]["content"]
+    except (ValueError, KeyError, TypeError):
+        sys.exit(f"cannot read the DNA {url}: {(r.stderr or r.stdout).strip()[:300]}")
     f = v.materials / "source" / "dna.md"; f.write_text(content, encoding="utf-8")
     print(f"{f} {f.stat().st_size} bytes")
 
@@ -270,7 +280,7 @@ def cmd_cutref(a):
     if pad > 0.001: vf += f",tpad=stop_mode=clone:stop_duration={pad:.3f}"
     out.parent.mkdir(parents=True, exist_ok=True)
     run(["ffmpeg", "-v", "error", "-y", "-ss", f"{s:.3f}", "-t", f"{length:.3f}", "-i", src, "-an", "-map_metadata", "-1",
-         "-vf", vf, "-t", dur, "-c:v", "libx264", "-crf", "16", "-preset", scratch_profile.preset("intermediate"), "-pix_fmt", "yuv420p", out])
+         "-vf", vf, "-t", dur, "-c:v", "libx264", "-crf", "16", "-preset", "medium", "-pix_fmt", "yuv420p", out])
     cuts = scene_changes(out, 0.3)
     print(f"{out} {duration(out):.2f}s  scene changes inside: {' '.join(map(str, cuts)) or 'none'}")
     if cuts: sys.exit("a scene change is inside the reference clip: end it a few frames before the cut")
@@ -351,79 +361,9 @@ def cmd_lesson(a):
     print(f"{len(d['lessons'])} lessons proposed in {v.metadata}")
 
 
-def cmd_stage(a):
-    v = Video(a[0])
-    if len(a) < 2:
-        print(read_meta(v).get("stage", "none")); return
-    update_meta(v, lambda d: d.update({"stage": a[1]}))
-    print(f"stage = {a[1]}")
-
-
-# ---------------------------------------------------------------- chain-check
-CHAIN_MODELS = ("ai-influencer-image", "gpt-image-2", "wan-3.0", "suno-music")
-
-
-def planned_labels(plan):
-    """Labels of the Generation plan table rows whose model is one the chain runs."""
-    labels, inside = [], False
-    for line in plan.read_text(encoding="utf-8").splitlines():
-        if line.startswith("## "):
-            inside = line.strip().lower() == "## generation plan"; continue
-        if not inside or not line.lstrip().startswith("|"): continue
-        cells = [c.strip().strip("`").strip() for c in line.strip().strip("|").split("|")]
-        if len(cells) < 2 or cells[0].lower() == "label" or set(cells[0]) <= set("-: "): continue
-        if any(m in cells[1] for m in CHAIN_MODELS): labels.append(cells[0])
-    return labels
-
-
-def cmd_chain_check(a):
-    v = Video(a[0]); path = v.materials / "chain.json"
-    if not path.is_file(): sys.exit(f"no chain.json in {v.materials}")
-    try:
-        jobs = json.loads(path.read_text(encoding="utf-8")).get("jobs")
-    except json.JSONDecodeError as e:
-        sys.exit(f"chain.json is not valid JSON: {e}")
-    if not isinstance(jobs, list): sys.exit('chain.json has no "jobs" list')
-    problems, needs = [], {}
-    for n, j in enumerate(jobs):
-        label = j.get("label") if isinstance(j, dict) else None
-        if not label:
-            problems.append(f"job #{n + 1} has no label"); continue
-        if label in needs: problems.append(f"label {label} is used by more than one job")
-        for key in ("model", "out"):
-            if not j.get(key): problems.append(f"{label}: no {key}")
-        needs[label] = list(j.get("needs") or [])
-    for j in jobs:
-        label = j.get("label") if isinstance(j, dict) else None
-        if not label: continue
-        for dep in needs[label]:
-            if dep not in needs: problems.append(f"{label} needs {dep}, and no job is labelled {dep}")
-        for ref in sorted(set(re.findall(r"\{\{\s*([^}\s]+)\s*\}\}", json.dumps(j.get("inputs") or {})))):
-            if ref not in needs: problems.append(f"{label} uses {{{{{ref}}}}}, and no job is labelled {ref}")
-            elif ref not in needs[label]: problems.append(f"{label} uses {{{{{ref}}}}} but does not list {ref} in needs")
-    state = {}
-    def visit(label, trail):
-        state[label] = 1
-        for dep in needs[label]:
-            if dep not in needs: continue
-            if state.get(dep) == 1: problems.append("needs cycle: " + " -> ".join(trail[trail.index(dep):] + [dep]))
-            elif not state.get(dep): visit(dep, trail + [dep])
-        state[label] = 2
-    for label in needs:
-        if not state.get(label): visit(label, [label])
-    if v.plan.is_file():
-        for label in planned_labels(v.plan):
-            if label not in needs: problems.append(f"plan.md plans {label}, and chain.json has no job labelled {label}")
-    else:
-        problems.append(f"no plan.md in {v.materials}")
-    for p in problems: print(p)
-    if problems: sys.exit(f"chain-check: {len(problems)} problem(s) in {path}")
-    print(f"chain-check: {len(needs)} jobs, ok")
-
-
-COMMANDS = {"stage": cmd_stage, "new": cmd_new, "fetch": cmd_fetch, "probe": cmd_probe, "frames": cmd_frames, "still": cmd_still,
+COMMANDS = {"new": cmd_new, "fetch": cmd_fetch, "probe": cmd_probe, "frames": cmd_frames, "still": cmd_still,
             "dna": cmd_dna, "mask": cmd_mask, "cutref": cmd_cutref, "strip": cmd_strip, "safe": cmd_safe,
-            "audio-probe": cmd_audio_probe, "loudness": cmd_loudness, "lesson": cmd_lesson, "chain-check": cmd_chain_check}
+            "audio-probe": cmd_audio_probe, "loudness": cmd_loudness, "lesson": cmd_lesson}
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS: sys.exit(__doc__)

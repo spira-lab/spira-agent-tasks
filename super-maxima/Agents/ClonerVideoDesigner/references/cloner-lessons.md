@@ -1,6 +1,6 @@
 ---
 name: cloner-lessons
-description: Read-only record of Cloner runs that had issues, why they failed, and what fixed them, adapted to the house rules. Read before writing plan.md. Never written by a designer - new lessons are proposed in the video's metadata ("lessons") and Vega adds approved ones.
+description: Read-only record of Cloner runs that had issues, why they failed, and what fixed them, adapted to the house rules. Read before writing plan.md. Never written by a designer - new lessons are proposed in the video's metadata ("lessons") and Nova adds approved ones.
 ---
 
 # Cloner lessons
@@ -11,7 +11,7 @@ conditions, change the plan first.
 
 **This file is read only.** A run that teaches something proposes a
 lesson in its metadata's `"lessons"` list, in the entry format below.
-Vega adds approved lessons to the shared lessons file. Never edit this
+Nova adds approved lessons to the shared lessons file. Never edit this
 file, the skill or any shared file.
 
 **What makes a lesson worth proposing:**
@@ -59,8 +59,8 @@ adaptation is noted in the entry in *italics*.
 - **Applies when:** source understanding for several sources at the same time.
 - **Failed:** the understanding files came back crossed between videos (2 credits each).
 - **Why:** the old script set the video URL on one shared workflow, so parallel runs overwrote each other's input.
-- **Fixed by:** ✅ *by design in this install: the understanding is a `submit_ai_job` per source, each with its own `jobId` and `.pending` file, so runs never share an input.*
-- **Carry forward:** each source gets its own job and its own `saveTo` file; never reuse another run's `jobId`.
+- **Fixed by:** ✅ *by design in this install: `understand_source.py --task-id` creates one workflow per run, named `Clone Source Understanding <Task ID>`.*
+- **Carry forward:** always pass the Task ID; never run the understanding on a workflow another run uses.
 
 ### 2026-10-19 · bybit/07-most-likely-coworkers · Wan gesture not in the reference window
 - **Applies when:** Wan 3.0 `reference_to_video` person replacement, where the prompt asks for a gesture at a given second that the reference clip doesn't show at that moment.
@@ -140,10 +140,10 @@ adaptation is noted in the entry in *italics*.
 - **Applies when:** any Spira job that runs far longer than its siblings and then reports FAILED.
 - **Failed:** the job read FAILED with 0 credits and no error, while `latestExecution` already said SUCCESS with a result URL. Minutes later it read COMPLETED.
 - **Why:** cause unknown, probably a provider retry that finished after the job was marked failed.
-- **Fixed by:** ✅ calling `wait_ai_job` again for the status and `resultUrls` before retaking; the file was complete and saved a 68-credit retake.
-- **Carry forward:** on FAILED with `error: null`, call `wait_ai_job` again with the same `jobId` before planning a retake. *`wait_ai_job` reports "no result" as a failure: re-check the job before resubmitting.*
+- **Fixed by:** ✅ reading `latestExecution.resultUrls` and the status again before retaking; the file was complete and saved a 68-credit retake.
+- **Carry forward:** on FAILED with `error: null`, re-check `spira --json ai jobs status` and `latestExecution` before planning a retake. *The shared `spira-jobs.py wait` stops on "no result": check the status before resubmitting.*
 - **Not for:** FAILED with a real error (`content_flagged`, `provider_error`).
-- **Also seen:** 2026-10-19 · bybit/05-sort-tasks-talking-head: gpt-image-2 2K edit, FAILED after 7 min with `error: null`, the execution SUCCESS but `resultUrls: null`, never flipped. Resubmitted unchanged, it completed in 42 s; the failure cost 0. If the re-check shows no result URL, resubmit once unchanged (*it counts as one of the 2 extra generations only if it is billed*).
+- **Also seen:** 2026-10-19 · bybit/05-sort-tasks-talking-head: gpt-image-2 2K edit, FAILED after 7 min with `error: null`, `latestExecution` SUCCESS but `resultUrls: null`, never flipped. Resubmitted unchanged, it completed in 42 s; the failure cost 0. If the re-check shows no result URL, resubmit once unchanged (*it counts as one of the 2 extra generations only if it is billed*).
 
 ### 2026-10-19 · cookiy/01-marketing-tier-list · Omni dropped last sentence
 - **Applies when:** Gemini Omni Flash 1.1 talking head, a chunk whose last sentence is a short contrast clause starting a new sentence ("…at scale, fast. But you only get…").

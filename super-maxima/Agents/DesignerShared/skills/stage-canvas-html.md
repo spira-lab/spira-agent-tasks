@@ -11,7 +11,7 @@ creative decisions are not made here.
 ## 1. Start from the template
 
 Every video is a copy of the template `<shared>/stage/stage-9x16.html` (`<shared>` is the designers'
-shared folder, `Super Vega/Agents/DesignerShared`). Where the
+shared folder, `Super Nova/Agents/DesignerShared`). Where the
 copy goes, what it is called, and where every file it uses lives are fixed
 by the file-management skill; follow it for every path mentioned here.
 Never edit the template in place. Never build a video from a blank file.
@@ -66,9 +66,7 @@ python3 <shared>/tools/make-timings.py <path to vo.mp3> --language <code> --prom
 `--language` is the speech's ISO 639 code (`en` by default; `vi`, `ms`, `th`,
 `id`, ...). Always pass `--prompt` with the brand name, the product name, and
 any people or other proper nouns the script says (e.g. `--prompt "Cookiy Earn,
-Cookiy Earn Text Agent, Davin"`). It waits for one of the 4 timing slots shared
-by every designer; exit 75 means they stayed busy for 5 minutes: run the same
-line again.
+Cookiy Earn Text Agent, Davin"`).
 This transcribes with **ElevenLabs Scribe** through the Spira CLI (the owner's
 choice, 2026-10-22: about 1 credit a minute and no local memory) and falls back
 to Whisper only if Scribe fails; the last line says which engine ran. Scribe

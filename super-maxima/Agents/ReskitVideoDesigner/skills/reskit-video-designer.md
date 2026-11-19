@@ -56,7 +56,7 @@ Atlas's request carries these lines (a line is left out when its column is blank
 | `Use this brand color: <hex[, hex]>` | The brand colors. They win over captured ones. |
 | `Use this avatar image: <...>` | The persona (section 7.5). |
 | `Music: ...` | `no music`, `use music from the library`, `original` (generate one, for ads), or absent (keep the source's music, section 7.8). |
-| `These are the instructions: ...` | Market, language, what to change, competitor naming, anything else. It may end with `Brand DNA: <DNA file path>` and `Brand website: <url>`. |
+| `These are the instructions: ...` | Market, language, what to change, competitor naming, anything else. It may end with `Brand DNA: <Lark url>` and `Brand website: <url>`. |
 | `This is a scriptless video: ...` | Always: there is no script. The source's dialogue is the script, through keep/cut/rewrite. |
 | `Read this skill right after ...` | For the render phase (section 8). |
 
@@ -64,15 +64,18 @@ Material the request provides always wins over anything you find or make.
 
 ## 3. Where things are
 
-- `<super>`: the Super Vega folder. Work only inside it; never read or follow copies of these
+- `<super>`: the Super Nova folder. Work only inside it; never read or follow copies of these
   skills elsewhere on the machine.
 - `<shared>`: `<super>/Agents/DesignerShared` (shared skills, tools, music).
 - `<reskit>`: `<super>/Agents/ReskitVideoDesigner` (this skill, `references/`, `tools/`).
 - The video's **root**: `<super>/Project/<BrandName>/`, laid out exactly as the shared
   file-management skill says (`references/file-management.md` has the re-skit specifics).
-- Brand-level files that must survive backups: `<super>/Agents/VegaOM/client-assets/<BrandName>/`,
-  in its `personas/<Name>/` and `brand/` folders. **That is the one place in `Agents/` you
-  write.** Everything else in `Agents/` is read only.
+- Brand-level files that must survive backups: `<super>/Agents/NovaOM/client-assets/<BrandName>/`,
+  as text in its `personas/<Name>/` (`outfits.md`, `voice.md`) and `brand/` folders. **That is
+  the one place in `Agents/` you write, and you write no images there** (the owner's rule,
+  2026-11-17): only an anchor persona keeps an image there, its master `sheet_4k.png`, which you
+  read and never replace. Every image you make (a one-off persona and its sheet, outfit sheets,
+  site captures) stays in this video's materials. Everything else in `Agents/` is read only.
 
 Tools (every one runs through `python3` or `node`; each prints its usage when run without
 arguments):
@@ -80,25 +83,17 @@ arguments):
 | Tool | What it does |
 |---|---|
 | `python3 <reskit>/tools/reskit.py` | `new`, `fetch`, `probe`, `frames`, `still`, `dna`, `mask`, `cutref`, `strip`, `safe`, `audio-probe`, `loudness`, `lesson` |
-| `submit_ai_job`, `wait_ai_job`, `host_file` | the worker's internal tools (the toolkit's steps): submit a job, collect its result URLs, turn a local file into a public URL. They run every generation in `chain.json` (7.7) |
+| `python3 <reskit>/tools/spira_chain.py` | the generation chain: `price`, `run`, `wait`, `status`, `approve`, `redo` |
 | `python3 <reskit>/tools/build_edit.py <edit.json> draft\|final` | builds the edit, the final render, the share copy, the checks, and rewrites the editable page |
 | `node <reskit>/tools/render_html.js` | HTML to PNG (overlays, simulated screens, sheets) through the shared playwright-core |
 | `node <reskit>/tools/capture_site.js` | screenshots, logo, colors and text from the brand's own website |
 | `<reskit>/tools/caption.html`, `beat.html`, `popup.html`, `sheet_template.html` | overlay and sheet templates |
 | `python3 <shared>/tools/make-timings.py` | transcripts and speech checks (Scribe first, Whisper fallback): the source's word timings, and every re-voiced clip checked against its script |
-| `python3 <shared>/tools/heavy-slot.py <Task ID> -- <command>` | runs a heavy command in one of the render slots (4) (Bash timeout 600000; exit 75 = slots busy, run the same line again). Every `build_edit.py` run, every `render_html.js --batch`, every `composite.py` and every frame-sequence ffmpeg encode goes through it |
-| `python3 <shared>/tools/brand-lock.py` | `append <file> @<textfile>` for a line in `truth.md`, `outfits.md` or a lessons file; `<BrandName> -- <command>` for anything else written in the brand's client-assets |
-
-Other designers work at the same time as you (up to 8, 2026-11-13). Keep throwaway files in
-`<scratchpad>/t<Task ID>/` only, and write each job ID into `chain.json` the moment
-`submit_ai_job` returns it (7.7).
 
 You may use only Atlas's approved commands (`<super>/Agents/AtlasPM/docs/atlas-allowed-tools.txt`):
-never shell loops, `$(...)` variables, `sleep`, `kill` or `mktemp`. The tools do the
-looping; the waiting is `wait_ai_job` (parallel tool calls, one per job). Never run a job through the
-`spira` CLI (only `spira ai models get <id>` for model docs); every generation is `submit_ai_job`
-and every download is the `ai` tool's download action. Every path you pass is absolute (or
-relative to the folder the tool names).
+never shell loops, `$(...)` variables, `sleep`, `kill`, `mktemp` or `sips`. The tools do the
+looping and the waiting. Every path you pass is absolute (or relative to the folder the tool
+names).
 
 ## 4. Read first
 
@@ -154,8 +149,9 @@ again (`references/persona-and-outfits.md`).
 movement, framing, rhythm and gesture. The person, the room and anything branded in the frame
 are newly generated. **Never use the source creator's face or likeness: always recast the
 person** (the owner's rule). Nothing that identifies the original creator (face, body, name
-spoken on camera, burned-in text) survives into the result. Kept source audio is **always
-pitch-adjusted** (the owner's rule). A re-voiced line is never in the source creator's voice: no
+spoken on camera, burned-in text) survives into the result. Kept source voices are **always
+pitch-adjusted** (the owner's rule); music never is (the owner, 2026-11-18: "The pitch adjustment is
+for voice not music"). A re-voiced line is never in the source creator's voice: no
 source speech is ever sent to the video model, and the voice is described in words.
 
 **Show the product the way it really looks.** When the story needs the brand on screen, the
@@ -165,12 +161,12 @@ be found, design a believable screen from what is true. A stand-in emoji, a gues
 invented feature reads as fake and erodes trust.
 
 **Plan the spend, then spend.** Every paid generation is in the chain with its model and its
-expected price before anything runs, and the plan's total is written down. Nothing waits for a "go".
+live price before anything runs, and the plan's total is written down. Nothing waits for a "go".
 
 **Generate first, edit while it renders.** Generation is the slowest part of the job (a Wan clip
-takes 4 to 25 minutes) and needs nobody watching. So the moment the plan is written, the jobs
-whose inputs exist are submitted together: the outfit and the plates in parallel, then each clip
-the moment its own inputs exist, all side by side, each result downloaded and logged as it lands.
+takes 4 to 25 minutes) and needs nobody watching. So the moment the plan is written, the whole
+chain starts in the background: the outfit and the plates in parallel, then each clip the
+moment its own inputs exist, all side by side, each result downloaded and logged as it lands.
 Only then does the hands-on work begin, in the time the renders would otherwise waste: the
 overlays, the b-roll and simulated screens, the music, and the complete edit, built with the
 source footage standing in for every clip that hasn't arrived. When a clip lands it's checked
@@ -189,12 +185,10 @@ plainly, in the metadata.
   (~5 each), music (~7), transcripts (~1). A new persona adds ~20. Wan runs at 720p unless the
   instructions ask for 1080p. Re-voicing costs nothing extra: Wan's sound is priced the same on or
   off, and the clips are generated anyway; only the speech check adds about a credit a clip.
-- **At most 2 extra generations per job** (the toolkit's rule; you count them in `chain.json`'s
-  `submissions` and never submit a third). Then keep the best take and say what is wrong in your
-  final line.
-- **Credits are recorded per job**, the moment it lands: the figure the job reports, else the
-  model's price for those inputs (`spira ai models get <id>`). Never work them out from the
-  account balance: other sessions share it.
+- **At most 2 extra generations per job** (the toolkit's rule; `spira_chain.py redo` refuses a
+  third). Then keep the best take and say what is wrong in your final line.
+- **Credits are recorded per job**, from the job itself or the live price list, the moment it
+  lands (the chain does it). Never work them out from the account balance: other sessions share it.
 - `wan-3.0` is approved for this work (the owner, 2026-10-24).
 
 ## 7. The design phase → READY
@@ -204,19 +198,18 @@ Do not render the final, do not start any after-video skill.
 
 ### 7.1 Set up
 
-1. Nothing to sign in to or check: the worker's tools carry the account (toolkit 1), and the
-   balance is never read.
+1. `spira --version`, `spira auth whoami`, `spira credits balance` (toolkit 1). A failed sign-in
+   is a blocker (section 9).
 2. `python3 <reskit>/tools/reskit.py new "<Brand>" <Task ID> --brand-number <Brand number>`
    (add `--topic "<two to four words>"` for Brandless). It creates the editable page, the
    materials folder (`source/ assets/ gen/ref/ gen/out/ music/ deletable/`), `plan.md`,
    `edit.json`, the metadata file and `renders/deletable/`, and prints their paths. On a resumed
-   session it prints the existing ones: carry on from `plan.md` and `chain.json` (a job with a
-   `job_id` and no file is still in flight: `wait_ai_job` it, never submit it again).
+   session it prints the existing ones: carry on from `plan.md` and `spira_chain.py status`.
 
 ### 7.2 Understanding the source
 
 1. `reskit.py fetch <materials> "<source link or path>"`: the video goes to `source/source.mp4`
-   (yt-dlp, with ffmpeg on a direct video URL as the fallback), its info to `source/info.json`, and the
+   (yt-dlp, with `spira media video` as the fallback), its info to `source/info.json`, and the
    link into the metadata. It prints the length, size, fps, audio and every scene change.
 2. Read it three ways:
    - **The transcript**, word by word: `python3 <shared>/tools/make-timings.py <materials>/source/source.mp4 --language <code>`
@@ -239,8 +232,8 @@ Before writing a word, build the job's part of the brand's truth file,
 `client-assets/<BrandName>/brand/truth.md` (`references/brand-truth-and-text.md`): what the
 brand is, who it serves, its real features and their real names, real numbers, its real look
 (logo, colors, UI), and what it does not have. Sources, in order: the request's material; the
-DNA (`reskit.py dna <materials> "<DNA path>"` writes `source/dna.md`); the brand's own site,
-captured with `node <reskit>/tools/capture_site.js <url> <client-assets>/<BrandName>/brand/ui/<YYYY-MM-DD> [--pages ...] [--full]`
+DNA (`reskit.py dna <materials> "<DNA url>"` writes `source/dna.md`); the brand's own site,
+captured with `node <reskit>/tools/capture_site.js <url> <materials>/ui/<YYYY-MM-DD> [--pages ...] [--full]` (into this video's materials)
 (the site's address is the `Brand website:` in the instructions, else the one in the DNA; visit it yourself for brand info too); reputable reporting for outside events.
 If the hook depends on outside news, verify it with a fresh search and record the exact status
 and date. The truth file is the only place on-screen claims can come from.
@@ -294,12 +287,16 @@ screen is visible, since on a phone that stretch is the second pass and its cost
 The Avatar Designer is the one source of personas (the owner's rule); the full method is in
 `references/persona-and-outfits.md`.
 
-- **`Use this avatar image` is given:** that image is the persona. Use its character sheet in
-  `client-assets/<BrandName>/personas/<Name>/` if one exists; otherwise register it and make the
-  sheet from it (first jobs of the chain).
-- **No avatar image:** use the brand's existing persona from `client-assets/<BrandName>/personas/`;
-  if there is none, make one by the Avatar Designer's method (Soul, then the GPT Image 2 edit),
-  then its sheet, saved there.
+- **`Use this avatar image` is given:** that image is the persona. Use its anchor sheet in
+  `client-assets/<BrandName>/personas/<Name>/sheet_4k.png` if one exists; otherwise register it
+  for this video and make the sheet from it in `<materials>/persona/<Name>/` (first jobs of the chain).
+- **No avatar image:** use the brand's anchor persona (a `sheet_4k.png` in
+  `client-assets/<BrandName>/personas/<Name>/`); if there is none, make one for this video by the
+  Avatar Designer's method (Soul, then the GPT Image 2 edit), then its sheet, in
+  `<materials>/persona/<Name>/`.
+- Outfit sheets always go in `<materials>/persona/<Name>/outfits/`, and the outfit gets a row in
+  `client-assets/<BrandName>/personas/<Name>/outfits.md` (text only), so the next video knows what
+  she has worn.
 
 Then choose this video's kind of attire (a home outfit, office wear, gym wear, ...: the kind
 only, never a garment or a colour, in any prompt; `references/persona-and-outfits.md` section 4,
@@ -356,54 +353,39 @@ every clip, since that is all the model has to keep the voice the same.
      Wan can copy in one job: the playbook's "A shot longer than one reference" decides between
      copying the opening and extending it, or copying it in parts;
    - one still per setup for its plate: `reskit.py still ...`.
-2. **Write `<materials>/chain.json`**, the plan file you keep by hand (format in
-   `references/generation-playbook.md`): (a new persona and its sheet,) the outfit sheet with
+2. **Write `<materials>/chain.json`**: (a new persona and its sheet,) the outfit sheet with
    `"hold": true`, one plate per setup, one Wan `reference_to_video` clip per setup needing
-   the outfit and its plate (`needs`), any `image_to_video` shot, the music when you generate it,
-   any new Omni line. A clip whose person speaks new or re-voiced lines has `"sound": true` and
-   the dialogue prompt (its lines from the dialogue script, times relative to the clip's start); a
-   clip that keeps the source's voices has `"sound": false`. The reference clip is always silent
-   (`cutref` strips the audio), and no `referenceAudio` ever carries the voice of a person whose
-   words change. Prompts in the playbook's and the prompting skill's formats.
+   `{{outfit}}` and its plate, any `image_to_video` shot, the music when you generate it. A clip
+   whose person speaks new or re-voiced lines has `"sound": true` and the dialogue prompt (its
+   lines from the dialogue script, times relative to the clip's start); a clip that keeps the
+   source's voices has `"sound": false`. The reference clip is always silent (`cutref` strips the
+   audio), and no `referenceAudio` ever carries the voice of a person whose words change. Prompts
+   in the playbook's and the prompting skill's formats.
    A clip with a phone or tablet screen that shows the brand is two jobs: pass 1 (the whole
    clip, the screen plain green) with `"hold": true`, and pass 2 (the green stretch cut from the
-   landed pass 1, with the screen video), which `needs` pass 1 and is submitted once pass 1 is
-   checked. Price both, pass 2 at its own length and resolution. A laptop or monitor screen adds
-   no job: the clip or plate shows the screen plain green (or glowing white where hands stay in
-   front) and the screen is laid on in the edit.
-3. **Price it before spending.** For each distinct model, read `spira ai models get <id>` and put
-   every job's expected credits in `chain.json` and in the plan's generation table, with the
-   total. Nothing is submitted before the table is written.
-4. **Check the chain:** `python3 <reskit>/tools/reskit.py chain-check <materials>` (read-only).
-   It names every `needs` or `{{label}}` with no job behind it, any cycle, and any row of the
-   plan's generation table missing from `chain.json` (a new persona's `persona_soul`,
-   `persona_edit`, `sheet` and the `outfit` all belong in the chain). Fix `chain.json` and run it
-   again; nothing is submitted until it passes. A chain you cannot make pass ends the job with
-   `FAILED <what chain-check reports>`, never a silent stop.
+   landed pass 1, with the screen video), run as its own job once pass 1 is checked. Price both,
+   pass 2 at its own length and resolution. A laptop or monitor screen adds no job: the clip or
+   plate shows the screen plain green (or glowing white where hands stay in front) and the
+   screen is laid on in the edit.
+3. `python3 <reskit>/tools/spira_chain.py price <materials>/chain.json`: copy every job's
+   expected credits and the total into the plan's generation table.
 
 ### 7.7 Starting the chain
 
-Start it straight away, once `chain-check` passes (7.6). On a resumed session, run `chain-check`
-again before anything else in the chain: a clip left `pending` behind a label no job produces
-never starts, so fix the chain (or end with `FAILED`) rather than waiting on it. Run the chain by
-hand, as the toolkit's `submit_ai_job` / `wait_ai_job` / `host_file` steps say, and the
-playbook's "Running jobs" describes:
+Start it straight away, in the background (the Bash tool's `run_in_background`):
 
-1. Host every local input a job needs with `host_file` (reference clips, plate sources,
-   the persona sheet), all in one turn.
-2. Submit, as parallel `submit_ai_job` calls in one turn, every job with `status: pending` whose
-   `needs` are all `done` (and, for a `hold` job, approved). Write each returned job ID into
-   `chain.json` and the metadata at once.
-3. Do the hands-on work of 7.8 while they render, then call `wait_ai_job` for every in-flight job
-   in one turn, each with its `saveTo` (the job's `out`). As each lands, set it `done`, record
-   its URL, credits and file in `chain.json`, the metadata's `assets[]` and the plan's job log,
-   and submit the jobs it unblocked at once.
+```
+python3 <reskit>/tools/spira_chain.py run <materials>/chain.json
+```
 
-Don't watch it. When the outfit sheet lands, look at it: the same face, hair and body as the
-original sheet in every panel, the outfit identical across panels and not a near-copy of one in
-the persona's `outfits.md`. Only then mark it `"approved": true` in `chain.json` and submit the
-clips that need it; or redo it with a tighter prompt (the 2-extra limit). Record the approved
-outfit in the persona's `outfits.md` and copy its sheet to the persona's `outfits/` folder.
+It submits every job whose inputs exist, in parallel, submits each dependent job the moment its
+inputs land, downloads each result, and records each job (ID, model, inputs, credits) in the
+metadata and in the plan's job log. Don't watch it. When the outfit sheet lands (`status` shows
+`HOLD`), look at it: the same face, hair and body as the original sheet in every panel, the
+outfit identical across panels and not a near-copy of one in the persona's `outfits.md`. Then `spira_chain.py approve <chain.json> outfit` (the running
+chain carries on by itself; if it has stopped, run it again), or `redo` it with a tighter prompt.
+Record the approved outfit in the persona's `outfits.md` and copy its sheet to the persona's
+`outfits/` folder.
 
 ### 7.8 Building while the clips render
 
@@ -411,7 +393,7 @@ Everything that doesn't need a generated result, now:
 
 - **Overlays:** render the caption, the text beats and the pop-ups from the templates
   (`node <reskit>/tools/render_html.js <template>#<urlencoded text> <out.png> [w h scale]`, or
-  `--batch` for all of them, through `heavy-slot.py`), keeping each one's HTML beside its PNG in `assets/`. Time each
+  `--batch` for all of them), keeping each one's HTML beside its PNG in `assets/`. Time each
   pop-up to the exact word it reacts to.
 - **B-roll and simulated screens:** rebuilt in HTML from the captured or provided UI, rendered,
   animated in ffmpeg (the playbook's "B-roll and simulated screens").
@@ -429,8 +411,10 @@ Everything that doesn't need a generated result, now:
     Measure the source first (`reskit.py audio-probe`).
   - no Music line (organic videos, the owner's rule of 2026-11-02): **keep the source's own sound,
     its music included**, the way the source creator used it. Never replace the source's song with
-    a generated one: generated tracks sound like a stock ad library. Kept source audio is always
-    pitch-adjusted (+0.6 semitones). When the source's voices are replaced (new dialogue) and its
+    a generated one: generated tracks sound like a stock ad library. Kept source voices are always
+    pitch-adjusted (+0.6 semitones); the source's music keeps its original pitch (the owner,
+    2026-11-18: "The pitch adjustment is for voice not music"). A source that is only a song: use
+    `"audio": "music"` with the source as the music, `"pitch": false`. When the source's voices are replaced (new dialogue) and its
     song plays under them, keep the song where no old voice is heard, and carry the new lines on it;
     where the old voices can't be parted from the song, use the source audio of a stretch without
     speech as the bed (never cut mid-word). **When the source's music is shorter than the edit**
@@ -446,7 +430,7 @@ Everything that doesn't need a generated result, now:
   depends on what the source's sound was:
   - **If the source had music and no dialogue** and you've added lines, give the music back under
     them, a little lower: the voice rides on the source's own track, about 14 LU under (`music` =
-    the source, `"pitch": true`, `music_under_lu` about 14). The music is part of why the trend
+    the source, `"pitch": false`, `music_under_lu` about 14). The music is part of why the trend
     works; with it underneath, the video still plays like the trend with a person talking over it,
     where the voice alone can feel empty (the owner, 2026-11-05). Lower it further if a line gets
     hard to make out in the transcript.
@@ -457,14 +441,12 @@ Everything that doesn't need a generated result, now:
     asked for the room's sound and no music.
 - **The edit:** fill `<materials>/edit.json` (the build file; `build_edit.py`'s header has the
   format): the kept segments with their source times, the clips' start times, inserts, overlays
-  with exact times, the audio mode (`source` or `clips`), `pitch_semitones` (0.6), room tone, the
+  with exact times, the audio mode (`source` or `clips`), `pitch_semitones` (0.6, voices only; music is never pitched), room tone, the
   cover moment. Then:
 
   ```
-  python3 <shared>/tools/heavy-slot.py <Task ID> -- python3 <reskit>/tools/build_edit.py <materials>/edit.json draft
+  python3 <reskit>/tools/build_edit.py <materials>/edit.json draft
   ```
-
-  (Bash timeout 600000; exit 75 means every render slot stayed busy: run the same line again.)
 
   It builds the whole cut with the source footage (caption masked) standing in for every clip
   still rendering, writes `renders/deletable/<name>_draft.mp4`, rewrites the editable page, and
@@ -473,15 +455,15 @@ Everything that doesn't need a generated result, now:
 
 ### 7.9 When the clips land
 
-`wait_ai_job` on the in-flight jobs (parallel calls, one turn; call it again with the same
-`jobId` when it returns `stillRunning`; never a polling loop or `sleep`). Check every clip as it lands:
+`spira_chain.py wait <materials>/chain.json --for 9` blocks until something changes (repeat it
+while you have nothing else to do; never a polling loop). Check every clip as it lands:
 `reskit.py strip <source.mp4> gen/out/<id>.mp4 <out.jpg> --offset <clip start>` and look at it
 (identity, outfit on every frame, room, props, hands, leftover text, motion lined up). A clip
 with speech is also transcribed (`make-timings.py gen/out/<id>.mp4 --txt <materials>/deletable/check
 --language <code>`) and read against its lines in the dialogue script: every word there, in
 order, starting near its time; none of the source's old words; no extra lines; no music. A failed
-clip is a redo: move its take to `deletable/`, fix the prompt in `chain.json`, record the redo and
-its reason, and submit it again (at most 2 extra). Remember a prompt can't replace a gesture that is in the reference clip:
+clip is `redo` with the prompt fixed in `chain.json` (at most 2 extra), then run the chain again
+in the background. Remember a prompt can't replace a gesture that is in the reference clip:
 change the meaning with text, cut the moment, or make a new shot instead. Rebuild the draft
 whenever clips arrive.
 
@@ -507,8 +489,7 @@ Then record it on the sheet and reply exactly as Atlas's closing text says:
 When Atlas resumes you with "Render the video now by following the rendering skill", the
 rendering skill for a re-skit is **this section**. Never run `render-fast.js` on a re-skit.
 
-1. `python3 <shared>/tools/heavy-slot.py <Task ID> -- python3 <reskit>/tools/build_edit.py <materials>/edit.json final`
-   (Bash timeout 600000; exit 75: run it again). It mixes and checks the
+1. `python3 <reskit>/tools/build_edit.py <materials>/edit.json final`. It mixes and checks the
    audio on its own, renders the picture, attaches the sound, embeds the cover, writes
    `renders/<name>.mp4` (an older render moves to `renders/deletable/` first), makes the share
    copy (under 30 MB) at `renders/deletable/<name>_share.mp4`, checks the file (1080x1920,
@@ -519,7 +500,7 @@ rendering skill for a re-skit is **this section**. Never run `render-fast.js` on
 2. Check the delivered file itself: `python3 <shared>/tools/make-timings.py <root>/renders/<name>.mp4 --txt <materials>/deletable/final-check --language <code>`.
    The kept lines, or the dialogue script, must all be heard. Hearing only "music" where speech
    should be is a failure to investigate, not a quirk.
-3. Tidy the materials folder: frame folders, check images and rejected takes
+3. Tidy the materials folder: chain working files, frame folders, check images and rejected takes
    go to `deletable/` (`references/file-management.md`). Keep `plan.md`, `edit.json`,
    `chain.json` and everything the build uses. Write the result section of `plan.md` (planned
    against actual credits, what was decided, what was not verified).
@@ -529,7 +510,7 @@ rendering skill for a re-skit is **this section**. Never run `render-fast.js` on
 5. **After-video skills.** IF an after-video skill is named, read and follow it.
 6. Reply as Atlas's render text says: `DONE <root>/renders/<name>.mp4 <total credits> <minutes>`,
    where the credits are the metadata's `credits_total` and the minutes run from the start of
-   your design phase. Record it on the sheet and send Vega the VIDEO message as that text says.
+   your design phase. Record it on the sheet and send Nova the VIDEO message as that text says.
 
 ## 9. Questions are for true blockers only
 
@@ -538,31 +519,17 @@ You never ask for approval, a story choice, an outfit, music or a go: decide. Re
 
 - the source video can't be downloaded or read (and no path was given);
 - the request has no Task ID or no Brand number;
+- the Spira sign-in or the balance check fails;
 - the instructions contradict themselves in a way that changes the video (e.g. "name the
   competitor" and "never name competitors").
 
 A failed generation, a missing DNA, a site that can't be captured or a source with no clean
 plate frame is not a blocker: work around it and say so in the metadata.
 
-## 10. On a Linux worker
-
-The tools detect the platform and the machine; there is nothing to configure.
-
-- Scratch files (extracted frames, render temp, composites) go to memory when it has room and are
-  removed when the command ends. `reskit.py frames` copies back only `contact.jpg`; add
-  `--keep-frames` to keep single frames, or use `reskit.py still` for one frame.
-- Several clips or voice-overs at once: `python3 tools/make-timings.py a.mp3 b.mp3` loads the
-  model once. `timings.json` records the engine used.
-- A coloured marker in hand (a logo or sticker to pin on): `python3 tools/track-overlay.py <video> <overlay.png> <out.mp4> --hsv "H0,S0,V0:H1,S1,V1"`.
-  It needs `opencv-python-headless`; if it is missing, install it and run again.
-- The metadata's `stage` key (`fetched`, then `rendered`) says how far a job got. After a restart,
-  read it with `python3 tools/reskit.py stage <materials>` and continue from there instead of
-  redoing finished steps. Set it yourself with `reskit.py stage <materials> <name>`.
-
-## 11. Hard rules
+## 10. Hard rules
 
 - Never use the source creator's face or likeness, name, voice or burned-in text. Always recast.
-- Kept source audio is always pitch-adjusted (`build_edit.py` refuses otherwise).
+- Kept source voices are always pitch-adjusted (`build_edit.py` refuses otherwise); music never is.
 - Never send source speech to the video model: reference clips are silent, and no reference audio
   carries the voice of anyone whose words change. Re-voiced speech comes from one full script, in
   a voice described in words, the same description in every clip.
@@ -574,11 +541,12 @@ The tools detect the platform and the machine; there is nothing to configure.
   camera moves and behind any hand or object that briefly covers it (the owner's rule, 2026-11-07).
 - No claim on screen without a row in the truth file; no competitor named unless the
   instructions ask; no brand name in generated speech or lyrics.
-- At most 2 extra generations per job. Never resubmit a job that is merely slow, or one that has a job ID and no result yet.
+- At most 2 extra generations per job. Never resubmit a job that is merely slow.
 - Credits per job, recorded the moment the job lands; never from the balance.
 - Files exactly as file-management says: NN is the Task ID; rejected takes to `deletable/`, never
-  suffixed copies in place; nothing deleted. Write in `Agents/` only in
-  `Agents/VegaOM/client-assets/<BrandName>/personas/` and `.../brand/`.
+  suffixed copies in place; nothing deleted. Write in `Agents/` only text in
+  `Agents/NovaOM/client-assets/<BrandName>/personas/` and `.../brand/` (plus the real logo); every
+  image stays in the video's materials.
 - Never edit this skill, its references or its tools, or any shared file. A lesson or a needed
-  change goes in the metadata for Vega.
+  change goes in the metadata for Nova.
 - Never stop for approval; run straight through.

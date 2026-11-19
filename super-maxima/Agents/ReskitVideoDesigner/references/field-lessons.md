@@ -5,7 +5,7 @@ together with the shared `Agents/DesignerShared/docs/designer-lessons.md`.
 
 **You never write to this file** (or to the skill or the other references). A job that teaches
 something new proposes it in its metadata (`python3 <reskit>/tools/reskit.py lesson <materials>
-"<lesson>"`); Vega adds it to the shared lessons file after the owner's OK (the owner's rule,
+"<lesson>"`); Nova adds it to the shared lessons file after the owner's OK (the owner's rule,
 2026-10-24).
 
 ## Success rates so far

@@ -7,7 +7,7 @@
   state.py record --url U --theme T --subject S --angle A --headline H --story TEXT --slides N [--notes TEXT] [--run ID]
                                  -> appends to history (kept at 30) and writes last-run.json
 State lives in Agents/CorporateCarouselDesigner/state/: history.json and last-run.json. Never edit by hand.
-Up to 8 designers run at once: next-theme and record both hold the lock on state/.lock, so two
+Up to 6 designers run at once: next-theme and record both hold the lock on state/.lock, so two
 runs never claim the same theme or overwrite each other's record. Always pass --run <carousel folder>:
 every designer in a batch works from the same folder (Project/), so the default would be shared."""
 import sys, json, os, argparse, datetime, re, fcntl

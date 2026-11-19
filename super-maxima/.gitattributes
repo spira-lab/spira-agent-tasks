@@ -1,0 +1,6 @@
+# Append-only production ledgers (2026-11-19, the shared system): every agent adds lines to these while
+# working. "union" keeps both sides' lines on a pull, so a mini's own entries never clash with the main
+# agent's. Brand DNA and everything else is pushed by the main agent only.
+Agents/NovaOM/client-assets/*/personas/*/outfits.md merge=union
+Agents/LifestyleStoryCarouselDesigner/clients/*/used-ideas.md merge=union
+Agents/LifestyleStoryCarouselDesigner/angles-log.md merge=union

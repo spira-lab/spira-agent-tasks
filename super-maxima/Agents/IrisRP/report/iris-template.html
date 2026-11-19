@@ -1,4 +1,4 @@
-<title>Super Vega Track Sheet</title>
+<title>Super Nova Track Sheet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap">
@@ -19,7 +19,7 @@
   --rim: rgba(244, 242, 247, .16); --rim-hot: rgba(255, 111, 0, .45); --orange-glow: rgba(255, 111, 0, .35);
   --scrim: rgba(4, 4, 6, .72);
   --f-display: "Urbanist", "Avenir Next", "Segoe UI", system-ui, sans-serif;
-  --f-body: "Manrope", Arial, system-ui, sans-serif;
+  --f-body: "Manrope", "Helvetica Neue", Arial, system-ui, sans-serif;
   --r: 46px;
 }
 * { box-sizing: border-box; }
@@ -240,7 +240,7 @@ footer { color: var(--faint); font-size: 13px; max-width: 72ch; }
 <div class="wrap">
   <header>
     <div>
-      <div class="label">Super Vega · Track sheet</div>
+      <div class="label">Super Nova · Track sheet</div>
       <h1 id="month">This month</h1>
     </div>
     <div class="head-end">
@@ -261,7 +261,7 @@ footer { color: var(--faint); font-size: 13px; max-width: 72ch; }
   </section>
 
   <section class="agents" aria-label="Agents in the system">
-    <div class="sec-head"><h2>Agents in the system</h2><span class="label" id="ag-note">from Vega's roster</span></div>
+    <div class="sec-head"><h2>Agents in the system</h2><span class="label" id="ag-note">from Nova's roster</span></div>
     <div class="agents" id="agents"></div>
   </section>
 
@@ -280,8 +280,8 @@ footer { color: var(--faint); font-size: 13px; max-width: 72ch; }
     <div id="devnotes"></div>
   </section>
 
-  <footer>Counts are original videos (organic and ad) from Vega's output log. Test runs have their own card and
-  never count toward the totals. Goals come from Vega's targets; weeks run Monday to Friday and goals
+  <footer>Counts are original videos (organic and ad) from Nova's output log. Test runs have their own card and
+  never count toward the totals. Goals come from Nova's targets; weeks run Monday to Friday and goals
   count working days only. Kept up to date by Iris each time a report is asked for.</footer>
   </div>
 
@@ -404,7 +404,7 @@ function statCard(cls, label, value, unit, cell = 5) {
 
 function render() {
   setupViews();
-  if (!DATA) { $("#thumbs").append(el("div", "card grey empty", "No report data yet. Ask Vega for a report and Iris will fill this in.")); return; }
+  if (!DATA) { $("#thumbs").append(el("div", "card grey empty", "No report data yet. Ask Nova for a report and Iris will fill this in.")); return; }
   $("#month").textContent = DATA.month_name;
   const dleft = DATA.workdays_left != null ? DATA.workdays_left : (DATA.day_of_month ? DATA.days_in_month - DATA.day_of_month + 1 : 0);
   $("#when").innerHTML = (DATA.day_of_month ? `<div>Day <b>${DATA.day_of_month}</b> of ${DATA.days_in_month}</div>` : "") + `<div>Updated ${esc(DATA.generated)}</div>`;
@@ -435,7 +435,7 @@ function render() {
   renderAgents();
 
   const thumbs = $("#thumbs");
-  if (!DATA.brands.length) thumbs.append(el("div", "card grey empty", "No brands yet. A brand appears here once Vega has it."));
+  if (!DATA.brands.length) thumbs.append(el("div", "card grey empty", "No brands yet. A brand appears here once Nova has it."));
   DATA.brands.forEach((b) => {
     const m = b.month, s = status(m, b.test);
     const t = el("button", "card grey thumb"); t.type = "button"; t.id = `t-${b.brand}`;
@@ -533,7 +533,7 @@ function renderAgents() {
   const R = DATA.roster || [], host = $("#agents"), list = $("#agents-list");
   if (!R.length) { host.append(el("div", "card grey empty", "No roster yet.")); list.append(el("p", "empty", "No roster yet.")); return; }
   const cnt = (st) => R.filter((a) => a.status === st).length;
-  $("#ag-note").textContent = `${R.length} agents · ${cnt("built")} built · ${cnt("new")} new${cnt("not ready") ? ` · ${cnt("not ready")} not ready` : ""}${cnt("planned") ? ` · ${cnt("planned")} planned` : ""}${cnt("decommissioned") ? ` · ${cnt("decommissioned")} decommissioned` : ""} · from Vega's roster`;
+  $("#ag-note").textContent = `${R.length} agents · ${cnt("built")} built · ${cnt("new")} new${cnt("not ready") ? ` · ${cnt("not ready")} not ready` : ""}${cnt("planned") ? ` · ${cnt("planned")} planned` : ""}${cnt("decommissioned") ? ` · ${cnt("decommissioned")} decommissioned` : ""} · from Nova's roster`;
   const thumbs = el("div", "thumbs team-thumbs"), panel = el("div", "team-panel");
   panel.id = "team-panel"; host.append(thumbs, panel);
   let openTeam = null;
@@ -575,11 +575,11 @@ function renderStorage() {
     c.innerHTML = `${ring(Math.round(used), Math.round(total), null, 3, "GB", center)}<div class="facts"><h3>${title}</h3><div class="rows">${rows}</div></div>`;
     return c;
   };
-  host.append(gauge("grey", "This machine", S.host.used, S.host.total,
-    `<span><b>${gb(S.host.used)}</b> used of ${gb(S.host.total)}</span><span><b>${gb(S.host.free)}</b> free</span>`));
+  host.append(gauge("grey", "This Mac", S.mac.used, S.mac.total,
+    `<span><b>${gb(S.mac.used)}</b> used of ${gb(S.mac.total)}</span><span><b>${gb(S.mac.free)}</b> free</span>`));
   const sm = el("div", "card orange gauge flat");
-  sm.innerHTML = `<div class="label">Super Vega uses</div><div class="figure">${dm(String(S.super_vega.size), 5)}<span class="unit">GB</span></div>
-    <div class="rows"><span><b>${gb(S.super_vega.project)}</b> of it is the Project folder</span><span><b>${(S.super_vega.size / S.host.total * 100).toFixed(1)}%</b> of this machine</span></div>`;
+  sm.innerHTML = `<div class="label">Super Nova uses</div><div class="figure">${dm(String(S.super_nova.size), 5)}<span class="unit">GB</span></div>
+    <div class="rows"><span><b>${gb(S.super_nova.project)}</b> of it is the Project folder</span><span><b>${(S.super_nova.size / S.mac.total * 100).toFixed(1)}%</b> of this Mac</span></div>`;
   host.append(sm);
   const d = S.backup_drive;
   host.append(d.connected
@@ -632,7 +632,7 @@ function open(key, scroll) {
 function detail(b) {
     const m = b.month, s = status(m, b.test);
     const sec = el("section", "brand"); sec.setAttribute("aria-label", b.name);
-    sec.append(el("div", "brand-title", `<h2>${esc(b.name)}</h2><div class="end"><span class="goal">${m.goal ? `Goal ${fmt(m.goal)} this month, from ${esc(m.goal_from)}` : "Tell Vega a target to track progress"}</span><button class="closebtn" type="button">Close</button></div>`));
+    sec.append(el("div", "brand-title", `<h2>${esc(b.name)}</h2><div class="end"><span class="goal">${m.goal ? `Goal ${fmt(m.goal)} this month, from ${esc(m.goal_from)}` : "Tell Nova a target to track progress"}</span><button class="closebtn" type="button">Close</button></div>`));
     sec.querySelector(".closebtn").addEventListener("click", () => { open(null); $(`#t-${b.brand}`)?.focus(); });
     const grid = el("div", "brand-grid");
     const main = el("div", "card orange");

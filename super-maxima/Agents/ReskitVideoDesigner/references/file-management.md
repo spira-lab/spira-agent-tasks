@@ -15,13 +15,13 @@ Project/<BrandName>/
       NN-name-MM-DD/
         plan.md                      the single record of the video (below)
         edit.json                    the build file: segments, overlays, sound (build_edit.py reads it)
-        chain.json                   the generation plan you keep by hand (`chain.json`)
+        chain.json                   the generation chain (spira_chain.py reads it)
         source/                      source.mp4, info.json, timings.json, dna.md, frames, captures for this video
         assets/                      plates, outfit sheet, b-roll HTML and its renders, overlay PNGs and their HTML, masks
         gen/ref/                     reference clips sent to the video model
         gen/out/                     clips that came back (the chosen take only)
         music/                       briefs, lyrics, takes, transcripts of takes
-        deletable/                   rejected takes, replaced files, scratch files
+        deletable/                   rejected takes, replaced files, chain working files
   renders/
     NN-name-MM-DD.mp4                the final video
     deletable/                       NN-name-MM-DD_draft.mp4, NN-name-MM-DD_share.mp4, older renders
@@ -34,48 +34,50 @@ Project/<BrandName>/
 - The editable page is rewritten by every build. Never edit it by hand: change `edit.json`,
   then build again. It is an HTML file so Jani's backup and the Data Cleaner find the video;
   it is not a stage, and `render-fast.js` is never run on it.
-- **A rejected or replaced take is moved to `deletable/`**, keeping its name (you move it when you redo a job). There are no suffixed copies left in place (`_v1`, `_failed`):
+- **A rejected or replaced take is moved to `deletable/`**, keeping its name (`spira_chain.py
+  redo` does this itself). There are no suffixed copies left in place (`_v1`, `_failed`):
   `gen/out/` and `assets/` hold only what the build uses.
 - The share copy and the drafts live in `renders/deletable/`, so `renders/` holds exactly one
   file per video.
-- At the render, move the working files (frame folders, contact sheets) to `deletable/`. Keep
-  `chain.json`, `edit.json` and `plan.md`.
-- Never delete anything. Throwaway intermediates go to your own scratch folder,
-  `<scratchpad>/t<Task ID>/`: other designers share the scratchpad at the same time
-  (2026-11-10), so never read, change or run another task's files there (a `--batch` jobs
-  file included).
+- At the render, move the working files (`chain.state.json`, `chain.approved.json`, `chain.log`,
+  `chain.runner.lock`, frame folders, contact sheets) to `deletable/`. Keep `chain.json`,
+  `edit.json` and `plan.md`.
+- Never delete anything. Throwaway intermediates go to the session scratchpad.
 
 ## Brand-level files (the one place in Agents/ you write)
 
-Personas, the outfit ledger and the brand's truth file belong to the brand, not to one video,
-and must survive Jani's backups (Jani clears `Project/`). They live in Vega's client assets:
+The outfit ledger, the voice and the brand's truth file belong to the brand, not to one video,
+and must survive Jani's backups (Jani clears `Project/`). They live in Nova's client assets, as
+text. Images go there only for an anchor persona's master sheet (the owner's rule, 2026-11-17):
 
 ```
-Agents/VegaOM/client-assets/<BrandName>/
-  personas/<Name>/           a persona made from 2026-11-10 on: <Name>-t<Task ID>/
-    source/                  the given avatar image, or the Soul base image if one was made
-    sheet_4k.png             the master character sheet (never edited in place)
+Agents/NovaOM/client-assets/<BrandName>/
+  personas/<Name>/
+    sheet_4k.png             anchor personas only (Spiraverse, IASO, Emochi): the master sheet, used as is
     voice.md                 her voice in one sentence, written the first time she speaks, never changed
-    sheet.html               how the sheet was assembled, when built from photos
-    outfits/                 one sheet per outfit: <YYYY-MM-DD>_<short-outfit-name>.png
-    outfits.md               the outfit ledger (persona-and-outfits.md)
+    outfits.md               the outfit ledger (persona-and-outfits.md), one row per video
   brand/
     truth.md                 facts with sources and dates (brand-truth-and-text.md)
     logo/                    the real logo, from the brand's own site or the request
-    ui/                      real screenshots and captures of the product
 ```
 
-`Agents/VegaOM/client-assets/<BrandName>/personas/` and `.../brand/` are the **only** places in
-`Agents/` this designer writes. Never touch the brand's other files there (the logo and product
-images Vega keeps at the top of the brand's folder): read them, copy them into the video's
-materials when a build needs them.
+Every image made for this video stays in its materials and goes to the backup drive with the
+project:
 
-Another designer may be writing the same brand's files at the same time. Add lines to
-`truth.md` and `outfits.md` only with `python3 <shared>/tools/brand-lock.py append <file> @<textfile>`.
-Anything else written here (a new `voice.md`, `brand/ui/` screenshots, a new `logo/`, an
-in-place edit of `truth.md`) goes inside `python3 <shared>/tools/brand-lock.py <BrandName> -- <command>`,
-after looking again for what you were about to make: when another designer has just made it,
-reuse theirs.
+```
+<materials>/persona/<Name>/
+  source/                    the given avatar image, or the Soul base image if one was made (one-off personas)
+  sheet_4k.png               a one-off persona's character sheet
+  sheet.html                 how the sheet was assembled, when built from photos
+  outfits/                   this video's outfit sheet: <YYYY-MM-DD>_<short-outfit-name>.png (anchors too)
+<materials>/ui/<YYYY-MM-DD>/ this video's captures of the brand's site and app
+```
+
+In `Agents/`, this designer writes only text in `Agents/NovaOM/client-assets/<BrandName>/personas/`
+(`outfits.md`, `voice.md`) and `.../brand/` (`truth.md`, the real `logo/`). Never add an image to
+a persona folder there, and never touch the brand's other files (the anchor sheets, and the logo and
+product images Nova keeps at the top of the brand's folder): read them, and copy them into the
+video's materials when a build needs them.
 
 ## The plan file
 
@@ -87,8 +89,9 @@ reuse theirs.
   video, in order, with its speaker, source start time, the source's words and the new words
   (kept lines word for word), and the voice sentence used for each speaker
 - the persona and the outfit chosen, and the ledger entry it created
-- the generation plan: every job with model, settings and expected credits (read from `spira ai models get`), and the total
-- the **job log** (last section of the file): you append one row per job the
+- the generation plan: every job with model, settings and expected credits (`spira_chain.py
+  price`), and the total
+- the **job log** (last section of the file): `spira_chain.py` appends one row per job the
   moment it finishes, with its job ID, model, settings, credits and render time
 - the result: what was delivered, planned against actual credits, what was not verified
 
@@ -104,13 +107,13 @@ brand, created, editable, assets, renders) and adds:
 - `music`: where the soundtrack came from (kept source audio, generated, library) and why
 - `dialogue`: when re-voiced, `{script, voices}`: the full dialogue script and each speaker's
   voice sentence, verbatim
-- `assets[]`: every job, written by you the moment the job exists: label, job ID,
+- `assets[]`: every job, written by `spira_chain.py` the moment the job exists: label, job ID,
   model, the exact inputs and prompt, result URLs, file, credits and where the credit figure
   came from. Add an entry yourself for anything else that costs credits (a Scribe transcript
   through `make-timings.py` prints its credits).
-- `credits_total`: the sum of every asset's credits (you keep it up to date)
+- `credits_total`: the sum of every asset's credits (the chain keeps it up to date)
 - `renders[]`: written by `build_edit.py final`
 - `lessons[]`: proposed lessons (`reskit.py lesson`)
 - `risks[]`, `unverified[]`: what you flag and what you could not check
 
-Inputs for generation are public URLs made with `host_file`: host only what a job needs, never anything personal.
+Uploads for generation are public URLs: upload only what a job needs, never anything personal.

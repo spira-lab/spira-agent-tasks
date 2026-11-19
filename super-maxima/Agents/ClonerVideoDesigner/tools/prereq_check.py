@@ -5,9 +5,10 @@
 
 Prints PASS / WARN / FAIL per item with the fix, and the Python to run music_cut.py with
 (MUSIC_PYTHON). Exit code 1 if anything FAILs. Read only: it installs nothing, creates no folder
-and writes no file. Sign-in and credits are not checked here: the worker preflight covers them.
+and writes no file. It never reads the credit balance to measure spend (the account is shared);
+the balance is shown only so you know there is enough to work with.
 """
-import os, shutil, subprocess, sys
+import json, os, shutil, subprocess, sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -16,7 +17,11 @@ SUPER = HERE.parents[2]
 AGENTS = SUPER / "Agents"
 SHARED = AGENTS / "DesignerShared"
 PROJECT = SUPER / "Project"
-CLIENT_ASSETS = AGENTS / "VegaOM" / "client-assets"
+CLIENT_ASSETS = AGENTS / "NovaOM" / "client-assets"
+
+MODELS = ["ai-influencer-image", "gpt-image-2", "wan-3.0", "kling-3.0-motion-control",
+          "gemini-omni-flash-1.1", "seedance-1.5-pro", "suno-music",
+          "pixelcut-video-background-removal", "elevenlabs-text-to-speech", "elevenlabs-sound-effects"]
 
 fails = warns = 0
 
@@ -42,17 +47,43 @@ def run(*cmd, timeout=60):
         return 1, str(e)
 
 
+def spira_json(*args):
+    code, out = run("spira", "--json", *args)
+    try:
+        start = out.index("{")
+        return code, json.loads(out[start:], strict=False)
+    except ValueError:
+        return code, {}
+
+
+print("== Spira")
+if shutil.which("spira"):
+    ok(f"Spira CLI {run('spira', '--version')[1].strip()}")
+    code, d = spira_json("credits", "balance")
+    data = d.get("data") or {}
+    bal = data.get("availableCredits", data.get("balance"))
+    if code == 0 and bal is not None:
+        ok(f"signed in, {bal} credits available on the shared account (not a measure of this run's spend)")
+    else:
+        fail("Spira not signed in (or the sign-in expired)", "the user runs: spira auth login")
+    for m in MODELS:
+        if run("spira", "--json", "ai", "models", "get", m)[0] == 0:
+            ok(f"model {m}")
+        else:
+            fail(f"model {m} not available", "check 'spira --json ai models list' for a renamed id and tell Nova")
+    if run("spira", "workflows", "--help")[0] == 0:
+        ok("spira workflows (understand_source.py creates one workflow per run, named with the Task ID)")
+    else:
+        fail("spira workflows command missing", "update the Spira CLI: npm install -g @spira-lab/cli")
+else:
+    fail("Spira CLI not installed", "npm install -g @spira-lab/cli")
+
 print("== Media tools")
-for t in ("ffmpeg", "ffprobe"):
+for t in ("yt-dlp", "ffmpeg", "ffprobe"):
     if shutil.which(t):
         ok(t)
     else:
-        fail(f"{t} not installed", "install ffmpeg")
-if shutil.which("yt-dlp"):
-    ok("yt-dlp")
-else:
-    warn("yt-dlp not installed (not on the worker by default)",
-         "download a source link with the ai tool's download action, or use the file the request supplies")
+        fail(f"{t} not installed", f"brew install {'ffmpeg' if t == 'ffprobe' else t}")
 if shutil.which("ffmpeg") and "libvpx-vp9" in run("ffmpeg", "-hide_banner", "-decoders")[1]:
     ok("ffmpeg can decode VP9 with alpha (libvpx-vp9)")
 else:
@@ -64,7 +95,7 @@ else:
 
 print("== Python")
 if sys.version_info >= (3, 9):
-    ok(f"python3 {sys.version.split()[0]} (prereq_check, lyrics_check, shared tools)")
+    ok(f"python3 {sys.version.split()[0]} (prereq_check, understand_source, lyrics_check, shared tools)")
 else:
     fail(f"python3 {sys.version.split()[0]} is too old", "Python 3.9 or newer")
 music_py = None
@@ -94,47 +125,44 @@ else:
     fail("node not installed", "install Node.js")
 render = SHARED / "tools" / "render"
 for f, fix in ((render / "render-fast.js", "restore the shared renderer"),
+               (render / "node_modules" / "playwright-core", "npm install in Agents/DesignerShared/tools/render (ask Nova)"),
                (SHARED / "tools" / "bgm-extend.py", "restore it one folder above the renderer")):
     (ok if f.exists() else (lambda m: fail(m, fix)))(f"{f.relative_to(SUPER)}")
-if shutil.which("node") and run("node", "-e", "require('playwright-core')")[0] == 0:
-    ok("playwright-core resolves with require('playwright-core')")
-else:
-    fail("require('playwright-core') does not resolve", "the global playwright-core module is missing on the worker; tell Vega")
 chrome = os.environ.get("CHROME_PATH")
 if chrome and os.access(chrome, os.X_OK):
-    ok(f"Chromium at CHROME_PATH ({chrome})")
-elif shutil.which("chromium") or shutil.which("chromium-browser") or shutil.which("google-chrome"):
-    ok("Chromium on PATH (renderer and capture_site.js)")
+    ok("Chrome at CHROME_PATH")
+elif Path("/Applications/Google Chrome.app").exists():
+    ok("Google Chrome installed (renderer and capture_site.js)")
 else:
-    fail("Chromium not found", "set CHROME_PATH to the chromium binary (/usr/bin/chromium)")
+    fail("Google Chrome not found", "install Google Chrome, or set CHROME_PATH to a Chrome binary")
 
 print("== Shared designer files")
-for rel in ("stage/stage-9x16.html", "tools/chunker.py", "tools/make-timings.py",
+for rel in ("stage/stage-9x16.html", "tools/chunker.py", "tools/make-timings.py", "tools/spira-jobs.py",
             "skills/file-management.md", "skills/toolkit.md", "skills/prompting.md",
             "skills/stage-canvas-html.md", "skills/rendering.md", "skills/known-methods.md",
             "skills/working-memory.md", "music"):
     f = SHARED / rel
-    (ok if f.exists() else (lambda m: fail(m, "restore it; tell Vega")))(f"DesignerShared/{rel}")
+    (ok if f.exists() else (lambda m: fail(m, "restore it; tell Nova")))(f"DesignerShared/{rel}")
 f = AGENTS / "AvatarDesigner" / "skills" / "avatar-designer.md"
-(ok if f.exists() else (lambda m: fail(m, "restore it; tell Vega")))("AvatarDesigner/skills/avatar-designer.md (persona method)")
+(ok if f.exists() else (lambda m: fail(m, "restore it; tell Nova")))("AvatarDesigner/skills/avatar-designer.md (persona method)")
 
 print("== This designer")
 for rel in ("skills/cloner-video-designer.md", "references/cloningtoolkit.md",
             "references/clonerfilemanagement.md", "references/cloner-lessons.md",
-            "references/source-understanding-workflow.json",
+            "references/source-understanding-workflow.json", "tools/understand_source.py",
             "tools/music_cut.py", "tools/lyrics_check.py", "tools/capture_site.js"):
     f = CLONER / rel
-    (ok if f.exists() else (lambda m: fail(m, "restore it; tell Vega")))(f"ClonerVideoDesigner/{rel}")
+    (ok if f.exists() else (lambda m: fail(m, "restore it; tell Nova")))(f"ClonerVideoDesigner/{rel}")
 
 print("== Folders")
 if PROJECT.is_dir() and os.access(PROJECT, os.W_OK):
     ok(f"Project folder writable: {PROJECT}")
 else:
-    fail(f"can't write to {PROJECT}", "Vega checks the build folder (this check creates nothing)")
+    fail(f"can't write to {PROJECT}", "Nova checks the build folder (this check creates nothing)")
 if CLIENT_ASSETS.is_dir():
-    ok(f"client assets: {CLIENT_ASSETS.relative_to(SUPER)} (personas are saved in <BrandName>/personas/)")
+    ok(f"client assets: {CLIENT_ASSETS.relative_to(SUPER)} (anchor sheets and persona records in <BrandName>/personas/; persona images stay in the project)")
 else:
-    fail(f"{CLIENT_ASSETS} missing", "tell Vega")
+    fail(f"{CLIENT_ASSETS} missing", "tell Nova")
 
 print()
 print(f"MUSIC_PYTHON={music_py or 'none'}")

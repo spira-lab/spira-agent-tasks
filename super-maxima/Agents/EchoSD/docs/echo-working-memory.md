@@ -1,7 +1,7 @@
 # Echo — Working memory
 
 What the user asked Echo to remember, kept across sessions. Echo's tools read it; Echo writes
-to it only when the user (through Vega) asks her to remember, change, or forget something.
+to it only when the user (through Nova) asks her to remember, change, or forget something.
 
 ## Product writing styles
 

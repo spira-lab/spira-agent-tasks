@@ -2,7 +2,7 @@
 # Usage: render.sh slides.html outdir count ["1 3 5"]  -> outdir/slide-0N.jpg + outdir/contact.png
 set -euo pipefail
 HTML="$1"; OUT="$2"; N="$3"; ONLY="${4:-}"
-CHROME="${CHROME_PATH:-/usr/bin/chromium}"
+CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 mkdir -p "$OUT"; ABS="$(cd "$(dirname "$HTML")" && pwd)/$(basename "$HTML")"
 IDS=${ONLY:-$(seq 1 "$N")}
 TMP="$(dirname "$ABS")/.render-tmp.html"

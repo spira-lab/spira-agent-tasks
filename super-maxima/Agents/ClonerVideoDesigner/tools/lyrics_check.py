@@ -9,20 +9,16 @@ usage:
   python3 lyrics_check.py transcribe <audio or video> <out.txt> [--language en] [--model small]
       Whisper in lyrics mode (initial prompt "Song lyrics:", high no-speech threshold), which hears
       a sung hook where default mode writes "music". Writes the plain text to <out.txt>.
-      Needs the `whisper` command (openai-whisper) and ffmpeg. Runs in a timing slot
-      (DesignerShared/tools/timing_slot.py); exit 75 = slots busy, run the same line again.
+      Needs the `whisper` command (openai-whisper) and ffmpeg.
 
-Paths may be absolute, relative to the current folder, or relative to the Super Vega folder.
-Outputs go only inside Super Vega/Project/ (or the system temp folder); only folders inside
+Paths may be absolute, relative to the current folder, or relative to the Super Nova folder.
+Outputs go only inside Super Nova/Project/ (or the system temp folder); only folders inside
 Project/ are ever created. Run with python3.
 """
 import argparse, json, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parent.parent / "DesignerShared" / "tools"))
-import profile as scratch_profile  # noqa: E402,F401  (redirects tempfile to the scratch root)
-from timing_slot import WHISPER_THREADS, timing_slot  # noqa: E402
 SUPER = HERE.parents[2]
 PROJECT = SUPER / "Project"
 
@@ -79,11 +75,10 @@ def transcribe(a):
     with tempfile.TemporaryDirectory(prefix="lyrics-") as td:
         wav = Path(td) / "a.wav"
         subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(src), "-vn", "-ac", "1", "-ar", "16000", str(wav)], check=True)
-        with timing_slot(f"lyrics {src}"):
-            r = subprocess.run(["whisper", str(wav), "--model", a.model, "--language", a.language,
-                                "--initial_prompt", "Song lyrics:", "--no_speech_threshold", "0.9",
-                                "--condition_on_previous_text", "False", "--threads", str(WHISPER_THREADS),
-                                "--output_format", "json", "--output_dir", td], capture_output=True, text=True)
+        r = subprocess.run(["whisper", str(wav), "--model", a.model, "--language", a.language,
+                            "--initial_prompt", "Song lyrics:", "--no_speech_threshold", "0.9",
+                            "--condition_on_previous_text", "False", "--output_format", "json",
+                            "--output_dir", td], capture_output=True, text=True)
         j = Path(td) / "a.json"
         if not j.exists():
             sys.exit("whisper failed:\n" + (r.stderr or r.stdout)[-800:])

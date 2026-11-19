@@ -6,7 +6,7 @@ and never opens their contents.
 
   python3 "<cleaner>/tools/datacleaner-archive.py" <task id> <redo|cancel>
 
-It looks the task up in Vega's register (never trusts a number it is handed), finds
+It looks the task up in Nova's register (never trusts a number it is handed), finds
 the video by the metadata file whose task_id matches, and moves everything with that
 video's name into:
 
@@ -24,7 +24,7 @@ from datetime import datetime
 from pathlib import Path
 
 SUPER = Path(__file__).resolve().parents[3]          # <super>/Agents/DataCleaner/tools/this
-MAX_TOOL = SUPER / "Agents" / "VegaOM" / "tools" / "vega-task-id.py"
+MAX_TOOL = SUPER / "Agents" / "NovaOM" / "tools" / "nova-task-id.py"
 PROJECT = SUPER / "Project"
 
 def main():
@@ -32,10 +32,10 @@ def main():
         sys.exit(__doc__)
     task, decision = sys.argv[1], sys.argv[2]
 
-    # 1. Vega's register is the source of truth for the task's brand and number.
+    # 1. Nova's register is the source of truth for the task's brand and number.
     res = subprocess.run([sys.executable, str(MAX_TOOL), "show", task], capture_output=True, text=True)
     if res.returncode != 0:
-        sys.exit(f"Vega's register has no active task {task}: {res.stderr.strip() or res.stdout.strip()}")
+        sys.exit(f"Nova's register has no active task {task}: {res.stderr.strip() or res.stdout.strip()}")
     t = json.loads(res.stdout)
     task_id, brand, bno = t["task_id"], t["brand"], t["brand_number"]
     root = PROJECT / brand

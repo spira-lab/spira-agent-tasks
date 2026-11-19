@@ -1,5 +1,5 @@
 > **This file is an Atlas batch sheet. To run it, read and follow
-> `Agents/AtlasPM/atlas-project-manager.md` (in the Super Vega folder),
+> `Agents/AtlasPM/atlas-project-manager.md` (in the Super Nova folder),
 > with this file as the sheet. Do not produce any video from this file
 > directly.**
 
@@ -8,9 +8,9 @@
 One row per video. Fill the first five columns and leave the rest blank;
 the batch fills Status, Started, Minutes, and Result as it runs.
 
-- **Task ID** is the video's number, issued by Vega (`Agents/VegaOM/tools/vega-task-id.py`). It never restarts; never number by counting files.
-- **Brand number**: the video's place in its brand's count (no gaps), issued by Vega with the Task ID. It is the number in the video's file names.
-- **Output type**: `organic-video`, `ad-video`, `avatar-image` or `carousel`. Vega's output log counts finished outputs by it.
+- **Task ID** is the video's number, issued by Nova from the shared Lark Base tracker (`Agents/NovaOM/docs/tracker.json`, one count for every agent). It never restarts. The one exception: on 2026-11-19 the owner restarted every count at 1 for the shared tracker, so Task IDs and Brand numbers from that day start again at 1 (Project/ was backed up and cleared before, so names don't clash). Never number by counting files.
+- **Brand number**: the video's place in its brand's count (no gaps), issued by Nova with the Task ID. It is the number in the video's file names.
+- **Output type**: `organic-video`, `ad-video`, `avatar-image` or `carousel`. Nova's output log counts finished outputs by it.
 - **Duration**: target length in seconds, for Echo only: she writes each script to it. It is never passed to a designer; the video's length follows the script.
 - **Style**: the video style (e.g. `talking head edited`). Atlas picks the designer for it from `docs/atlas-designers.json`. Blank uses the default style.
 - **Script**: for a style that needs one, filled by Echo, the script director (A **scriptless** style, marked `"script": "none"` in `docs/atlas-designers.json`, has no script: its row is ready at once and the designer works from Instructions.) Filled by Echo (`atlas-sheet.py set <Task ID> "Script=@<file>"`). A row without a script is a `draft` and is not run.
@@ -22,7 +22,7 @@ the batch fills Status, Started, Minutes, and Result as it runs.
 - **Brand logo**: the logo image's link or file path. **Brand color**: the
   colour as a hex code, such as #1E40AF, or several separated by commas.
   Both blank when not given.
-- **Avatar image** + **Avatar voice**: a persistent avatar for the talking head, from the brand's preferences in Vega's working memory. Image: a path or URL. Voice: `elevenlabs <voice ID> <model>`. Both blank: the designer makes its own persona.
+- **Avatar image** + **Avatar voice**: a persistent avatar for the talking head, from the brand's preferences in Nova's working memory. Image: a path or URL. Voice: `elevenlabs <voice ID> <model>`. Both blank: the designer makes its own persona.
 - **Music**: `none` for no music, `library` to pick from the music
   library, blank to generate music.
 - **After video skill**: a skill to read and continue with once the video

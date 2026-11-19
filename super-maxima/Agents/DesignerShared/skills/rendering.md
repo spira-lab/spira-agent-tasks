@@ -15,20 +15,8 @@ better. Run it, read its one result line, move on.
 
 WHEN the editable is built and has passed the stage skill's first-frame
 audit (3a) and its checks before hand-over (4), it is ready to render.
-Other designers render on the same machine at the same time, so every
-render runs inside a **render slot**: at most 4 renders at once (the owner's
-decision, 2026-11-13). Put `python3 <shared>/tools/heavy-slot.py <Task ID> --`
-in front of the render command, with a Bash timeout of 600000. It waits
-for a free slot, runs the command, and exits with the command's own exit
-code. IF it exits **75**, every slot stayed busy for 5 minutes and nothing
-ran: run the same line again. The same goes for every other heavy step a
-style skill names (an HTML batch render, a build or composite script, a
-final ffmpeg encode); light steps (AI jobs, probes, single frames) run
-without a slot. A command that needs a shell (a pipe, `&&`) goes in as
-`bash -c "<command>"`.
-Transcriptions are not renders: `make-timings.py` and the other Whisper
-tools take one of the **timing slots** (10) themselves (2026-11-13), so never
-wrap them in `heavy-slot.py`. IF one exits **75**, run the same line again.
+Only one render runs on the machine at a time; never start a second one
+alongside.
 
 ## Before you run it
 
@@ -58,10 +46,10 @@ mix effects into the voice file yourself.
 ## The command
 
 ```bash
-python3 <shared>/tools/heavy-slot.py <Task ID> -- node <shared>/tools/render/render-fast.js <root>/editable/<name>.html <root>/renders/<name>.mp4 --cover <seconds>
+node <shared>/tools/render/render-fast.js <root>/editable/<name>.html <root>/renders/<name>.mp4 --cover <seconds>
 ```
 
-`<shared>` is the designers' shared folder, `Super Vega/Agents/DesignerShared`; `<root>` and `<name>` are
+`<shared>` is the designers' shared folder, `Super Nova/Agents/DesignerShared`; `<root>` and `<name>` are
 as the file-management skill gives them.
 
 What it does, in order:
@@ -69,9 +57,9 @@ What it does, in order:
 1. Moves an existing render of this video to `renders/deletable/`, with
    its time as a suffix.
 2. Decodes every video clip in the editable once, into still frames.
-3. Draws each frame in headless Chrome (software rendering), showing each clip's
+3. Draws each frame in headless Chrome on the GPU, showing each clip's
    pre-decoded frame for that moment.
-4. Encodes with libx264.
+4. Encodes on the Mac's hardware video encoder.
 5. Mixes the audio: voice at -16 LUFS, music 20 LU under it (or as
    many LU as the bgm tag's `data-under` says) with a one-second fade in
    and 1.5 out, and every sound effect tag at its moment.
@@ -79,8 +67,7 @@ What it does, in order:
 7. Checks the file: frame count, length, stereo audio, cover.
 
 Expect about one second of wall time per second of video; a 40-second
-video takes about 45 seconds (longer while another render shares the
-machine), plus any wait for a slot.
+video takes about 45 seconds.
 
 ## The result
 
@@ -96,9 +83,10 @@ The command prints one line of JSON.
 
 ## What the machine needs
 
-Node, ffmpeg, and Chromium at `/usr/bin/chromium` (or `CHROME_PATH` set to
-another Chromium), with `npm install` run once in the shared folder's `tools/render`.
-The render always encodes in software.
+Node, ffmpeg, and Google Chrome (or `CHROME_PATH` set to another
+Chromium), with `npm install` run once in the shared folder's `tools/render`.
+On a Mac with a hardware encoder the render uses it; elsewhere it falls
+back to software encoding on its own.
 
 `tools/render/render.js`, the older renderer, stays in the shared folder
 because other tools still call it. Productions use `render-fast.js`.

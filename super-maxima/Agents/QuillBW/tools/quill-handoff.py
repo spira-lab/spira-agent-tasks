@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Quill's handoff tool. After the user APPROVES the brief, leaves it in Vega's inbox as one
-small file. Vega records it into his Client Ledger and working memory with his own tool.
+"""Quill's handoff tool. After the user APPROVES the brief, leaves it in Nova's inbox as one
+small file. Nova records it into her Client Ledger and working memory with her own tool.
 Without --product the brief is about the brand (its brand row); with --product it is about
-that product (its own row). --dna is that row's DNA file path.
+that product (its own row). --dna is that row's DNA doc.
 Prints one JSON line with the handoff file.
 
   python3 "<quill>/tools/quill-handoff.py" "<brand>" [--product "<product>"]
-      [--dna <DNA file path>] [--website <the site researched>] [--colors "#1E40AF, #F5F5F5"]
+      [--dna <Lark URL>] [--website <the site researched>] [--colors "#1E40AF, #F5F5F5"]
       [--logo '<{"local":..,"hosted":..} from quill-assets.py>']
       [--product-images '<[{"local":..,"hosted":..}, ...] from quill-assets.py>']
       [--pref "production: talking head edited only"] [--pref "after: upload every video to Spira"]
@@ -23,7 +23,7 @@ from datetime import datetime
 from pathlib import Path
 
 QUILL = Path(__file__).resolve().parents[1]
-INBOX = QUILL.parents[1] / "Agents" / "VegaOM" / "docs" / "vega-inbox"
+INBOX = QUILL.parents[1] / "Agents" / "NovaOM" / "docs" / "nova-inbox"
 SECTIONS = {"production", "after", "other"}
 
 def key(name): return re.sub(r"[^A-Za-z0-9]", "", name or "")
@@ -58,7 +58,7 @@ def main():
         sys.exit("nothing to hand over")
     h["from"] = "Quill"; h["approved_by_user"] = True; h["created"] = datetime.now().isoformat(timespec="seconds")
     INBOX.mkdir(parents=True, exist_ok=True)
-    f = INBOX / f"vega-handoff-{key(brand) or 'Brandless'}-{datetime.now():%Y%m%d-%H%M%S}.json"
+    f = INBOX / f"nova-handoff-{key(brand) or 'Brandless'}-{datetime.now():%Y%m%d-%H%M%S}.json"
     f.write_text(json.dumps(h, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps({"handoff": str(f.relative_to(QUILL.parents[1])), "brand": brand}))
 

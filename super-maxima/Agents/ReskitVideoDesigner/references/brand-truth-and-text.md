@@ -5,7 +5,7 @@ This file is the logic for changing text without drifting.
 
 ## The brand-truth file
 
-Each brand has one truth file, `Agents/VegaOM/client-assets/<BrandName>/brand/truth.md`, and
+Each brand has one truth file, `Agents/NovaOM/client-assets/<BrandName>/brand/truth.md`, and
 each video adds to it what it needs (read it first; earlier videos may already hold what you
 need, but re-check any row older than 30 days that your story leans on). Every entry is a fact
 with its source and the date it was checked:
@@ -18,17 +18,13 @@ with its source and the date it was checked:
 | The brand has no live chat support | absent from site, help centre, app UI text | site + app strings | 2026-01-15 |
 ```
 
-Other designers may be working on the same brand at the same time. Add rows only with
-`python3 <shared>/tools/brand-lock.py append <truth.md> @<textfile>`; an in-place edit of a row
-(a re-check), and a new capture into `brand/ui/`, go inside
-`python3 <shared>/tools/brand-lock.py <BrandName> -- <command>`, reading the file again first.
-
 **Sources, in order of trust:**
 1. Material the request provides (product image, logo, screenshots, files named in the
    instructions). It always wins.
-2. The brand's DNA (`Brand DNA: <path>` in the instructions; `reskit.py dna` fetches it).
+2. The brand's DNA (`Brand DNA: <url>` in the instructions; `reskit.py dna` fetches it).
 3. The brand's own product: its site, store listing, app, in-product text. Capture it yourself
-   with `node <reskit>/tools/capture_site.js <url> <client-assets>/<BrandName>/brand/ui/<YYYY-MM-DD>`
+   with `node <reskit>/tools/capture_site.js <url> <materials>/ui/<YYYY-MM-DD>` (in this video's
+   materials, so it is backed up with the project; the owner's rule, 2026-11-17)
    (screenshots, logo candidates, colours, the page text).
 4. Reputable reporting, for outside events only.
 
@@ -84,7 +80,7 @@ react the way the source's person reacts. If it would make a customer quit the p
 **Other companies are not named by default.** Naming a competitor and saying something about
 it is a legal question. Use the unnamed version ("the app I've used for years"). Name one only
 when the instructions explicitly ask for it, and then record the claim and its source in the
-metadata's `risks` so Vega can flag it.
+metadata's `risks` so Nova can flag it.
 
 **No brand names inside generated speech or song lyrics.** Generators mispronounce them. The
 brand name goes on screen. (For any other hard word in a line Wan will say, the shared Reword
@@ -103,8 +99,7 @@ on-screen text keeps the real spelling.)
   (take the time from `source/timings.json`) and holds until the moment passes or the shot cuts.
 - **Text beats** (`tools/beat.html`) that replace the source's own caption moments (for example a
   two-part setup over a reaction) use the source's caption style at the same height.
-- Render every overlay from its HTML (`render_html.js`, several at once with `--batch` through
-  `heavy-slot.py`), and
+- Render every overlay from its HTML (`render_html.js`, several at once with `--batch`), and
   keep the HTML beside the PNG in `assets/`, so a text change is a re-render, not a redesign.
 - The brand's logo appears only as the real file (from the request, or captured from the
   brand's site), never an emoji or a lookalike. Brand colors from the request win over captured

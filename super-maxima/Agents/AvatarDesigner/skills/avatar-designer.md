@@ -27,7 +27,7 @@ reference, and you never ask for one.
 
 ## 2. Read first, and only this
 
-From the shared folder `Super Vega/Agents/DesignerShared/skills/`:
+From the shared folder `Super Nova/Agents/DesignerShared/skills/`:
 
 - `prompting.md`: section 1 (principles), section 2 (the Higgsfield
   Soul format) and section 3 (the GPT Image 2 persona edit). Fill the
@@ -90,11 +90,11 @@ The Avatar Designer is the one source of personas (the owner's rule, 2026-10-24)
 3. Check every panel is the same person and outfit. Rerun the edit at most once.
 4. Save it as `NN-sheet-MM-DD.png` beside the avatar, and record it in the metadata.
 
-**For a brand persona** (the instructions say which brand), also save a copy to `Agents/VegaOM/client-assets/<BrandName>/personas/<Name>-t<Task ID>/`, keeping both `avatar.png` and `sheet.png` there (other designers may save a persona of the same brand at the same time: make the folder inside `python3 Agents/DesignerShared/tools/brand-lock.py <BrandName> -- <command>`). That folder is the one place in Agents/ this designer may write.
+**For a brand persona** (the instructions say which brand), the avatar and sheet stay in the Avatar folder with the project. Only when the instructions say it is an **anchor** persona (a recurring main character, e.g. a Spiraverse persona) save a copy of the sheet as `Agents/NovaOM/client-assets/<BrandName>/personas/<Name>/sheet_4k.png`; for every other brand persona write only a text record there, `<Name>.md` (how the person looks, in words, and the Task ID). That folder is the one place in Agents/ this designer may write (the owner's rule, 2026-11-17).
 
 ## 5. Files
 
-Everything goes in the Avatar folder, `Super Vega/Project/Avatar/`:
+Everything goes in the Avatar folder, `Super Nova/Project/Avatar/`:
 
 ```
 Project/Avatar/
@@ -122,5 +122,5 @@ nothing to render.
 - **When Atlas resumes you to render:** there is no video and no
   rendering skill to follow. Check that the PNG and its metadata exist.
   Then reply `DONE <path of the .png> <total credits> <minutes>`, record
-  it on the sheet, and message Vega exactly as that message says (the
+  it on the sheet, and message Nova exactly as that message says (the
   `VIDEO` line carries the PNG path).

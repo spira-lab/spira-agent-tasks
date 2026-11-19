@@ -4,13 +4,13 @@ usage: python -I render_text.py <text.json>
 
 text.json:
 {
-  "out_dir": "<absolute build folder>/slides",
+  "out_dir": "/Users/.../Super Nova/Project/<Brand>/carousels/<build>/slides",   # (Rey: D:/.../builds/<run>/slides)
   "name": "NO.<batch> - <Client> - <NN> <Title>",     # file name prefix
   "maker": "Rey", "version": 1,
   "width": 1080, "height": 1350,
   "style": "box" | "outline",                            # story captions | feed overlay text
   "slides": [
-    {"id": "01", "image": "<absolute build folder>/work/s01-graded.png",
+    {"id": "01", "image": "/Users/.../carousels/<build>/work/s01-graded.png",
      "main": "line one", "sub": "optional smaller line",
      "x": 50, "y": 12,            # anchor point in % of the frame
      "align": "center" | "left" | "right",
@@ -54,7 +54,10 @@ html,body{margin:0;width:%(W)spx;height:%(H)spx;overflow:hidden;background:#000}
 """ % {"W": W, "H": H, "BRAND": spec.get("brand", "#111")}
 
 with sync_playwright() as p:
-    b = p.chromium.launch(executable_path=os.environ.get("CHROME_PATH") or "/usr/bin/chromium")
+    try:
+        b = p.chromium.launch(channel="msedge")   # Rey's Windows default; on the Mac it falls back to Playwright's Chromium
+    except Exception:
+        b = p.chromium.launch()  # needs: python -m playwright install chromium
     pg = b.new_page(viewport={"width": W, "height": H})
     def block(s):
         x, y, w, al = s.get("x", 50), s.get("y", 12), s.get("width", 80), s.get("align", "center")

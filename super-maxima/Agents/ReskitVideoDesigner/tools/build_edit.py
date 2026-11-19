@@ -39,13 +39,15 @@ edit.json (paths relative to the materials folder):
                 cut at the same points as the picture; a clip still rendering uses the
                 pitch-adjusted source audio as a stand-in in the draft)
               | "music" | "none"
-  "pitch_semitones": 0.6 source audio is ALWAYS pitch-adjusted (owner's rule): 0.4 to 1.0 up,
-              or the same range down; length and lip sync hold (resample + tempo correction)
+  "pitch_semitones": 0.6 kept source VOICES are ALWAYS pitch-adjusted (owner's rule): 0.4 to 1.0 up,
+              or the same range down; length and lip sync hold (resample + tempo correction).
+              Music is never pitch-shifted (the owner, 2026-11-18: "The pitch adjustment is for
+              voice not music").
   "music":    {"file": "music/take_a.mp3", "start": 0, "pitch": false} or null. With audio "music"
               it is the whole soundtrack; with audio "source" or "clips" it is a bed music_under_lu
-              under the voices. "pitch": true shifts the bed by pitch_semitones: required when the
-              bed is the source's own sound (kept source audio is always pitch-adjusted), e.g.
-              {"file": "source/source.mp4", "start": 0, "pitch": true} for a source with no voices.
+              under the voices. Keep "pitch": false: music stays at its original pitch, the
+              source's own song included, e.g. {"file": "source/source.mp4", "start": 0,
+              "pitch": false} with audio "music" for a source that is only a song (no voices).
   "music_under_lu": 20
   "roomtone": [9.30, 2.10]   a truly quiet stretch of the source (start, length) for inserts and holds:
               at least 10 dB below the source and 0.5 s longer than the longest insert or hold, so it
@@ -59,7 +61,7 @@ from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from reskit_common import SHARED, Video, update_meta, write_editable, ffprobe_json, duration, loudness, to_deletable, now, scratch_profile
+from reskit_common import SHARED, Video, update_meta, write_editable, ffprobe_json, duration, loudness, to_deletable, now
 
 FPS = 30; AF = 0.03; SR = 48000
 FIT = "scale=1080:1920:force_original_aspect_ratio=increase:flags=lanczos,crop=1080:1920,setsar=1"
@@ -114,11 +116,9 @@ def main():
     music = E.get("music") or None
     bed_from_source = bool(music) and P(music["file"]).resolve() == src.resolve()
     if audio == "source" and not has_src_audio: sys.exit('audio is "source" but the source has no audio')
-    if bed_from_source and not music.get("pitch"):
-        sys.exit("the music bed is the source's own sound: set \"pitch\": true on it (kept source audio is always pitch-adjusted)")
     if audio in ("source", "clips") or (music and music.get("pitch")):
         if not 0.4 <= abs(semis) <= 1.0:
-            sys.exit("kept source audio is always pitch-adjusted (the owner's rule): pitch_semitones must be 0.4 to 1.0 "
+            sys.exit("kept source voices are always pitch-adjusted (the owner's rule): pitch_semitones must be 0.4 to 1.0 "
                      "(or -0.4 to -1.0); +0.6 is the approved value")
     if audio == "music" and not music: sys.exit('audio is "music" but no music is set')
     if music and not P(music["file"]).exists(): sys.exit(f"missing music {P(music['file'])}")
@@ -230,7 +230,7 @@ def main():
         # ------------------------------------------------------------ picture render + attach
         pic = tmp / "picture.mp4"
         flat = [x for inp in inputs for x in inp]
-        crf, preset = ("23", "veryfast") if mode == "draft" else ("18", scratch_profile.preset("final"))
+        crf, preset = ("23", "veryfast") if mode == "draft" else ("18", "medium")
         r = subprocess.run(["ffmpeg", "-v", "error", "-y", *map(str, flat), "-filter_complex", g.text(), "-map", "[v]",
                             "-t", f3(total), "-an", "-c:v", "libx264", "-preset", preset, "-crf", crf, "-r", str(FPS),
                             "-pix_fmt", "yuv420p", str(pic)], capture_output=True, text=True)
@@ -264,7 +264,7 @@ def main():
             if share.exists(): share.unlink()            # the share copy is rebuilt from the current render
             for c, scale in (("23", None), ("26", None), ("26", "scale=720:-2")):
                 run(["ffmpeg", "-v", "error", "-y", "-i", joined, *(["-vf", scale] if scale else []), "-c:v", "libx264",
-                     "-crf", c, "-preset", scratch_profile.preset("intermediate"), "-c:a", "copy", "-movflags", "+faststart", share])
+                     "-crf", c, "-preset", "medium", "-c:a", "copy", "-movflags", "+faststart", share])
                 if share.stat().st_size < SHARE_MB * 1e6: break
             problems += check_final(out, total, share)
             fi, ftp = loudness(out)
@@ -274,7 +274,7 @@ def main():
                       "voice_from_clips": voiced, "overlays": times, "problems": problems, "notes": notes}
             update_meta(v, lambda d: d.setdefault("renders", []).append({
                 "file": str(out), "rendered": now(), "status": "current", "fps": FPS, "duration_ms": int(round(duration(out) * 1000)),
-                "lufs": fi, "true_peak": ftp, "share": str(share), "ok": not problems, "problems": problems}) or d.update({"stage": "rendered"}))
+                "lufs": fi, "true_peak": ftp, "share": str(share), "ok": not problems, "problems": problems}))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     write_editable(v, E, note=f"Last build: {mode}, {now()}, {'ok' if result['ok'] else 'problems: ' + '; '.join(problems)}")

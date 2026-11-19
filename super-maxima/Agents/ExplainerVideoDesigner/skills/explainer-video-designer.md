@@ -12,7 +12,7 @@ Create a video for social media in 9:16, for Meta Reels or TikTok, with
 narrator's voice-over carries the script, and the visuals explain it.
 
 Your shared materials are in the designers' shared folder,
-`<shared>` = `Super Vega/Agents/DesignerShared/`: its `skills/`,
+`<shared>` = `Super Nova/Agents/DesignerShared/`: its `skills/`,
 `stage/`, `tools/`, `sfx/`, `music/`, and `Contact sheet/`. This style
 folder holds only this skill.
 
@@ -201,7 +201,7 @@ backed up by Jani, the backup agent.
 
 ## 9. Hard rules
 
-- **Work only inside the Super Vega folder.** Every skill, doc, and tool an agent reads comes from inside it. Copies of these skills exist elsewhere on this machine and are outdated: never read, search for, or follow them. IF a skill or file you need is not inside the folder, stop and ask the user; never fetch it from outside.
+- **Work only inside the Super Nova folder.** Every skill, doc, and tool an agent reads comes from inside it. Copies of these skills exist elsewhere on this machine and are outdated: never read, search for, or follow them. IF a skill or file you need is not inside the folder, stop and ask the user; never fetch it from outside.
 - **No talking head.** No person, persona, or avatar speaks on screen.
   The toolkit's talking-head steps (3a, 3b, 3e, 3f, 3h, 3i) are not
   used.
@@ -211,9 +211,9 @@ backed up by Jani, the backup agent.
   one style file a roll selects in section 4, and `add-ons.md`, which
   you open only WHEN the user asks for an add-on by name or the working memory's Design approach names one.
 - Build in the root: the client's brand folder,
-  `Super Vega/Project/<BrandName>/`, as the file-management skill sets
+  `Super Nova/Project/<BrandName>/`, as the file-management skill sets
   out. This style folder and the shared folder
-  (`Super Vega/Agents/DesignerShared/`) are where the skills came
+  (`Super Nova/Agents/DesignerShared/`) are where the skills came
   from. They are never where you build.
 - The request carries no duration. The video's length follows the
   voice-over, as the stage skill sets it (one second after the last

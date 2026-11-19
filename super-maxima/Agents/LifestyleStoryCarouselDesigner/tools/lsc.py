@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """The Lifestyle Story Carousel Designer's tool (installed 2026-11-03). One entry point for every step of a
 lifestyle story carousel row, so the designer only ever runs `python3` (Atlas's approved commands have no
-`bash`, no `cd` and no `$(...)`). Rey's scripts (scripts/) run from here, under this python3 (Playwright,
-Pillow, NumPy, OpenCV). Jobs run with the submit_ai_job and wait_ai_job tools, never from this tool.
+`bash`, no `cd` and no `$(...)`). Rey's scripts (scripts/) run from here, under the carousel's own Python
+(~/.venvs/lifestyle-carousel: Playwright, Pillow, NumPy, OpenCV); without it, under this python3.
 
   python3 "<lsc>/tools/lsc.py" new "<Brand>" <Task ID> --brand-number <n> [--product "<name>"] [--website <url>]
           [--format feed|story] [--cap <credits>]
@@ -23,18 +23,15 @@ Pillow, NumPy, OpenCV). Jobs run with the submit_ai_job and wait_ai_job tools, n
   python3 "<lsc>/tools/lsc.py" append angles|ledger|bank:<client>|sources:<client> "| cell | cell | ... |"
       Adds one table row under a lock: angles-log.md, references/ideas-ledger.md (the next G-ID is put in
       front), clients/<client>/ideas.md (the next <client>-NNN is put in front), clients/<client>/screens/sources.md.
-  python3 "<lsc>/tools/lsc.py" job "<folder>" <model-id> <name> '<inputs-json>' <listed credits>
-      Before submit_ai_job: writes the payload gen/<name>.json and prints the modelId, inputs and saveTo
-      (gen/<name>.png). Refused (exit 4) when the credits spent, plus the listed credits of the jobs planned
-      with `job` and not recorded yet, plus this job's listed price would pass the carousel's cap.
-  python3 "<lsc>/tools/lsc.py" submitted "<folder>" <name> <jobId>
-      Right after submit_ai_job: writes gen/<name>.pending ({"jobId", "model"}).
-  python3 "<lsc>/tools/lsc.py" record "<folder>" <name> [--url <resultUrl>] [--status succeeded|failed]
-          [--credits <n>] [--error "<provider error>"]
-      After wait_ai_job: the job goes into jobs.jsonl and the metadata's "jobs" with its listed price as
-      credits (credits_source "price"; 0 for a failed job unless --credits), and gen/<name>.pending is deleted.
+  python3 "<lsc>/tools/lsc.py" job "<folder>" <model-id> <name> '<inputs-json>' [listed credits]
+      One Spira job through Rey's scripts/job.py (submit once, poll the same ID) into <folder>/gen/<name>.<ext>.
+      Then the job's real charge (`spira --json ai jobs status <jobId>` -> data.credits) goes into the
+      metadata's "jobs" (listed price only when the job gives none: credits_source "price"). Refused (exit 4)
+      when the credits already spent plus this job's listed price would pass the carousel's cap.
+  python3 "<lsc>/tools/lsc.py" fetch "<folder>" <name>
+      Picks up a job that job.py gave up polling (its gen/<name>.job.json), never a second paid job.
   python3 "<lsc>/tools/lsc.py" cap "<folder>" <credits>
-      Raises the cap after Vega's ANSWER allows it (at most 500).
+      Raises the cap after Nova's ANSWER allows it (at most 500).
   python3 "<lsc>/tools/lsc.py" run "<folder>" grade|render_text|statusbar|screen_fit|screen_composite <args...>
       Runs that script of Rey's (0 credits). Every path argument must be inside the build folder or <lsc>/clients/.
   python3 "<lsc>/tools/lsc.py" py "<folder>" "<folder>/work/<script>.py" [args...]
@@ -47,9 +44,9 @@ Pillow, NumPy, OpenCV). Jobs run with the submit_ai_job and wait_ai_job tools, n
   python3 "<lsc>/tools/lsc.py" finish "<folder>" [--title "<title>"]
       Writes the slides, totals and minutes since the start into the metadata.
 
-<folder> is the build folder (absolute, or relative to the Super Vega folder), inside Project/<BrandName>/carousels/.
+<folder> is the build folder (absolute, or relative to the Super Nova folder), inside Project/<BrandName>/carousels/.
 """
-import fcntl, json, os, re, subprocess, sys
+import fcntl, json, os, re, subprocess, sys, time
 from datetime import datetime
 from pathlib import Path
 
@@ -63,10 +60,14 @@ IDEAS_LEDGER = LSC / "references" / "ideas-ledger.md"
 STATE_LOCK = LSC / "clients" / ".lsc.lock"          # one lock for every shared log of this designer
 SUPER = LSC.parents[1]
 PROJECT = SUPER / "Project"
+VENV_PY = Path.home() / ".venvs" / "lifestyle-carousel" / "bin" / "python"
 DEFAULT_CAP, MAX_CAP = 150, 500                   # the owner's rules, 2026-11-03
 SIZES = {"feed": (1080, 1350), "story": (1080, 1920)}
 RUNNABLE = {"grade", "render_text", "statusbar", "screen_fit", "screen_composite"}
 
+# Run under the carousel's own Python when it is there (Playwright and OpenCV live in it).
+if VENV_PY.is_file() and not os.environ.get("LSC_IN_VENV"):
+    os.execve(str(VENV_PY), [str(VENV_PY), str(Path(__file__).resolve()), *sys.argv[1:]], {**os.environ, "LSC_IN_VENV": "1"})
 PY = sys.executable
 
 
@@ -382,79 +383,99 @@ def append(a):
     sys.exit(__doc__)
 
 
-# ---------- Spira jobs (run with submit_ai_job / wait_ai_job, never from this tool) ----------
-NAME_RE = r"[A-Za-z0-9._-]+"
+# ---------- Spira jobs ----------
+def spira_json(*args):
+    r = subprocess.run(["spira", "--json", *args], capture_output=True, text=True, stdin=subprocess.DEVNULL)
+    try: return json.loads(r.stdout)
+    except ValueError:
+        m = re.search(r"\{.*\}", r.stdout or "", re.S)
+        try: return json.loads(m.group(0)) if m else {}
+        except ValueError: return {}
 
 
-def in_flight(folder, jobs, skip=None):
-    """Listed credits of the jobs planned with `job` and not yet recorded (a gen/<name>.json with no record)."""
-    done, n = {j.get("name") for j in jobs}, 0.0
-    for p in (folder / "gen").glob("*.json"):
-        if p.stem in done or p.stem == skip: continue
-        try: n += float(json.loads(p.read_text()).get("listed_credits") or 0)
-        except (OSError, ValueError, AttributeError): pass
-    return n
+def job_credits(job_id):
+    for attempt in range(2):
+        d = (spira_json("ai", "jobs", "status", job_id).get("data") or {})
+        for k in ("credits", "creditsCharged", "chargedCredits", "cost", "creditCost"):
+            if isinstance(d.get(k), (int, float)): return float(d[k]), "job"
+        if attempt == 0: time.sleep(5)
+    return None, "missing"
 
 
-def job(folder, a):
-    if len(a) < 6: sys.exit(__doc__)
-    model, name, inputs = a[2], a[3], a[4]
-    if not re.fullmatch(r"\d+(\.\d+)?", a[5]): sys.exit("the listed credits must be a number (spira ai models get <model-id>)")
-    listed = float(a[5])
-    if not re.fullmatch(NAME_RE, name): sys.exit("the name is letters, digits, dot, dash, underscore (no folder)")
-    try: inputs = json.loads(inputs)
-    except ValueError as e: sys.exit(f"the inputs are not JSON: {e}")
-    gen = folder / "gen"
-    if (gen / f"{name}.pending").exists():
-        sys.exit(f"gen/{name} was already submitted: call wait_ai_job on the jobId in gen/{name}.pending, never submit again")
-    if (gen / f"{name}.png").exists(): sys.exit(f"gen/{name}.png already exists: use another name for a re-roll")
-    d = json.loads(meta_path(folder).read_text())
-    cap, spent, flying = d.get("credit_cap") or DEFAULT_CAP, total(d.get("jobs", [])), in_flight(folder, d.get("jobs", []), name)
-    if spent + flying + listed > cap:
-        say({"refused": True, "why": f"{spent} spent + {flying} in flight + {listed} listed would pass the cap of {cap}" +
-             (" (a planned job you will not submit: delete its gen/<name>.json)" if flying else ""),
-             "total_credits": spent, "in_flight": flying, "credit_cap": cap}, 4)
-    write_atomic(gen / f"{name}.json", json.dumps({"model": model, "inputs": inputs, "listed_credits": listed,
-                 "created": datetime.now().isoformat(timespec="seconds")}, indent=1, ensure_ascii=False) + "\n")
-    say({"ok": True, "modelId": model, "inputs": inputs, "saveTo": str(gen / f"{name}.png"),
-         "next": f"submit_ai_job, then: lsc.py submitted \"{folder}\" {name} <jobId>"})
-
-
-def submitted(folder, a):
-    if len(a) < 4 or not re.fullmatch(NAME_RE, a[2]): sys.exit(__doc__)
-    name, jid = a[2], a[3]
-    pay = folder / "gen" / f"{name}.json"
-    if not pay.is_file(): sys.exit(f"no gen/{name}.json: run `job` before submit_ai_job")
-    model = json.loads(pay.read_text()).get("model")
-    write_atomic(folder / "gen" / f"{name}.pending", json.dumps({"jobId": jid, "model": model}) + "\n")
-    say({"pending": str(folder / "gen" / f"{name}.pending"), "jobId": jid})
-
-
-def record(folder, a):
-    if len(a) < 3 or not re.fullmatch(NAME_RE, a[2]): sys.exit(__doc__)
-    name = a[2]; gen = folder / "gen"
-    side, pay = gen / f"{name}.pending", gen / f"{name}.json"
-    if not side.is_file(): sys.exit(f"no gen/{name}.pending: nothing submitted under this name")
-    info = json.loads(side.read_text()); p = json.loads(pay.read_text()) if pay.is_file() else {}
-    jid, listed = info.get("jobId"), p.get("listed_credits")
-    ok = (opt(a, "--status") or "succeeded").lower() == "succeeded"
-    out = gen / f"{name}.png"
-    if ok and not out.is_file(): sys.exit(f"no {out}: call wait_ai_job with saveTo {out} first")
-    credits = opt(a, "--credits")
-    credits = float(credits) if credits is not None else (float(listed) if ok and listed is not None else 0.0)
-    rec = {"name": name, "jobId": jid, "model": info.get("model") or p.get("model"), "resultUrl": opt(a, "--url"),
-           "credits": credits, "credits_source": "price", "listed_credits": listed,
-           "file": str(out) if ok else None, "status": "succeeded" if ok else "failed",
-           "prompt": (p.get("inputs") or {}).get("prompt"), "inputs": p.get("inputs"),
-           "created": datetime.now().isoformat(timespec="seconds")}
-    if opt(a, "--error"): rec["error"] = opt(a, "--error")
+def record(folder, name, listed, ok, out_file=None, note=None):
+    side = folder / "gen" / f"{name}.job.json"
+    info = json.loads(side.read_text()) if side.is_file() else {}
+    jid = info.get("jobId")
+    credits, source = job_credits(jid) if jid else (0, "no job was created")
+    if credits is None and listed is not None: credits, source = float(listed), "price"
+    res = folder / "gen" / f"{name}.json"
+    url = json.loads(res.read_text()).get("source_url") if res.is_file() else None
+    rec = {"name": name, "jobId": jid, "model": info.get("model"), "resultUrl": url, "credits": credits,
+           "credits_source": source, "listed_credits": listed, "file": str(out_file) if out_file else None,
+           "status": "succeeded" if ok else "failed", "prompt": (info.get("inputs") or {}).get("prompt"),
+           "inputs": info.get("inputs"), "created": datetime.now().isoformat(timespec="seconds")}
+    if note: rec["note"] = note
     with open(folder / "jobs.jsonl", "a") as f: f.write(json.dumps(rec, ensure_ascii=False) + "\n")
     with Meta(folder) as d:
         jobs = d.setdefault("jobs", [])
         jobs[:] = [j for j in jobs if not (j.get("jobId") and j.get("jobId") == jid)] + [rec]
         d["total_credits"] = total(jobs); tc = d["total_credits"]
-    side.unlink()
-    say({"job": jid, "status": rec["status"], "file": rec["file"], "credits": credits, "total_credits": tc})
+    return rec, tc
+
+
+def job(folder, a):
+    if len(a) < 5: sys.exit(__doc__)
+    model, name, inputs = a[2], a[3], a[4]
+    listed = float(a[5]) if len(a) > 5 and re.fullmatch(r"\d+(\.\d+)?", a[5]) else None
+    if not re.fullmatch(r"[A-Za-z0-9._-]+", name): sys.exit("the name is letters, digits, dot, dash, underscore (no folder)")
+    try: json.loads(inputs)
+    except ValueError as e: sys.exit(f"the inputs are not JSON: {e}")
+    if (folder / "gen" / f"{name}.job.json").exists():
+        sys.exit(f"gen/{name} already has a job: use `fetch` to pick it up, or another name for a re-roll")
+    d = json.loads(meta_path(folder).read_text())
+    cap, spent = d.get("credit_cap") or DEFAULT_CAP, total(d.get("jobs", []))
+    if spent + (listed or 0) > cap:
+        say({"refused": True, "why": f"{spent} credits spent + {listed} listed would pass the cap of {cap}",
+             "total_credits": spent, "credit_cap": cap}, 4)
+    out = folder / "gen" / name
+    r = subprocess.run([PY, str(SCRIPTS / "job.py"), model, str(out), inputs] + ([a[5]] if listed is not None else []),
+                       text=True, capture_output=True, cwd=str(SCRIPTS), stdin=subprocess.DEVNULL)
+    sys.stdout.write(r.stdout); sys.stderr.write(r.stderr)
+    files = sorted(p for p in (folder / "gen").glob(f"{name}.*") if p.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp"))
+    still = "still running" in (r.stderr or "")
+    rec, tc = record(folder, name, listed, r.returncode == 0 and bool(files), files[0] if files else None,
+                     note="polling gave up: run `fetch`" if still else None)
+    print(json.dumps({"job": rec["jobId"], "status": rec["status"], "file": rec["file"], "url": rec["resultUrl"],
+                      "credits": rec["credits"], "total_credits": tc}))
+    sys.exit(r.returncode)
+
+
+def fetch(folder, a):
+    if len(a) < 3: sys.exit(__doc__)
+    name = a[2]; side = folder / "gen" / f"{name}.job.json"
+    if not side.is_file(): sys.exit(f"no gen/{name}.job.json")
+    info = json.loads(side.read_text()); jid = info["jobId"]; start = time.time()
+    prev = json.loads(meta_path(folder).read_text()).get("jobs", [])
+    listed = next((j.get("listed_credits") for j in prev if j.get("jobId") == jid), None)
+    while True:
+        d = spira_json("ai", "jobs", "status", jid).get("data") or {}
+        st = str(d.get("status") or "").upper()
+        if st in ("SUCCEEDED", "COMPLETED", "SUCCESS", "DONE"): break
+        if st in ("FAILED", "CANCELLED", "CANCELED"):
+            rec, tc = record(folder, name, listed, False); say({"job": jid, "status": "failed", "total_credits": tc}, 1)
+        if time.time() - start > 3600: say({"job": jid, "status": "still running after 60 min"}, 1)
+        time.sleep(10)
+    text = json.dumps(d)
+    urls = [u for u in re.findall(r'https://[^"\s]+?\.(?:png|jpg|jpeg|webp)(?:\?[^"\s]*)?', text) if "/uploads/" not in u]
+    if not urls: sys.exit("the job succeeded but has no result URL")
+    ext = urls[0].split("?")[0].rsplit(".", 1)[-1]
+    import urllib.request
+    req = urllib.request.Request(urls[0], headers={"User-Agent": "Mozilla/5.0"})   # the CDN 403s without it
+    out = folder / "gen" / f"{name}.{ext}"; out.write_bytes(urllib.request.urlopen(req).read())
+    (folder / "gen" / f"{name}.json").write_text(json.dumps({"model": info.get("model"), "provider": "spira-cli", "jobId": jid,
+        "inputs": info.get("inputs"), "source_url": urls[0], "created": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, indent=1))
+    rec, tc = record(folder, name, listed, True, out)
+    say({"job": jid, "status": "succeeded", "file": str(out), "url": urls[0], "credits": rec["credits"], "total_credits": tc})
 
 
 def cap_cmd(folder, a):
@@ -565,7 +586,6 @@ def check(folder):
         if not (folder / f).is_file(): problems.append(f"no {f}")
     if d and not d.get("idea"): problems.append("no idea reserved in the metadata (lsc.py reserve)")
     if d and any(j.get("credits") is None for j in d.get("jobs", [])): problems.append("a job has no credits recorded")
-    for p in sorted((folder / "gen").glob("*.pending")): problems.append(f"gen/{p.name}: wait_ai_job on its jobId, then lsc.py record")
     tc = total(d.get("jobs", []))
     res = {"ok": not problems, "folder": str(folder), "format": d.get("format"), "slides": len(sl), "total_credits": tc,
            "credit_cap": d.get("credit_cap"), "problems": problems}
@@ -605,7 +625,7 @@ def main():
     if cmd == "append": return append(a)
     if len(a) < 2: sys.exit(__doc__)
     folder = folder_of(a[1])
-    cmds = {"reserve": reserve, "mark": mark, "job": job, "submitted": submitted, "record": record, "cap": cap_cmd, "run": run, "py": py,
+    cmds = {"reserve": reserve, "mark": mark, "job": job, "fetch": fetch, "cap": cap_cmd, "run": run, "py": py,
             "export": export, "finish": finish, "report": report}
     if cmd in cmds: return cmds[cmd](folder, a)
     if cmd == "check":

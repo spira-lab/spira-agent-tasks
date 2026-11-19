@@ -1,0 +1,69 @@
+{
+ "_about": "Emochi personas (the owner, 2026-11-19), built from personas/<Name>/persona.md by nova-emochi.py index",
+ "personas": [
+  {
+   "name": "Ashley",
+   "handle": "@Ashes2ashes",
+   "profile": "Female · 20 · Indian-American · Curious",
+   "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794998759163-b2cfd8aa-792c-4374-9eed-2b7c1fcc38fd.jpg",
+   "doc": "Agents/NovaOM/client-assets/Emochi/personas/Ashley/persona.md",
+   "tag_id": "c81e8bd5-1145-4c40-a503-d80e0f533ebf"
+  },
+  {
+   "name": "Gabby",
+   "handle": "@gabbybaby",
+   "profile": "Female · 21 · Puerto Rican-American · Dramatic",
+   "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794998754900-d1496d42-9464-4f20-9656-8a8601b120a7.jpg",
+   "doc": "Agents/NovaOM/client-assets/Emochi/personas/Gabby/persona.md",
+   "tag_id": "46d12a1a-496a-4437-80b6-b80b1d60bca3"
+  },
+  {
+   "name": "Jasmine",
+   "handle": "@jas.queen",
+   "profile": "Female · 20 · Black American · Witty",
+   "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794998753286-56922b9a-5dca-4a04-983b-fe08f900b48f.jpg",
+   "doc": "Agents/NovaOM/client-assets/Emochi/personas/Jasmine/persona.md",
+   "tag_id": "978acee3-f1a6-48ef-a124-0aa596d2a083"
+  },
+  {
+   "name": "Lexi",
+   "handle": "@Lexii.draws",
+   "profile": "Female · 19 · White American, blonde · Hyper",
+   "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794998760835-222a6946-9760-459b-bec0-896bbd42e212.jpg",
+   "doc": "Agents/NovaOM/client-assets/Emochi/personas/Lexi/persona.md",
+   "tag_id": "1a179dd2-451e-4817-801b-42c559c11b01"
+  },
+  {
+   "name": "Mia",
+   "handle": "@mimi.yaaah",
+   "profile": "Female · Casually relatable: an everyday girl",
+   "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794998749367-8a680a1a-595e-4b13-a412-625ad2d8e5ab.jpg",
+   "doc": "Agents/NovaOM/client-assets/Emochi/personas/Mia/persona.md",
+   "tag_id": "6bf33f3d-122a-464e-a230-187bd3d4a44f"
+  },
+  {
+   "name": "Natalie",
+   "handle": "@natyourordinary",
+   "profile": "Female · 18 · White American, brown · Shy and sweet",
+   "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794998757136-da25485e-734e-40f7-b27a-770b12eada4e.jpg",
+   "doc": "Agents/NovaOM/client-assets/Emochi/personas/Natalie/persona.md",
+   "tag_id": "1a258021-96a5-4aad-90a0-9f096b749baf"
+  },
+  {
+   "name": "Rachel",
+   "handle": "@finerachel.xxiv",
+   "profile": "Female · 25 · White American, brown · Grounded",
+   "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794998762544-d44f3e55-18d4-4333-be52-80922e0a647d.jpg",
+   "doc": "Agents/NovaOM/client-assets/Emochi/personas/Rachel/persona.md",
+   "tag_id": "7077a99f-b99b-401c-b013-91a550e6a447"
+  },
+  {
+   "name": "Zoe",
+   "handle": "@zoe.no.y",
+   "profile": "Female · 20 · White American, black hair · Enthusiastic",
+   "sheet": "https://static.viralwell.ai/assets/media/308864c5-67b4-47a3-9d2b-8aa8741308f1/uploads/1794998766132-7bfd1639-3049-4881-9aeb-4f49410c5ed3.jpg",
+   "doc": "Agents/NovaOM/client-assets/Emochi/personas/Zoe/persona.md",
+   "tag_id": "c8cbef52-b839-4bd7-8ec7-dbdec7b09188"
+  }
+ ]
+}

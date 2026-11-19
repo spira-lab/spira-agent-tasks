@@ -43,7 +43,7 @@ claim exactly; the headlines, the story shape and the words on the slides are yo
 
 ## 2. Where things are
 
-- `<super>`: the Super Vega folder. Work only inside it; copies of this skill elsewhere on the
+- `<super>`: the Super Nova folder. Work only inside it; copies of this skill elsewhere on the
   machine are outdated: never read, search for or follow them.
 - `<carousel>`: `<super>/Agents/CorporateCarouselDesigner`, this designer's folder: `skills/` (this file),
   `references/` (the six rule docs), `tools/` and `state/` (the run memory). All of it is read only
@@ -53,7 +53,7 @@ claim exactly; the headlines, the story shape and the words on the slides are yo
   in lower case (`partgenie`), `MM-DD` today's date. Its **metadata** is
   `<super>/Project/<BrandName>/metadata/<same name>.json`.
 - Nothing is written anywhere else: never in `Agents/`, never in `Project/` itself, never outside
-  the Super Vega folder. Throwaway intermediates go in your session scratchpad or the folder's
+  the Super Nova folder. Throwaway intermediates go in your session scratchpad or the folder's
   `deletable/`.
 
 Tools (each prints its usage when run without arguments):
@@ -62,7 +62,8 @@ Tools (each prints its usage when run without arguments):
 |---|---|
 | `python3 <carousel>/tools/carousel.py new ...` | makes the folder and the metadata (with the start time) |
 | `python3 <carousel>/tools/carousel.py scrape <folder> <url>` | `scrape.sh`: page text, meta, links, fonts, colors, product image candidates into `research/` |
-| `python3 <carousel>/tools/carousel.py record-job <folder> <jobId> <credits> <out.png> [--url u] [--prompt p]` | records a GPT Image 2 job you ran with `submit_ai_job` / `wait_ai_job` (jobId, model, resultUrl, credits) in the metadata |
+| `python3 <carousel>/tools/carousel.py gen-image <folder> <inputs> <out.png>` | `gen_image.sh`: one GPT Image 2 job; records its jobId, model, resultUrl and credits in the metadata |
+| `python3 <carousel>/tools/carousel.py gen-edit <folder> "<prompt>" <public url> <out.png> [size] [res]` | `gen_edit.sh`: GPT Image 2 with a real product image as the reference; recorded the same way |
 | `python3 <carousel>/tools/carousel.py render <folder> <N> ["2 5"]` | `render.sh`: `slides.html` → `out/slide-0N.jpg` and `out/contact.png` (headless Chrome) |
 | `python3 <carousel>/tools/carousel.py check <folder>` | confirms the finished carousel, changes nothing |
 | `python3 <carousel>/tools/carousel.py finish <folder>` | writes slides, totals and minutes into the metadata |
@@ -71,8 +72,8 @@ Tools (each prints its usage when run without arguments):
 | `node <super>/Agents/ClonerVideoDesigner/tools/capture_site.js <url> <out.png> [--mobile] [--full-page]` | a screenshot of the brand's public site (the Cloner's tool; `out` must be inside `Project/`) |
 
 You may use only Atlas's approved commands (`<super>/Agents/AtlasPM/docs/atlas-allowed-tools.txt`):
-`python3`, `node`, `spira` (only `spira ai models get`), `date`, `ls`, `mkdir`, `mv`, `cp`, `cat` and the file tools.
-Generation uses `submit_ai_job`, `wait_ai_job` and, for downloads, the `ai` tool's download action. There is no `bash` and no `cd`: the shell scripts run through `carousel.py`, and **every path you
+`python3`, `node`, `spira`, `curl`, `date`, `ls`, `mkdir`, `mv`, `cp`, `cat` and the file tools.
+There is no `bash` and no `cd`: the shell scripts run through `carousel.py`, and **every path you
 pass is absolute**. Never write shell loops, `$(...)`, `$PWD` or other variables.
 
 ## 3. Read first
@@ -82,23 +83,27 @@ Read all six references in `<carousel>/references/` before the step that names t
 (step 3), `prompts.md` (step 4). They are this skill's craft: follow them exactly. Where a
 reference shows `<carousel>` or `<folder>`, use the full paths above.
 
-Read nothing in `Agents/DesignerShared/` except `skills/toolkit.md` section 1 (the submit_ai_job /
-wait_ai_job steps; a local file is never hosted for generation here, whatever its section 2 says), and no
+Read nothing in `Agents/DesignerShared/` except `skills/post-copy.md` (the post copy you write before
+reporting done, 2026-11-12) and `skills/toolkit.md` section 1 (the Spira CLI and
+credits; a local file is never uploaded for generation here, whatever its section 2 says), and no
 video designer skill: they are for making videos and would pull
 you into steps you do not do.
 
 ## 4. Spend
 
-- All AI generation is `submit_ai_job` with model `gpt-image-2`, collected with `wait_ai_job` and
-  saved to the file you name (`saveTo`). Never run a job through the `spira` CLI and never call a
-  provider directly. The balance is not checked: other sessions share it.
+- All AI generation goes through the Spira CLI only, through `carousel.py gen-image` / `gen-edit`
+  (model `gpt-image-2`). Never call a provider directly. Preflight once:
+  `spira --version`, `spira auth whoami`, `spira credits balance`. The balance only tells you
+  there is enough; it never measures what you spend (other sessions share it).
 - **Generated visuals are mandatory** (the owner, 2026-10-27): every carousel has at least one
   GPT Image 2 visual, and the hook slide (slide 1) always carries one. Usually one to three calls.
   Live price: about 4 credits at 1K, 5 at 2K and 8 at 4K per call (`spira ai models get gpt-image-2`);
   budget up to about 25 credits per carousel.
-- **Credits per job**: after each job, run `carousel.py record-job` with the live price
-  (`spira ai models get gpt-image-2`, for that size and resolution); the tool writes it into the
-  metadata's `jobs` marked `"credits_source": "price"`. `total_credits` is the sum of
+- **Credits come from each job**: the tool reads `data.credits` from
+  `spira --json ai jobs status <jobId>` and writes it into the metadata's `jobs`. IF a job shows
+  `"credits": null`, run `spira --json ai jobs status <jobId>` once more; still missing, set it
+  from the live price (`spira --json ai models get gpt-image-2`, for that size and resolution) in
+  the metadata and mark it `"credits_source": "price"`. `total_credits` is the sum of
   `jobs[].credits` (`finish` adds it up).
 - **At most 2 extra generations per call.** A rejected result is regenerated as one call (prompts.md,
   rejection rules); after two extra, keep the best take or drop the image from the design, and say
@@ -173,9 +178,9 @@ check again.
 
 ### 4. Assets
 
-All AI generation is `submit_ai_job` + `wait_ai_job`. Read `references/prompts.md`.
+All AI generation goes through the Spira CLI only. Read `references/prompts.md`.
 - **IF a real product image exists:** every generated image that shows the product uses it as the
-  GPT Image 2 reference (`referenceImage`), one call per product or angle. Real photos used as-is are
+  GPT Image 2 reference via `gen-edit`, one call per product or angle. Real photos used as-is are
   better still.
 - **Otherwise:** generic calls (a cover image, a cutout sheet and/or a collage) with objects or
   scenes from the brand's world and the mood words from the design brief. No props unless the
@@ -184,18 +189,15 @@ All AI generation is `submit_ai_job` + `wait_ai_job`. Read `references/prompts.m
   has one. A real screenshot or product photo does not replace it; it sits beside it. For a
   software brand with no physical product, generate the world its users work in (the bench, the
   board, the parts, the desk, the moment of the problem), never a mocked screen.
-Submit every independent image together (one `submit_ai_job` per image, `modelId` `gpt-image-2`,
-`inputs` as in `references/prompts.md`), wait on them together (`wait_ai_job`, `saveTo`
-`<folder>/gen/<name>.png`), then record each job and cut the sheets:
-
 ```bash
-python3 "<carousel>/tools/carousel.py" record-job "<folder>" <jobId> <credits> "<folder>/gen/<name>.png" --url <resultUrl> --prompt "<prompt>"
+python3 "<carousel>/tools/carousel.py" gen-edit "<folder>" "<prompt>" "<public product image url>" "<folder>/gen/<name>.png" 1:1 2K
+python3 "<carousel>/tools/carousel.py" gen-image "<folder>" "<folder>/gen/cutouts.json" "<folder>/gen/cutouts.png"
 python3 "<carousel>/tools/split_cutouts.py" "<folder>/gen/cutouts.png" "<folder>/gen/" <names in reading order>
 python3 "<carousel>/tools/split_collage.py" "<folder>/gen/collage.png" "<folder>/gen/" 2 2 <names>
 ```
-Write the inputs of a sheet (e.g. `gen/cutouts.json`) with the Write tool, as the record of the job. A
-`referenceImage` must be a public URL: the site's own image URLs (`research/images.txt`) qualify.
-**A local file** (a capture, a downloaded image you cropped) is never sent to generation and never hosted for it:
+Write an inputs file such as `cutouts.json` with the Write tool. The reference of `gen-edit` must be
+a public URL: the site's own image URLs (`research/images.txt`) qualify. **A local file** (a
+capture, a downloaded image you cropped) is never sent to generation and never uploaded for it:
 use it in the layout as it is.
 
 Inspect every output. Reject readable markings, logos, text, wrong anatomy; a rejected take moves to
@@ -259,7 +261,7 @@ captures), substitutions made. Then:
 ```bash
 python3 "<carousel>/tools/carousel.py" finish "<folder>" --theme <dark|light> --headline "<cover headline>"
 ```
-No doc or drive delivery: Vega delivers the slides.
+No doc or drive delivery: Nova delivers the slides.
 
 ## 6. Files
 
@@ -275,7 +277,7 @@ Project/<BrandName>/
       slide-01.jpg … slide-0N.jpg
       contact.png
       notes.md       with the captions
-    jobs.jsonl       every Spira job, as `record-job` logged it
+    jobs.jsonl       every Spira job, as the tool logged it
     deletable/       rejected takes, replaced files
   metadata/<NN>-<brandname>-<MM-DD>.json
 ```
@@ -300,7 +302,7 @@ is designed, so the render step only confirms.
   ```
   - `"ok": true`: read the clock with `date`, run `finish` again (it refreshes the minutes), and
     reply `DONE <folder> <total credits> <minutes>`, with the folder's full path, the metadata's
-    `total_credits` and the minutes from your start time. Record it on the sheet and message Vega
+    `total_credits` and the minutes from your start time. Record it on the sheet and message Nova
     exactly as Atlas's render message says (the `VIDEO` line carries the folder path).
   - `"ok": false`: fix what it names (a missing caption, a slide not rendered) and check again,
     once. IF it still fails, reply `FAILED <the problems>`.
@@ -318,7 +320,7 @@ You never ask for approval, a story choice, a font, a color or a go: decide. Rep
 - the request has no Task ID, no Brand number, or no website;
 - the request has no topic angle;
 - the website cannot be reached at all (the scrape and a capture both fail);
-- the `submit_ai_job` tool is unavailable or fails every submission.
+- the Spira sign-in or the balance check fails.
 
 A failed generation, a page behind a sign-in, a site with no product images or a commercial font is
 not a blocker: work around it (real images, typography and color fields, a labelled slot, the
@@ -343,5 +345,5 @@ closest Google face) and say so in `notes.md`.
   A carousel with no generated visual is not done.
 - Echo's topic angle is the carousel's angle: never swap it for another.
 - Never skip step 0 or step 7.
-- Files exactly as section 6 says: NN is the Task ID; credits per job from the live price, never
+- Files exactly as section 6 says: NN is the Task ID; credits per job from the job itself, never
   from the balance; nothing deleted; nothing written outside the carousel folder and its metadata.

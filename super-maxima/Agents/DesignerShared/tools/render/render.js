@@ -7,9 +7,9 @@
 //   * stage size is read from the page (window.STAGE), so any ratio works
 //   * Chrome is found through Playwright's "chrome" channel on any OS;
 //     set CHROME_PATH to override
-const { chromium } = require('playwright-core'); const profile = require('./profile');
+const { chromium } = require('playwright-core');
 const { spawn, execFileSync } = require('child_process');
-const fs = require('fs'), path = require('path'), http = require('http');
+const fs = require('fs'), path = require('path'), http = require('http'), os = require('os');
 
 const args = process.argv.slice(2);
 const usePng = args.includes('--png');
@@ -19,7 +19,7 @@ const htmlPath = path.resolve(htmlArg), out = path.resolve(outArg);
 const dir = path.dirname(htmlPath);            // the editable's folder; everything it references is below it
 const rel = path.basename(htmlPath);
 const fps = parseInt(fpsArg || '30', 10);
-const WORKERS = parseInt(workersArg || String(profile.defaultWorkers()), 10);
+const WORKERS = parseInt(workersArg || '4', 10);
 
 const html = fs.readFileSync(htmlPath, 'utf8');
 const durationMs = parseInt((html.match(/data-duration="(\d+)"/) || [0, 0])[1], 10);
@@ -27,7 +27,7 @@ const voSrc = (html.match(/<audio id="vo" src="([^"]+)"/) || [])[1];
 const bgmSrc = (html.match(/<audio id="bgm" src="([^"]+)"/) || [])[1];
 if (!durationMs) throw new Error(`${rel} has no data-duration on #stage`);
 const frames = Math.round(durationMs / 1000 * fps);
-const tmp = profile.makeTempDir('stage-render-');
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'stage-render-'));
 fs.mkdirSync(path.dirname(out), { recursive: true });
 
 const mime = { html:'text/html', css:'text/css', js:'text/javascript', json:'application/json',
@@ -69,8 +69,8 @@ const PREP = `
   })()`;
 
 function launchOpts() {
-  const o = { args: ['--force-device-scale-factor=1', ...profile.gpuArgs()] };
-  o.executablePath = process.env.CHROME_PATH || '/usr/bin/chromium';
+  const o = { args: ['--force-device-scale-factor=1'] };
+  if (process.env.CHROME_PATH) o.executablePath = process.env.CHROME_PATH; else o.channel = 'chrome';
   return o;
 }
 
@@ -97,7 +97,7 @@ async function runWorker(id, from, to, port) {
   const nAnims = await page.evaluate(PREP);
 
   const ff = spawn('ffmpeg', ['-y','-v','error','-f','image2pipe','-vcodec', usePng ? 'png' : 'mjpeg', '-framerate',String(fps),'-i','-',
-    '-c:v','libx264','-preset',profile.preset('final'),'-crf','17',...(profile.x264Threads() ? ['-threads', String(profile.x264Threads())] : []),'-pix_fmt','yuv420p', seg], { stdio: ['pipe','inherit','inherit'] });
+    '-c:v','libx264','-preset','medium','-crf','17','-pix_fmt','yuv420p', seg], { stdio: ['pipe','inherit','inherit'] });
   const write = buf => new Promise(r => { if (!ff.stdin.write(buf)) ff.stdin.once('drain', r); else r(); });
 
   let tSeek = 0, tShot = 0, tPipe = 0;
@@ -158,4 +158,4 @@ async function runWorker(id, from, to, port) {
   console.log(`  concat+audio in ${((Date.now()-tTail)/1000).toFixed(0)}s | total ${((Date.now()-t0)/1000).toFixed(0)}s`);
   console.log('done:', out);
   process.exit(0);   // keep-alive sockets otherwise hold the event loop open
-})().catch(e => { console.error(e); fs.rmSync(tmp, { recursive: true, force: true }); process.exit(1); });
+})().catch(e => { console.error(e); process.exit(1); });

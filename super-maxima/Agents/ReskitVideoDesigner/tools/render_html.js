@@ -16,7 +16,7 @@
 const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
-const { chromium } = (() => { try { return require(path.join(__dirname, '..', '..', 'DesignerShared', 'tools', 'render', 'node_modules', 'playwright-core')); } catch { return require('playwright-core'); } })();
+const { chromium } = require(path.join(__dirname, '..', '..', 'DesignerShared', 'tools', 'render', 'node_modules', 'playwright-core'));
 
 function pageUrl(spec) {
   const m = spec.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
@@ -42,7 +42,7 @@ async function main() {
     process.exit(2);
   }
   const launch = { headless: true, args: ['--allow-file-access-from-files', '--hide-scrollbars'] };
-  launch.executablePath = process.env.CHROME_PATH || '/usr/bin/chromium';
+  if (process.env.CHROME_PATH) launch.executablePath = process.env.CHROME_PATH; else launch.channel = 'chrome';
   const browser = await chromium.launch(launch);
   let failed = 0;
   try {

@@ -1,7 +1,7 @@
 # Spira image models: credit prices
 
 Checked 2026-10-29 with `spira ai models get <id>`, on server staging.tryspira.ai.
-Re-check before every quote. Each build's credits are the listed prices of its jobs (`lsc.py record`).
+Re-check before every quote: listed prices can differ from what gets billed. Log the real charge in each build's `credits.md`.
 
 | Model ID | 1K | 2K | 4K | Refs | Sizes | Use for |
 |---|---|---|---|---|---|---|
@@ -20,12 +20,17 @@ Slides are 1080×1350 and 1152×2048, so **2K** is the working resolution.
 Notes:
 - `referenceImage` takes public URLs, not local paths. Upload the lock image first.
 - `nano-banana-2.1` outputs PNG only and has no seed.
-- A job: `submit_ai_job` with `modelId` and `inputs` (`{"prompt":"…","size":"4:5","resolution":"2K","referenceImage":["<url>"]}`), then `wait_ai_job` with its `jobId` and `saveTo` (skill section 4).
+- Command: `spira ai jobs create --model-id <id> --inputs-json '{"prompt":"…","size":"4:5","resolution":"2K","referenceImage":["<url>"]}'`
 
-## Jobs (learned 2026-10-29)
-- Record the `jobId` (`lsc.py submitted`) right after submitting. A lost job ID means a lost image.
+## Running the CLI from a script (learned 2026-10-29)
+- On Windows `spira` is a `.cmd` wrapper. Python's subprocess can't find it, and it can mangle JSON quotes.
+  Call Node directly: `node "C:\Users\Rey's PC\AppData\Roaming\npm\node_modules\@spira-lab\cli\dist\index.cjs" --json ai jobs create ... --wait`.
+- Super Nova (Mac, 2026-11-03): `spira` is a normal executable on the PATH (`~/.npm-global/bin/spira`), so `scripts/spira_cli.py` returns it as is; the Windows path above is Rey's machine and is not used here.
+- Save the job's JSON before downloading anything. There is no command to list past jobs, so a lost job ID means a lost image.
+- The result URLs on `static-dev.viralwell.ai` return 403 without a browser `User-Agent` header.
 - `PROVIDER_FAILED` jobs are not charged. Retry once.
 - Billed price matched the listed price: nano-banana-2.1 at 2K = 3 credits.
+- Scripts: `scripts/job.py` (one job, submit once, poll the same ID).
 
 ## People pipeline: Higgsfield Soul + Astra (Rey's rule, 2026-10-29)
 - **Astra = `gpt-image-2.5`** (Flare tier by default). It takes up to 16 reference images. Price: 1K 2, 2K 6, 4K 10.

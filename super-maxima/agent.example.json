@@ -1,0 +1,13 @@
+{
+ "_about": "This machine's agent identity. One per machine, kept out of git (agent.example.json is the template). The shared docs call the operations-manager role 'Nova'; the agent reads that as itself.",
+ "name": "<Agent name, e.g. Mars>",
+ "emoji": "<one emoji>",
+ "pronouns": "<she/her, he/him or they/them>",
+ "photo": "<path to this agent's photo inside the folder>",
+ "photo_url": "<hosted URL of that photo>",
+ "photo_description": "<one line describing the character's look>",
+ "photo_folder": "<folder for this agent's new photos>",
+ "session_name": "<this machine's main session name>",
+ "atlas_permission_mode": "<empty = Atlas uses the allowed-tools list (Claude app); bypassPermissions = the main session runs in bypass (terminal)>",
+ "tracking": "<base = the shared Lark Base task tracker (default); local = this machine's old register>"
+}

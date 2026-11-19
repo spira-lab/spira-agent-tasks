@@ -43,6 +43,7 @@ from partgenie.ai itself, because the brief has none.
 - **Free:** $0, for students and makers, 50 AI credits a month.
 - **Pro:** $29/mo (20% off annually), 420 credits a month, full alternatives, BOM Health and export,
   7-day free trial.
+- **Education** (site, https://www.partgenie.ai/education, checked 2026-11-18, not in the client brief): 12 months of Pro complimentary for hardware/EE students at accredited schools with a verified school email, no card. Not yet used on slides.
 - **Business / Enterprise:** custom pricing, with team libraries, SSO, ERP/PLM integrations and API.
 - Early-stage startup. **Don't claim user numbers or funding.** There are none public.
 
