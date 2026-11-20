@@ -27,7 +27,7 @@ Required, else `report_error` naming each problem and change nothing:
   no workspace to edit);
 - `source` an object with `"kind": "agent-job"`;
 - `source.video.path` relative, no `..` (content-maxima: a `.mp4` under a
-  `renders/` folder);
+  `renders/` folder; super-maxima: a `.mp4` under `Project/<Brand>/`);
 - every `attachments[].path` starts with `comments/media/`, has no `..`,
   and names a file that exists here. IF one is missing: `report_error`
   naming it and change nothing — a comment whose media did not arrive
@@ -80,6 +80,7 @@ re-map their `time` yourself.
 |---|---|
 | `content-maxima` | `skills/edit-video-content-maxima.md` |
 | `content-maxima-origin` | `skills/edit-video-content-maxima.md` |
+| `super-maxima` | `skills/edit-video-super-maxima.md` |
 
 Any other value: `report_error` naming the types this task can edit.
 Never route by guessing from other fields.

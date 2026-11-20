@@ -19,6 +19,10 @@ IF the JSON fails the check in `edit-video-by-comment.md` section 2, call
 
 ## 1. Prices (credits)
 
+The review's `taskType` picks the table: `content-maxima` and
+`content-maxima-origin` use the first, `super-maxima` the second. A model
+missing from the chosen table is priced from the other.
+
 Copied from content-maxima `skills/toolkit.md` section 3; the toolkit is
 the source and a price change there is made here too.
 
@@ -34,13 +38,29 @@ the source and a price change there is made here too.
 | `kling-3.0-motion-control` pro (3h) | second | 9.52 |
 | `elevenlabs-text-to-speech` (3i) | character | 0.01 |
 
+`super-maxima`: copied from super-maxima
+`Agents/DesignerShared/skills/toolkit.md` section 3, the source for these.
+
+| Model | Unit | Credits |
+|---|---|---|
+| `ai-influencer-image` (persona base) | image | 7 |
+| `gpt-image-2` 2K (clean-up, element sheet) | image | 5 |
+| `gpt-image-2` 4K (b-roll still) | image | 8 |
+| `gemini-omni-flash-1.1` (talking-head clip) | clip of 4 / 6 / 8 / 10 s | 41 / 54 / 68 / 81 |
+| `heygen-avatar-4` (voice given) | second | 10 |
+| `pixelcut-video-background-removal` (cut-out) | source second | 2.2 |
+| `suno-music` | track | 7 |
+| `kling-3.0-motion-control` pro | second | 9.52 |
+| `elevenlabs-text-to-speech` | character | 0.01 |
+
 Free: the render, the audit, `host_file`, timings, captions, supplied
 files, and any job that fails or is cancelled.
 
 ## 2. By kind of change
 
 Sort each comment into the kinds of `edit-video-content-maxima.md`
-section 5 from its `text`, `selection` and `attachments`. A comment may
+section 5 (for every `taskType`) from its `text`, `selection` and
+`attachments`. A comment may
 need more than one line.
 
 | Kind | Lines |

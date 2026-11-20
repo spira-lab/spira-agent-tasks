@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "packageVersion": "0.15.0",
+  "packageVersion": "0.16.0",
   "description": "Edit a finished video according to a review comment file (a `video_review` JSON the video editor writes under comments/ and the opening message names, carrying a top-level `taskType` and `source` metadata about the task that made the video). Start with skills/edit-video-by-comment.md: it validates the JSON and routes to the editing skill for the video's source task type. The video is edited where it was made, in the linked task directory named in the file access rules.",
-  "linkedTaskTypes": ["content-maxima", "content-maxima-origin"],
+  "linkedTaskTypes": ["content-maxima", "content-maxima-origin", "super-maxima"],
   "requirements": [
     {"name": "ffmpeg", "kind": "system", "purpose": "Probing, frames and the render's audio mix (content-maxima tools)", "check": "ffmpeg -version && ffprobe -version"},
     {"name": "python3", "kind": "system", "purpose": "content-maxima tools/captions.py, tools/make-timings.py, tools/fetch-resource.py and the music bed", "check": "python3 --version"},
