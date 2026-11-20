@@ -35,8 +35,11 @@ Fill the slots. Drop a slot only where the format says it may be
 dropped.
 
 ```
-UGC Casually taken shot of a [age] [gender], [pretty/handsome/cute good looking], [beautiful and attractive with a natural easy smile, or the description that fits], [hair style] in a [outfit style], [what it is not, when needed; remove if unnecessary]. [He/She] is wearing a [outfit detail]. [Framed from the legs up if standing, waist up if sitting], [standing/sitting] relaxed in [setting location] [daylight/night time], looking at the camera, no posing, no filters, no text
+UGC Casually taken shot of a [age] [gender], [pretty/handsome/cute good looking], [beautiful and attractive with a natural easy smile, or the description that fits], [hair style] in a [outfit style], [what it is not, when needed; remove if unnecessary]. [He/She] is wearing a [outfit detail]. Framed from the waist up, standing relaxed in [setting location] [daylight/night time], nothing in front of [him/her], no chair, no desk, no table, looking at the camera, no posing, no filters, no text
 ```
+
+The person always stands: never seated on a chair, never with a desk or
+table in front.
 
 ## 3. GPT Image 2, persona edit
 

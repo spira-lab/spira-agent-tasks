@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "packageVersion": "1.7.2",
+  "packageVersion": "1.7.3",
   "description": "Make one or more videos for a brand as Nova, the operations manager. The opening message is the request (for example 'make 3 videos for Emochi'). Start by reading Agents/NovaOM/nova-operations-manager.md in full: it routes the batch to the designers, produces the videos in parallel, up to 8 at a time, and delivers hosted URLs. A client's assets are found through Agents/NovaOM/docs/nova-client-ledger.md under Agents/NovaOM/client-assets/<Brand>/.",
   "requirements": [
     {"name": "ffmpeg", "kind": "system", "purpose": "Probing, cutting and the audio mix", "check": "ffmpeg -version && ffprobe -version"},
