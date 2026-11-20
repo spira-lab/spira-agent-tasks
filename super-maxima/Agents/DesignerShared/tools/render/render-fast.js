@@ -16,6 +16,12 @@
 //   7. Checks the output and prints one JSON line. Exit code 0 only if it passed.
 const { chromium } = require('playwright-core');
 const { spawn, execFileSync, execFile } = require('child_process');
+// Screenshots arrive as JPEG (full range, BT.601). Convert to limited-range BT.709 and
+// tag it in the H.264 bitstream so players and platforms don't guess and wash it out.
+// Only the scale filter is used: the render Lambda's ffmpeg has no format filter.
+const COLOR_OUT = ['-vf', 'scale=in_range=pc:in_color_matrix=bt601:out_range=tv:out_color_matrix=bt709', '-pix_fmt', 'yuv420p',
+  '-color_range', 'tv', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709',
+  '-bsf:v', 'h264_metadata=video_full_range_flag=0:colour_primaries=1:transfer_characteristics=1:matrix_coefficients=1'];
 const fs = require('fs'), path = require('path'), http = require('http'), os = require('os');
 
 // ---------- arguments ----------
@@ -139,7 +145,7 @@ const ENC = hwEncoder ? ['-c:v', 'h264_videotoolbox', '-b:v', '10M', '-profile:v
 
 async function worker(id, from, to, port, meta) {
   const seg = path.join(tmp, `seg${String(id).padStart(2, '0')}.mp4`);
-  const launch = { args: ['--force-device-scale-factor=1', '--use-angle=metal', '--enable-gpu-rasterization', '--ignore-gpu-blocklist', '--enable-zero-copy'] };
+  const launch = { args: ['--force-device-scale-factor=1', '--force-color-profile=srgb', '--use-angle=metal', '--enable-gpu-rasterization', '--ignore-gpu-blocklist', '--enable-zero-copy'] };
   if (process.env.CHROME_PATH) launch.executablePath = process.env.CHROME_PATH; else launch.channel = 'chrome';
   const browser = await chromium.launch(launch);
   const page = await browser.newPage({ deviceScaleFactor: 1 });
@@ -158,7 +164,7 @@ async function worker(id, from, to, port, meta) {
   });
   await page.evaluate(PREP);
   await page.evaluate(INSTALL, meta);
-  const ff = spawn('ffmpeg', ['-y', '-v', 'error', '-f', 'image2pipe', '-vcodec', 'mjpeg', '-framerate', String(fps), '-i', '-', ...ENC, '-pix_fmt', 'yuv420p', seg], { stdio: ['pipe', 'inherit', 'inherit'] });
+  const ff = spawn('ffmpeg', ['-y', '-v', 'error', '-f', 'image2pipe', '-vcodec', 'mjpeg', '-framerate', String(fps), '-i', '-', ...ENC, ...COLOR_OUT, seg], { stdio: ['pipe', 'inherit', 'inherit'] });
   const write = buf => new Promise(r => { if (!ff.stdin.write(buf)) ff.stdin.once('drain', r); else r(); });
   const clip = { x: 0, y: 0, width: W, height: H };
   for (let i = from; i < to; i++) {

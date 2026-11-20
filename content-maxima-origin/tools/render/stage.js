@@ -3,6 +3,12 @@
 // The browser only runs on the Lambda, so playwright-core is required there, on launch.
 const fs = require('fs'), path = require('path'), http = require('http');
 const { spawn } = require('child_process');
+// Screenshots arrive as JPEG (full range, BT.601). Convert to limited-range BT.709 and
+// tag it in the H.264 bitstream so players and platforms don't guess and wash it out.
+// Only the scale filter is used: the render Lambda's ffmpeg has no format filter.
+const COLOR_OUT = ['-vf', 'scale=in_range=pc:in_color_matrix=bt601:out_range=tv:out_color_matrix=bt709', '-pix_fmt', 'yuv420p',
+  '-color_range', 'tv', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709',
+  '-bsf:v', 'h264_metadata=video_full_range_flag=0:colour_primaries=1:transfer_characteristics=1:matrix_coefficients=1'];
 
 const MIME = { html:'text/html', css:'text/css', js:'text/javascript', json:'application/json',
                png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', webp:'image/webp', gif:'image/gif', svg:'image/svg+xml', avif:'image/avif',
@@ -112,7 +118,7 @@ async function renderRange({ port, rel, fps, from, to, seg, label = '', ffmpeg =
   const browser = await launch(launchArgs);
   const { page, W, H, nAnims } = await openStage(browser, port, rel);
   const ff = spawn(ffmpeg, ['-y','-v','error','-f','image2pipe','-vcodec','mjpeg','-framerate',String(fps),'-i','-',
-    '-c:v','libx264','-preset','medium','-crf','17','-pix_fmt','yuv420p', seg], { stdio: ['pipe','inherit','inherit'] });
+    '-c:v','libx264','-preset','medium','-crf','17',...COLOR_OUT, seg], { stdio: ['pipe','inherit','inherit'] });
   const ffDone = new Promise((res, rej) => { ff.on('error', rej); ff.on('close', c => c === 0 ? res() : rej(new Error(`${label} ffmpeg ${c}`))); });
   const write = buf => new Promise(r => { if (!ff.stdin.write(buf)) ff.stdin.once('drain', r); else r(); });
 

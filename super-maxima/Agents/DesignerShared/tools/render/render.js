@@ -9,6 +9,12 @@
 //     set CHROME_PATH to override
 const { chromium } = require('playwright-core');
 const { spawn, execFileSync } = require('child_process');
+// Screenshots arrive as JPEG (full range, BT.601). Convert to limited-range BT.709 and
+// tag it in the H.264 bitstream so players and platforms don't guess and wash it out.
+// Only the scale filter is used: the render Lambda's ffmpeg has no format filter.
+const COLOR_OUT = ['-vf', 'scale=in_range=pc:in_color_matrix=bt601:out_range=tv:out_color_matrix=bt709', '-pix_fmt', 'yuv420p',
+  '-color_range', 'tv', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709',
+  '-bsf:v', 'h264_metadata=video_full_range_flag=0:colour_primaries=1:transfer_characteristics=1:matrix_coefficients=1'];
 const fs = require('fs'), path = require('path'), http = require('http'), os = require('os');
 
 const args = process.argv.slice(2);
@@ -97,7 +103,7 @@ async function runWorker(id, from, to, port) {
   const nAnims = await page.evaluate(PREP);
 
   const ff = spawn('ffmpeg', ['-y','-v','error','-f','image2pipe','-vcodec', usePng ? 'png' : 'mjpeg', '-framerate',String(fps),'-i','-',
-    '-c:v','libx264','-preset','medium','-crf','17','-pix_fmt','yuv420p', seg], { stdio: ['pipe','inherit','inherit'] });
+    '-c:v','libx264','-preset','medium','-crf','17',...COLOR_OUT, seg], { stdio: ['pipe','inherit','inherit'] });
   const write = buf => new Promise(r => { if (!ff.stdin.write(buf)) ff.stdin.once('drain', r); else r(); });
 
   let tSeek = 0, tShot = 0, tPipe = 0;
